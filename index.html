@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Payub School — แหล่งเรียนรู้สาธารณะ</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Noto+Serif+Thai:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+
+<div id="toast-container"></div>
+
+<nav class="sidebar">
+  <div class="sidebar-header">
+    <div style="font-size: 24px;">🏫</div>
+    <div style="font-weight: 700; font-size: 20px; margin-top: 10px;">Payub School</div>
+    <div id="user-badge" class="guest-tag">ผู้เข้าชมทั่วไป</div>
+  </div>
+  <div class="sidebar-nav">
+    <div class="nav-item active" onclick="navigate('dashboard', this)">🏠 หน้าแรก</div>
+    <div class="nav-item" onclick="navigate('subjects', this)">📚 บทเรียนออนไลน์</div>
+    <div class="nav-item" onclick="navigate('assignments', this)">📝 ใบงาน/กิจกรรม</div>
+    <div class="nav-item" onclick="checkAuth('submissions', this)">📤 ระบบส่งงาน</div>
+  </div>
+  <div style="padding: 20px;" id="auth-btn-area"></div>
+</nav>
+
+<main class="main-content">
+  <div class="page active" id="page-dashboard">
+    <h2>📊 ยินดีต้อนรับสู่แหล่งเรียนรู้</h2>
+    <div class="card" style="margin-top:20px; background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: white; border:none;">
+      <h3>โรงเรียนบ้านป่ายุบ (บุ้นกีประชานุเคราะห์)</h3>
+      <p>พื้นที่แห่งการแบ่งปันความรู้ด้านวิทยากรคำนวณและเทคโนโลยี</p>
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+      <div class="card"><h4>🎯 เป้าหมาย</h4><p>เพื่อให้ผู้เรียนเข้าถึงเนื้อหาได้ทุกที่ทุกเวลา</p></div>
+      <div class="card"><h4>📢 ประชาสัมพันธ์</h4><p>บุคคลทั่วไปสามารถเข้าดูเนื้อหาและดาวน์โหลดใบงานได้ฟรี</p></div>
+    </div>
+  </div>
+
+  <div class="page" id="page-subjects">
+    <div class="header-flex">
+      <h2>📚 รายวิชาทั้งหมด</h2>
+      <button class="btn btn-primary" id="add-sub-btn" style="display:none;" onclick="openModal('modal-subject')">+ เพิ่มวิชา</button>
+    </div>
+    <div id="subjects-list">กำลังโหลดเนื้อหา...</div>
+  </div>
+
+  <div class="page" id="page-assignments">
+    <div class="header-flex">
+      <h2>📝 ใบงานและกิจกรรม</h2>
+      <button class="btn btn-primary" id="add-assign-btn" style="display:none;" onclick="openAddAssignment()">+ เพิ่มใบงาน</button>
+    </div>
+    <div id="assignments-list">กำลังโหลดใบงาน...</div>
+  </div>
+
+  <div class="page" id="page-submissions">
+    <h2>📤 ระบบจัดการงาน</h2>
+    <div id="submissions-list"><div class="card" style="text-align:center; padding: 40px; color: gray;">อยู่ระหว่างการพัฒนาระบบส่งงาน</div></div>
+  </div>
+</main>
+
+<div class="modal-overlay" id="modal-auth">
+  <div class="auth-card">
+    <button style="position:absolute; right:20px; top:20px; border:none; background:none; cursor:pointer; font-size:20px;" onclick="closeAuth()">✕</button>
+    <h3 id="auth-title" style="margin-bottom:20px;">เข้าสู่ระบบ</h3>
+    
+    <div id="login-form">
+      <div class="form-group"><input type="email" id="email" placeholder="อีเมล"></div>
+      <div class="form-group">
+        <input type="password" id="password" placeholder="รหัสผ่าน" onkeypress="if(event.key === 'Enter') login()">
+      </div>
+      <button class="btn btn-primary" style="width:100%;" onclick="login()">เข้าสู่ระบบ</button>
+      <p style="text-align:center; margin-top:15px; font-size:14px;">ยังไม่มีบัญชี? <a href="#" onclick="toggleAuth(true)">สมัครสมาชิกนักเรียน</a></p>
+    </div>
+
+    <div id="reg-form" style="display:none;">
+      <div class="form-group"><input type="text" id="reg-name" placeholder="ชื่อ-นามสกุล"></div>
+      <div class="form-group"><input type="email" id="reg-email" placeholder="อีเมล"></div>
+      <div class="form-group">
+        <input type="password" id="reg-password" placeholder="รหัสผ่าน (6 ตัวขึ้นไป)" onkeypress="if(event.key === 'Enter') register()">
+      </div>
+      <button class="btn btn-accent" style="width:100%;" onclick="register()">สร้างบัญชีนักเรียน</button>
+      <p style="text-align:center; margin-top:15px; font-size:14px;"><a href="#" onclick="toggleAuth(false)">กลับไปหน้าล็อกอิน</a></p>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-subject">
+  <div class="modal auth-card">
+    <h3>เพิ่มวิชา</h3>
+    <input type="text" id="sub-name" class="form-group" style="width:100%; margin:15px 0;">
+    <button class="btn btn-primary" onclick="addSubject()">บันทึก</button>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
