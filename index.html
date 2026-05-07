@@ -78,11 +78,29 @@
     </div>
 
     <div id="reg-form" style="display:none;">
-      <div class="form-group"><input type="text" id="reg-name" placeholder="ชื่อ-นามสกุล"></div>
+      <div class="form-group"><input type="text" id="reg-name" placeholder="ชื่อ-นามสกุลจริง"></div>
       <div class="form-group"><input type="email" id="reg-email" placeholder="อีเมล"></div>
       <div class="form-group">
-        <input type="password" id="reg-password" placeholder="รหัสผ่าน (6 ตัวขึ้นไป)" onkeypress="if(event.key === 'Enter') register()">
+        <input type="password" id="reg-password" placeholder="รหัสผ่าน (6 ตัวขึ้นไป)">
       </div>
+      
+      <div class="form-group">
+        <select id="reg-class" style="width: 100%; padding: 12px; border: 2px solid var(--border); border-radius: 10px; outline: none; font-family: 'Sarabun';">
+          <option value="" disabled selected>เลือกระดับชั้น</option>
+          <option value="ม.1/1">มัธยมศึกษาปีที่ 1/1</option>
+          <option value="ม.1/2">มัธยมศึกษาปีที่ 1/2</option>
+          <option value="ม.2/1">มัธยมศึกษาปีที่ 2/1</option>
+          <option value="ม.2/2">มัธยมศึกษาปีที่ 2/2</option>
+          <option value="ม.3/1">มัธยมศึกษาปีที่ 3/1</option>
+          <option value="ม.3/2">มัธยมศึกษาปีที่ 3/2</option>
+          <option value="ป.5/1">ประถมศึกษาปีที่ 5/1</option>
+          <option value="ป.5/2">ประถมศึกษาปีที่ 5/2</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <input type="number" id="reg-no" placeholder="เลขที่" onkeypress="if(event.key === 'Enter') register()">
+      </div>
+
       <button class="btn btn-accent" style="width:100%;" onclick="register()">สร้างบัญชีนักเรียน</button>
       <p style="text-align:center; margin-top:15px; font-size:14px;"><a href="#" onclick="toggleAuth(false)">กลับไปหน้าล็อกอิน</a></p>
     </div>
