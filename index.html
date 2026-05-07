@@ -253,20 +253,47 @@ h2 { font-family: 'Noto Serif Thai', serif; color: var(--primary-dark); font-siz
 </div>
 
 <div class="modal-overlay" id="modal-submit-work">
-  <div class="modal auth-card" style="max-width: 450px; padding: 35px 30px;">
+  <div class="modal auth-card" style="max-width: 480px; padding: 35px 30px;">
     <h3 style="color: var(--primary-dark); margin-bottom: 5px;">📤 ส่งผลงาน</h3>
     <p id="submit-work-title" style="color: var(--primary); font-size: 16px; font-weight: bold; margin-bottom: 20px;">ชื่องาน...</p>
-    
     <input type="hidden" id="submit-assign-id">
-    
-    <div class="form-group" style="margin-bottom: 25px;">
-      <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 10px;">วางลิงก์ผลงาน (เช่นลิงก์ Canva, Google Drive) หรือพิมพ์คำตอบที่นี่:</p>
-      <textarea id="submit-content" placeholder="พิมพ์ข้อความ หรือ วางลิงก์ผลงาน..." style="width: 100%; height: 120px; padding: 14px 16px; border: 2px solid var(--border); border-radius: 12px; font-family: 'Sarabun'; outline: none; transition: 0.3s; resize: none;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+
+    <!-- โซนเลือกไฟล์ -->
+    <div id="upload-zone" onclick="document.getElementById('file-input').click()" style="border: 2px dashed var(--primary-light); border-radius: 16px; padding: 30px 20px; text-align: center; cursor: pointer; background: #f0faf5; transition: all 0.3s; margin-bottom: 16px;">
+      <div style="font-size: 40px; margin-bottom: 10px;">📁</div>
+      <div style="font-weight: 700; color: var(--primary-dark); font-size: 16px;">คลิกเพื่อเลือกไฟล์งาน</div>
+      <div style="color: var(--text-muted); font-size: 13px; margin-top: 6px;">รองรับ รูปภาพ, PDF, PowerPoint, Word</div>
+      <div style="color: var(--text-muted); font-size: 12px; margin-top: 4px;">ขนาดไม่เกิน 20MB</div>
+    </div>
+    <input type="file" id="file-input" accept="image/*,.pdf,.ppt,.pptx,.doc,.docx" style="display:none" onchange="onFileSelected(this)">
+
+    <!-- แสดงชื่อไฟล์ที่เลือก -->
+    <div id="file-selected-info" style="display:none; background:#eafaf1; border:1px solid #a9dfbf; border-radius:10px; padding:12px 16px; margin-bottom:16px; display:none; align-items:center; gap:10px;">
+      <span style="font-size:24px" id="file-icon">📄</span>
+      <div style="flex:1">
+        <div id="file-name" style="font-weight:600; color:var(--primary-dark); font-size:14px;"></div>
+        <div id="file-size" style="color:var(--text-muted); font-size:12px;"></div>
+      </div>
+      <button onclick="clearFile()" style="background:none;border:none;cursor:pointer;font-size:18px;color:#aaa;">✕</button>
+    </div>
+
+    <!-- Progress bar -->
+    <div id="upload-progress" style="display:none; margin-bottom:16px;">
+      <div style="font-size:13px; color:var(--primary); margin-bottom:6px; font-weight:600;" id="upload-status-text">⏳ กำลังอัปโหลด...</div>
+      <div style="background:#e0e0e0; border-radius:10px; height:8px; overflow:hidden;">
+        <div id="progress-bar" style="background:linear-gradient(90deg,var(--primary),var(--primary-light)); height:100%; width:0%; border-radius:10px; transition:width 0.3s;"></div>
+      </div>
+    </div>
+
+    <!-- หรือพิมพ์ข้อความ -->
+    <div style="text-align:center; color:var(--text-muted); font-size:13px; margin-bottom:12px;">─── หรือพิมพ์คำตอบข้อความ ───</div>
+    <div class="form-group" style="margin-bottom: 20px;">
+      <textarea id="submit-content" placeholder="พิมพ์ข้อความ หรือ วางลิงก์ผลงาน..." style="width: 100%; height: 90px; padding: 14px 16px; border: 2px solid var(--border); border-radius: 12px; font-family: 'Sarabun'; outline: none; transition: 0.3s; resize: none;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'"></textarea>
     </div>
     
     <div style="display: flex; gap: 12px;">
       <button class="btn" style="flex: 1; background: var(--surface2); color: var(--text-muted);" onclick="closeModal('modal-submit-work')">❌ ยกเลิก</button>
-      <button class="btn btn-primary" style="flex: 1;" onclick="submitWork()">🚀 ยืนยันการส่ง</button>
+      <button class="btn btn-primary" style="flex: 1;" id="submit-btn" onclick="submitWork()">🚀 ยืนยันการส่ง</button>
     </div>
   </div>
 </div>
