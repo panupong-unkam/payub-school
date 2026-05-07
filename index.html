@@ -90,10 +90,18 @@
 </div>
 
 <div class="modal-overlay" id="modal-subject">
-  <div class="modal auth-card">
-    <h3>เพิ่มวิชา</h3>
-    <input type="text" id="sub-name" class="form-group" style="width:100%; margin:15px 0;">
-    <button class="btn btn-primary" onclick="addSubject()">บันทึก</button>
+  <div class="modal auth-card" style="max-width: 400px; padding: 35px 30px;">
+    <h3 style="color: var(--primary-dark); font-family: 'Noto Serif Thai', serif; font-size: 22px; margin-bottom: 5px;">📚 เพิ่มวิชาเรียนใหม่</h3>
+    <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 25px;">กรอกชื่อรายวิชาที่คุณครูต้องการเปิดสอน</p>
+    
+    <div class="form-group" style="margin-bottom: 25px;">
+      <input type="text" id="sub-name" placeholder="ตัวอย่าง: วิทยาการคำนวณ ม.4" style="width: 100%; padding: 14px 16px; border: 2px solid var(--border); border-radius: 12px; font-family: 'Sarabun', sans-serif; font-size: 15px; outline: none; transition: 0.3s;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'" onkeypress="if(event.key === 'Enter') addSubject()">
+    </div>
+    
+    <div style="display: flex; gap: 12px;">
+      <button class="btn" style="flex: 1; background: var(--surface2); color: var(--text-muted); border: 2px solid var(--border);" onclick="closeModal('modal-subject')">❌ ยกเลิก</button>
+      <button class="btn btn-primary" style="flex: 1;" onclick="addSubject()">💾 บันทึกรายวิชา</button>
+    </div>
   </div>
 </div>
 
