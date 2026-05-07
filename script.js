@@ -112,24 +112,126 @@ function openSubmitModal(id, title) {
     openModal('modal-submit-work');
 }
 
+// ===== ระบบอัปโหลดไฟล์ผ่าน Google Apps Script =====
+const GAS_URL = 'https://script.google.com/a/macros/payub.ac.th/s/AKfycbygLR4QQPKtqn7YItiQNSJQKcKQF_ISkRC-In47dlHNRv8rjx85jhlGThi8p8Y4yQRbrQ/exec';
+let selectedFile = null;
+
+function onFileSelected(input) {
+    const file = input.files[0];
+    if (!file) return;
+    if (file.size > 20 * 1024 * 1024) { showToast('❌ ไฟล์ใหญ่เกิน 20MB กรุณาเลือกไฟล์ใหม่'); input.value = ''; return; }
+
+    selectedFile = file;
+
+    // แสดงข้อมูลไฟล์
+    const ext = file.name.split('.').pop().toLowerCase();
+    const icons = { pdf: '📄', ppt: '📊', pptx: '📊', doc: '📝', docx: '📝', jpg: '🖼️', jpeg: '🖼️', png: '🖼️', gif: '🖼️' };
+    document.getElementById('file-icon').textContent = icons[ext] || '📁';
+    document.getElementById('file-name').textContent = file.name;
+    document.getElementById('file-size').textContent = (file.size / 1024 / 1024).toFixed(2) + ' MB';
+
+    const info = document.getElementById('file-selected-info');
+    info.style.display = 'flex';
+
+    // ไฮไลต์โซนอัปโหลด
+    document.getElementById('upload-zone').style.borderColor = 'var(--success)';
+    document.getElementById('upload-zone').style.background = '#eafaf1';
+}
+
+function clearFile() {
+    selectedFile = null;
+    document.getElementById('file-input').value = '';
+    document.getElementById('file-selected-info').style.display = 'none';
+    document.getElementById('upload-zone').style.borderColor = 'var(--primary-light)';
+    document.getElementById('upload-zone').style.background = '#f0faf5';
+}
+
+async function uploadFileToGAS(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            const base64 = e.target.result.split(',')[1];
+
+            // แสดง progress
+            document.getElementById('upload-progress').style.display = 'block';
+            animateProgress();
+
+            try {
+                const res = await fetch(GAS_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        fileName: currentUser.full_name + '_' + file.name,
+                        fileData: base64,
+                        mimeType: file.type
+                    })
+                });
+                const result = await res.json();
+                if (result.success) {
+                    document.getElementById('progress-bar').style.width = '100%';
+                    document.getElementById('upload-status-text').textContent = '✅ อัปโหลดสำเร็จ!';
+                    resolve(result.url);
+                } else {
+                    reject(result.error || 'อัปโหลดไม่สำเร็จ');
+                }
+            } catch(err) {
+                reject('เชื่อมต่อไม่ได้: ' + err.message);
+            }
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+function animateProgress() {
+    let w = 0;
+    const bar = document.getElementById('progress-bar');
+    const interval = setInterval(() => {
+        w = Math.min(w + Math.random() * 8, 90);
+        bar.style.width = w + '%';
+        if (w >= 90) clearInterval(interval);
+    }, 200);
+}
+
 async function submitWork() {
     const assignId = document.getElementById('submit-assign-id').value;
-    const content = document.getElementById('submit-content').value;
-    
-    if (!content.trim()) return showToast('❌ กรุณาวางลิงก์ หรือพิมพ์คำตอบก่อนส่งครับ');
+    const textContent = document.getElementById('submit-content').value.trim();
+    const btn = document.getElementById('submit-btn');
+
+    if (!selectedFile && !textContent) return showToast('❌ กรุณาเลือกไฟล์ หรือพิมพ์คำตอบก่อนส่งครับ');
+
+    btn.disabled = true;
+    btn.textContent = '⏳ กำลังส่ง...';
+
+    let content = textContent;
+
+    // ถ้ามีไฟล์ → อัปโหลดก่อน
+    if (selectedFile) {
+        try {
+            content = await uploadFileToGAS(selectedFile);
+        } catch(err) {
+            showToast('❌ อัปโหลดไฟล์ไม่สำเร็จ: ' + err);
+            btn.disabled = false;
+            btn.textContent = '🚀 ยืนยันการส่ง';
+            document.getElementById('upload-progress').style.display = 'none';
+            return;
+        }
+    }
 
     const { data: existing } = await sb.from('submissions').select('id').eq('assignment_id', assignId).eq('student_id', currentUser.id).single();
 
     if (existing) {
-        const { error } = await sb.from('submissions').update({ content: content, status: 'รอตรวจ', score: null, feedback: null }).eq('id', existing.id);
-        if (error) return showToast('❌ อัปเดตงานไม่สำเร็จ: ' + error.message);
+        await sb.from('submissions').update({ content, status: 'รอตรวจ', score: null, feedback: null }).eq('id', existing.id);
     } else {
-        const { error } = await sb.from('submissions').insert({ assignment_id: assignId, student_id: currentUser.id, content: content });
-        if (error) return showToast('❌ ส่งงานไม่สำเร็จ: ' + error.message);
+        await sb.from('submissions').insert({ assignment_id: assignId, student_id: currentUser.id, content });
     }
 
+    btn.disabled = false;
+    btn.textContent = '🚀 ยืนยันการส่ง';
+    document.getElementById('upload-progress').style.display = 'none';
+    clearFile();
+    document.getElementById('submit-content').value = '';
     closeModal('modal-submit-work');
     showToast('✅ ส่งผลงานเรียบร้อยแล้ว! รอกระบวนการตรวจนะครับ');
+    if (document.getElementById('page-submissions').classList.contains('active')) loadSubmissions();
 }
 
 function formatDriveLink(url) {
