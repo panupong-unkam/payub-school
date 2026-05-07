@@ -13,6 +13,15 @@
 
 <div id="toast-container"></div>
 
+<div class="mobile-header">
+  <div style="display: flex; align-items: center; gap: 10px;">
+    <button class="hamburger-btn" onclick="toggleSidebar()">☰</button>
+    <span style="font-family:'Noto Serif Thai',serif; font-weight:700; font-size: 18px;">Payub School</span>
+  </div>
+  <span id="mobile-badge" class="guest-tag" style="margin: 0;">ผู้เข้าชม</span>
+</div>
+
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
 <nav class="sidebar">
   <div class="sidebar-header">
     <div style="font-size: 24px;">🏫</div>
