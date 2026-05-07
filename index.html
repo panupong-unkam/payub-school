@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Payub School — แหล่งเรียนรู้สาธารณะ</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Noto+Serif+Thai:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+<style>
+:root {
+  --primary: #1a5f3f; --primary-light: #2d8a5e; --primary-dark: #0d3d28;
+  --accent: #f0a500; --bg: #f5f7f5; --surface: #ffffff;
+  --text: #1a2e1a; --text-muted: #5a7a5a; --border: #d0e0d0;
+  --danger: #c0392b; --success: #27ae60;
+  --shadow: 0 4px 24px rgba(26,95,63,0.10); --radius: 16px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Sarabun', sans-serif; background: var(--bg); color: var(--text); overflow-x: hidden; scroll-behavior: smooth; }
+
+/* ===== แถบเมนูมือถือ ===== */
+.mobile-header { display: none; }
+
+/* ===== SIDEBAR ===== */
+.sidebar { width: 280px; background: linear-gradient(180deg, var(--primary-dark) 0%, var(--primary) 100%); color: white; display: flex; flex-direction: column; position: fixed; top: 0; left: 0; height: 100vh; z-index: 100; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+.sidebar-header { padding: 30px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); text-align: center; }
+.sidebar-nav { flex: 1; padding: 20px 12px; overflow-y: auto; }
+
+/* 🌟 ลูกเล่นเมนูด้านซ้าย */
+.nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 12px; cursor: pointer; margin-bottom: 5px; opacity: 0.8; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+.nav-item:hover { background: rgba(255,255,255,0.15); opacity: 1; transform: translateX(8px); }
+.nav-item:active { transform: scale(0.95); } /* กดยุบ */
+.nav-item.active { background: var(--accent); color: var(--primary-dark); font-weight: 700; opacity: 1; transform: translateX(5px); box-shadow: 0 4px 15px rgba(240,165,0,0.4); }
+#auth-btn-area { padding: 20px; }
+
+/* ===== MAIN CONTENT ===== */
+.main-content { margin-left: 280px; padding: 40px; min-height: 100vh; display: block; }
+.page { display: none; }
+.page.active { display: block; animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+@keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+.header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+h2 { font-family: 'Noto Serif Thai', serif; color: var(--primary-dark); font-size: 28px; }
+
+/* 🌟 ลูกเล่นการ์ดทั่วไป */
+.card { background: var(--surface); border-radius: var(--radius); padding: 25px; box-shadow: var(--shadow); margin-bottom: 20px; border: 1px solid var(--border); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+.card:hover { transform: translateY(-6px); box-shadow: 0 15px 35px rgba(26,95,63,0.15); border-color: var(--primary-light); }
+
+/* 🌟 ลูกเล่นปุ่มกด (ลอยขึ้น + ยุบตัวเวลาคลิก) */
+.btn { padding: 12px 24px; border: none; border-radius: 10px; cursor: pointer; font-family: 'Sarabun'; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); }
+.btn:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(26,95,63,0.25); }
+.btn:active { transform: translateY(2px) scale(0.95); box-shadow: 0 2px 5px rgba(26,95,63,0.15); }
+.btn-primary { background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: white; }
+.btn-accent { background: linear-gradient(135deg, var(--accent), #ffc233); color: var(--primary-dark); box-shadow: 0 4px 15px rgba(240,165,0,0.3); }
+.btn-outline { background: transparent; border: 2px solid rgba(255,255,255,0.5); color: white; }
+.btn-outline:hover { border-color: white; background: rgba(255,255,255,0.1); }
+.btn-sm { padding: 8px 16px; font-size: 13px; }
+
+/* 🌟 ลูกเล่นปุ่มการ์ดวิชา */
+#subjects-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; margin-top: 20px; }
+.subject-card { background: white; border-radius: 20px; padding: 30px 20px; text-align: center; border: 1px solid var(--border); box-shadow: var(--shadow); cursor: pointer; position: relative; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); overflow: hidden; }
+.subject-card:hover { transform: translateY(-10px) scale(1.03); border-color: var(--primary); box-shadow: 0 20px 40px rgba(26,95,63,0.2); }
+.subject-icon { font-size: 50px; margin-bottom: 15px; transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+.subject-card:hover .subject-icon { transform: scale(1.2) rotate(10deg); } /* ไอคอนขยายและเอียง */
+.subject-name { font-size: 18px; font-weight: 700; margin-bottom: 10px; transition: color 0.3s; }
+.subject-card:hover .subject-name { color: var(--primary-dark); }
+.subject-btn { margin-top: 15px; padding: 8px 20px; background: var(--surface2); border-radius: 30px; font-size: 14px; font-weight: 600; color: var(--text-muted); transition: all 0.3s; }
+.subject-card:hover .subject-btn { background: var(--primary); color: white; transform: scale(1.05); }
+
+.cat-cs { border-top: 8px solid #3498db; } .cat-com { border-top: 8px solid #9b59b6; } .cat-moral { border-top: 8px solid #e67e22; } .cat-hist { border-top: 8px solid #c0392b; } .cat-robot { border-top: 8px solid #27ae60; }
+
+/* 🌟 ลูกเล่นหน้าต่าง Modals */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(8px); opacity: 0; transition: opacity 0.3s ease; }
+.modal-overlay.show { display: flex; opacity: 1; }
+.auth-card { background: white; border-radius: 24px; width: 100%; position: relative; transform: scale(0.8); opacity: 0; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+.modal-overlay.show .auth-card { transform: scale(1); opacity: 1; } /* เด้งดึ๋งตอนเปิด */
+
+/* 🌟 ลูกเล่นช่องกรอกข้อมูล */
+.form-group { margin-bottom: 15px; position: relative; }
+.form-group input, .form-group select { width: 100%; padding: 14px 16px; border: 2px solid var(--border); border-radius: 12px; outline: none; font-family: 'Sarabun'; transition: all 0.3s ease; background: #fdfdfd; }
+.form-group input:focus, .form-group select:focus { border-color: var(--primary); background: white; box-shadow: 0 0 0 4px rgba(26,95,63,0.1); transform: translateY(-2px); } /* มีแสงเรืองรอง */
+
+/* ===== TOAST ===== */
+#toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 2000; }
+.toast { background: var(--primary-dark); color: white; padding: 15px 25px; border-radius: 12px; margin-top: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); animation: slideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+@keyframes slideIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+.guest-tag { background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 12px; margin-top: 10px; display: inline-block; transition: 0.3s; }
+.guest-tag:hover { background: rgba(255,255,255,0.3); }
+
+/* =========================================
+   📱 RESPONSIVE (มือถือและแท็บเล็ต) 
+   ========================================= */
+@media (max-width: 992px) {
+  .mobile-header { display: flex; justify-content: space-between; align-items: center; background: var(--primary-dark); color: white; padding: 15px 20px; position: fixed; top: 0; left: 0; right: 0; z-index: 90; box-shadow: 0 4px 15px rgba(0,0,0,0.15); }
+  .hamburger-btn { background: none; border: none; color: white; font-size: 24px; cursor: pointer; transition: transform 0.3s; }
+  .hamburger-btn:active { transform: scale(0.8); }
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); box-shadow: 5px 0 25px rgba(0,0,0,0.3); }
+  .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 95; backdrop-filter: blur(3px); opacity: 0; transition: opacity 0.3s; }
+  .sidebar-overlay.show { display: block; opacity: 1; }
+  
+  .main-content { margin-left: 0; padding: 20px; padding-top: 80px; width: 100%; }
+  .header-flex { flex-direction: column; align-items: flex-start; gap: 15px; }
+  #subjects-list { grid-template-columns: 1fr; }
+  .auth-card { padding: 30px 20px !important; margin: 15px; width: calc(100% - 30px) !important; }
+}
+</style>
+</head>
+<body>
+
+<div id="toast-container"></div>
+
+<div class="mobile-header">
+  <div style="display: flex; align-items: center; gap: 10px;">
+    <button class="hamburger-btn" onclick="toggleSidebar()">☰</button>
+    <span style="font-family:'Noto Serif Thai',serif; font-weight:700; font-size: 18px;">Payub School</span>
+  </div>
+  <span id="mobile-badge" class="guest-tag" style="margin: 0; background: var(--primary); color: white;">ผู้เข้าชม</span>
+</div>
+
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+<nav class="sidebar">
+  <div class="sidebar-header">
+    <div style="font-size: 24px; animation: bounceIn 1s;">🏫</div>
+    <div style="font-weight: 700; font-size: 20px; margin-top: 10px;">Payub School</div>
+    <div id="user-badge" class="guest-tag">ผู้เข้าชมทั่วไป</div>
+  </div>
+  <div class="sidebar-nav">
+    <div class="nav-item active" onclick="navigate('dashboard', this)">🏠 หน้าแรก</div>
+    <div class="nav-item" onclick="navigate('subjects', this)">📚 บทเรียนออนไลน์</div>
+    <div class="nav-item" onclick="navigate('assignments', this)">📝 ใบงาน/กิจกรรม</div>
+    <div class="nav-item" onclick="checkAuth('submissions', this)">📤 ระบบส่งงาน</div>
+  </div>
+  <div style="padding: 20px;" id="auth-btn-area"></div>
+</nav>
+
+<main class="main-content">
+  <div class="page active" id="page-dashboard">
+    <h2>📊 ยินดีต้อนรับสู่แหล่งเรียนรู้</h2>
+    <div class="card" style="margin-top:20px; background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: white; border:none; border-bottom: 5px solid var(--primary-dark);">
+      <h3>โรงเรียนบ้านป่ายุบ (บุ้นกีประชานุเคราะห์)</h3>
+      <p style="opacity: 0.9; margin-top: 5px;">พื้นที่แห่งการแบ่งปันความรู้ด้านวิทยากรคำนวณและเทคโนโลยี</p>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+      <div class="card"><h4>🎯 เป้าหมาย</h4><p style="color: var(--text-muted); margin-top: 5px;">เพื่อให้ผู้เรียนเข้าถึงเนื้อหาได้ทุกที่ทุกเวลา</p></div>
+      <div class="card"><h4>📢 ประชาสัมพันธ์</h4><p style="color: var(--text-muted); margin-top: 5px;">บุคคลทั่วไปสามารถเข้าดูเนื้อหาและดาวน์โหลดใบงานได้ฟรี</p></div>
+    </div>
+  </div>
+
+  <div class="page" id="page-subjects">
+    <div class="header-flex">
+      <h2>📚 รายวิชาทั้งหมด</h2>
+      <button class="btn btn-primary" id="add-sub-btn" style="display:none;" onclick="openModal('modal-subject')">+ เพิ่มวิชา</button>
+    </div>
+    <div id="subjects-list">กำลังโหลดเนื้อหา...</div>
+  </div>
+
+  <div class="page" id="page-assignments">
+    <div class="header-flex">
+      <h2 id="assign-title-text">📝 ใบงานและกิจกรรม</h2>
+      <button class="btn btn-primary" id="add-assign-btn" style="display:none;" onclick="openAddAssignment()">+ เพิ่มใบงาน</button>
+    </div>
+    <div id="assignments-list">กำลังโหลดใบงาน...</div>
+  </div>
+
+  <div class="page" id="page-submissions">
+    <h2>📤 ระบบจัดการงาน</h2>
+    <div id="submissions-list"><div class="card" style="text-align:center; padding: 40px; color: gray;">อยู่ระหว่างการพัฒนาระบบส่งงาน</div></div>
+  </div>
+</main>
+
+<div class="modal-overlay" id="modal-auth">
+  <div class="auth-card" style="max-width: 400px; padding: 30px;">
+    <button style="position:absolute; right:20px; top:20px; border:none; background:none; cursor:pointer; font-size:20px; transition: 0.3s;" onmouseover="this.style.color='red'" onmouseout="this.style.color='black'" onclick="closeAuth()">✕</button>
+    <h3 id="auth-title" style="margin-bottom:20px;">เข้าสู่ระบบ</h3>
+    
+    <div id="login-form">
+      <div class="form-group"><input type="email" id="email" placeholder="อีเมล"></div>
+      <div class="form-group">
+        <input type="password" id="password" placeholder="รหัสผ่าน" onkeypress="if(event.key === 'Enter') login()">
+      </div>
+      <button class="btn btn-primary" style="width:100%;" onclick="login()">เข้าสู่ระบบ</button>
+      <p style="text-align:center; margin-top:15px; font-size:14px;">ยังไม่มีบัญชี? <a href="#" style="color: var(--primary); font-weight: bold; text-decoration: none;" onclick="toggleAuth(true)">สมัครสมาชิกนักเรียน</a></p>
+    </div>
+
+    <div id="reg-form" style="display:none;">
+      <div class="form-group"><input type="text" id="reg-name" placeholder="ชื่อ-นามสกุลจริง"></div>
+      <div class="form-group"><input type="email" id="reg-email" placeholder="อีเมล"></div>
+      <div class="form-group">
+        <input type="password" id="reg-password" placeholder="รหัสผ่าน (6 ตัวขึ้นไป)">
+      </div>
+      
+      <div class="form-group">
+        <select id="reg-class">
+          <option value="" disabled selected>เลือกระดับชั้น</option>
+          <option value="ม.1/1">มัธยมศึกษาปีที่ 1/1</option>
+          <option value="ม.1/2">มัธยมศึกษาปีที่ 1/2</option>
+          <option value="ม.2/1">มัธยมศึกษาปีที่ 2/1</option>
+          <option value="ม.2/2">มัธยมศึกษาปีที่ 2/2</option>
+          <option value="ม.3/1">มัธยมศึกษาปีที่ 3/1</option>
+          <option value="ม.3/2">มัธยมศึกษาปีที่ 3/2</option>
+          <option value="ป.5/1">ประถมศึกษาปีที่ 5/1</option>
+          <option value="ป.5/2">ประถมศึกษาปีที่ 5/2</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <input type="number" id="reg-no" placeholder="เลขที่" onkeypress="if(event.key === 'Enter') register()">
+      </div>
+
+      <button class="btn btn-accent" style="width:100%;" onclick="register()">สร้างบัญชีนักเรียน</button>
+      <p style="text-align:center; margin-top:15px; font-size:14px;"><a href="#" style="color: var(--text-muted); text-decoration: none;" onclick="toggleAuth(false)">กลับไปหน้าล็อกอิน</a></p>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-subject">
+  <div class="modal auth-card" style="max-width: 400px; padding: 35px 30px;">
+    <h3 style="color: var(--primary-dark); margin-bottom: 5px;">📚 เพิ่มวิชาเรียนใหม่</h3>
+    <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 25px;">กรอกชื่อรายวิชาที่คุณครูต้องการเปิดสอน</p>
+    
+    <div class="form-group" style="margin-bottom: 25px;">
+      <input type="text" id="sub-name" placeholder="ตัวอย่าง: วิทยาการคำนวณ ม.4" onkeypress="if(event.key === 'Enter') addSubject()">
+    </div>
+    
+    <div style="display: flex; gap: 12px;">
+      <button class="btn" style="flex: 1; background: var(--surface2); color: var(--text-muted);" onclick="closeModal('modal-subject')">❌ ยกเลิก</button>
+      <button class="btn btn-primary" style="flex: 1;" onclick="addSubject()">💾 บันทึก</button>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal-overlay" id="modal-assignment">
+  <div class="modal auth-card" style="max-width: 400px; padding: 35px 30px;">
+    <h3 style="color: var(--primary-dark); font-family: 'Noto Serif Thai', serif; font-size: 22px; margin-bottom: 5px;">📝 เพิ่มใบงานใหม่</h3>
+    <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 25px;">สร้างใบงานและตั้งค่าโฟลเดอร์รับงาน</p>
+
+    <div class="form-group" style="margin-bottom: 15px;">
+      <select id="assign-sub-id" style="width: 100%; padding: 14px 16px; border: 2px solid var(--border); border-radius: 12px; font-family: 'Sarabun'; outline: none; transition: 0.3s;"></select>
+    </div>
+
+    <div class="form-group" style="margin-bottom: 15px;">
+      <input type="text" id="assign-title" placeholder="ชื่องาน เช่น บทที่ 1: การเขียนโปรแกรม" style="width: 100%; padding: 14px 16px; border: 2px solid var(--border); border-radius: 12px; font-family: 'Sarabun'; outline: none; transition: 0.3s;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'">
+    </div>
+
+    <div class="form-group" style="margin-bottom: 25px;">
+      <input type="text" id="assign-folder-id" placeholder="รหัสโฟลเดอร์ Drive (Folder ID)" style="width: 100%; padding: 14px 16px; border: 2px solid var(--border); border-radius: 12px; font-family: 'Sarabun'; outline: none; transition: 0.3s;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'">
+      <p style="font-size: 12px; color: #d32f2f; margin-top: 5px;">*นำรหัสภาษาอังกฤษยาวๆ ด้านหลังคำว่า /folders/ ในลิงก์ Google Drive มาใส่ครับ</p>
+    </div>
+
+    <div style="display: flex; gap: 12px;">
+      <button class="btn" style="flex: 1; background: var(--surface2); color: var(--text-muted); border: 2px solid var(--border);" onclick="closeModal('modal-assignment')">❌ ยกเลิก</button>
+      <button class="btn btn-primary" style="flex: 1;" onclick="addAssignment()">💾 บันทึกใบงาน</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-lesson">
+  <div class="modal auth-card" style="max-width: 450px; padding: 35px 30px;">
+    <h3 style="color: var(--primary-dark); font-size: 22px; margin-bottom: 5px;">📚 เพิ่มเนื้อหาบทเรียน</h3>
+    <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 25px;">เพิ่มสไลด์, วิดีโอ หรือข้อสอบ</p>
+
+    <input type="hidden" id="lesson-sub-id">
+
+    <div class="form-group" style="margin-bottom: 15px;">
+      <input type="text" id="lesson-title" placeholder="ชื่อเนื้อหา (เช่น EP.1 รู้จักอัลกอริทึม)" style="width: 100%; padding: 14px; border: 2px solid var(--border); border-radius: 12px; font-family: 'Sarabun'; outline: none;">
+    </div>
+
+    <div class="form-group" style="margin-bottom: 15px;">
+      <select id="lesson-type" style="width: 100%; padding: 14px; border: 2px solid var(--border); border-radius: 12px; font-family: 'Sarabun'; outline: none;">
+        <option value="youtube">📺 วิดีโอ YouTube</option>
+        <option value="canva">🎨 สไลด์ Canva / CAI</option>
+        <option value="slide">📊 สไลด์ Google Slides / PPT</option>
+        <option value="form">📝 ข้อสอบ Google Forms</option>
+        <option value="link">🌐 เว็บไซต์อื่นๆ</option>
+      </select>
+    </div>
+
+    <div class="form-group" style="margin-bottom: 25px;">
+      <input type="text" id="lesson-url" placeholder="วางลิงก์ (URL) ที่นี่..." style="width: 100%; padding: 14px; border: 2px solid var(--border); border-radius: 12px; font-family: 'Sarabun'; outline: none;">
+    </div>
+
+    <div style="display: flex; gap: 12px;">
+      <button class="btn" style="flex: 1; background: var(--surface2); border: 2px solid var(--border);" onclick="closeModal('modal-lesson')">❌ ยกเลิก</button>
+      <button class="btn btn-primary" style="flex: 1;" onclick="addLesson()">💾 บันทึกเนื้อหา</button>
+    </div>
+  </div>
+</div>
+
+
+
+<div class="modal-overlay" id="modal-submit-work">
+  <div class="modal auth-card" style="max-width: 450px; padding: 35px 30px;">
+    <h3 style="color: var(--primary-dark); font-size: 22px; margin-bottom: 5px;">📤 ส่งผลงาน</h3>
+    <p id="submit-work-title" style="color: var(--primary); font-size: 16px; font-weight: bold; margin-bottom: 20px;">ชื่องาน...</p>
+    
+    <input type="hidden" id="submit-assign-id">
+    <input type="hidden" id="submit-folder-id">
+    
+    <div class="form-group" style="margin-bottom: 15px;">
+      <label style="font-size: 14px; font-weight: bold; display: block; margin-bottom: 5px; color: var(--text-muted);">📁 เลือกไฟล์ผลงาน (รูปภาพ/PDF):</label>
+      <input type="file" id="submit-file" style="width: 100%; padding: 10px; border: 2px dashed var(--primary); border-radius: 12px; cursor: pointer; background: #f0fdf4;">
+    </div>
+
+    <div class="form-group" style="margin-bottom: 25px;">
+      <textarea id="submit-content" placeholder="พิมพ์ข้อความตอบ หรือแนบลิงก์เพิ่มเติม (ถ้ามี)..." style="width: 100%; height: 80px; padding: 14px 16px; border: 2px solid var(--border); border-radius: 12px; font-family: 'Sarabun'; outline: none; transition: 0.3s; resize: none;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+    </div>
+    
+    <div style="display: flex; gap: 12px;">
+      <button class="btn" style="flex: 1; background: var(--surface2); color: var(--text-muted); border: 2px solid var(--border);" onclick="closeModal('modal-submit-work')">❌ ยกเลิก</button>
+      <button class="btn btn-primary" id="btn-confirm-submit" style="flex: 1;" onclick="uploadAndSubmit()">🚀 ยืนยันการส่ง</button>
+    </div>
+  </div>
+</div>
+
+<style>
+  .grading-layout { display: flex; flex-direction: row; width: 100%; height: 100%; border-radius: 20px; overflow: hidden; }
+  .grading-left { flex: 7.5; background: #333; position: relative; display: flex; flex-direction: column; }
+  .grading-right { flex: 2.5; background: white; padding: 30px; display: flex; flex-direction: column; min-width: 320px; border-left: 1px solid #ddd; }
+  
+  /* ย่อจอเป็นแนวตั้งเฉพาะตอนเปิดบนมือถือ/แท็บเล็ตเล็ก */
+  @media (max-width: 992px) {
+    .grading-layout { flex-direction: column; overflow-y: auto; }
+    .grading-left { min-height: 55vh; flex: none; }
+    .grading-right { padding: 25px; flex: none; height: auto; }
+  }
+</style>
+
+<div class="modal-overlay" id="modal-grading" style="padding: 0; z-index: 2000;">
+  <div class="auth-card" style="max-width: 96%; width: 96%; height: 92vh; padding: 0; background: transparent; box-shadow: 0 10px 40px rgba(0,0,0,0.5);">
+    
+    <div class="grading-layout">
+        <div class="grading-left">
+            <button onclick="closeModal('modal-grading')" style="position: absolute; top: 15px; left: 15px; z-index: 10; border: none; background: white; color: #d32f2f; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; font-size: 24px; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; transition: 0.3s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">✕</button>
+
+            <div style="background: #222; color: #ccc; padding: 12px; text-align: center; font-size: 14px; letter-spacing: 1px;">
+                👁️ พื้นที่แสดงตัวอย่างผลงานของนักเรียน (จาก Google Drive)
+            </div>
+
+            <iframe id="grading-iframe" src="" style="width: 100%; flex-grow: 1; border: none; display: none; background: #f5f5f5;"></iframe>
+            
+            <div id="grading-text-content" style="display:none; padding: 40px; overflow-y: auto; flex-grow: 1; background: white; font-size: 16px; line-height: 1.8;"></div>
+        </div>
+        
+        <div class="grading-right">
+            <h3 style="color: var(--primary-dark); margin-bottom: 5px; font-size: 22px;">📝 ตรวจผลงาน</h3>
+            <p id="grading-student-info" style="font-weight: bold; font-size: 16px; margin-bottom: 5px; color: var(--primary);"></p>
+            <p id="grading-assign-title" style="color: var(--text-muted); font-size: 14px; margin-bottom: 25px; border-bottom: 1px dashed #eee; padding-bottom: 15px;"></p>
+            
+            <input type="hidden" id="grading-sub-id">
+            
+            <div class="form-group">
+                <label style="font-size: 14px; font-weight: bold; display: block; margin-bottom: 8px; color: #333;">🎯 คะแนนที่ได้:</label>
+                <input type="text" id="grading-score" placeholder="เช่น 10/10 หรือ ผ่าน" style="width: 100%; padding: 15px; border: 2px solid var(--border); border-radius: 12px; font-size: 16px; font-weight: bold; text-align: center; outline: none; transition: 0.3s;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'">
+            </div>
+            
+            <div class="form-group" style="flex: 1; display: flex; flex-direction: column; margin-top: 15px;">
+                <label style="font-size: 14px; font-weight: bold; display: block; margin-bottom: 8px; color: #333;">💬 คำติชม/เสนอแนะ:</label>
+                <textarea id="grading-feedback" placeholder="พิมพ์คำแนะนำให้นักเรียน (นักเรียนจะเห็นข้อความนี้)..." style="width: 100%; flex: 1; min-height: 150px; padding: 15px; border: 2px solid var(--border); border-radius: 12px; font-family: 'Sarabun'; font-size: 15px; outline: none; resize: none; transition: 0.3s;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+            </div>
+            
+            <button class="btn btn-primary" style="width: 100%; margin-top: 15px; padding: 15px; font-size: 16px; border-radius: 12px; box-shadow: 0 4px 15px rgba(26,95,63,0.3);" onclick="saveGrade()">💾 บันทึกคะแนน</button>
+        </div>
+    </div>
+    
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
