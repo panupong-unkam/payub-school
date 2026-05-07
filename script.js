@@ -1,50 +1,194 @@
-// ===== SUPABASE SETUP =====
 const SUPABASE_URL = 'https://hbpqbkgqckawqjcbqemh.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_ES5K5aB28I9NkTt-6ddPUA_4NfZ3aJd';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let currentUser = null;
-let currentSubjectFilter = null; // ตัวแปรเก็บว่าตอนนี้กำลังดูวิชาอะไรอยู่
+let currentSubjectFilter = null;
 
-// --- ฟังก์ชันเปิด/ปิดเมนูบนมือถือ ---
+// --- ระบบนำทาง (รองรับมือถือ) ---
 function toggleSidebar() {
-  document.querySelector('.sidebar').classList.toggle('open');
-  document.getElementById('sidebar-overlay').classList.toggle('show');
-}
-// --- ฟังก์ชันนำทางและเลือกวิชา (อัปเดตใหม่ แก้บัคกดแล้วไม่ยอมกรองวิชา) ---
-function viewSubject(subjectId, subjectName) {
-  // 1. บันทึกวิชาที่คลิก
-  currentSubjectFilter = { id: subjectId, name: subjectName };
-  
-  // 2. สลับไปหน้าใบงาน (เขียนคำสั่งตรงๆ ไม่ผ่าน navigate เพื่อป้องกันการถูกล้างค่า)
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById('page-assignments').classList.add('active');
-  
-  // 3. ทำให้เมนู "ใบงาน/กิจกรรม" ด้านซ้ายสว่างขึ้น
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.querySelectorAll('.nav-item')[2].classList.add('active');
-  
-  // 4. โหลดข้อมูลใหม่
-  loadData(); 
+    document.querySelector('.sidebar').classList.toggle('open');
+    document.getElementById('sidebar-overlay').classList.toggle('show');
 }
 
+// --- ระบบนำทาง (แก้บัคการล้างค่าตัวกรองวิชา) ---
 function navigate(page, el) {
-  if (page === 'assignments' && el) {
-      currentSubjectFilter = null; 
-  }
-  
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('page-' + page).classList.add('active');
-  if(el) el.classList.add('active');
-  
-  // --- ส่วนที่เพิ่มมา: ปิดเมนูบนมือถืออัตโนมัติเมื่อกดเลือกหน้า ---
-  document.querySelector('.sidebar').classList.remove('open');
-  const overlay = document.getElementById('sidebar-overlay');
-  if (overlay) overlay.classList.remove('show');
-  
-  loadData();
+    // ล้างค่าตัวกรอง เฉพาะตอนที่คลิกเมนูด้านซ้ายตรงๆ ด้วยเมาส์เท่านั้น
+    if (page === 'assignments' && el) {
+        currentSubjectFilter = null; 
+    }
+    
+    // สลับหน้า
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + page).classList.add('active');
+    
+    // ไฮไลต์เมนู
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    if(el) el.classList.add('active');
+
+    // ปิดเมนูบนมือถืออัตโนมัติ
+    document.querySelector('.sidebar').classList.remove('open');
+    const overlay = document.getElementById('sidebar-overlay');
+    if(overlay) overlay.classList.remove('show');
+    
+    window.scrollTo(0, 0);
+    loadData();
 }
+
+function viewSubject(subjectId, subjectName) {
+    // 1. บันทึกวิชาที่คลิก
+    currentSubjectFilter = { id: subjectId, name: subjectName };
+    
+    // 2. สลับไปหน้าใบงานด้วยตัวเอง (ไม่ผ่าน navigate เพื่อป้องกันการถูกล้างค่า)
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-assignments').classList.add('active');
+    
+    // 3. ทำให้เมนู "ใบงาน/กิจกรรม" ด้านซ้ายสว่างขึ้น
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.querySelectorAll('.nav-item')[2].classList.add('active');
+
+    // 4. ปิดเมนูบนมือถืออัตโนมัติ
+    document.querySelector('.sidebar').classList.remove('open');
+    const overlay = document.getElementById('sidebar-overlay');
+    if(overlay) overlay.classList.remove('show');
+    
+    window.scrollTo(0, 0);
+    
+    // 5. สั่งโหลดข้อมูลใหม่
+    loadData(); 
+}
+
+// --- การแสดงผลข้อมูล ---
+async function loadData() {
+    const { data: subs } = await sb.from('subjects').select('*');
+    
+    let assignQuery = sb.from('assignments').select('*, subjects(name)');
+    if (currentSubjectFilter) {
+        assignQuery = assignQuery.eq('subject_id', currentSubjectFilter.id);
+    }
+    const { data: assigns } = await assignQuery;
+    
+    let displaySubs = subs || [];
+    let displayAssigns = assigns || [];
+
+    // คัดกรองตามชั้นเรียนนักเรียน
+    if (currentUser && currentUser.role === 'student') {
+        const myClass = currentUser.class_level || '';
+        const prefix = myClass.split('/')[0];
+        const isMySubject = (subName) => {
+            if (!subName) return false;
+            return subName.includes(prefix) || subName.includes(myClass) || (subName.includes('ม.ต้น') && prefix.startsWith('ม.'));
+        };
+        displaySubs = displaySubs.filter(s => isMySubject(s.name));
+        displayAssigns = displayAssigns.filter(a => isMySubject(a.subjects?.name));
+    }
+
+    // อัปเดตหัวข้อใบงาน
+    document.getElementById('assign-title-text').innerHTML = currentSubjectFilter ? 
+        `📝 ใบงาน: <span style="color:var(--primary)">${currentSubjectFilter.name}</span>` : 
+        `📝 ใบงานและกิจกรรมทั้งหมด`;
+
+    // เรนเดอร์รายวิชา
+    const subContainer = document.getElementById('subjects-list');
+    subContainer.innerHTML = displaySubs.length ? displaySubs.map(s => {
+        let icon = '💻';
+        if(s.name.includes('วิทยาการคำนวณ')) icon = '🧠';
+        else if(s.name.includes('คอมพิวเตอร์')) icon = '⌨️';
+        else if(s.name.includes('ทุจริต')) icon = '⚖️';
+        else if(s.name.includes('ประวัติศาสตร์')) icon = '📜';
+        else if(s.name.includes('หุ่นยนต์')) icon = '🤖';
+
+        const delBtn = (currentUser?.role === 'teacher') ? 
+            `<button onclick="event.stopPropagation(); deleteSubject(${s.id}, '${s.name}')" style="position:absolute; top:10px; right:10px; border:none; background:#fee2e2; color:#b91c1c; width:30px; height:30px; border-radius:50%; cursor:pointer;">✕</button>` : '';
+
+        return `
+            <div class="subject-card" onclick="viewSubject(${s.id}, '${s.name}')">
+                ${delBtn}
+                <div class="subject-icon">${icon}</div>
+                <div class="subject-name">${s.name}</div>
+                <div style="font-size:13px; color:var(--text-muted);">เข้าสู่บทเรียน</div>
+            </div>
+        `;
+    }).join('') : '<div class="card empty-state">ไม่มีรายวิชาในขณะนี้</div>';
+
+    // เรนเดอร์ใบงาน
+    const assignContainer = document.getElementById('assignments-list');
+    assignContainer.innerHTML = displayAssigns.length ? displayAssigns.map(a => {
+        const teacherUI = (currentUser?.role === 'teacher') ? `
+            <div style="margin-top:10px; display:flex; gap:10px;">
+                <button class="btn btn-secondary" style="padding:6px 12px; font-size:13px;" onclick="renameAssignment(${a.id}, '${a.title}')">✏️ แก้ไข</button>
+                <button class="btn btn-secondary" style="padding:6px 12px; font-size:13px; color:#b91c1c;" onclick="deleteAssignment(${a.id}, '${a.title}')">🗑️ ลบ</button>
+            </div>
+        ` : '';
+
+        return `
+            <div class="card assignment-card">
+                <div class="assign-info">
+                    <b>📝 ${a.title}</b><br>
+                    <small style="color:var(--text-muted)">วิชา: ${a.subjects?.name}</small>
+                    ${teacherUI}
+                </div>
+                <button class="btn btn-primary" onclick="checkAuth('submissions')">🔗 ส่งงาน</button>
+            </div>
+        `;
+    }).join('') : '<div class="card empty-state">ยังไม่มีใบงานในขณะนี้</div>';
+}
+
+// --- ฟังก์ชันเสริม (เหมือนเดิมแต่ปรับ UI) ---
+function showToast(msg) {
+    const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+    document.getElementById('toast-container').appendChild(t);
+    setTimeout(() => { t.style.opacity = '1'; t.style.transform = 'translateY(0)'; }, 10);
+    setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 500); }, 3000);
+}
+
+function updateUI() {
+    const area = document.getElementById('auth-btn-area');
+    const badge = document.getElementById('user-badge');
+    const mobileBadge = document.getElementById('mobile-badge');
+    if (currentUser) {
+        const role = currentUser.role === 'teacher' ? 'ครู' : 'นักเรียน';
+        badge.textContent = `${currentUser.full_name} (${role})`;
+        if(mobileBadge) mobileBadge.textContent = role;
+        area.innerHTML = `<button class="btn btn-secondary full-width" onclick="logout()">🚪 ออกจากระบบ</button>`;
+        if(currentUser.role === 'teacher') {
+            document.getElementById('add-sub-btn').style.display = 'block';
+            document.getElementById('add-assign-btn').style.display = 'block';
+        }
+    } else {
+        badge.textContent = '👤 ผู้เข้าชมทั่วไป';
+        if(mobileBadge) mobileBadge.textContent = 'ผู้เข้าชม';
+        area.innerHTML = `<button class="btn btn-accent full-width" onclick="openAuth()">🔑 เข้าสู่ระบบ</button>`;
+        document.getElementById('add-sub-btn').style.display = 'none';
+        document.getElementById('add-assign-btn').style.display = 'none';
+    }
+}
+
+// ... (ฟังก์ชัน login, register, delete, modal อื่นๆ เหมือนชุดเดิมที่คุณครูมีได้เลยครับ)
+async function login() {
+    const e = document.getElementById('email').value;
+    const p = document.getElementById('password').value;
+    const { data } = await sb.from('profiles').select('*').eq('email', e).eq('password', p).single();
+    if (data) {
+        currentUser = data;
+        localStorage.setItem('payub_user', JSON.stringify(data));
+        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+        updateUI(); closeAuth(); showToast('🎉 เข้าสู่ระบบสำเร็จ'); loadData();
+    } else { showToast('❌ ข้อมูลไม่ถูกต้อง'); }
+}
+
+function logout() { currentUser = null; localStorage.removeItem('payub_user'); updateUI(); navigate('dashboard'); showToast('🚪 ออกจากระบบ'); }
+function openAuth() { document.getElementById('modal-auth').classList.add('show'); }
+function closeAuth() { document.getElementById('modal-auth').classList.remove('show'); }
+function toggleAuth(isReg) { document.getElementById('login-form').style.display = isReg ? 'none' : 'block'; document.getElementById('reg-form').style.display = isReg ? 'block' : 'none'; }
+function openModal(id) { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+window.onload = () => {
+    const saved = localStorage.getItem('payub_user');
+    if (saved) currentUser = JSON.parse(saved);
+    updateUI(); loadData();
+};
 
 // --- ฟังก์ชันแจ้งเตือน ---
 function showToast(msg) {
@@ -116,13 +260,8 @@ function logout() {
 function updateUI() {
   const area = document.getElementById('auth-btn-area');
   const badge = document.getElementById('user-badge');
-  const mobileBadge = document.getElementById('mobile-badge'); // ดึงตัวป้ายบนมือถือ
-
   if (currentUser) {
-    const roleText = currentUser.role === 'teacher' ? 'ครู' : 'นักเรียน';
-    badge.textContent = currentUser.full_name + ' (' + roleText + ')';
-    if(mobileBadge) mobileBadge.textContent = roleText; // อัปเดตป้ายมือถือ
-
+    badge.textContent = currentUser.full_name + ' (' + (currentUser.role === 'teacher' ? 'ครู' : 'นักเรียน') + ')';
     area.innerHTML = `<button class="btn btn-outline" style="width:100%; color:white; border-color:white;" onclick="logout()">🚪 ออกจากระบบ</button>`;
     if(currentUser.role === 'teacher') {
       document.getElementById('add-sub-btn').style.display = 'block';
@@ -133,8 +272,6 @@ function updateUI() {
     }
   } else {
     badge.textContent = '👤 ผู้เข้าชมทั่วไป';
-    if(mobileBadge) mobileBadge.textContent = 'ผู้เข้าชม'; // อัปเดตป้ายมือถือ
-
     area.innerHTML = `<button class="btn btn-accent" style="width:100%;" onclick="openAuth()">🔑 เข้าสู่ระบบ</button>`;
     document.getElementById('add-sub-btn').style.display = 'none';
     document.getElementById('add-assign-btn').style.display = 'none';
