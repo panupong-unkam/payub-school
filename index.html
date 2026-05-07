@@ -6,6 +6,7 @@
 <title>Payub School — ระบบจัดการการเรียนการสอน</title>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Noto+Serif+Thai:wght@400;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 <style>
   :root {
     --primary: #1a5f3f; --primary-light: #2d8a5e; --primary-dark: #0d3d28;
@@ -17,8 +18,12 @@
     --radius: 16px;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Sarabun', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+  body { font-family: 'Sarabun', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
 
+  /* ===== อนิเมชันพื้นฐาน ===== */
+  @keyframes slideUp { from { opacity:0; transform: translateY(30px); } to { opacity:1; transform: translateY(0); } }
+  @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+  
   /* ===== AUTH ===== */
   #auth-screen {
     min-height: 100vh; display: flex; align-items: center; justify-content: center;
@@ -28,66 +33,81 @@
   .auth-card {
     background: var(--surface); border-radius: 24px; padding: 48px 40px;
     width: 100%; max-width: 420px; box-shadow: 0 24px 64px rgba(0,0,0,0.3);
-    position: relative; z-index: 1; animation: slideUp 0.5s ease;
+    position: relative; z-index: 1; animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
   }
-  @keyframes slideUp { from { opacity:0; transform: translateY(30px); } to { opacity:1; transform: translateY(0); } }
-  .auth-logo { text-align: center; margin-bottom: 32px; }
-  .auth-logo .logo-icon { font-size: 36px; margin-bottom: 16px; }
+  .auth-logo { text-align: center; margin-bottom: 32px; transition: transform 0.3s; }
+  .auth-logo:hover { transform: scale(1.05); } /* ลูกเล่นเมื่อเอาเมาส์ชี้โลโก้ */
+  .auth-logo .logo-icon { font-size: 42px; margin-bottom: 16px; animation: slideUp 0.8s; }
   .auth-logo h1 { font-family: 'Noto Serif Thai', serif; font-size: 22px; font-weight: 700; color: var(--primary-dark); }
   
   .auth-tabs { display: flex; background: var(--surface2); border-radius: 12px; padding: 4px; margin-bottom: 28px; }
-  .auth-tab { flex: 1; padding: 10px; border: none; background: transparent; border-radius: 10px; cursor: pointer; color: var(--text-muted); }
-  .auth-tab.active { background: var(--surface); color: var(--primary); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+  .auth-tab { flex: 1; padding: 10px; border: none; background: transparent; border-radius: 10px; cursor: pointer; color: var(--text-muted); transition: all 0.3s; }
+  .auth-tab.active { background: var(--surface); color: var(--primary); box-shadow: 0 2px 8px rgba(0,0,0,0.08); transform: scale(1.02); }
 
-  .form-group { margin-bottom: 18px; }
+  .form-group { margin-bottom: 18px; animation: fadeIn 0.5s; }
   .form-group label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 8px; }
-  .form-group input, .form-group select, .form-group textarea {
+  .form-group input, .form-group select {
     width: 100%; padding: 13px 16px; border: 2px solid var(--border); border-radius: 12px;
-    font-family: 'Sarabun', sans-serif; font-size: 15px; outline: none;
+    font-family: 'Sarabun', sans-serif; font-size: 15px; outline: none; transition: border-color 0.3s, box-shadow 0.3s;
   }
+  .form-group input:focus, .form-group select:focus { border-color: var(--primary-light); box-shadow: 0 0 0 4px rgba(45,138,94,0.1); }
   
-  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 13px 24px; border: none; border-radius: 12px; font-family: 'Sarabun', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; width: 100%; }
-  .btn-primary { background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: white; }
+  /* ปุ่มกดมี Effect */
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 13px 24px; border: none; border-radius: 12px; font-family: 'Sarabun', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; width: 100%; transition: all 0.2s; }
+  .btn-primary { background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: white; box-shadow: 0 4px 15px rgba(26,95,63,0.3); }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(26,95,63,0.4); }
+  .btn-primary:active { transform: translateY(1px); box-shadow: 0 2px 10px rgba(26,95,63,0.3); } /* เวลากดปุ่มจะยุบลงไป */
   .btn-secondary { background: var(--surface2); color: var(--primary); border: 2px solid var(--border); }
-  .btn-accent { background: linear-gradient(135deg, var(--accent), var(--accent-light)); color: white; }
+  .btn-secondary:hover { background: var(--border); }
   .btn-sm { padding: 8px 16px; font-size: 13px; width: auto; }
 
-  .alert { padding: 12px 16px; border-radius: 10px; font-size: 14px; margin-bottom: 16px; display: none; }
-  .alert-error { background: #fdecea; color: var(--danger); border: 1px solid #f5c6c2; }
-  .alert-success { background: #eafaf1; color: var(--success); border: 1px solid #a9dfbf; }
-  .alert.show { display: block; }
+  /* ===== ระบบแจ้งเตือน (Toast) ===== */
+  #toast-container { position: fixed; top: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 12px; }
+  .toast {
+    background: var(--surface); color: var(--text); padding: 16px 24px; border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 12px;
+    transform: translateX(120%); transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    border-left: 6px solid var(--primary); font-weight: 600; min-width: 250px;
+  }
+  .toast.show { transform: translateX(0); }
+  .toast.success { border-color: var(--success); }
+  .toast.error { border-color: var(--danger); }
+  .toast.info { border-color: var(--accent); }
 
   /* ===== APP ===== */
   #app-screen { display: none; }
   .app-layout { display: flex; min-height: 100vh; }
-  .sidebar { width: 260px; background: linear-gradient(180deg, var(--primary-dark) 0%, var(--primary) 100%); color: white; display: flex; flex-direction: column; position: fixed; height: 100vh; z-index: 100; }
+  .sidebar { width: 260px; background: linear-gradient(180deg, var(--primary-dark) 0%, var(--primary) 100%); color: white; display: flex; flex-direction: column; position: fixed; height: 100vh; z-index: 100; transition: transform 0.3s; }
   .sidebar-header { padding: 28px 24px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
   .sidebar-nav { flex: 1; padding: 16px 12px; overflow-y: auto; }
-  .nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 12px; border-radius: 10px; cursor: pointer; margin-bottom: 2px; opacity: 0.8; }
-  .nav-item.active { background: rgba(255,255,255,0.15); opacity: 1; }
-  .main-content { margin-left: 260px; flex: 1; padding: 28px 32px; }
-  .page { display: none; } .page.active { display: block; }
-  .card { background: var(--surface); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); margin-bottom: 20px; }
-  table { width: 100%; border-collapse: collapse; }
-  th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border); }
+  .nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 12px; border-radius: 10px; cursor: pointer; margin-bottom: 2px; opacity: 0.8; transition: all 0.3s; }
+  .nav-item:hover { opacity: 1; background: rgba(255,255,255,0.1); transform: translateX(5px); } /* เลื่อนเมนูเมื่อเอาเมาส์ชี้ */
+  .nav-item.active { background: rgba(255,255,255,0.15); opacity: 1; border-left: 4px solid var(--accent); }
   
-  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; align-items: center; justify-content: center; }
+  .main-content { margin-left: 260px; flex: 1; padding: 28px 32px; background: var(--bg); }
+  .page { display: none; animation: slideUp 0.4s ease; } /* หน้าเว็บเลื่อนขึ้นมานุ่มๆ */
+  .page.active { display: block; }
+  
+  /* การ์ดข้อมูลมี Effect เด้งดึ๋ง */
+  .card { background: var(--surface); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); margin-bottom: 20px; transition: transform 0.3s, box-shadow 0.3s; border: 1px solid var(--border); }
+  .card:hover { transform: translateY(-5px); box-shadow: 0 12px 32px rgba(26,95,63,0.15); }
+  
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
   .modal-overlay.show { display: flex; }
-  .modal { background: var(--surface); border-radius: 20px; padding: 32px; width: 100%; max-width: 480px; }
+  .modal { background: var(--surface); border-radius: 20px; padding: 32px; width: 100%; max-width: 480px; animation: slideUp 0.3s ease; }
   .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
-  .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
-  .badge-success { background: #eafaf1; color: var(--success); }
-  .badge-danger { background: #fdecea; color: var(--danger); }
 </style>
 </head>
 <body>
+
+<div id="toast-container"></div>
 
 <div id="auth-screen">
   <div class="auth-card">
     <div class="auth-logo">
       <div class="logo-icon">🏫</div>
       <h1>Payub School</h1>
-      <p>ระบบจัดการการเรียนการสอน</p>
+      <p>ยินดีต้อนรับเข้าสู่ระบบ</p>
     </div>
 
     <div class="auth-tabs">
@@ -95,22 +115,20 @@
       <button class="auth-tab" onclick="switchTab('register')">สมัครสมาชิก</button>
     </div>
 
-    <div id="alert-auth" class="alert"></div>
-
     <div id="login-form">
       <div class="form-group"><label>อีเมล</label><input type="email" id="login-email" placeholder="กรอกอีเมล"></div>
       <div class="form-group"><label>รหัสผ่าน</label><input type="password" id="login-password" placeholder="กรอกรหัสผ่าน"></div>
-      <button class="btn btn-primary" onclick="login()">🔐 เข้าสู่ระบบ</button>
+      <button class="btn btn-primary" onclick="login()">✨ เข้าสู่ระบบ</button>
     </div>
 
     <div id="register-form" style="display:none">
-      <div class="form-group"><label>ชื่อ-นามสกุล</label><input type="text" id="reg-name" placeholder="กรอกชื่อ-นามสกุล"></div>
+      <div class="form-group"><label>ชื่อ-นามสกุล</label><input type="text" id="reg-name" placeholder="กรอกชื่อ-นามสกุลจริง"></div>
       <div class="form-group"><label>อีเมล</label><input type="email" id="reg-email" placeholder="กรอกอีเมล"></div>
-      <div class="form-group"><label>รหัสผ่าน</label><input type="password" id="reg-password" placeholder="อย่างน้อย 6 ตัวอักษร"></div>
+      <div class="form-group"><label>รหัสผ่าน</label><input type="password" id="reg-password" placeholder="ตั้งรหัสผ่านที่จำง่าย (อย่างน้อย 6 ตัว)"></div>
       <div class="form-group"><label>สมัครในฐานะ</label>
-        <select id="reg-role"><option value="student">นักเรียน</option><option value="teacher">ครู</option></select>
+        <select id="reg-role"><option value="student">👨‍🎓 นักเรียน</option><option value="teacher">👩‍🏫 ครู</option></select>
       </div>
-      <button class="btn btn-primary" onclick="register()">✨ สมัครสมาชิก</button>
+      <button class="btn btn-primary" onclick="register()">📝 ยืนยันการสมัคร</button>
     </div>
   </div>
 </div>
@@ -123,14 +141,20 @@
         <div id="sidebar-username" style="font-size:13px; opacity:0.8; margin-top:5px;">กำลังโหลด...</div>
       </div>
       <div class="sidebar-nav" id="sidebar-nav"></div>
-      <div style="padding: 16px;"><button class="btn btn-secondary" onclick="logout()">🚪 ออกจากระบบ</button></div>
+      <div style="padding: 16px;"><button class="btn btn-secondary" onclick="logout()" style="color:white; border-color:rgba(255,255,255,0.3); background:rgba(255,255,255,0.1);">🚪 ออกจากระบบ</button></div>
     </nav>
 
     <div class="main-content">
-      <div class="page active" id="page-dashboard"><h2>📊 แดชบอร์ด</h2><p>ยินดีต้อนรับเข้าสู่ระบบ!</p></div>
-      <div class="page" id="page-subjects"><h2>📚 วิชาเรียน</h2><button class="btn btn-primary btn-sm" id="btn-add-subject" onclick="openModal('modal-subject')" style="display:none">+ เพิ่มวิชา</button><div id="subjects-list" style="margin-top:20px;">กำลังโหลด...</div></div>
-      <div class="page" id="page-assignments"><h2>📝 งานที่มอบหมาย</h2><button class="btn btn-primary btn-sm" id="btn-add-assignment" onclick="openAddAssignment()" style="display:none">+ มอบหมายงาน</button><div id="assignments-list" style="margin-top:20px;">กำลังโหลด...</div></div>
-      <div class="page" id="page-submissions"><h2>📤 การส่งงาน / ตรวจงาน</h2><div id="submissions-list" style="margin-top:20px;">กำลังโหลด...</div></div>
+      <div class="page active" id="page-dashboard">
+        <h2>📊 แดชบอร์ด</h2>
+        <div class="card" style="margin-top:20px; background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: white;">
+          <h3 id="welcome-text">ยินดีต้อนรับเข้าสู่ระบบ!</h3>
+          <p style="opacity: 0.8; margin-top: 5px;">พร้อมที่จะเรียนรู้สิ่งใหม่ๆ หรือยัง?</p>
+        </div>
+      </div>
+      <div class="page" id="page-subjects"><h2>📚 วิชาเรียน</h2><button class="btn btn-primary btn-sm" id="btn-add-subject" onclick="openModal('modal-subject')" style="display:none; margin-top:10px;">+ เพิ่มวิชาใหม่</button><div id="subjects-list" style="margin-top:20px;">กำลังโหลด...</div></div>
+      <div class="page" id="page-assignments"><h2>📝 งานที่มอบหมาย</h2><button class="btn btn-primary btn-sm" id="btn-add-assignment" onclick="openAddAssignment()" style="display:none; margin-top:10px;">+ มอบหมายงาน</button><div id="assignments-list" style="margin-top:20px;">กำลังโหลด...</div></div>
+      <div class="page" id="page-submissions"><h2>📤 ส่งงาน / ตรวจงาน</h2><div id="submissions-list" style="margin-top:20px;">กำลังโหลด...</div></div>
     </div>
   </div>
 </div>
@@ -138,10 +162,10 @@
 <div class="modal-overlay" id="modal-subject">
   <div class="modal">
     <h3>📚 เพิ่มวิชาใหม่</h3>
-    <div class="form-group" style="margin-top:15px;"><label>ชื่อวิชา</label><input type="text" id="subject-name"></div>
+    <div class="form-group" style="margin-top:15px;"><label>ชื่อวิชา</label><input type="text" id="subject-name" placeholder="เช่น วิทยาการคำนวณ ม.1"></div>
     <div class="modal-actions">
       <button class="btn btn-secondary" onclick="closeModal('modal-subject')">ยกเลิก</button>
-      <button class="btn btn-primary" onclick="addSubject()">บันทึก</button>
+      <button class="btn btn-primary" onclick="addSubject()">💾 บันทึก</button>
     </div>
   </div>
 </div>
@@ -150,10 +174,10 @@
   <div class="modal">
     <h3>📝 มอบหมายงานใหม่</h3>
     <div class="form-group" style="margin-top:15px;"><label>วิชา</label><select id="assignment-subject"></select></div>
-    <div class="form-group"><label>ชื่องาน</label><input type="text" id="assignment-title"></div>
+    <div class="form-group"><label>ชื่องาน</label><input type="text" id="assignment-title" placeholder="เช่น ส่งใบงานที่ 1"></div>
     <div class="modal-actions">
       <button class="btn btn-secondary" onclick="closeModal('modal-assignment')">ยกเลิก</button>
-      <button class="btn btn-primary" onclick="addAssignment()">บันทึก</button>
+      <button class="btn btn-primary" onclick="addAssignment()">💾 บันทึก</button>
     </div>
   </div>
 </div>
@@ -168,35 +192,59 @@ const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
 let currentUser = null;
 let currentProfile = null;
 
-// ===== CUSTOM AUTH LOGIC =====
+// ===== ระบบแสดงแจ้งเตือน (TOAST) =====
+function showToast(message, type = 'success') {
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  
+  let icon = '✅';
+  if(type === 'error') icon = '❌';
+  if(type === 'info') icon = '💡';
+
+  toast.innerHTML = `<span style="font-size:20px;">${icon}</span> <span>${message}</span>`;
+  container.appendChild(toast);
+
+  // ทำให้เลื่อนเข้ามา
+  requestAnimationFrame(() => {
+    toast.classList.add('show');
+  });
+
+  // ลบออกอัตโนมัติเมื่อผ่านไป 3 วินาที
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 400);
+  }, 3000);
+}
+
+// ===== AUTH LOGIC =====
 function switchTab(tab) {
   document.querySelectorAll('.auth-tab').forEach((t,i) => t.classList.toggle('active', (i===0&&tab==='login')||(i===1&&tab==='register')));
   document.getElementById('login-form').style.display = tab==='login' ? 'block' : 'none';
   document.getElementById('register-form').style.display = tab==='register' ? 'block' : 'none';
-  clearAlert('alert-auth');
 }
-function showAlert(id, msg, type='error') { const el = document.getElementById(id); el.className = `alert alert-${type} show`; el.textContent = msg; }
-function clearAlert(id) { document.getElementById(id).className = 'alert'; document.getElementById(id).textContent = ''; }
 
 window.onload = async () => {
   const savedUserId = localStorage.getItem('payub_user_id');
   if (savedUserId) {
     const { data } = await sb.from('profiles').select('*').eq('id', savedUserId).single();
-    if (data) { currentUser = { id: data.id }; currentProfile = data; initApp(); }
+    if (data) { currentUser = { id: data.id }; currentProfile = data; initApp(false); }
   }
 };
 
 async function login() {
   const email = document.getElementById('login-email').value.trim();
   const pass = document.getElementById('login-password').value;
-  if (!email || !pass) return showAlert('alert-auth', 'กรุณากรอกข้อมูลให้ครบ');
+  if (!email || !pass) return showToast('กรุณากรอกอีเมลและรหัสผ่านให้ครบ', 'error');
   
   const { data, error } = await sb.from('profiles').select('*').eq('email', email).eq('password', pass).single();
-  if (error || !data) return showAlert('alert-auth', 'อีเมลหรือรหัสผ่านไม่ถูกต้อง');
+  if (error || !data) return showToast('อีเมลหรือรหัสผ่านไม่ถูกต้อง', 'error');
 
   currentUser = { id: data.id }; currentProfile = data;
   localStorage.setItem('payub_user_id', data.id);
-  initApp();
+  
+  showToast(`เข้าสู่ระบบสำเร็จ! สวัสดี ${data.full_name}`, 'success');
+  initApp(true); // true = ให้ยิงพลุ
 }
 
 async function register() {
@@ -205,56 +253,73 @@ async function register() {
   const pass = document.getElementById('reg-password').value;
   const role = document.getElementById('reg-role').value;
 
-  if (!name || !email || !pass) return showAlert('alert-auth', 'กรุณากรอกข้อมูลให้ครบ');
+  if (!name || !email || !pass) return showToast('กรุณากรอกข้อมูลให้ครบทุกช่อง', 'error');
+  if (pass.length < 6) return showToast('รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร', 'error');
   
   const { data: existing } = await sb.from('profiles').select('id').eq('email', email).maybeSingle();
-  if (existing) return showAlert('alert-auth', 'อีเมลนี้มีในระบบแล้ว');
+  if (existing) return showToast('อีเมลนี้มีคนใช้งานแล้ว', 'error');
 
   const { error } = await sb.from('profiles').insert([{ full_name: name, email: email, password: pass, role: role }]);
-  if (error) return showAlert('alert-auth', error.message);
+  if (error) return showToast('เกิดข้อผิดพลาด: ' + error.message, 'error');
   
-  showAlert('alert-auth', 'สมัครสมาชิกสำเร็จ! กรุณาเข้าสู่ระบบ', 'success');
+  showToast('สมัครสมาชิกสำเร็จ! กรุณาล็อกอิน', 'success');
   switchTab('login');
+  document.getElementById('login-email').value = email; // เติมให้อัตโนมัติ
 }
 
 async function logout() {
   localStorage.removeItem('payub_user_id');
-  document.getElementById('auth-screen').style.display = 'flex'; document.getElementById('app-screen').style.display = 'none';
+  document.getElementById('auth-screen').style.display = 'flex'; 
+  document.getElementById('app-screen').style.display = 'none';
   currentUser = null; currentProfile = null;
+  document.getElementById('login-password').value = '';
+  showToast('ออกจากระบบเรียบร้อยแล้ว', 'info');
 }
 
 // ===== APP LOGIC =====
-function initApp() {
+function initApp(triggerConfetti = false) {
   document.getElementById('auth-screen').style.display = 'none';
   document.getElementById('app-screen').style.display = 'block';
-  document.getElementById('sidebar-username').textContent = currentProfile.full_name + (currentProfile.role==='teacher'?' (ครู)':' (นักเรียน)');
+  
+  let roleIcon = currentProfile.role === 'teacher' ? '👩‍🏫 ครู' : '👨‍🎓 นักเรียน';
+  document.getElementById('sidebar-username').innerHTML = `${currentProfile.full_name} <br><span style="color:var(--accent-light)">${roleIcon}</span>`;
+  document.getElementById('welcome-text').textContent = `สวัสดีครับ, ${currentProfile.full_name}! 👋`;
+
+  // ลูกเล่นยิงพลุกระดาษฉลองการล็อกอิน
+  if (triggerConfetti) {
+    confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 }, colors: ['#1a5f3f', '#f0a500', '#ffffff'] });
+  }
   
   const isTeacher = currentProfile.role === 'teacher';
   const nav = [
     { icon: '📊', label: 'แดชบอร์ด', page: 'dashboard' },
     { icon: '📚', label: 'วิชาเรียน', page: 'subjects' },
-    { icon: '📝', label: 'งาน', page: 'assignments' },
-    { icon: '📤', label: 'ส่งงาน/ตรวจงาน', page: 'submissions' }
+    { icon: '📝', label: 'งานมอบหมาย', page: 'assignments' },
+    { icon: '📤', label: isTeacher ? 'ตรวจงาน' : 'ส่งงาน', page: 'submissions' }
   ];
 
   document.getElementById('sidebar-nav').innerHTML = nav.map(n => `
-    <div class="nav-item ${n.page==='dashboard'?'active':''}" onclick="navigate('${n.page}')">
-      <span>${n.icon}</span> ${n.label}
+    <div class="nav-item ${n.page==='dashboard'?'active':''}" onclick="navigate('${n.page}', this)">
+      <span style="font-size:20px">${n.icon}</span> <span>${n.label}</span>
     </div>
   `).join('');
 
   if (isTeacher) {
     document.getElementById('btn-add-subject').style.display = 'inline-block';
     document.getElementById('btn-add-assignment').style.display = 'inline-block';
+  } else {
+    document.getElementById('btn-add-subject').style.display = 'none';
+    document.getElementById('btn-add-assignment').style.display = 'none';
   }
+  
   loadSubjects(); loadAssignments(); loadSubmissions();
 }
 
-function navigate(page) {
+function navigate(page, element) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-'+page).classList.add('active');
-  event.currentTarget.classList.add('active');
+  if(element) element.classList.add('active');
 }
 
 function openModal(id) { document.getElementById(id).classList.add('show'); }
@@ -262,33 +327,39 @@ function closeModal(id) { document.getElementById(id).classList.remove('show'); 
 
 async function loadSubjects() {
   const { data } = await sb.from('subjects').select('*');
-  document.getElementById('subjects-list').innerHTML = data?.length ? data.map(s => `<div class="card"><b>${s.name}</b></div>`).join('') : 'ยังไม่มีวิชา';
+  document.getElementById('subjects-list').innerHTML = data?.length ? data.map(s => `<div class="card"><b>${s.name}</b></div>`).join('') : '<div style="opacity:0.5; text-align:center; padding: 20px;">ยังไม่มีวิชาเรียน</div>';
 }
 async function addSubject() {
-  const name = document.getElementById('subject-name').value;
+  const name = document.getElementById('subject-name').value.trim();
+  if(!name) return showToast('กรุณากรอกชื่อวิชา', 'error');
   await sb.from('subjects').insert({ name, teacher_id: currentUser.id });
+  showToast('เพิ่มวิชาใหม่เรียบร้อย', 'success');
   closeModal('modal-subject'); loadSubjects();
+  document.getElementById('subject-name').value = '';
 }
 
 async function loadAssignments() {
   const { data } = await sb.from('assignments').select('*, subjects(name)');
-  document.getElementById('assignments-list').innerHTML = data?.length ? data.map(a => `<div class="card"><b>${a.title}</b> (วิชา: ${a.subjects?.name})</div>`).join('') : 'ยังไม่มีงาน';
+  document.getElementById('assignments-list').innerHTML = data?.length ? data.map(a => `<div class="card"><b>${a.title}</b> <br><span style="font-size:13px; color:gray;">วิชา: ${a.subjects?.name}</span></div>`).join('') : '<div style="opacity:0.5; text-align:center; padding: 20px;">ยังไม่มีงานมอบหมาย</div>';
 }
 async function openAddAssignment() {
   const { data } = await sb.from('subjects').select('*').eq('teacher_id', currentUser.id);
-  document.getElementById('assignment-subject').innerHTML = data?.map(s => `<option value="${s.id}">${s.name}</option>`).join('') || '';
+  if(!data || data.length === 0) return showToast('คุณต้องสร้างวิชาก่อนมอบหมายงาน', 'error');
+  document.getElementById('assignment-subject').innerHTML = data.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
   openModal('modal-assignment');
 }
 async function addAssignment() {
-  const title = document.getElementById('assignment-title').value;
+  const title = document.getElementById('assignment-title').value.trim();
   const subject_id = document.getElementById('assignment-subject').value;
+  if(!title) return showToast('กรุณากรอกชื่องาน', 'error');
   await sb.from('assignments').insert({ title, subject_id });
+  showToast('มอบหมายงานสำเร็จ!', 'success');
   closeModal('modal-assignment'); loadAssignments();
+  document.getElementById('assignment-title').value = '';
 }
 
 async function loadSubmissions() {
-  const { data } = await sb.from('submissions').select('*, assignments(title), profiles(full_name)');
-  document.getElementById('submissions-list').innerHTML = data?.length ? data.map(s => `<div class="card">ผู้ส่ง: ${s.profiles?.full_name} | งาน: ${s.assignments?.title} | คะแนน: ${s.score||'รอตรวจ'}</div>`).join('') : 'ยังไม่มีการส่งงาน';
+  document.getElementById('submissions-list').innerHTML = '<div style="opacity:0.5; text-align:center; padding: 20px;">กำลังโหลด...</div>';
 }
 </script>
 </body>
