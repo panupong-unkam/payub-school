@@ -3,9 +3,10 @@ const SUPABASE_URL = 'https://hbpqbkgqckawqjcbqemh.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_ES5K5aB28I9NkTt-6ddPUA_4NfZ3aJd';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// --- โค้ดที่ต้องเพิ่มใหม่ ---
+let currentUser = null;
 let currentSubjectFilter = null; // ตัวแปรเก็บว่าตอนนี้กำลังดูวิชาอะไรอยู่
 
+// --- ฟังก์ชันนำทางและเลือกวิชา ---
 function viewSubject(subjectId, subjectName) {
   currentSubjectFilter = { id: subjectId, name: subjectName };
   // เปลี่ยนไปหน้าใบงาน และสั่งโหลดข้อมูลใหม่เฉพาะวิชานี้
@@ -13,10 +14,10 @@ function viewSubject(subjectId, subjectName) {
   loadData(); 
 }
 
-// อัปเดตฟังก์ชัน navigate เดิม ให้ล้างค่าวิชาเมื่อกดเมนูด้านซ้ายตรงๆ
 function navigate(page, el) {
+  // เลือกล้างค่าตัวกรอง เพื่อแสดงใบงานทั้งหมดเวลากดเมนูด้านซ้ายตรงๆ
   if (page === 'assignments' && el) {
-      currentSubjectFilter = null; // ล้างค่าตัวกรอง เพื่อแสดงใบงานทั้งหมด
+      currentSubjectFilter = null; 
       loadData();
   }
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -25,22 +26,13 @@ function navigate(page, el) {
   if(el) el.classList.add('active');
 }
 
-// แจ้งเตือน Toast
+// --- ฟังก์ชันแจ้งเตือน ---
 function showToast(msg) {
   const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
   document.getElementById('toast-container').appendChild(t);
   setTimeout(() => t.remove(), 3000);
 }
 
-// นำทางหน้าเว็บ
-function navigate(page, el) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('page-' + page).classList.add('active');
-  if(el) el.classList.add('active');
-}
-
-// เช็คสถานะก่อนเข้าดู
 function checkAuth(page, el) {
   if (!currentUser) {
     showToast('💡 กรุณาเข้าสู่ระบบก่อนใช้งานส่วนนี้ครับ');
@@ -50,7 +42,7 @@ function checkAuth(page, el) {
   }
 }
 
-// Modal เข้าสู่ระบบ
+// --- Modal เข้าสู่ระบบ ---
 function openAuth() { document.getElementById('modal-auth').classList.add('show'); }
 function closeAuth() { document.getElementById('modal-auth').classList.remove('show'); }
 function toggleAuth(isReg) {
@@ -59,7 +51,7 @@ function toggleAuth(isReg) {
   document.getElementById('auth-title').textContent = isReg ? 'สมัครสมาชิกใหม่' : 'เข้าสู่ระบบนักเรียน/ครู';
 }
 
-// ระบบเข้าสู่ระบบ
+// --- ระบบ Auth ---
 async function login() {
   const e = document.getElementById('email').value;
   const p = document.getElementById('password').value;
@@ -78,7 +70,6 @@ async function login() {
   }
 }
 
-// ระบบสมัครสมาชิก (เก็บชั้นและเลขที่ด้วย)
 async function register() {
   const n = document.getElementById('reg-name').value;
   const e = document.getElementById('reg-email').value;
@@ -94,7 +85,6 @@ async function register() {
   toggleAuth(false);
 }
 
-// ระบบออกจากระบบ
 function logout() {
   currentUser = null;
   localStorage.removeItem('payub_user');
@@ -103,7 +93,6 @@ function logout() {
   showToast('🚪 ออกจากระบบเรียบร้อย');
 }
 
-// อัปเดตหน้าตาเว็บตามสถานะ (ครู/นักเรียน/ผู้เยี่ยมชม)
 function updateUI() {
   const area = document.getElementById('auth-btn-area');
   const badge = document.getElementById('user-badge');
@@ -125,13 +114,45 @@ function updateUI() {
   }
 }
 
-// โหลดข้อมูลวิชาและใบงาน
+// --- โหลดข้อมูลวิชาและใบงาน ---
 async function loadData() {
   const { data: subs } = await sb.from('subjects').select('*');
-  const subjectsContainer = document.getElementById('subjects-list');
   
-  if (subs && subs.length > 0) {
-    subjectsContainer.innerHTML = subs.map(s => {
+  let assignQuery = sb.from('assignments').select('*, subjects(name)');
+  if (currentSubjectFilter) {
+    assignQuery = assignQuery.eq('subject_id', currentSubjectFilter.id);
+  }
+  const { data: assigns } = await assignQuery;
+  
+  let displaySubs = subs || [];
+  let displayAssigns = assigns || [];
+
+  if (currentUser && currentUser.role === 'student') {
+    const myClass = currentUser.class_level || '';
+    const prefix = myClass.split('/')[0];
+
+    const isMySubject = (subName) => {
+      if (!subName) return false;
+      if (subName.includes(prefix)) return true;
+      if (subName.includes(myClass)) return true;
+      if (subName.includes('ม.ต้น') && prefix.startsWith('ม.')) return true;
+      return false;
+    };
+
+    displaySubs = displaySubs.filter(s => isMySubject(s.name));
+    displayAssigns = displayAssigns.filter(a => isMySubject(a.subjects?.name));
+  }
+
+  const assignHeader = document.querySelector('#page-assignments h2');
+  if (currentSubjectFilter) {
+      assignHeader.innerHTML = `📝 ใบงาน: <span style="color:var(--primary)">${currentSubjectFilter.name}</span>`;
+  } else {
+      assignHeader.innerHTML = `📝 ใบงานและกิจกรรมทั้งหมด`;
+  }
+
+  const subjectsContainer = document.getElementById('subjects-list');
+  if (displaySubs.length > 0) {
+    subjectsContainer.innerHTML = displaySubs.map(s => {
       let catClass = 'cat-cs'; let icon = '💻';
       if(s.name.includes('วิทยาการคำนวณ')) { catClass = 'cat-cs'; icon = '🧠'; }
       else if(s.name.includes('คอมพิวเตอร์')) { catClass = 'cat-com'; icon = '⌨️'; }
@@ -139,35 +160,46 @@ async function loadData() {
       else if(s.name.includes('ประวัติศาสตร์')) { catClass = 'cat-hist'; icon = '📜'; }
       else if(s.name.includes('หุ่นยนต์')) { catClass = 'cat-robot'; icon = '🤖'; }
 
-      // ปุ่มลบวิชาสำหรับครู
       const deleteBtn = currentUser?.role === 'teacher' ? `<button onclick="event.stopPropagation(); deleteSubject(${s.id}, '${s.name}')" style="position:absolute; top:15px; right:15px; background:var(--danger); color:white; border:none; border-radius:50%; width:32px; height:32px; cursor:pointer; font-size:14px; box-shadow:0 2px 5px rgba(0,0,0,0.2);">🗑️</button>` : '';
 
       return `
-        <div class="subject-card ${catClass}" onclick="navigate('assignments', document.querySelectorAll('.nav-item')[2])">
+        <div class="subject-card ${catClass}" onclick="viewSubject(${s.id}, '${s.name}')">
           ${deleteBtn}
           <div class="subject-icon">${icon}</div>
           <div class="subject-name">${s.name}</div>
-          <div style="font-size:13px; color:gray;">คลิกเพื่อดูบทเรียน</div>
+          <div style="font-size:13px; color:gray;">คลิกเพื่อดูใบงานในวิชานี้</div>
           <div class="subject-btn">เข้าสู่ชั้นเรียน</div>
         </div>
       `;
     }).join('');
   } else {
-    subjectsContainer.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding: 40px; color:gray;">ยังไม่มีข้อมูลวิชาในระบบ</div>';
+    subjectsContainer.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding: 40px; color:gray;">ไม่มีวิชาเรียนสำหรับระดับชั้นของคุณ</div>';
   }
 
-  const { data: assigns } = await sb.from('assignments').select('*, subjects(name)');
-  document.getElementById('assignments-list').innerHTML = assigns?.length > 0 ? assigns.map(a => `
+  document.getElementById('assignments-list').innerHTML = displayAssigns.length > 0 ? displayAssigns.map(a => {
+    const teacherControls = currentUser?.role === 'teacher' ? `
+        <div style="margin-top: 15px; display: flex; gap: 8px;">
+            <button class="btn btn-sm" style="background:var(--surface2); color:var(--primary); border:1px solid var(--primary);" onclick="renameAssignment(${a.id}, '${a.title}')">✏️ เปลี่ยนชื่อ</button>
+            <button class="btn btn-sm" style="background:#fdecea; color:var(--danger); border:1px solid var(--danger);" onclick="deleteAssignment(${a.id}, '${a.title}')">🗑️ ลบใบงาน</button>
+        </div>
+    ` : '';
+
+    return `
     <div class="card">
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-        <div><b>📝 ${a.title}</b> <br><small style="color:gray;">วิชา: ${a.subjects?.name}</small></div>
-        <button class="btn btn-primary btn-sm" onclick="checkAuth('submissions', document.querySelectorAll('.nav-item')[3])">🔗 เข้าสู่ระบบเพื่อส่งงาน</button>
+      <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+        <div>
+            <b style="font-size:18px;">📝 ${a.title}</b> <br>
+            <small style="color:gray;">วิชา: ${a.subjects?.name}</small>
+            ${teacherControls}
+        </div>
+        <button class="btn btn-primary" onclick="checkAuth('submissions', document.querySelectorAll('.nav-item')[3])">🔗 ส่งงาน</button>
       </div>
     </div>
-  `).join('') : '<div style="text-align:center; padding: 40px; color:gray;">ยังไม่มีใบงาน</div>';
+    `;
+  }).join('') : '<div style="text-align:center; padding: 40px; color:gray;">ยังไม่มีใบงาน</div>';
 }
 
-// ระบบลบวิชาสำหรับครู
+// --- ฟังก์ชันจัดการระบบสำหรับครู ---
 async function deleteSubject(id, name) {
   if (confirm(`คุณต้องการลบวิชา "${name}" ใช่หรือไม่?\n(คำเตือน: ใบงานทั้งหมดในวิชานี้จะถูกลบไปด้วย)`)) {
     const { error } = await sb.from('subjects').delete().eq('id', id);
@@ -176,7 +208,6 @@ async function deleteSubject(id, name) {
   }
 }
 
-// Modal จัดการวิชาและใบงาน
 function openModal(id) { document.getElementById(id).classList.add('show'); }
 function closeModal(id) { document.getElementById(id).classList.remove('show'); }
 
@@ -188,6 +219,23 @@ async function addSubject() {
   document.getElementById('sub-name').value = '';
   loadData();
   showToast('✅ เพิ่มวิชาสำเร็จ');
+}
+
+async function deleteAssignment(id, title) {
+  if (confirm(`คุณต้องการลบใบงาน "${title}" ใช่หรือไม่?`)) {
+    const { error } = await sb.from('assignments').delete().eq('id', id);
+    if (error) { showToast('❌ ลบไม่สำเร็จ: ' + error.message); } 
+    else { showToast('🗑️ ลบใบงานเรียบร้อย'); loadData(); }
+  }
+}
+
+async function renameAssignment(id, oldTitle) {
+  const newTitle = prompt('แก้ไขชื่อใบงาน:', oldTitle);
+  if (newTitle && newTitle.trim() !== '' && newTitle !== oldTitle) {
+    const { error } = await sb.from('assignments').update({ title: newTitle }).eq('id', id);
+    if (error) { showToast('❌ แก้ไขไม่สำเร็จ: ' + error.message); } 
+    else { showToast('✅ เปลี่ยนชื่อใบงานเรียบร้อย'); loadData(); }
+  }
 }
 
 // เริ่มต้นระบบ
