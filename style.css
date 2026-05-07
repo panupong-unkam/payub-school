@@ -66,3 +66,28 @@ h2 { font-family: 'Noto Serif Thai', serif; color: var(--primary-dark); font-siz
 .cat-moral { border-top: 8px solid #e67e22; } 
 .cat-hist { border-top: 8px solid #c0392b; }  
 .cat-robot { border-top: 8px solid #27ae60; }
+
+/* ===== ระบบ RESPONSIVE (หน้าจอมือถือ & iPad) ===== */
+.mobile-header { display: none; background: var(--primary-dark); color: white; padding: 15px 20px; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 90; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+.hamburger-btn { background: none; border: none; color: white; font-size: 24px; cursor: pointer; padding: 0 10px 0 0; }
+.sidebar-overlay { visibility: hidden; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 95; opacity: 0; transition: all 0.3s; }
+.sidebar-overlay.show { visibility: visible; opacity: 1; }
+
+/* สำหรับหน้าจอขนาด iPad (992px) ลงไป */
+@media (max-width: 992px) { 
+  .mobile-header { display: flex; }
+  .sidebar { transform: translateX(-100%); z-index: 100; box-shadow: 5px 0 15px rgba(0,0,0,0.2); }
+  .sidebar.open { transform: translateX(0); }
+  .main-content { margin-left: 0; padding: 20px; }
+  
+  /* ปรับหน้าต่างป๊อปอัปให้พอดีจอมือถือ */
+  .auth-card { padding: 30px 20px !important; margin: 15px; width: calc(100% - 30px) !important; }
+  .header-flex { flex-direction: column; align-items: flex-start; gap: 15px; }
+}
+
+/* สำหรับหน้าจอมือถือขนาดเล็ก (480px) ลงไป */
+@media (max-width: 480px) { 
+  h2 { font-size: 22px; }
+  #subjects-list { grid-template-columns: 1fr; } /* ให้ปุ่มวิชาเรียง 1 แถวบนมือถือ */
+  .card { padding: 15px; }
+}
