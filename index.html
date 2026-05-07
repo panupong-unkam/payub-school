@@ -251,7 +251,79 @@ h2 { font-family: 'Noto Serif Thai', serif; color: var(--primary-dark); font-siz
     </div>
   </div>
 </div>
+
+<div class="modal-overlay" id="modal-submit-work">
+  <div class="modal auth-card" style="max-width: 450px; padding: 35px 30px;">
+    <h3 style="color: var(--primary-dark); margin-bottom: 5px;">📤 ส่งผลงาน</h3>
+    <p id="submit-work-title" style="color: var(--primary); font-size: 16px; font-weight: bold; margin-bottom: 20px;">ชื่องาน...</p>
+    
+    <input type="hidden" id="submit-assign-id">
+    
+    <div class="form-group" style="margin-bottom: 25px;">
+      <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 10px;">วางลิงก์ผลงาน (เช่นลิงก์ Canva, Google Drive) หรือพิมพ์คำตอบที่นี่:</p>
+      <textarea id="submit-content" placeholder="พิมพ์ข้อความ หรือ วางลิงก์ผลงาน..." style="width: 100%; height: 120px; padding: 14px 16px; border: 2px solid var(--border); border-radius: 12px; font-family: 'Sarabun'; outline: none; transition: 0.3s; resize: none;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+    </div>
+    
+    <div style="display: flex; gap: 12px;">
+      <button class="btn" style="flex: 1; background: var(--surface2); color: var(--text-muted);" onclick="closeModal('modal-submit-work')">❌ ยกเลิก</button>
+      <button class="btn btn-primary" style="flex: 1;" onclick="submitWork()">🚀 ยืนยันการส่ง</button>
+    </div>
+  </div>
+</div>
+
+<style>
+  .grading-layout { display: flex; flex-direction: row; width: 100%; height: 100%; border-radius: 20px; overflow: hidden; }
+  .grading-left { flex: 7.5; background: #333; position: relative; display: flex; flex-direction: column; }
+  .grading-right { flex: 2.5; background: white; padding: 30px; display: flex; flex-direction: column; min-width: 320px; border-left: 1px solid #ddd; }
   
+  /* ย่อจอเป็นแนวตั้งเฉพาะตอนเปิดบนมือถือ/แท็บเล็ตเล็ก */
+  @media (max-width: 992px) {
+    .grading-layout { flex-direction: column; overflow-y: auto; }
+    .grading-left { min-height: 55vh; flex: none; }
+    .grading-right { padding: 25px; flex: none; height: auto; }
+  }
+</style>
+
+<div class="modal-overlay" id="modal-grading" style="padding: 0; z-index: 2000;">
+  <div class="auth-card" style="max-width: 96%; width: 96%; height: 92vh; padding: 0; background: transparent; box-shadow: 0 10px 40px rgba(0,0,0,0.5);">
+    
+    <div class="grading-layout">
+        <div class="grading-left">
+            <button onclick="closeModal('modal-grading')" style="position: absolute; top: 15px; left: 15px; z-index: 10; border: none; background: white; color: #d32f2f; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; font-size: 24px; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; transition: 0.3s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">✕</button>
+
+            <div style="background: #222; color: #ccc; padding: 12px; text-align: center; font-size: 14px; letter-spacing: 1px;">
+                👁️ พื้นที่แสดงตัวอย่างผลงานของนักเรียน (จาก Google Drive)
+            </div>
+
+            <iframe id="grading-iframe" src="" style="width: 100%; flex-grow: 1; border: none; display: none; background: #f5f5f5;"></iframe>
+            
+            <div id="grading-text-content" style="display:none; padding: 40px; overflow-y: auto; flex-grow: 1; background: white; font-size: 16px; line-height: 1.8;"></div>
+        </div>
+        
+        <div class="grading-right">
+            <h3 style="color: var(--primary-dark); margin-bottom: 5px; font-size: 22px;">📝 ตรวจผลงาน</h3>
+            <p id="grading-student-info" style="font-weight: bold; font-size: 16px; margin-bottom: 5px; color: var(--primary);"></p>
+            <p id="grading-assign-title" style="color: var(--text-muted); font-size: 14px; margin-bottom: 25px; border-bottom: 1px dashed #eee; padding-bottom: 15px;"></p>
+            
+            <input type="hidden" id="grading-sub-id">
+            
+            <div class="form-group">
+                <label style="font-size: 14px; font-weight: bold; display: block; margin-bottom: 8px; color: #333;">🎯 คะแนนที่ได้:</label>
+                <input type="text" id="grading-score" placeholder="เช่น 10/10 หรือ ผ่าน" style="width: 100%; padding: 15px; border: 2px solid var(--border); border-radius: 12px; font-size: 16px; font-weight: bold; text-align: center; outline: none; transition: 0.3s;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'">
+            </div>
+            
+            <div class="form-group" style="flex: 1; display: flex; flex-direction: column; margin-top: 15px;">
+                <label style="font-size: 14px; font-weight: bold; display: block; margin-bottom: 8px; color: #333;">💬 คำติชม/เสนอแนะ:</label>
+                <textarea id="grading-feedback" placeholder="พิมพ์คำแนะนำให้นักเรียน (นักเรียนจะเห็นข้อความนี้)..." style="width: 100%; flex: 1; min-height: 150px; padding: 15px; border: 2px solid var(--border); border-radius: 12px; font-family: 'Sarabun'; font-size: 15px; outline: none; resize: none; transition: 0.3s;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+            </div>
+            
+            <button class="btn btn-primary" style="width: 100%; margin-top: 15px; padding: 15px; font-size: 16px; border-radius: 12px; box-shadow: 0 4px 15px rgba(26,95,63,0.3);" onclick="saveGrade()">💾 บันทึกคะแนน</button>
+        </div>
+    </div>
+    
+  </div>
+</div>
+
 <script src="script.js"></script>
 </body>
 </html>
