@@ -58,16 +58,18 @@ async function login() {
   }
 }
 
-// ระบบสมัครสมาชิก (ล็อกให้เป็นนักเรียนเท่านั้น)
+// ระบบสมัครสมาชิก (เก็บชั้นและเลขที่ด้วย)
 async function register() {
   const n = document.getElementById('reg-name').value;
   const e = document.getElementById('reg-email').value;
   const p = document.getElementById('reg-password').value;
-  const r = 'student'; // บังคับสถานะเป็นนักเรียน
+  const c = document.getElementById('reg-class').value;
+  const no = document.getElementById('reg-no').value;
+  const r = 'student'; 
   
-  if (!n || !e || !p) return showToast('❌ กรุณากรอกข้อมูลให้ครบถ้วน');
+  if (!n || !e || !p || !c || !no) return showToast('❌ กรุณากรอกข้อมูลให้ครบถ้วน รวมถึงชั้นและเลขที่');
 
-  await sb.from('profiles').insert([{ full_name: n, email: e, password: p, role: r }]);
+  await sb.from('profiles').insert([{ full_name: n, email: e, password: p, role: r, class_level: c, student_no: no }]);
   showToast('✅ สมัครสำเร็จ! ลองล็อกอินดูนะครับ');
   toggleAuth(false);
 }
