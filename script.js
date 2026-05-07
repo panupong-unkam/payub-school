@@ -3,7 +3,27 @@ const SUPABASE_URL = 'https://hbpqbkgqckawqjcbqemh.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_ES5K5aB28I9NkTt-6ddPUA_4NfZ3aJd';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-let currentUser = null;
+// --- โค้ดที่ต้องเพิ่มใหม่ ---
+let currentSubjectFilter = null; // ตัวแปรเก็บว่าตอนนี้กำลังดูวิชาอะไรอยู่
+
+function viewSubject(subjectId, subjectName) {
+  currentSubjectFilter = { id: subjectId, name: subjectName };
+  // เปลี่ยนไปหน้าใบงาน และสั่งโหลดข้อมูลใหม่เฉพาะวิชานี้
+  navigate('assignments', document.querySelectorAll('.nav-item')[2]);
+  loadData(); 
+}
+
+// อัปเดตฟังก์ชัน navigate เดิม ให้ล้างค่าวิชาเมื่อกดเมนูด้านซ้ายตรงๆ
+function navigate(page, el) {
+  if (page === 'assignments' && el) {
+      currentSubjectFilter = null; // ล้างค่าตัวกรอง เพื่อแสดงใบงานทั้งหมด
+      loadData();
+  }
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  if(el) el.classList.add('active');
+}
 
 // แจ้งเตือน Toast
 function showToast(msg) {
