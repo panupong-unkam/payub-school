@@ -245,3 +245,45 @@ window.onload = () => {
   updateUI();
   loadData();
 };
+
+// --- ระบบการเพิ่มใบงาน ---
+async function openAddAssignment() {
+  // 1. โหลดรายชื่อวิชาทั้งหมดของคุณครูมาใส่ใน Dropdown
+  const { data: subjects } = await sb.from('subjects').select('*').eq('teacher_id', currentUser.id);
+  
+  const selectEl = document.getElementById('assign-sub-id');
+  if (subjects && subjects.length > 0) {
+    // 2. ถ้าครูกำลังกดเพิ่มงานจากในหน้าวิชาไหน ให้เลือกวิชานั้นเป็นค่าเริ่มต้น
+    let defaultSubId = currentSubjectFilter ? currentSubjectFilter.id : subjects[0].id;
+    
+    selectEl.innerHTML = subjects.map(s => 
+      `<option value="${s.id}" ${s.id === defaultSubId ? 'selected' : ''}>${s.name}</option>`
+    ).join('');
+    
+    document.getElementById('assign-title').value = ''; // เคลียร์ช่องพิมพ์
+    openModal('modal-assignment'); // เปิดหน้าต่างป๊อปอัป
+  } else {
+    showToast('❌ คุณต้องเพิ่มวิชาเรียนก่อน ถึงจะสร้างใบงานได้ครับ');
+  }
+}
+
+async function addAssignment() {
+  const subjectId = document.getElementById('assign-sub-id').value;
+  const title = document.getElementById('assign-title').value;
+  
+  if (!title) return showToast('❌ กรุณากรอกชื่อใบงาน');
+  
+  // 3. บันทึกใบงานลงฐานข้อมูล
+  const { error } = await sb.from('assignments').insert({ 
+    title: title, 
+    subject_id: subjectId 
+  });
+  
+  if (error) {
+    showToast('❌ เพิ่มใบงานไม่สำเร็จ: ' + error.message);
+  } else {
+    closeModal('modal-assignment');
+    showToast('✅ เพิ่มใบงานใหม่เรียบร้อยแล้ว');
+    loadData(); // สั่งให้หน้ารีเฟรชเพื่อแสดงใบงานใหม่ทันที
+  }
+}
