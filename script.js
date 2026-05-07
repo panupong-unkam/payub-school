@@ -197,6 +197,7 @@ async function loadData() {
         }
     }
     else {
+        // --- ส่วนของหน้าใบงานทั้งหมด ---
         if (assignHeader) {
             if (currentUser && currentUser.role !== 'teacher') {
                 assignHeader.innerHTML = `
@@ -209,9 +210,38 @@ async function loadData() {
                         </select>
                     </div>
                 `;
-            } else { assignHeader.innerHTML = '📝 ใบงานและกิจกรรมทั้งหมด'; }
+            } else { 
+                assignHeader.innerHTML = '📝 ใบงานและกิจกรรมทั้งหมด'; 
+            }
         }
-        if (assignContainer) { assignContainer.innerHTML = filteredAssignsForList.length > 0 ? renderAssignmentsList(filteredAssignsForList, mySubmissions) : `<div style="padding:40px; text-align:center; color:gray; background: white; border-radius: 12px; border: 2px dashed var(--border);">ไม่พบใบงานในหมวดหมู่นี้ครับ 🎉</div>`; }
+
+        if (assignContainer) {
+            // 🌟 ตรวจสอบว่าเป็นบุคคลทั่วไปหรือไม่
+            if (!currentUser) {
+                assignContainer.innerHTML = `
+                    <div class="card" style="text-align:center; padding: 60px 30px; border: 2px dashed var(--border); background: linear-gradient(to bottom, #ffffff, #f9f9f9);">
+                        <div style="font-size: 60px; margin-bottom: 20px; animation: pulse 2s infinite;">🔐</div>
+                        <h3 style="color: var(--primary-dark); font-family: 'Noto Serif Thai', serif; margin-bottom: 10px;">พื้นที่เฉพาะสมาชิกนักเรียน</h3>
+                        <p style="color: var(--text-muted); font-size: 16px; margin-bottom: 30px; max-width: 450px; margin-left: auto; margin-right: auto;">
+                            ขออภัยครับ ในส่วนของรายละเอียดใบงานและการส่งผลงาน <br>สงวนสิทธิ์ให้เข้าถึงได้เฉพาะนักเรียนที่เข้าสู่ระบบแล้วเท่านั้น
+                        </p>
+                        <div style="display:flex; gap:15px; justify-content:center; flex-wrap:wrap;">
+                            <button class="btn btn-primary" onclick="openAuth(); toggleAuth(false);" style="padding: 12px 30px; box-shadow: 0 4px 15px rgba(26,95,63,0.3);">
+                                🔑 เข้าสู่ระบบทันที
+                            </button>
+                            <button class="btn btn-outline" onclick="openAuth(); toggleAuth(true);" style="border: 2px solid var(--primary);">
+                                📝 สมัครสมาชิกนักเรียน
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                // ถ้าเป็นนักเรียนหรือครู ให้โชว์รายชื่อใบงานตามปกติ
+                assignContainer.innerHTML = filteredAssignsForList.length > 0 
+                    ? renderAssignmentsList(filteredAssignsForList, mySubmissions) 
+                    : `<div style="padding:40px; text-align:center; color:gray; background: white; border-radius: 12px; border: 2px dashed var(--border);">ไม่พบใบงานในหมวดหมู่นี้ครับ 🎉</div>`;
+            }
+        }
     }
 }
 
