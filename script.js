@@ -6,8 +6,12 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let currentUser = null;
 let currentSubjectFilter = null; // ตัวแปรเก็บว่าตอนนี้กำลังดูวิชาอะไรอยู่
 
+// --- ฟังก์ชันเปิด/ปิดเมนูบนมือถือ ---
+function toggleSidebar() {
+  document.querySelector('.sidebar').classList.toggle('open');
+  document.getElementById('sidebar-overlay').classList.toggle('show');
+}
 // --- ฟังก์ชันนำทางและเลือกวิชา (อัปเดตใหม่ แก้บัคกดแล้วไม่ยอมกรองวิชา) ---
-
 function viewSubject(subjectId, subjectName) {
   // 1. บันทึกวิชาที่คลิก
   currentSubjectFilter = { id: subjectId, name: subjectName };
@@ -25,18 +29,20 @@ function viewSubject(subjectId, subjectName) {
 }
 
 function navigate(page, el) {
-  // เลือกล้างค่าตัวกรอง เฉพาะตอนที่คลิก "เมนูด้านซ้าย" ด้วยเมาส์โดยตรงเท่านั้น
   if (page === 'assignments' && el) {
       currentSubjectFilter = null; 
   }
   
-  // สลับหน้าจอ
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-' + page).classList.add('active');
   if(el) el.classList.add('active');
   
-  // โหลดข้อมูลใหม่ทุกครั้งที่เปลี่ยนหน้า
+  // --- ส่วนที่เพิ่มมา: ปิดเมนูบนมือถืออัตโนมัติเมื่อกดเลือกหน้า ---
+  document.querySelector('.sidebar').classList.remove('open');
+  const overlay = document.getElementById('sidebar-overlay');
+  if (overlay) overlay.classList.remove('show');
+  
   loadData();
 }
 
@@ -110,8 +116,13 @@ function logout() {
 function updateUI() {
   const area = document.getElementById('auth-btn-area');
   const badge = document.getElementById('user-badge');
+  const mobileBadge = document.getElementById('mobile-badge'); // ดึงตัวป้ายบนมือถือ
+
   if (currentUser) {
-    badge.textContent = currentUser.full_name + ' (' + (currentUser.role === 'teacher' ? 'ครู' : 'นักเรียน') + ')';
+    const roleText = currentUser.role === 'teacher' ? 'ครู' : 'นักเรียน';
+    badge.textContent = currentUser.full_name + ' (' + roleText + ')';
+    if(mobileBadge) mobileBadge.textContent = roleText; // อัปเดตป้ายมือถือ
+
     area.innerHTML = `<button class="btn btn-outline" style="width:100%; color:white; border-color:white;" onclick="logout()">🚪 ออกจากระบบ</button>`;
     if(currentUser.role === 'teacher') {
       document.getElementById('add-sub-btn').style.display = 'block';
@@ -122,6 +133,8 @@ function updateUI() {
     }
   } else {
     badge.textContent = '👤 ผู้เข้าชมทั่วไป';
+    if(mobileBadge) mobileBadge.textContent = 'ผู้เข้าชม'; // อัปเดตป้ายมือถือ
+
     area.innerHTML = `<button class="btn btn-accent" style="width:100%;" onclick="openAuth()">🔑 เข้าสู่ระบบ</button>`;
     document.getElementById('add-sub-btn').style.display = 'none';
     document.getElementById('add-assign-btn').style.display = 'none';
