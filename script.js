@@ -6,24 +6,38 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let currentUser = null;
 let currentSubjectFilter = null; // ตัวแปรเก็บว่าตอนนี้กำลังดูวิชาอะไรอยู่
 
-// --- ฟังก์ชันนำทางและเลือกวิชา ---
+// --- ฟังก์ชันนำทางและเลือกวิชา (อัปเดตใหม่ แก้บัคกดแล้วไม่ยอมกรองวิชา) ---
+
 function viewSubject(subjectId, subjectName) {
+  // 1. บันทึกวิชาที่คลิก
   currentSubjectFilter = { id: subjectId, name: subjectName };
-  // เปลี่ยนไปหน้าใบงาน และสั่งโหลดข้อมูลใหม่เฉพาะวิชานี้
-  navigate('assignments', document.querySelectorAll('.nav-item')[2]);
+  
+  // 2. สลับไปหน้าใบงาน (เขียนคำสั่งตรงๆ ไม่ผ่าน navigate เพื่อป้องกันการถูกล้างค่า)
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-assignments').classList.add('active');
+  
+  // 3. ทำให้เมนู "ใบงาน/กิจกรรม" ด้านซ้ายสว่างขึ้น
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.nav-item')[2].classList.add('active');
+  
+  // 4. โหลดข้อมูลใหม่
   loadData(); 
 }
 
 function navigate(page, el) {
-  // เลือกล้างค่าตัวกรอง เพื่อแสดงใบงานทั้งหมดเวลากดเมนูด้านซ้ายตรงๆ
+  // เลือกล้างค่าตัวกรอง เฉพาะตอนที่คลิก "เมนูด้านซ้าย" ด้วยเมาส์โดยตรงเท่านั้น
   if (page === 'assignments' && el) {
       currentSubjectFilter = null; 
-      loadData();
   }
+  
+  // สลับหน้าจอ
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-' + page).classList.add('active');
   if(el) el.classList.add('active');
+  
+  // โหลดข้อมูลใหม่ทุกครั้งที่เปลี่ยนหน้า
+  loadData();
 }
 
 // --- ฟังก์ชันแจ้งเตือน ---
