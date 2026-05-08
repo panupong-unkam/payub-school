@@ -7,6 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Noto+Serif+Thai:wght@400;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -25,8 +26,13 @@
 
 <nav class="sidebar">
   <div class="sidebar-header">
-    <div style="font-size: 24px; animation: bounceIn 1s;">🏫</div>
-    <div style="font-weight: 700; font-size: 20px; margin-top: 10px;">Computer Science <br>ครูภาณุพงศ์ อุ่นคำ</div>
+    <div class="logo-container">
+      <img src="logo.svg" class="main-logo-svg" alt="School Logo">
+    </div>
+    <div style="font-weight: 700; font-size: 18px; margin-top: 5px; color: #fff; letter-spacing: 0.5px;">
+        Computer Science <br>
+        <span style="color: var(--accent); font-size: 14px;">ครูภาณุพงศ์ อุ่นคำ</span>
+    </div>
     <div id="user-badge" class="guest-tag">ผู้เข้าชมทั่วไป</div>
   </div>
   <div class="sidebar-nav">
@@ -34,28 +40,59 @@
     <div class="nav-item" onclick="navigate('subjects', this)">📚 บทเรียนออนไลน์</div>
     <div class="nav-item" onclick="navigate('assignments', this)">📝 ใบงาน/กิจกรรม</div>
     <div class="nav-item" onclick="checkAuth('submissions', this)">📤 ระบบส่งงาน</div>
-    <div class="nav-item" onclick="navigate('reports', this)">📊 ผลการเรียน (ปพ.5)</div>
-  </div>
+    <div class="nav-item" onclick="navigate('reports', this)">📊 ผลการเรียน</div>
+    <div class="nav-item" onclick="navigate('clubs', this)">🎪 ยื่นคำขอเข้าชุมนุม</div>
+    </div>
   <div style="padding: 20px;" id="auth-btn-area"></div>
 </nav>
 
 <main class="main-content">
-  <div class="page active" id="page-dashboard">
-    <h2>📊 ยินดีต้อนรับสู่แหล่งเรียนรู้</h2>
-    <div class="card" style="margin-top:20px; background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: white; border:none; border-bottom: 5px solid var(--primary-dark);">
-      <h3>โรงเรียนบ้านป่ายุบ (บุ้นกีประชานุเคราะห์)</h3>
-      <p style="opacity: 0.9; margin-top: 5px;">พื้นที่แห่งการแบ่งปันความรู้ด้านวิทยากรคำนวณและเทคโนโลยี</p>
+  <div class="page" id="page-clubs">
+    <div class="header-flex">
+      <h2>🎪 ระบบจัดการชุมนุม</h2>
     </div>
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
-      <div class="card"><h4>🎯 เป้าหมาย</h4><p style="color: var(--text-muted); margin-top: 5px;">เพื่อให้ผู้เรียนเข้าถึงเนื้อหาได้ทุกที่ทุกเวลา</p></div>
-      <div class="card"><h4>📢 ประชาสัมพันธ์</h4><p style="color: var(--text-muted); margin-top: 5px;">บุคคลทั่วไปสามารถเข้าดูเนื้อหาและดาวน์โหลดใบงานได้ฟรี</p></div>
+    <div id="clubs-list">กำลังโหลดข้อมูลชุมนุม...</div>
+  </div>
+  <div class="page active" id="page-dashboard">
+    <div class="hero-banner">
+      <div style="position: relative; z-index: 2;">
+        <h1 style="font-family: 'Noto Serif Thai', serif; font-size: clamp(28px, 6vw, 42px); margin-bottom: 15px; text-shadow: 0 2px 10px rgba(0,0,0,0.2);">
+            ยินดีต้อนรับสู่แหล่งเรียนรู้อนาคต
+        </h1>
+        <h3 style="font-weight: 400; opacity: 0.95; font-size: 18px; max-width: 600px; line-height: 1.6;">
+            โรงเรียนบ้านป่ายุบ (บุ้นกีประชานุเคราะห์) <br>
+            พื้นที่แห่งการแบ่งปันความรู้ด้านวิทยาการคำนวณและเทคโนโลยีหุ่นยนต์
+        </h3>
+        <div style="margin-top: 30px; display: flex; gap: 15px;">
+            <button class="btn btn-accent" onclick="navigate('subjects', document.querySelectorAll('.nav-item')[1])">🚀 เริ่มเรียนรู้ออนไลน์</button>
+            <button class="btn" style="background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3); backdrop-filter: blur(5px);" onclick="navigate('clubs', document.querySelectorAll('.nav-item')[5])">🎪 เข้าชมระบบชุมนุม</button>
+        </div>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-top: 20px;">
+      <div class="floating-card">
+        <div style="font-size: 40px; margin-bottom: 15px;">🎯</div>
+        <h4 style="font-size: 20px; color: var(--primary-dark); margin-bottom: 10px;">เป้าหมายการเรียนรู้</h4>
+        <p style="color: var(--text-muted); line-height: 1.6;">มุ่งเน้นให้นักเรียนเข้าถึงเนื้อหาการเรียนการสอนได้ทุกที่ ทุกเวลา เพื่อเสริมสร้างทักษะดิจิทัลอย่างไร้ขีดจำกัด</p>
+      </div>
+      <div class="floating-card">
+        <div style="font-size: 40px; margin-bottom: 15px;">📢</div>
+        <h4 style="font-size: 20px; color: var(--primary-dark); margin-bottom: 10px;">ข่าวประชาสัมพันธ์</h4>
+        <p style="color: var(--text-muted); line-height: 1.6;">เปิดรับนักเรียนและบุคคลทั่วไปเข้าชมเนื้อหาบทเรียนออนไลน์และดาวน์โหลดสื่อการสอนได้ฟรี ไม่มีค่าใช้จ่าย</p>
+      </div>
+    </div>
+
+    <div style="margin-top: 60px; text-align: center; opacity: 0.6;">
+        <p style="font-size: 14px; letter-spacing: 1px;">POWERED BY MODERN TECHNOLOGY & EDUCATION</p>
+        <div style="width: 50px; height: 3px; background: var(--accent); margin: 15px auto; border-radius: 2px;"></div>
     </div>
   </div>
 
   <div class="page" id="page-subjects">
     <div class="header-flex">
       <h2>📚 รายวิชาทั้งหมด</h2>
-      <button class="btn btn-primary" id="add-sub-btn" style="display:none;" onclick="openModal('modal-subject')">+ เพิ่มวิชา</button>
+      <button class="btn btn-primary" id="add-sub-btn" style="display:none;" onclick="openAddSubject()">+ เพิ่มวิชา</button>
     </div>
     <div id="subjects-list">กำลังโหลดเนื้อหา...</div>
   </div>
@@ -119,16 +156,40 @@
   </div>
 </div>
 
-<div class="modal-overlay" id="modal-subject">
-  <div class="modal auth-card" style="max-width: 400px; padding: 35px 30px;">
-    <h3 style="color: var(--primary-dark); margin-bottom: 5px;">📚 เพิ่มวิชาเรียนใหม่</h3>
-    <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 25px;">กรอกชื่อรายวิชาที่คุณครูต้องการเปิดสอน</p>
-    <div class="form-group" style="margin-bottom: 25px;">
-      <input type="text" id="sub-name" placeholder="ตัวอย่าง: วิทยาการคำนวณ ม.4" onkeypress="if(event.key === 'Enter') addSubject()">
+<div class="modal-overlay" id="modal-confirm" style="z-index: 9999;">
+  <div class="modal auth-card" style="max-width: 400px; padding: 35px 30px; text-align: center;">
+    <div style="font-size: 55px; margin-bottom: 15px; animation: bounceIn 0.5s;">❓</div>
+    <h3 style="color: var(--primary-dark); font-size: 22px; margin-bottom: 10px; font-family: 'Noto Serif Thai', serif;" id="confirm-title">ยืนยันการทำรายการ</h3>
+    <p style="color: var(--text-muted); font-size: 15px; margin-bottom: 25px;" id="confirm-desc">คุณแน่ใจหรือไม่?</p>
+    <div style="display: flex; gap: 12px; justify-content: center;">
+      <button class="btn" style="flex: 1; background: var(--surface2); color: var(--text-muted); border: 2px solid var(--border);" onclick="closeModal('modal-confirm')">❌ ยกเลิก</button>
+      <button class="btn btn-primary" style="flex: 1; box-shadow: 0 4px 15px rgba(26,95,63,0.3);" onclick="executeConfirm()">✅ ยืนยัน</button>
     </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-subject">
+  <div class="modal auth-card" style="max-width: 450px; padding: 35px 30px;">
+    <h3 id="subject-modal-title" style="color: var(--primary-dark); margin-bottom: 5px; font-size: 22px;">📚 เพิ่มวิชาเรียนใหม่</h3>
+    <p id="subject-modal-desc" style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px;">เลือกไอคอนและตั้งชื่อรายวิชา</p>
+    
+    <input type="hidden" id="sub-id-edit">
+
+    <div class="form-group" style="margin-bottom: 20px;">
+      <label style="font-size: 13px; font-weight: bold; color: var(--primary);">🎨 เลือกไอคอนวิชา (Emoji):</label>
+      <div id="icon-picker" style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; padding: 12px; border: 2px solid var(--border); border-radius: 12px; background: #fdfdfd; justify-content: center;">
+        </div>
+      <input type="hidden" id="sub-icon" value="💻">
+    </div>
+
+    <div class="form-group" style="margin-bottom: 25px;">
+      <label style="font-size: 13px; font-weight: bold; color: var(--primary);">📘 ชื่อรายวิชา:</label>
+      <input type="text" id="sub-name" placeholder="ตัวอย่าง: วิทยาการคำนวณ ม.4" style="width: 100%; padding: 14px 16px; border: 2px solid var(--border); border-radius: 12px; font-family: 'Sarabun'; outline: none;" onkeypress="if(event.key === 'Enter') saveSubject()">
+    </div>
+
     <div style="display: flex; gap: 12px;">
-      <button class="btn" style="flex: 1; background: var(--surface2); color: var(--text-muted);" onclick="closeModal('modal-subject')">❌ ยกเลิก</button>
-      <button class="btn btn-primary" style="flex: 1;" onclick="addSubject()">💾 บันทึก</button>
+      <button class="btn" style="flex: 1; background: var(--surface2); color: var(--text-muted); border: 2px solid var(--border);" onclick="closeModal('modal-subject')">❌ ยกเลิก</button>
+      <button class="btn btn-primary" style="flex: 1;" onclick="saveSubject()">💾 บันทึกวิชา</button>
     </div>
   </div>
 </div>
@@ -171,6 +232,17 @@
       <button class="btn" style="flex: 1; background: var(--surface2); color: var(--text-muted); border: 2px solid var(--border);" onclick="closeModal('modal-assignment')">❌ ยกเลิก</button>
       <button class="btn btn-primary" style="flex: 1;" onclick="addAssignment()">💾 บันทึกใบงาน</button>
     </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-manage-club" style="z-index: 2000;">
+  <div class="modal auth-card" style="max-width: 550px; padding: 30px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h3 id="manage-club-title" style="color: var(--primary-dark); font-size: 20px;">👥 จัดการสมาชิกชุมนุม</h3>
+        <button onclick="closeModal('modal-manage-club')" style="border: none; background: #ffebee; color: #c62828; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: bold; transition: 0.3s;">✕</button>
+    </div>
+    <div id="club-members-list" style="max-height: 400px; overflow-y: auto; padding-right: 10px; border: 1px solid var(--border); border-radius: 12px; background: #fdfdfd;">
+        </div>
   </div>
 </div>
 
@@ -296,6 +368,9 @@
   </div>
 </div>
 
+<button class="theme-toggle-fab" id="floating-theme-toggle" onclick="toggleDarkMode()" title="สลับโหมดสว่าง/มืด">
+  🌙
+</button>
 <script src="script.js"></script>
 </body>
 </html>
