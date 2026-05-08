@@ -315,6 +315,33 @@ body.dark-mode .form-group textarea {
     border-color: var(--border);
 }
 
+/* ==========================================
+   🌟 HIGH CONTRAST FIX (ปรับตัวอักษรบนพื้นเหลืองให้อ่านง่าย)
+   ========================================== */
+
+/* 1. เมนูด้านซ้ายที่ถูกเลือก (Active Menu) */
+.nav-item.active {
+    color: #121814 !important; /* เปลี่ยนตัวหนังสือเป็นสีเข้มจัด */
+    font-weight: 800 !important; /* เพิ่มความหนาให้คมชัด */
+    text-shadow: none !important; /* เอาเงาสว่างออก (ถ้ามี) */
+    box-shadow: 0 4px 15px rgba(240, 165, 0, 0.4); /* เพิ่มเงาสีเหลืองเรืองแสงรอบกล่อง */
+}
+
+/* 2. ปุ่มสีเหลืองต่างๆ (เช่น เริ่มเรียนรู้ออนไลน์, เข้าสู่ระบบ) */
+.btn-accent,
+.auth-card .btn-accent,
+button[style*="background: var(--accent)"] {
+    color: #121814 !important; /* เปลี่ยนตัวหนังสือเป็นสีเข้มจัด */
+    font-weight: 800 !important;
+    text-shadow: none !important;
+}
+
+/* 3. ปรับสีไอคอน (Emoji) บนปุ่มสีเหลืองให้สีสดขึ้น ไม่โดนดรอป */
+.nav-item.active span, 
+.btn-accent span {
+    filter: brightness(0.9);
+}
+
 /* 3. ปุ่มลอยสลับโหมดมุมขวาล่าง (Floating Action Button - FAB) */
 .theme-toggle-fab {
     position: fixed;
@@ -349,4 +376,133 @@ body.dark-mode .form-group textarea {
 /* เพิ่ม Transition ให้การสลับโหมดดูแพงและนุ่มนวล */
 body, .sidebar, .main-content, .card, .nav-item, .btn, h2, h3, p {
     transition: background-color 0.4s ease, color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease !important;
+}
+
+/* ==========================================
+   ✨ PREMIUM MOBILE HEADER EFFECTS
+   ========================================== */
+
+/* 1. เอฟเฟกต์ตัวอักษรประกายแสง (Shimmering Text) */
+.shimmer-text {
+    background: linear-gradient(120deg, #ffffff 30%, #f0a500 50%, #ffffff 70%);
+    background-size: 200% auto;
+    color: transparent;
+    -webkit-background-clip: text;
+    background-clip: text;
+    animation: shineText 3.5s linear infinite;
+}
+
+@keyframes shineText {
+    0% { background-position: 200% center; }
+    100% { background-position: -200% center; }
+}
+
+/* 2. โลโก้ลอยแบบนุ่มนวล (สำหรับมือถือ) */
+@keyframes floatingMobileLogo {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-4px); }
+}
+
+/* ==========================================
+   ✨ MAGIC ANIMATIONS & DYNAMIC UI
+   ========================================== */
+
+/* 1. Modal: ฉากหลังเบลอ (iOS Style) และเอฟเฟกต์เด้งดึ๋ง (Pop-in) */
+.modal-overlay {
+    backdrop-filter: blur(6px);
+    background: rgba(0, 0, 0, 0.4) !important;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.modal-overlay.show .auth-card,
+.modal-overlay.show .modal {
+    animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes popIn {
+    0% { transform: scale(0.8) translateY(30px); opacity: 0; }
+    100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+/* 2. Sidebar: เลื่อนเปิด-ปิดเนียนๆ */
+.sidebar {
+    transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1), background-position 0.5s ease !important;
+}
+
+/* 3. ปุ่มกด: เด้งดึ๋งเวลากดและเอาเมาส์ชี้ */
+.btn {
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s, background-color 0.2s !important;
+}
+.btn:hover {
+    transform: translateY(-2px);
+}
+.btn:active {
+    transform: scale(0.95);
+}
+
+/* 4. Dropdown และช่องกรอกข้อความ: เรืองแสงเวลาคลิก */
+input, select, textarea {
+    transition: border-color 0.3s ease, box-shadow 0.3s ease !important;
+}
+input:focus, select:focus, textarea:focus {
+    box-shadow: 0 0 0 3px rgba(102, 187, 106, 0.25) !important;
+}
+
+/* ==========================================
+   📱 SMART MOBILE UX FIXES
+   ========================================== */
+
+/* ควบคุมการแสดงผลเฉพาะมือถือ / คอมพิวเตอร์ */
+.mobile-only-section { display: none; }
+
+@media (max-width: 992px) {
+    .mobile-only-section { 
+        display: block; 
+        animation: slideUpFade 0.6s ease forwards;
+    }
+    
+    /* จัดการปุ่มโฮมซ้ายล่าง */
+    #mobile-home-fab {
+        left: 20px;
+        right: auto;
+        background: linear-gradient(135deg, var(--primary), var(--primary-light));
+        color: white;
+        border-color: var(--primary-light);
+        z-index: 9999;
+        animation: popIn 0.4s ease forwards;
+    }
+    
+    /* ปรับแต่ง Grid วิชาในหน้าแรกมือถือ */
+    #mobile-dashboard-subjects-list {
+        display: grid;
+        grid-template-columns: 1fr 1fr; /* ให้แสดง 2 คอลัมน์ในมือถือ */
+        gap: 12px;
+    }
+    
+    #mobile-dashboard-subjects-list .subject-card {
+        padding: 15px 10px;
+        border-radius: 16px;
+    }
+    
+    #mobile-dashboard-subjects-list .subject-icon {
+        font-size: 35px;
+        margin-bottom: 8px;
+    }
+    
+    #mobile-dashboard-subjects-list .subject-name {
+        font-size: 14px;
+        margin-bottom: 5px;
+    }
+    
+    /* ซ่อนปุ่มแก้ไข/ลบวิชาของครู ในหน้าแรกของมือถือ */
+    #mobile-dashboard-subjects-list [onclick*="deleteSubject"],
+    #mobile-dashboard-subjects-list [onclick*="openEditSubject"] {
+        display: none !important;
+    }
+}
+
+/* แอนิเมชันเด้งดึ๋ง */
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
 }
