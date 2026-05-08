@@ -16,6 +16,14 @@ let gradingAssignId = null;
 if (typeof window.studentFilterStatus === 'undefined') {
     window.studentFilterStatus = 'all';
 }
+// --- ตัวแปรควบคุมการตรวจงานและฟิลเตอร์ ---
+if (typeof window.studentFilterStatus === 'undefined') {
+    window.studentFilterStatus = 'all';
+}
+// 🌟 เพิ่มบรรทัดนี้: สำหรับจำวิชาที่เลือกในหน้าใบงาน
+if (typeof window.assignmentSubjectFilter === 'undefined') {
+    window.assignmentSubjectFilter = 'all';
+}
 
 // ==========================================
 // 1. ระบบนำทาง (Navigation)
@@ -26,7 +34,12 @@ function toggleSidebar() {
 }
 
 function navigate(page, el, isShortcut = false) {
-    if (page === 'assignments' && el) currentSubjectFilter = null; 
+    // 🌟 จุดที่แก้บั๊ก: เคลียร์ความจำวิชาที่เลือกไว้เสมอ เมื่อกดเมนูหลักที่แถบด้านซ้าย
+    if ((page === 'subjects' || page === 'assignments') && el) {
+        currentSubjectFilter = null; 
+        window.assignmentSubjectFilter = 'all'; 
+    }
+    
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.getElementById('page-' + page).classList.add('active');
     
@@ -47,9 +60,16 @@ function navigate(page, el, isShortcut = false) {
         loadSubmissions(); 
     }
     
-    // 🌟 แก้ไขบั๊กจาก pageId เป็น page ตรงนี้ครับ
     if (page === 'reports') {
         loadReports();
+    }
+
+    if (page === 'reports') {
+        loadReports();
+    }
+    // 🌟 เพิ่มการนำทางไปหน้าระบบชุมนุม
+    if (page === 'clubs') {
+        loadClubs();
     }
 }
 
@@ -114,8 +134,12 @@ async function loadData() {
     }
     let submissionQuery = (currentUser && currentUser.role !== 'teacher') ? sb.from('submissions').select('assignment_id, status, score, feedback').eq('student_id', currentUser.id) : null;
 
+    // 🌟 ดึงข้อมูล 4 อย่างพร้อมกัน (วิชา, ใบงาน, บทเรียน, สถานะการส่งงาน)
     const [subsRes, assignsRes, lessonsRes, studentSubsRes] = await Promise.all([
-        sb.from('subjects').select('*'), assignQuery, lessonQuery, submissionQuery ? submissionQuery : Promise.resolve({ data: [] })
+        sb.from('subjects').select('*').order('sort_order', { ascending: true }).order('id', { ascending: true }),
+        assignQuery,
+        lessonQuery,
+        submissionQuery ? submissionQuery : Promise.resolve({ data: [] })
     ]);
 
     let displaySubs = subsRes.data || []; 
@@ -123,27 +147,35 @@ async function loadData() {
     let displayLessons = lessonsRes.data || []; 
     let mySubmissions = studentSubsRes.data || [];
 
-    // ⭐ 1. กรองวิชาและใบงาน (เวอร์ชันอัปเกรด: แยกตามห้องเรียน)
+   // ⭐ 1. กรองวิชาและใบงาน (เวอร์ชันอัปเกรด: แยกตามห้องเรียน + ระบบชุมนุม)
     if (currentUser && currentUser.role !== 'teacher') {
         const myClass = currentUser.class_level || ''; 
         const prefix = myClass.split('/')[0];
         
-        const isMySubject = (subName) => { 
+        // 🌟 ดึงข้อมูลชุมนุมที่นักเรียนคนนี้ได้รับการ "อนุมัติแล้ว"
+        const { data: myApprovedClubs } = await sb.from('club_requests').select('club_id').eq('student_id', currentUser.id).eq('status', 'approved');
+        const approvedClubIds = myApprovedClubs ? myApprovedClubs.map(c => c.club_id) : [];
+
+        const isMySubject = (subName, subId) => { 
             if (!subName) return false; 
+            if (subName.includes('ชุมนุม')) return approvedClubIds.includes(subId); // ถ้าเป็นชุมนุม ต้องได้รับอนุมัติถึงจะเห็น!
             return subName.includes(prefix) || subName.includes(myClass) || (subName.includes('ม.ต้น') && prefix.startsWith('ม.')); 
         };
 
-        // กรองให้เห็นเฉพาะวิชาของชั้นตัวเอง
-        displaySubs = displaySubs.filter(s => isMySubject(s.name)); 
+        // กรองวิชาของชั้นตัวเอง + ชุมนุมที่อนุมัติ
+        displaySubs = displaySubs.filter(s => isMySubject(s.name, s.id)); 
         
-        // 🌟 กรองใบงาน: ต้องตรงกับวิชา และ "ตรงกับห้องตัวเอง" (หรือครูสั่ง all)
+        // กรองใบงานของห้องตัวเอง + ของชุมนุม
         displayAssigns = displayAssigns.filter(a => {
-            const isSubjectMatch = isMySubject(a.subjects?.name);
+            const isSubjectMatch = isMySubject(a.subjects?.name, a.subject_id);
             const isClassMatch = !a.target_classes || a.target_classes === 'all' || a.target_classes === myClass;
-            return isSubjectMatch && isClassMatch;
+            const isClubAssign = a.subjects?.name && a.subjects.name.includes('ชุมนุม');
+            return isSubjectMatch && (isClassMatch || isClubAssign);
         });
+    } else if (!currentUser) {
+        // สำหรับบุคคลทั่วไป ให้ซ่อนวิชาที่เป็น "ชุมนุม" ออกไปจากหน้าบทเรียนออนไลน์
+        displaySubs = displaySubs.filter(s => !s.name.includes('ชุมนุม'));
     }
-
     // ⭐ 2. กรองใบงานตามสถานะการส่ง (ดรอปดาวน์ สีเขียว/เหลือง ของนักเรียน)
     let filteredAssignsForList = displayAssigns;
     if (currentUser && currentUser.role !== 'teacher' && window.studentFilterStatus !== 'all') {
@@ -162,10 +194,33 @@ async function loadData() {
         if (assignHeader) assignHeader.innerHTML = '📚 รายวิชาทั้งหมด';
         if (subjectsContainer) {
             subjectsContainer.innerHTML = displaySubs.length ? displaySubs.map(s => {
-                let icon = s.name.includes('คำนวณ') ? '🧠' : (s.name.includes('หุ่นยนต์') ? '🤖' : '💻');
-                const deleteBtn = currentUser?.role === 'teacher' ? `<button onclick="event.stopPropagation(); deleteSubject(${s.id}, '${s.name}')" style="position:absolute; top:15px; right:15px; background:var(--danger); color:white; border:none; border-radius:50%; width:32px; height:32px; cursor:pointer; font-size:14px;">🗑️</button>` : '';
-                return `<div class="subject-card cat-cs" onclick="viewSubject(${s.id}, '${s.name}')">${deleteBtn}<div class="subject-icon">${icon}</div><div class="subject-name">${s.name}</div><div style="font-size:13px; color:gray;">คลิกเพื่อเข้าเรียน</div></div>`;
-            }).join('') : '<div style="grid-column: 1/-1; text-align:center; padding: 40px; color:gray;">ไม่มีวิชาเรียนในระดับชั้นนี้</div>';
+                let icon = s.icon || (s.name.includes('คำนวณ') ? '🧠' : (s.name.includes('หุ่นยนต์') ? '🤖' : '💻'));
+                const controls = currentUser?.role === 'teacher' ? `
+                    <div style="position:absolute; top:15px; right:15px; display:flex; gap:8px; z-index:10;">
+                        <button onclick="event.stopPropagation(); openEditSubject(${s.id}, '${s.name}', '${icon}')" style="background:var(--primary); color:white; border:none; border-radius:50%; width:35px; height:35px; cursor:pointer; font-size:14px; box-shadow:0 2px 5px rgba(0,0,0,0.2); transition:0.3s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">✏️</button>
+                        <button onclick="event.stopPropagation(); deleteSubject(${s.id}, '${s.name}')" style="background:var(--danger); color:white; border:none; border-radius:50%; width:35px; height:35px; cursor:pointer; font-size:14px; box-shadow:0 2px 5px rgba(0,0,0,0.2); transition:0.3s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">🗑️</button>
+                    </div>` : '';
+                
+                // 🌟 แอบใส่ data-id ไว้ให้ระบบรู้ว่าลากวิชาไหน
+                return `<div class="subject-card cat-cs" data-id="${s.id}" onclick="viewSubject(${s.id}, '${s.name}')">${controls}<div class="subject-icon" style="font-size: 55px; margin-bottom: 10px;">${icon}</div><div class="subject-name">${s.name}</div><div style="font-size:13px; color:gray;">คลิกเพื่อเข้าเรียน</div></div>`;
+            }).join('') : '<div style="grid-column: 1/-1; text-align:center; padding: 40px; color:gray; background: white; border-radius: 12px; border: 2px dashed var(--border);">ไม่มีวิชาเรียนในระดับชั้นนี้ครับ 🎒</div>';
+
+            // 🌟 ใช้งานระบบลากวาง (เฉพาะครูเท่านั้นที่ลากได้)
+            if (currentUser?.role === 'teacher' && displaySubs.length > 0) {
+                new Sortable(subjectsContainer, {
+                    animation: 200,
+                    ghostClass: 'sortable-ghost',
+                    onEnd: function () {
+                        // เมื่อปล่อยเมาส์ ให้จำลำดับใหม่ แล้วส่งไปบอกฐานข้อมูล
+                        const items = subjectsContainer.querySelectorAll('.subject-card');
+                        const newOrder = Array.from(items).map((el, index) => ({ 
+                            id: parseInt(el.getAttribute('data-id')), 
+                            sort_order: index 
+                        }));
+                        saveSubjectOrder(newOrder); // เรียกฟังก์ชันบันทึกอัตโนมัติ
+                    }
+                });
+            }
         }
     } 
     else if (isOnlineLessonsMenu && currentSubjectFilter) {
@@ -179,6 +234,7 @@ async function loadData() {
             `;
         }
         if (assignContainer) {
+            // --- ส่วนของ 📖 เนื้อหาบทเรียน (โชว์ให้ทุกคนเห็น) ---
             let html = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;"><h3 style="color:var(--primary-dark); font-family:'Noto Serif Thai', serif;">📖 เนื้อหาบทเรียน</h3>${currentUser?.role === 'teacher' ? `<button class="btn btn-sm btn-primary" onclick="openAddLesson()">+ เพิ่มเนื้อหา</button>` : ''}</div>`;
             if (displayLessons.length > 0) {
                 html += `<div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap:15px; margin-bottom:40px;">`;
@@ -190,56 +246,123 @@ async function loadData() {
                 html += `</div>`;
             } else { html += `<div style="padding:20px; text-align:center; color:gray; background:var(--surface2); border-radius:15px; margin-bottom:40px;">ยังไม่มีเนื้อหาในบทนี้</div>`; }
 
-            html += `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;"><h3 style="color:var(--primary-dark); font-family:'Noto Serif Thai', serif;">📝 ใบงานและกิจกรรม</h3>${currentUser?.role === 'teacher' ? `<button class="btn btn-sm btn-primary" onclick="openAddAssignment()">+ เพิ่มใบงาน</button>` : ''}</div>`;
-            if (displayAssigns.length > 0) { html += renderAssignmentsList(displayAssigns, mySubmissions); } 
-            else { html += `<div style="padding:20px; text-align:center; color:gray;">ยังไม่มีใบงานในบทนี้</div>`; }
+            // --- ส่วนของ 📝 ใบงานและกิจกรรม (เวอร์ชันอัจฉริยะ) ---
+            html += `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                        <h3 style="color:var(--primary-dark); font-family:'Noto Serif Thai', serif;">📝 ใบงานและกิจกรรม</h3>
+                        ${currentUser?.role === 'teacher' ? `<button class="btn btn-sm btn-primary" onclick="openAddAssignment()">+ เพิ่มใบงาน</button>` : ''}
+                    </div>`;
+
+            if (!currentUser) {
+                // 🔐 1. มุมมองบุคคลทั่วไป: ล็อกไม่ให้เห็นใบงาน
+                html += `
+                    <div class="card" style="text-align:center; padding: 40px 20px; border: 2px dashed var(--border); background: #fdfdfd;">
+                        <div style="font-size: 40px; margin-bottom: 15px;">🔐</div>
+                        <b style="color: var(--primary-dark); display: block; margin-bottom: 8px;">พื้นที่เฉพาะสมาชิกนักเรียน</b>
+                        <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px;">กรุณาเข้าสู่ระบบเพื่อดูรายละเอียดใบงานและส่งผลงานครับ</p>
+                        <button class="btn btn-primary btn-sm" onclick="openAuth(); toggleAuth(false);">🔑 เข้าสู่ระบบทันที</button>
+                    </div>`;
+            } 
+            else if (currentUser.role === 'student') {
+                // 🎓 2. มุมมองนักเรียน: กรองเฉพาะงานที่ยังทำไม่เสร็จ
+                // เงื่อนไข: เก็บงานที่ "ยังไม่ส่ง" หรือ "ยังเป็นแบบร่าง" ไว้
+                const todoList = displayAssigns.filter(a => {
+                    const sub = mySubmissions.find(s => s.assignment_id === a.id);
+                    return !sub || sub.status.includes('แบบร่าง');
+                });
+
+                if (todoList.length > 0) {
+                    html += renderAssignmentsList(todoList, mySubmissions);
+                } else if (displayAssigns.length > 0) {
+                    // ถ้าในวิชานี้มีงาน แต่เด็กทำเสร็จหมดแล้ว
+                    html += `
+                        <div class="card" style="text-align:center; padding: 40px 20px; border: 2px solid var(--success); background: #f0fdf4;">
+                            <div style="font-size: 40px; margin-bottom: 15px;">🎉</div>
+                            <b style="color: var(--success); display: block; margin-bottom: 8px;">เยี่ยมมาก! คุณเคลียร์งานวิชานี้หมดแล้ว</b>
+                            <p style="color: #166534; font-size: 14px;">งานที่ส่งแล้วจะถูกย้ายไปสรุปไว้ที่เมนู "ผลการเรียน" นะครับ</p>
+                        </div>`;
+                } else {
+                    html += `<div style="padding:20px; text-align:center; color:gray;">ยังไม่มีใบงานในบทนี้</div>`;
+                }
+            } 
+            else {
+                // 👨‍🏫 3. มุมมองคุณครู: โชว์ครบถ้วนเสมอเพื่อการจัดการ
+                if (displayAssigns.length > 0) {
+                    html += renderAssignmentsList(displayAssigns, mySubmissions);
+                } else {
+                    html += `<div style="padding:20px; text-align:center; color:gray;">ยังไม่มีใบงานในบทนี้</div>`;
+                }
+            }
+
             assignContainer.innerHTML = html;
         }
     }
     else {
-        // --- ส่วนของหน้าใบงานทั้งหมด ---
+        // --- ส่วนของหน้าใบงานรวม (ที่กดมาจากเมนู Sidebar) ---
         if (assignHeader) {
+            // 🌟 สร้างรายชื่อวิชาสำหรับใส่ใน Dropdown
+            const subjectOptions = displaySubs.map(s => `
+                <option value="${s.id}" ${window.assignmentSubjectFilter == s.id ? 'selected' : ''}>
+                    ${s.name}
+                </option>
+            `).join('');
+
             if (currentUser && currentUser.role !== 'teacher') {
+                // 👨‍🎓 มุมมองนักเรียน: มี 2 Dropdown (วิชา + สถานะ)
                 assignHeader.innerHTML = `
                     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; width:100%;">
-                        <span style="font-size: 1.1rem; font-weight: bold; color: var(--primary-dark);">📝 ใบงานและกิจกรรมทั้งหมด</span>
-                        <select onchange="window.studentFilterStatus=this.value; loadData();" style="padding: 6px 12px; border-radius: 20px; border: 2px solid var(--primary); outline: none; font-family: 'Sarabun'; cursor: pointer; font-size: 14px; background: white; color: var(--primary-dark); font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-                            <option value="all" ${window.studentFilterStatus === 'all' ? 'selected' : ''}>📋 ดูงานทั้งหมด</option>
-                            <option value="submitted" ${window.studentFilterStatus === 'submitted' ? 'selected' : ''}>✅ งานที่ส่งแล้ว</option>
-                            <option value="pending" ${window.studentFilterStatus === 'pending' ? 'selected' : ''}>⏳ งานที่ยังไม่ส่ง</option>
-                        </select>
+                        <span style="font-size: 1.1rem; font-weight: bold; color: var(--primary-dark);">📝 ใบงานและกิจกรรม</span>
+                        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                            <select onchange="window.assignmentSubjectFilter=this.value; loadData();" style="padding: 6px 12px; border-radius: 20px; border: 2px solid var(--primary); outline: none; font-family: 'Sarabun'; cursor: pointer; font-size: 14px; background: white; color: var(--primary-dark); font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                                <option value="all" ${window.assignmentSubjectFilter === 'all' ? 'selected' : ''}>📚 ทุกวิชา</option>
+                                ${subjectOptions}
+                            </select>
+                            <select onchange="window.studentFilterStatus=this.value; loadData();" style="padding: 6px 12px; border-radius: 20px; border: 2px solid var(--primary); outline: none; font-family: 'Sarabun'; cursor: pointer; font-size: 14px; background: white; color: var(--primary-dark); font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                                <option value="all" ${window.studentFilterStatus === 'all' ? 'selected' : ''}>📋 ทุกสถานะ</option>
+                                <option value="submitted" ${window.studentFilterStatus === 'submitted' ? 'selected' : ''}>✅ ส่งแล้ว</option>
+                                <option value="pending" ${window.studentFilterStatus === 'pending' ? 'selected' : ''}>⏳ ยังไม่ส่ง</option>
+                            </select>
+                        </div>
                     </div>
                 `;
             } else { 
-                assignHeader.innerHTML = '📝 ใบงานและกิจกรรมทั้งหมด'; 
+                // 👨‍🏫 มุมมองครู: มี 1 Dropdown (วิชา)
+                assignHeader.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; width:100%;">
+                        <span style="font-size: 1.1rem; font-weight: bold; color: var(--primary-dark);">📝 ใบงานและกิจกรรม</span>
+                        <select onchange="window.assignmentSubjectFilter=this.value; loadData();" style="padding: 6px 12px; border-radius: 20px; border: 2px solid var(--primary); outline: none; font-family: 'Sarabun'; cursor: pointer; font-size: 14px; background: white; color: var(--primary-dark); font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                            <option value="all" ${window.assignmentSubjectFilter === 'all' ? 'selected' : ''}>📚 ดูทุกวิชา</option>
+                            ${subjectOptions}
+                        </select>
+                    </div>
+                `;
             }
         }
 
         if (assignContainer) {
-            // 🌟 ตรวจสอบว่าเป็นบุคคลทั่วไปหรือไม่
             if (!currentUser) {
+                // 🔐 ระบบล็อคสำหรับบุคคลทั่วไป (เหมือนเดิมที่คุณครูเคยมี)
                 assignContainer.innerHTML = `
                     <div class="card" style="text-align:center; padding: 60px 30px; border: 2px dashed var(--border); background: linear-gradient(to bottom, #ffffff, #f9f9f9);">
-                        <div style="font-size: 60px; margin-bottom: 20px; animation: pulse 2s infinite;">🔐</div>
+                        <div style="font-size: 60px; margin-bottom: 20px;">🔐</div>
                         <h3 style="color: var(--primary-dark); font-family: 'Noto Serif Thai', serif; margin-bottom: 10px;">พื้นที่เฉพาะสมาชิกนักเรียน</h3>
                         <p style="color: var(--text-muted); font-size: 16px; margin-bottom: 30px; max-width: 450px; margin-left: auto; margin-right: auto;">
                             ขออภัยครับ ในส่วนของรายละเอียดใบงานและการส่งผลงาน <br>สงวนสิทธิ์ให้เข้าถึงได้เฉพาะนักเรียนที่เข้าสู่ระบบแล้วเท่านั้น
                         </p>
                         <div style="display:flex; gap:15px; justify-content:center; flex-wrap:wrap;">
-                            <button class="btn btn-primary" onclick="openAuth(); toggleAuth(false);" style="padding: 12px 30px; box-shadow: 0 4px 15px rgba(26,95,63,0.3);">
-                                🔑 เข้าสู่ระบบทันที
-                            </button>
-                            <button class="btn btn-outline" onclick="openAuth(); toggleAuth(true);" style="border: 2px solid var(--primary);">
-                                📝 สมัครสมาชิกนักเรียน
-                            </button>
+                            <button class="btn btn-primary" onclick="openAuth(); toggleAuth(false);">🔑 เข้าสู่ระบบทันที</button>
+                            <button class="btn btn-outline" onclick="openAuth(); toggleAuth(true);">📝 สมัครสมาชิกนักเรียน</button>
                         </div>
-                    </div>
-                `;
+                    </div>`;
             } else {
-                // ถ้าเป็นนักเรียนหรือครู ให้โชว์รายชื่อใบงานตามปกติ
-                assignContainer.innerHTML = filteredAssignsForList.length > 0 
-                    ? renderAssignmentsList(filteredAssignsForList, mySubmissions) 
-                    : `<div style="padding:40px; text-align:center; color:gray; background: white; border-radius: 12px; border: 2px dashed var(--border);">ไม่พบใบงานในหมวดหมู่นี้ครับ 🎉</div>`;
+                // 🌟 กรองข้อมูลตามวิชาที่เลือกใน Dropdown
+                let finalFilteredList = filteredAssignsForList;
+                if (window.assignmentSubjectFilter !== 'all') {
+                    finalFilteredList = finalFilteredList.filter(a => a.subject_id == window.assignmentSubjectFilter);
+                }
+
+                assignContainer.innerHTML = finalFilteredList.length > 0 
+                    ? renderAssignmentsList(finalFilteredList, mySubmissions) 
+                    : `<div style="padding:40px; text-align:center; color:gray; background: white; border-radius: 12px; border: 2px dashed var(--border);">ไม่พบใบงานในตัวกรองนี้ครับ 🎉</div>`;
             }
         }
     }
@@ -434,7 +557,7 @@ async function loadSubmissions() {
     }
     container.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--primary);">⏳ กำลังดึงข้อมูล...</div>';
 
-    // 👨‍🎓 มุมมองนักเรียน (ดูงานของตัวเอง)
+    // 👨‍🎓 มุมมองนักเรียน (ดูงานของตัวเอง) : ระบบเดิมใช้งานได้ 100%
     if (currentUser.role === 'student') {
         const { data: subs, error } = await sb.from('submissions').select(`*, assignments:assignment_id (title, subjects (name))`).eq('student_id', currentUser.id).order('created_at', { ascending: false });
         if (error) { container.innerHTML = `Error: ${error.message}`; return; }
@@ -452,9 +575,10 @@ async function loadSubmissions() {
             </div>
         `).join('') : '<div class="card" style="text-align:center; padding: 40px; color: gray;">คุณยังไม่ได้ส่งงานใดๆ</div>';
     } else {
-        // 👨‍🏫 มุมมองครู: สเต็ป 1 (เลือกวิชา)
+        // 👨‍🏫 มุมมองครู: สเต็ป 1 (เลือกวิชา) - 🌟 อัปเดตให้เรียงลำดับโฟลเดอร์ตามหน้าบทเรียนออนไลน์เป๊ะๆ
         if (currentGradingStep === 'subjects') {
-            const { data: subjects } = await sb.from('subjects').select('*').eq('teacher_id', currentUser.id);
+            const { data: subjects } = await sb.from('subjects').select('*').eq('teacher_id', currentUser.id).order('sort_order', { ascending: true }).order('id', { ascending: true });
+            
             if(pathText) pathText.textContent = "📂 กรุณาเลือกวิชาที่ต้องการตรวจ";
             container.innerHTML = subjects && subjects.length ? `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">` + subjects.map((s, index) => `
                 <div class="card" onclick="selectGradingSubject(${s.id}, '${s.name}')" style="cursor:pointer; display: flex; align-items: center; gap: 15px; padding: 20px; border-left: 6px solid var(--primary); border-radius: 16px; margin-bottom: 0; animation-delay: ${index * 0.1}s;" onmouseover="this.style.transform='translateY(-5px)'; this.style.borderColor='var(--accent)';" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='var(--primary)';">
@@ -463,18 +587,16 @@ async function loadSubmissions() {
                 </div>
             `).join('') + `</div>` : '<div class="card" style="text-align:center; padding:40px; color:gray;">คุณยังไม่ได้สร้างรายวิชาครับ</div>';
         } 
-        // 👨‍🏫 มุมมองครู: สเต็ป 2 (เลือกใบงาน)
+        // 👨‍🏫 มุมมองครู: สเต็ป 2 (เลือกใบงาน) : ระบบเดิมใช้งานได้ 100%
         else if (currentGradingStep === 'assignments') {
             const { data: assigns } = await sb.from('assignments').select('*').eq('subject_id', gradingSubjectId);
             
-            // 🌟 สร้างปุ่มย้อนกลับกลับไปหน้ารายวิชา
             const topBarHtml = `
                 <div style="margin-bottom: 20px;">
                     <button class="btn btn-sm btn-outline" onclick="resetGradingStep()" style="border: 2px solid var(--border); color: var(--text); padding: 8px 16px; background: white; font-weight: bold; transition: 0.3s;" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='var(--border)'">⬅️ กลับไปเลือกรายวิชา</button>
                 </div>
             `;
 
-            // สร้างการ์ดใบงาน
             const listHtml = assigns && assigns.length ? `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">` + assigns.map((a, index) => `
                 <div class="card" onclick="selectGradingAssign(${a.id}, '${a.title}')" style="cursor:pointer; border-left: 5px solid var(--accent); padding: 20px; border-radius: 16px; margin-bottom: 0; animation-delay: ${index * 0.1}s;" onmouseover="this.style.transform='translateY(-5px)';" onmouseout="this.style.transform='translateY(0)';">
                     <b style="font-size:18px; color: var(--primary-dark); display:block; margin-bottom: 8px;">📝 ${a.title}</b>
@@ -482,17 +604,15 @@ async function loadSubmissions() {
                 </div>
             `).join('') + `</div>` : '<div class="card" style="text-align:center; padding:40px; color:gray;">ยังไม่มีใบงานในวิชานี้ครับ</div>';
 
-            // นำปุ่มย้อนกลับมาต่อกับรายการใบงาน
             container.innerHTML = topBarHtml + listHtml;
         }
-        // 👨‍🏫 มุมมองครู: สเต็ป 3 (รายชื่อนักเรียน + แถบกรองห้อง/เลขที่)
+        // 👨‍🏫 มุมมองครู: สเต็ป 3 (รายชื่อนักเรียน) : ระบบเดิมใช้งานได้ 100%
         else if (currentGradingStep === 'students') {
-            // ดึงข้อมูลแค่รอบเดียวตอนกดเข้าใบงาน
             const { data: students, error } = await sb.from('submissions').select(`*, profiles:student_id (full_name, class_level, student_no), assignments:assignment_id (title, subjects (name))`).eq('assignment_id', gradingAssignId);
             if(pathText) pathText.innerHTML = `<span onclick="resetGradingStep()" style="cursor:pointer; color:var(--primary); text-decoration:underline;">🏠 วิชา</span> > <span onclick="backToAssignments()" style="cursor:pointer; color:var(--primary); text-decoration:underline;">📝 ใบงาน</span> > 👨‍🎓 ตรวจงาน`;
             
             currentGradingStudentsData = students || [];
-            renderGradingStudentsList(); // เรียกฟังก์ชันแสดงผลอัจฉริยะ
+            renderGradingStudentsList(); 
         }
     }
 }
@@ -618,6 +738,98 @@ async function saveGrade() {
 // ==========================================
 // 5. ระบบเพิ่ม/แก้ไข/ลบ ข้อมูลทั่วไป
 // ==========================================
+
+// 🌟 คลังไอคอนจัดเต็ม ทุกหมวดหมู่
+const SUBJECT_ICONS = [
+    // เทคโนโลยี/AI
+    '💻', '⌨️', '🤖', '🧠', '📡', '💾',
+    // ออกแบบ/3D/ช่าง
+    '🧊', '🏗️', '📐', '⚙️',
+    // การงาน/คหกรรม
+    '🍳', '🍲', '🍰', '🧵',
+    // ศิลปะ/ดนตรี/นาฏศิลป์
+    '🎨', '🎵', '🎸', '💃', '🎭',
+    // กีฬา
+    '🥊', '⚽', '🏃‍♂️', '🏸',
+    // วิทย์/คณิต
+    '🧮', '🔬', '🧬', '🔭', '🪐',
+    // ภาษา/สังคม
+    '📚', '🌍', '🇹🇭', '🗣️', '📜', '⚖️'
+];
+
+function renderIconPicker(selectedIcon = '💻') {
+    const container = document.getElementById('icon-picker');
+    container.innerHTML = SUBJECT_ICONS.map(icon => `
+        <div onclick="selectSubjectIcon('${icon}')" style="font-size: 28px; cursor: pointer; padding: 6px; border-radius: 12px; transition: 0.2s; border: 2px solid ${icon === selectedIcon ? 'var(--primary)' : 'transparent'}; background: ${icon === selectedIcon ? '#e8f5e9' : 'transparent'}; transform: ${icon === selectedIcon ? 'scale(1.1)' : 'scale(1)'};" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='${icon === selectedIcon ? 'scale(1.1)' : 'scale(1)'}'">
+            ${icon}
+        </div>
+    `).join('');
+    document.getElementById('sub-icon').value = selectedIcon;
+}
+
+function selectSubjectIcon(icon) {
+    renderIconPicker(icon); // วาดใหม่เพื่อรีเฟรชสีตัวที่ถูกเลือก
+}
+
+function openAddSubject() {
+    document.getElementById('sub-id-edit').value = '';
+    document.getElementById('sub-name').value = '';
+    document.getElementById('subject-modal-title').innerHTML = '📚 เพิ่มวิชาเรียนใหม่';
+    document.getElementById('subject-modal-desc').innerHTML = 'เลือกไอคอนและตั้งชื่อรายวิชา (สอนได้ทุกหมวดหมู่)';
+    renderIconPicker('💻'); // ค่าเริ่มต้นตอนสร้างใหม่
+    openModal('modal-subject');
+}
+
+function openEditSubject(id, name, icon) {
+    document.getElementById('sub-id-edit').value = id;
+    document.getElementById('sub-name').value = name;
+    document.getElementById('subject-modal-title').innerHTML = '✏️ แก้ไขวิชาเรียน';
+    document.getElementById('subject-modal-desc').innerHTML = 'ปรับเปลี่ยนไอคอนหรือแก้ไขชื่อวิชา';
+    renderIconPicker(icon || '💻'); // ดึงไอคอนเดิมมาแสดง
+    openModal('modal-subject');
+}
+
+async function saveSubject() {
+    const id = document.getElementById('sub-id-edit').value;
+    const name = document.getElementById('sub-name').value;
+    const icon = document.getElementById('sub-icon').value;
+    
+    if(!name) return showToast('❌ กรุณาใส่ชื่อวิชาก่อนครับ');
+
+    if (id) {
+        // อัปเดตข้อมูล (แก้ไข)
+        const { error } = await sb.from('subjects').update({ name: name, icon: icon }).eq('id', id);
+        if(error) return showToast('❌ แก้ไขไม่สำเร็จ: ' + error.message);
+        showToast('✅ อัปเดตข้อมูลวิชาเรียบร้อย');
+    } else {
+        // เพิ่มวิชาใหม่
+        const { error } = await sb.from('subjects').insert({ name: name, teacher_id: currentUser.id, icon: icon });
+        if(error) return showToast('❌ เพิ่มวิชาไม่สำเร็จ: ' + error.message);
+        showToast('✅ สร้างวิชาใหม่เรียบร้อย');
+    }
+    
+    closeModal('modal-subject'); 
+    loadData(); // โหลดหน้าจอใหม่ให้เห็นความเปลี่ยนแปลงทันที
+}
+
+async function deleteSubject(id, name) {
+    if (confirm(`คุณแน่ใจหรือไม่ที่จะลบวิชา "${name}"?\n(คำเตือน: ข้อมูลบทเรียนและใบงานทั้งหมดในวิชานี้จะถูกลบไปด้วย)`)) {
+        const { error } = await sb.from('subjects').delete().eq('id', id);
+        if (error) { showToast('❌ ลบวิชาไม่สำเร็จ: ' + error.message); } 
+        else { showToast('🗑️ ลบวิชาเรียบร้อยแล้ว'); loadData(); }
+    }
+}
+
+// 🌟 ฟังก์ชันบันทึกลำดับวิชาอัตโนมัติ (เมื่อปล่อยเมาส์ที่ลาก)
+async function saveSubjectOrder(orderArray) {
+    try {
+        const updates = orderArray.map(item => sb.from('subjects').update({ sort_order: item.sort_order }).eq('id', item.id));
+        await Promise.all(updates);
+    } catch (err) {
+        showToast('❌ จัดเรียงไม่สำเร็จ');
+    }
+}
+
 function openAddLesson() {
     if (!currentSubjectFilter) return showToast('❌ กรุณาเลือกวิชาก่อน');
     document.getElementById('lesson-sub-id').value = currentSubjectFilter.id;
@@ -637,23 +849,22 @@ async function addLesson() {
     else { closeModal('modal-lesson'); showToast('✅ เพิ่มบทเรียนเรียบร้อย'); loadData(); }
 }
 
-// --- 🌟 ฟังก์ชันอัจฉริยะ: เสกชื่อห้องตามวิชาที่เลือก ---
+// --- 🌟 ฟังก์ชันอัจฉริยะ: เสกชื่อห้องตอนสั่งใบงาน ---
 function updateTargetClassOptions() {
     const subSelect = document.getElementById('assign-sub-id');
     const classSelect = document.getElementById('assign-target-class');
-    const selectedText = subSelect.options[subSelect.selectedIndex]?.text || "";
+    if(!subSelect || !classSelect) return;
     
-    // ตั้งค่าเริ่มต้น
+    const selectedText = subSelect.options[subSelect.selectedIndex]?.text || "";
     let options = `<option value="all">✅ ทุกห้องเรียนที่เรียนวิชานี้</option>`;
     
-    // ตรรกะเช็คชื่อวิชาเพื่อหาห้อง (ปรับแก้ตรงนี้ได้ตามต้องการครับ)
     let rooms = [];
-    if (selectedText.includes("ม.1")) rooms = ["ม.1/1", "ม.1/2"];
+    if (selectedText.includes("ม.3/2")) rooms = ["ม.3/2"]; // เพิ่มให้ดัก ม.3/2 ได้แม่นยำขึ้น
+    else if (selectedText.includes("ม.1")) rooms = ["ม.1/1", "ม.1/2"];
     else if (selectedText.includes("ม.2")) rooms = ["ม.2/1", "ม.2/2"];
     else if (selectedText.includes("ม.3")) rooms = ["ม.3/1", "ม.3/2"];
     else if (selectedText.includes("ป.5")) rooms = ["ป.5/1", "ป.5/2"];
     
-    // เพิ่มตัวเลือกห้องเข้าไปในดรอปดาวน์
     rooms.forEach(room => {
         options += `<option value="${room}">👤 เฉพาะนักเรียนชั้น ${room}</option>`;
     });
@@ -971,32 +1182,60 @@ async function loadReports(searchName = null) {
 }
 
 // --- [ครู] หน้าเลือกวิชาและห้อง ---
+// --- [ครู] หน้าเลือกวิชาและห้อง ---
 async function renderTeacherReportSelection() {
     const area = document.getElementById('report-content-area');
     try {
-        const { data: subjects, error } = await sb.from('subjects').select('*').eq('teacher_id', currentUser.id);
+        // อัปเดตให้เรียงวิชาตามที่ลากวางไว้
+        const { data: subjects, error } = await sb.from('subjects').select('*').eq('teacher_id', currentUser.id).order('sort_order', { ascending: true });
         if (error) throw error;
 
         area.innerHTML = `
             <div class="card" style="padding:25px; border-top: 5px solid var(--primary);">
                 <h4>📂 เลือกรายงานที่ต้องการสรุป</h4>
                 <div style="display:flex; gap:10px; margin-top:15px; flex-wrap:wrap;">
-                    <select id="rpt-sub-id" style="flex:1; min-width:200px; padding:12px; border-radius:10px; border:1px solid var(--border);">
+                    <select id="rpt-sub-id" style="flex:1; min-width:200px; padding:12px; border-radius:10px; border:1px solid var(--border);" onchange="updateReportClassOptions()">
                         ${subjects && subjects.length ? subjects.map(s => `<option value="${s.id}">${s.name}</option>`).join('') : '<option disabled>ไม่มีวิชา</option>'}
                     </select>
                     <select id="rpt-class" style="width:120px; padding:12px; border-radius:10px; border:1px solid var(--border);">
-                        <option value="ม.1/1">ม.1/1</option><option value="ม.1/2">ม.1/2</option>
-                        <option value="ม.2/1">ม.2/1</option><option value="ม.2/2">ม.2/2</option>
-                        <option value="ม.3/1">ม.3/1</option><option value="ม.3/2">ม.3/2</option>
-                    </select>
+                        </select>
                     <button class="btn btn-primary" onclick="generateTeacherMatrix()">📊 ดูตารางคะแนน</button>
                 </div>
             </div>
             <div id="matrix-output" style="margin-top:20px; overflow-x:auto;"></div>
         `;
+
+        // ให้ระบบคำนวณห้องเรียนทันทีเมื่อโหลดหน้าต่างเสร็จ
+        setTimeout(() => {
+            updateReportClassOptions();
+        }, 50);
+
     } catch (err) {
         area.innerHTML = `<div class="card" style="text-align:center; color:red;">❌ ระบบขัดข้อง: ${err.message}</div>`;
     }
+}
+
+// 🌟 ฟังก์ชันอัจฉริยะ: กรองห้องเรียนอัตโนมัติในหน้า ปพ.5
+function updateReportClassOptions() {
+    const subSelect = document.getElementById('rpt-sub-id');
+    const classSelect = document.getElementById('rpt-class');
+    if (!subSelect || !classSelect) return;
+
+    const selectedText = subSelect.options[subSelect.selectedIndex]?.text || "";
+    let rooms = [];
+    
+    // ตรรกะอ่านชื่อวิชาเพื่อกรองห้อง (ต้องเช็คตัวที่เจาะจงที่สุดก่อน เช่น ม.3/2)
+    if (selectedText.includes("ม.3/2")) rooms = ["ม.3/2"];
+    else if (selectedText.includes("ม.1")) rooms = ["ม.1/1", "ม.1/2"];
+    else if (selectedText.includes("ม.2")) rooms = ["ม.2/1", "ม.2/2"];
+    else if (selectedText.includes("ม.3")) rooms = ["ม.3/1", "ม.3/2"];
+    else if (selectedText.includes("ป.5")) rooms = ["ป.5/1", "ป.5/2"];
+    else {
+        // ถ้าชื่อวิชาไม่ได้ระบุชั้น ให้โชว์ทั้งหมดไปก่อน
+        rooms = ["ม.1/1", "ม.1/2", "ม.2/1", "ม.2/2", "ม.3/1", "ม.3/2", "ป.5/1", "ป.5/2"];
+    }
+    
+    classSelect.innerHTML = rooms.map(room => `<option value="${room}">${room}</option>`).join('');
 }
 
 // --- [ครู] สร้างตารางหมากรุก (Matrix Table) ---
@@ -1252,23 +1491,6 @@ window.showRptTab = function(tabId) {
     }
 }
 
-// 📥 ฟังก์ชันส่งออกเป็นไฟล์ CSV (เปิดใน Excel ได้)
-function exportTableToCSV(filename) {
-    const table = document.getElementById("grade-table");
-    if (!table) return showToast('❌ ไม่พบตารางข้อมูล');
-    
-    let csv = "\uFEFF"; // ใส่ BOM เพื่อให้ Excel อ่านภาษาไทยออก
-    for (let i = 0; i < table.rows.length; i++) {
-        let row = [], cols = table.rows[i].querySelectorAll("td, th");
-        for (let j = 0; j < cols.length; j++) row.push('"' + cols[j].innerText.replace(/"/g, '""') + '"');
-        csv += row.join(",") + "\r\n";
-    }
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = `คะแนนห้อง_${filename}.csv`;
-    link.click();
-}
 
 // 📥 ฟังก์ชันส่งออกเป็นไฟล์ CSV (เปิดใน Excel ได้)
 function exportTableToCSV(filename) {
@@ -1287,3 +1509,201 @@ function exportTableToCSV(filename) {
     link.download = `คะแนนห้อง_${filename}.csv`;
     link.click();
 }
+// ==========================================
+// 🎪 ระบบจัดการชุมนุมอัจฉริยะ (Smart Club System)
+// ==========================================
+
+async function loadClubs() {
+    const container = document.getElementById('clubs-list');
+    container.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--primary);">⏳ กำลังโหลดข้อมูลชุมนุม...</div>';
+
+    // 🌟 ดึงวิชาที่มีคำว่า "ชุมนุม" เท่านั้น
+    const { data: clubs, error } = await sb.from('subjects').select('*').like('name', '%ชุมนุม%').order('sort_order', { ascending: true });
+    
+    if (error || !clubs || clubs.length === 0) {
+        container.innerHTML = '<div class="card" style="text-align:center; color:gray; padding: 40px;">ยังไม่มีการเปิดรับสมัครชุมนุมในขณะนี้ครับ 🎪</div>';
+        return;
+    }
+
+    if (!currentUser) {
+        // 👤 มุมมองบุคคลทั่วไป (เห็นชุมนุมแต่ต้องล็อกอินก่อนกด)
+        container.innerHTML = `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">` + clubs.map((c, index) => `
+            <div class="subject-card cat-cs" style="cursor:default; animation-delay: ${index * 0.1}s;">
+                <div class="subject-icon" style="font-size: 55px; margin-bottom: 10px;">${c.icon || '🎪'}</div>
+                <div class="subject-name">${c.name}</div>
+                <button class="btn btn-outline" style="width:100%; margin-top:15px; border: 2px solid var(--border); color: var(--primary-dark);" onclick="showToast('💡 เรียนผู้ปกครองและนักเรียน กรุณาลงชื่อเข้าสู่ระบบก่อนสมัครเข้าชุมนุมนะครับ'); openAuth(); toggleAuth(false);">✋ ยื่นคำขอเข้าชุมนุม</button>
+            </div>`).join('') + `</div>`;
+        return;
+    }
+
+    if (currentUser.role === 'student') {
+        // 🎓 มุมมองนักเรียน (เช็คสถานะคำขอ)
+        const { data: myRequests } = await sb.from('club_requests').select('*').eq('student_id', currentUser.id);
+        
+        container.innerHTML = `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">` + clubs.map((c, index) => {
+            const req = (myRequests || []).find(r => r.club_id === c.id);
+            let statusBtn = `<button class="btn btn-primary" style="width:100%; margin-top:15px; box-shadow: 0 4px 15px rgba(26,95,63,0.3);" onclick="requestJoinClub(${c.id}, '${c.name}')">✋ ยื่นคำขอเข้าชุมนุม</button>`;
+            
+            if (req) {
+                if (req.status === 'pending') {
+                    statusBtn = `<div style="margin-top:15px; text-align:center; padding:10px; background:#fffde7; color:#f57f17; border-radius:10px; font-weight:bold; border: 1px solid #fff59d;">⏳ รอคุณครูอนุมัติ</div>`;
+                } else if (req.status === 'approved') {
+                    statusBtn = `<div style="margin-top:15px; text-align:center; padding:10px; background:#e8f5e9; color:#2e7d32; border-radius:10px; font-weight:bold; border: 1px solid #a5d6a7;">✅ อนุมัติแล้ว (เป็นสมาชิก)</div>`;
+                }
+            }
+
+            return `
+            <div class="subject-card cat-cs" style="cursor:default; animation-delay: ${index * 0.1}s;">
+                <div class="subject-icon" style="font-size: 55px; margin-bottom: 10px;">${c.icon || '🎪'}</div>
+                <div class="subject-name">${c.name}</div>
+                ${statusBtn}
+            </div>`;
+        }).join('') + `</div>`;
+    } else {
+        // 👨‍🏫 มุมมองครู (กดเพื่อจัดการสมาชิก)
+        container.innerHTML = `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">` + clubs.map((c, index) => `
+            <div class="subject-card cat-cs" onclick="manageClub(${c.id}, '${c.name}')" style="animation-delay: ${index * 0.1}s;" onmouseover="this.style.borderColor='var(--accent)';" onmouseout="this.style.borderColor='var(--border)';">
+                <div class="subject-icon" style="font-size: 55px; margin-bottom: 10px;">${c.icon || '🎪'}</div>
+                <div class="subject-name">${c.name}</div>
+                <div style="margin-top:15px; background:var(--surface2); color:var(--primary); padding:10px; border-radius:10px; font-size:14px; font-weight:bold; border: 1px solid var(--border);">
+                    👥 จัดการสมาชิก / ตรวจคำขอ
+                </div>
+            </div>
+        `).join('') + `</div>`;
+    }
+}
+
+function requestJoinClub(clubId, clubName) {
+    // ใช้ Popup ตัวใหม่ที่สวยงามแทน confirm() เดิม
+    showConfirmModal(
+        'ยืนยันการเข้าร่วมชุมนุม',
+        `คุณต้องการยื่นคำขอเข้า "${clubName}" ใช่หรือไม่?`,
+        async () => {
+            // เมื่อกดยืนยัน จะมาทำคำสั่งตรงนี้
+            const { error } = await sb.from('club_requests').insert({ student_id: currentUser.id, club_id: clubId, status: 'pending' });
+            
+            // 🌟 เพิ่มการดึง error.message มาโชว์ จะได้รู้ว่า Supabase ติดปัญหาอะไร
+            if (error) return showToast('❌ ส่งคำขอไม่สำเร็จ: ' + error.message);
+            
+            showToast('✅ ส่งคำขอเรียบร้อยแล้ว รอคุณครูอนุมัติครับ');
+            loadClubs(); // โหลดหน้าจอเพื่ออัปเดตปุ่มเป็นสีส้ม
+        }
+    );
+}
+
+async function manageClub(clubId, clubName) {
+    document.getElementById('manage-club-title').textContent = `👥 ตรวจคำขอ: ${clubName}`;
+    const listArea = document.getElementById('club-members-list');
+    listArea.innerHTML = '<div style="text-align:center; padding:30px;">⏳ กำลังโหลดรายชื่อ...</div>';
+    openModal('modal-manage-club');
+
+    const { data: requests, error } = await sb.from('club_requests').select('*, profiles(full_name, class_level, student_no)').eq('club_id', clubId).order('created_at', { ascending: false });
+    
+    if (error || !requests || requests.length === 0) {
+        listArea.innerHTML = '<div style="text-align:center; padding:30px; color:gray;">ยังไม่มีนักเรียนยื่นคำขอในชุมนุมนี้ครับ</div>';
+        return;
+    }
+
+    listArea.innerHTML = requests.map(req => {
+        const s = req.profiles;
+        let actionBtns = '';
+        if (req.status === 'pending') {
+            actionBtns = `
+                <button class="btn btn-sm btn-primary" onclick="updateClubRequest(${req.id}, 'approved', ${clubId}, '${clubName}')">✅ อนุมัติ</button>
+                <button class="btn btn-sm" style="background:#ffebee; color:#c62828; border:1px solid #ffcdd2;" onclick="updateClubRequest(${req.id}, 'rejected', ${clubId}, '${clubName}')">❌ ปฏิเสธ</button>
+            `;
+        } else if (req.status === 'approved') {
+            actionBtns = `
+                <span style="color:var(--success); font-weight:bold; font-size:13px; margin-right:10px;">✅ อนุมัติแล้ว</span>
+                <button class="btn btn-sm" style="background:#f5f5f5; color:gray; border:1px solid #ddd;" onclick="updateClubRequest(${req.id}, 'rejected', ${clubId}, '${clubName}')">🗑️ ลบออก</button>
+            `;
+        }
+
+        return `
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:15px; border-bottom:1px solid #eee;">
+            <div>
+                <b style="color:var(--primary-dark); font-size:16px;">เลขที่ ${s?.student_no} ${s?.full_name}</b><br>
+                <small style="color:gray;">ระดับชั้น: ${s?.class_level}</small>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center;">
+                ${actionBtns}
+            </div>
+        </div>`;
+    }).join('');
+}
+
+async function updateClubRequest(reqId, newStatus, clubId, clubName) {
+    const actionText = newStatus === 'approved' ? 'อนุมัติ' : 'ลบ/ปฏิเสธ';
+    if (!confirm(`ยืนยันการ ${actionText} นักเรียนคนนี้?`)) return;
+
+    // ถ้าปฏิเสธหรือลบออก ให้ลบข้อมูลทิ้งเลย เด็กจะได้กดยื่นใหม่ได้ในอนาคต
+    if (newStatus === 'rejected') {
+        await sb.from('club_requests').delete().eq('id', reqId);
+    } else {
+        await sb.from('club_requests').update({ status: newStatus }).eq('id', reqId);
+    }
+
+    showToast(`✅ ${actionText} เรียบร้อยแล้ว`);
+    manageClub(clubId, clubName); // รีเฟรชตารางป๊อปอัพ
+    loadData(); // อัปเดตข้อมูลวิชาในระบบ (เผื่อเด็กกำลังล็อกอินอยู่)
+}
+
+// ==========================================
+// 🌟 ระบบ Popup ยืนยันแบบกำหนดเอง (Custom Confirm)
+// ==========================================
+let pendingConfirmCallback = null;
+
+function showConfirmModal(title, desc, callback) {
+    document.getElementById('confirm-title').textContent = title;
+    document.getElementById('confirm-desc').textContent = desc;
+    pendingConfirmCallback = callback;
+    openModal('modal-confirm');
+}
+
+function executeConfirm() {
+    closeModal('modal-confirm');
+    if (typeof pendingConfirmCallback === 'function') {
+        pendingConfirmCallback(); // สั่งให้ทำงานต่อหลังจากกดยืนยัน
+    }
+}
+
+// ==========================================
+// 🌙 ระบบสลับโหมดกลางคืน (Dark Mode Manager)
+// ==========================================
+
+function toggleDarkMode() {
+    const isDark = document.body.classList.toggle('dark-mode');
+    
+    // บันทึกสถานะลงในเครื่องของผู้ใช้
+    localStorage.setItem('darkMode', isDark ? 'enabled' : 'disabled');
+    
+    // อัปเดตหน้าตาปุ่ม
+    updateDarkModeUI(isDark);
+    
+    // เอฟเฟกต์พลุเบาๆ เมื่อสลับโหมด (ถ้าคุณครูชอบ)
+    if (isDark) {
+        showToast('🌙 เปิดโหมดถนอมสายตา');
+    } else {
+        showToast('☀️ เปิดโหมดสว่าง');
+    }
+}
+
+// อัปเดตหน้าตาปุ่มลอยตัว
+function updateDarkModeUI(isDark) {
+    const fabIcon = document.getElementById('floating-theme-toggle');
+    if (fabIcon) {
+        // ถ้าเป็นโหมดมืด (Dark) โชว์พระอาทิตย์ เพื่อบอกว่ากดแล้วจะสว่าง
+        // ถ้าเป็นโหมดสว่าง (Light) โชว์พระจันทร์
+        fabIcon.textContent = isDark ? '☀️' : '🌙';
+    }
+}
+
+// ตรวจสอบสถานะที่เคยบันทึกไว้ทุกครั้งที่เปิดหน้าเว็บ
+(function checkSavedTheme() {
+    const savedDarkMode = localStorage.getItem('darkMode');
+    if (savedDarkMode === 'enabled') {
+        document.body.classList.add('dark-mode');
+        // ต้องรอให้ DOM โหลดเสร็จก่อนถึงจะเปลี่ยนข้อความปุ่มได้
+        window.addEventListener('DOMContentLoaded', () => updateDarkModeUI(true));
+    }
+})();
