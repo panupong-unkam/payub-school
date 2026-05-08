@@ -77,8 +77,9 @@ function viewSubject(subjectId, subjectName) {
     currentSubjectFilter = { id: subjectId, name: subjectName };
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     
-    const pageAssign = document.getElementById('page-assignments');
-    if(pageAssign) pageAssign.classList.add('active'); 
+    // 🌟 แก้ไขจุดที่ 1: ให้เปิดหน้า page-subjects (บทเรียน) ไม่ใช่หน้าใบงาน
+    const pageSubjects = document.getElementById('page-subjects');
+    if(pageSubjects) pageSubjects.classList.add('active'); 
     
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     if(document.querySelectorAll('.nav-item')[1]) document.querySelectorAll('.nav-item')[1].classList.add('active');
@@ -89,6 +90,7 @@ function viewSubject(subjectId, subjectName) {
     window.scrollTo(0, 0); 
     loadData(); 
 }
+
 
 function goBackToSubjects() {
     currentSubjectFilter = null;
@@ -134,7 +136,6 @@ async function loadData() {
     }
     let submissionQuery = (currentUser && currentUser.role !== 'teacher') ? sb.from('submissions').select('assignment_id, status, score, feedback').eq('student_id', currentUser.id) : null;
 
-    // 🌟 ดึงข้อมูล 4 อย่างพร้อมกัน (วิชา, ใบงาน, บทเรียน, สถานะการส่งงาน)
     const [subsRes, assignsRes, lessonsRes, studentSubsRes] = await Promise.all([
         sb.from('subjects').select('*').order('sort_order', { ascending: true }).order('id', { ascending: true }),
         assignQuery,
@@ -147,25 +148,22 @@ async function loadData() {
     let displayLessons = lessonsRes.data || []; 
     let mySubmissions = studentSubsRes.data || [];
 
-   // ⭐ 1. กรองวิชาและใบงาน (เวอร์ชันอัปเกรด: แยกตามห้องเรียน + ระบบชุมนุม)
+   // ⭐ 1. กรองวิชาและใบงาน
     if (currentUser && currentUser.role !== 'teacher') {
         const myClass = currentUser.class_level || ''; 
         const prefix = myClass.split('/')[0];
         
-        // 🌟 ดึงข้อมูลชุมนุมที่นักเรียนคนนี้ได้รับการ "อนุมัติแล้ว"
         const { data: myApprovedClubs } = await sb.from('club_requests').select('club_id').eq('student_id', currentUser.id).eq('status', 'approved');
         const approvedClubIds = myApprovedClubs ? myApprovedClubs.map(c => c.club_id) : [];
 
         const isMySubject = (subName, subId) => { 
             if (!subName) return false; 
-            if (subName.includes('ชุมนุม')) return approvedClubIds.includes(subId); // ถ้าเป็นชุมนุม ต้องได้รับอนุมัติถึงจะเห็น!
+            if (subName.includes('ชุมนุม')) return approvedClubIds.includes(subId); 
             return subName.includes(prefix) || subName.includes(myClass) || (subName.includes('ม.ต้น') && prefix.startsWith('ม.')); 
         };
 
-        // กรองวิชาของชั้นตัวเอง + ชุมนุมที่อนุมัติ
         displaySubs = displaySubs.filter(s => isMySubject(s.name, s.id)); 
         
-        // กรองใบงานของห้องตัวเอง + ของชุมนุม
         displayAssigns = displayAssigns.filter(a => {
             const isSubjectMatch = isMySubject(a.subjects?.name, a.subject_id);
             const isClassMatch = !a.target_classes || a.target_classes === 'all' || a.target_classes === myClass;
@@ -173,10 +171,9 @@ async function loadData() {
             return isSubjectMatch && (isClassMatch || isClubAssign);
         });
     } else if (!currentUser) {
-        // สำหรับบุคคลทั่วไป ให้ซ่อนวิชาที่เป็น "ชุมนุม" ออกไปจากหน้าบทเรียนออนไลน์
         displaySubs = displaySubs.filter(s => !s.name.includes('ชุมนุม'));
     }
-    // ⭐ 2. กรองใบงานตามสถานะการส่ง (ดรอปดาวน์ สีเขียว/เหลือง ของนักเรียน)
+
     let filteredAssignsForList = displayAssigns;
     if (currentUser && currentUser.role !== 'teacher' && window.studentFilterStatus !== 'all') {
         filteredAssignsForList = displayAssigns.filter(a => {
@@ -190,116 +187,130 @@ async function loadData() {
 
     if (subjectsContainer) subjectsContainer.innerHTML = ''; if (assignContainer) assignContainer.innerHTML = '';
 
-    if (isOnlineLessonsMenu && !currentSubjectFilter) {
-        if (assignHeader) assignHeader.innerHTML = '📚 รายวิชาทั้งหมด';
-        if (subjectsContainer) {
-            subjectsContainer.innerHTML = displaySubs.length ? displaySubs.map(s => {
-                let icon = s.icon || (s.name.includes('คำนวณ') ? '🧠' : (s.name.includes('หุ่นยนต์') ? '🤖' : '💻'));
-                const controls = currentUser?.role === 'teacher' ? `
-                    <div style="position:absolute; top:15px; right:15px; display:flex; gap:8px; z-index:10;">
-                        <button onclick="event.stopPropagation(); openEditSubject(${s.id}, '${s.name}', '${icon}')" style="background:var(--primary); color:white; border:none; border-radius:50%; width:35px; height:35px; cursor:pointer; font-size:14px; box-shadow:0 2px 5px rgba(0,0,0,0.2); transition:0.3s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">✏️</button>
-                        <button onclick="event.stopPropagation(); deleteSubject(${s.id}, '${s.name}')" style="background:var(--danger); color:white; border:none; border-radius:50%; width:35px; height:35px; cursor:pointer; font-size:14px; box-shadow:0 2px 5px rgba(0,0,0,0.2); transition:0.3s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">🗑️</button>
-                    </div>` : '';
-                
-                // 🌟 แอบใส่ data-id ไว้ให้ระบบรู้ว่าลากวิชาไหน
-                return `<div class="subject-card cat-cs" data-id="${s.id}" onclick="viewSubject(${s.id}, '${s.name}')">${controls}<div class="subject-icon" style="font-size: 55px; margin-bottom: 10px;">${icon}</div><div class="subject-name">${s.name}</div><div style="font-size:13px; color:gray;">คลิกเพื่อเข้าเรียน</div></div>`;
-            }).join('') : '<div style="grid-column: 1/-1; text-align:center; padding: 40px; color:gray; background: white; border-radius: 12px; border: 2px dashed var(--border);">ไม่มีวิชาเรียนในระดับชั้นนี้ครับ 🎒</div>';
+    // 🌟 แก้ไขจุดที่ 3: สร้าง HTML ของวิชาเตรียมไว้เลย เพื่อให้ใช้ได้ทั้งสองหน้าพร้อมกัน!
+    const subjectsHTML = displaySubs.length ? displaySubs.map(s => {
+        let icon = s.icon || (s.name.includes('คำนวณ') ? '🧠' : (s.name.includes('หุ่นยนต์') ? '🤖' : '💻'));
+        const controls = currentUser?.role === 'teacher' ? `
+            <div style="position:absolute; top:15px; right:15px; display:flex; gap:8px; z-index:10;">
+                <button onclick="event.stopPropagation(); openEditSubject(${s.id}, '${s.name}', '${icon}')" style="background:var(--primary); color:white; border:none; border-radius:50%; width:35px; height:35px; cursor:pointer; font-size:14px; box-shadow:0 2px 5px rgba(0,0,0,0.2); transition:0.3s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">✏️</button>
+                <button onclick="event.stopPropagation(); deleteSubject(${s.id}, '${s.name}')" style="background:var(--danger); color:white; border:none; border-radius:50%; width:35px; height:35px; cursor:pointer; font-size:14px; box-shadow:0 2px 5px rgba(0,0,0,0.2); transition:0.3s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">🗑️</button>
+            </div>` : '';
+        
+        return `<div class="subject-card cat-cs" data-id="${s.id}" onclick="viewSubject(${s.id}, '${s.name}')">${controls}<div class="subject-icon" style="font-size: 55px; margin-bottom: 10px;">${icon}</div><div class="subject-name">${s.name}</div><div style="font-size:13px; color:gray;">คลิกเพื่อเข้าเรียน</div></div>`;
+    }).join('') : '<div style="grid-column: 1/-1; text-align:center; padding: 40px; color:gray; background: white; border-radius: 12px; border: 2px dashed var(--border);">ไม่มีวิชาเรียนในระดับชั้นนี้ครับ 🎒</div>';
 
-            // 🌟 ใช้งานระบบลากวาง (เฉพาะครูเท่านั้นที่ลากได้)
+    // 🌟 ดันวิชาไปหน้าบทเรียน (ถ้าเมนูบทเรียนถูกเปิดอยู่)
+    if (isOnlineLessonsMenu && !currentSubjectFilter) {
+        const subjectHeader = document.querySelector('#page-subjects h2');
+        if (subjectHeader) {
+            subjectHeader.style.display = 'block';
+            subjectHeader.innerHTML = '📚 รายวิชาทั้งหมด';
+        }
+        if (subjectsContainer) {
+            subjectsContainer.innerHTML = subjectsHTML;
+
             if (currentUser?.role === 'teacher' && displaySubs.length > 0) {
                 new Sortable(subjectsContainer, {
                     animation: 200,
                     ghostClass: 'sortable-ghost',
                     onEnd: function () {
-                        // เมื่อปล่อยเมาส์ ให้จำลำดับใหม่ แล้วส่งไปบอกฐานข้อมูล
                         const items = subjectsContainer.querySelectorAll('.subject-card');
                         const newOrder = Array.from(items).map((el, index) => ({ 
                             id: parseInt(el.getAttribute('data-id')), 
                             sort_order: index 
                         }));
-                        saveSubjectOrder(newOrder); // เรียกฟังก์ชันบันทึกอัตโนมัติ
+                        saveSubjectOrder(newOrder); 
                     }
                 });
             }
         }
     } 
+    // 🌟 ส่วนโชว์เนื้อหาบทเรียนย่อย (คืนชีพเลย์เอาต์แบบรูปที่ 2 อย่างสมบูรณ์!)
     else if (isOnlineLessonsMenu && currentSubjectFilter) {
-        if (assignHeader) {
-            // ⭐ ปรับโครงสร้าง HTML ตรงนี้ เพื่อให้รองรับ CSS ของมือถือที่เราเขียนไว้
-            assignHeader.innerHTML = `
-                <div style="display: flex; align-items: center; gap: 15px; width: 100%;">
-                    <button onclick="goBackToSubjects()" style="background: var(--surface2); border: 2px solid var(--border); border-radius: 12px; padding: 8px 18px; cursor: pointer; font-family: 'Sarabun'; font-weight: bold; color: var(--text); display: flex; align-items: center; gap: 8px; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); font-size: 15px;" onmouseover="this.style.borderColor='var(--primary)'; this.style.transform='translateX(-5px)';" onmouseout="this.style.borderColor='var(--border)'; this.style.transform='translateX(0)';">⬅️ ย้อนกลับ</button>
-                    <span style="color: var(--primary-dark); font-weight: 700;">🚪 วิชานี้: ${currentSubjectFilter.name}</span>
+        const subjectHeader = document.querySelector('#page-subjects h2');
+        if (subjectHeader) {
+            subjectHeader.style.display = 'none'; // ซ่อนหัวข้อเดิมไปก่อน เราจะสร้างใหม่ให้มีปุ่มย้อนกลับที่สวยงาม
+        }
+        
+        if (subjectsContainer) {
+            // 1. ส่วนหัว (ปุ่มย้อนกลับ + ชื่อวิชา)
+            const headerHtml = `
+                <div style="display:flex; align-items:center; flex-wrap:wrap; gap:15px; margin-bottom:30px;">
+                    <button class="btn btn-outline" style="background:var(--surface); border:1px solid var(--border); color:var(--text); padding:8px 20px; font-size: 15px; border-radius: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);" onclick="goBackToSubjects()">⬅️ ย้อนกลับ</button>
+                    <h2 style="margin:0; font-size:24px; color:var(--primary-dark); display:flex; align-items:center; gap:10px;">🚪 วิชานี้: ${currentSubjectFilter.name}</h2>
+                </div>
+            `;
+
+            // 2. ส่วนเนื้อหาบทเรียน (กล่องวิดีโอ/สไลด์ที่จัดเรียงสวยงาม)
+            const addLessonBtn = currentUser?.role === 'teacher' ? `<button class="btn btn-primary" style="padding: 8px 20px; border-radius: 20px;" onclick="openAddLesson()">+ เพิ่มเนื้อหา</button>` : '';
+            const lessonHeaderHtml = `
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap: 10px;">
+                    <h3 style="color:var(--primary-dark); font-size:20px; margin:0; display:flex; align-items:center; gap:10px;">📖 เนื้อหาบทเรียน</h3>
+                    ${addLessonBtn}
+                </div>
+            `;
+
+            const lessonsGridHtml = displayLessons.length ? `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; margin-bottom: 50px;">` + displayLessons.map((l, index) => {
+                let embedHtml = '';
+                const embedUrl = getEmbedUrl(l.url, l.content_type);
+                if (embedUrl) {
+                    embedHtml = `<iframe src="${embedUrl}" style="width:100%; aspect-ratio: 16/9; border:none; border-radius:12px; margin-bottom:15px; background:#f5f7f5;" allowfullscreen></iframe>`;
+                }
+                
+                const delBtn = currentUser?.role === 'teacher' ? `<div style="text-align:right; margin-top:15px; border-top: 1px dashed var(--border); padding-top: 15px;"><button class="btn btn-sm" style="background:#ffebee; color:#c62828; border:1px solid #ffcdd2; width: 100%;" onclick="deleteLesson(${l.id})">🗑️ ลบเนื้อหา</button></div>` : '';
+
+                return `
+                <div class="card" style="padding:20px; display:flex; flex-direction:column; animation-delay: ${index * 0.1}s; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid var(--border);">
+                    <div style="font-weight:bold; font-size:16px; margin-bottom:15px; color:var(--primary-dark); line-height:1.4;">${l.title}</div>
+                    ${embedHtml}
+                    <div style="margin-top:auto; text-align:center;">
+                        <a href="${l.url}" target="_blank" style="color:var(--text-muted); font-size:13px; text-decoration:underline; font-weight:bold;">🔗 เปิดในหน้าต่างใหม่</a>
+                    </div>
+                    ${delBtn}
+                </div>`;
+            }).join('') + `</div>` : '<div class="card" style="text-align:center; padding: 40px; color:gray; margin-bottom: 50px; border: 2px dashed var(--border);">ยังไม่มีเนื้อหาบทเรียนครับ</div>';
+
+            // 3. ส่วนใบงานและกิจกรรม (พร้อมระบบล็อกผู้เยี่ยมชม!)
+            const addAssignBtn = currentUser?.role === 'teacher' ? `<button class="btn btn-primary" style="padding: 8px 20px; border-radius: 20px;" onclick="openAddAssignment()">+ เพิ่มใบงาน</button>` : '';
+            const assignHeaderHtml = `
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap: 10px;">
+                    <h3 style="color:var(--primary-dark); font-size:20px; margin:0; display:flex; align-items:center; gap:10px;">📝 ใบงานและกิจกรรม</h3>
+                    ${addAssignBtn}
+                </div>
+            `;
+
+            let assignsListHtml = '';
+            if (!currentUser) {
+                // 🌟 ถ้าไม่ได้ล็อกอิน ให้โชว์แม่กุญแจและซ่อนใบงานทั้งหมด!
+                assignsListHtml = `
+                <div class="card" style="text-align:center; padding: 50px 20px; border: 2px dashed var(--border); background: linear-gradient(to bottom, var(--surface), rgba(0,0,0,0.02)); margin-bottom: 40px;">
+                    <div style="font-size: 50px; margin-bottom: 15px;">🔐</div>
+                    <h3 style="color: var(--primary-dark); font-family: 'Noto Serif Thai', serif; margin-bottom: 10px;">พื้นที่เฉพาะสมาชิกนักเรียน</h3>
+                    <p style="color: var(--text-muted); font-size: 15px; margin-bottom: 25px;">กรุณาเข้าสู่ระบบเพื่อดูรายละเอียดใบงานและส่งผลงานครับ</p>
+                    <button class="btn btn-primary" style="border-radius: 20px; padding: 10px 25px; box-shadow: 0 4px 15px rgba(26,95,63,0.3);" onclick="openAuth(); toggleAuth(false);">🔑 เข้าสู่ระบบทันที</button>
+                </div>`;
+            } else {
+                let currentSubjectAssigns = displayAssigns.filter(a => a.subject_id === currentSubjectFilter.id);
+                // 🌟 แก้ให้ใบงานเรียงต่อกันแนวตั้ง ไม่แตกกระจุย
+                assignsListHtml = currentSubjectAssigns.length > 0 ? `<div style="display:flex; flex-direction:column; gap:15px; margin-bottom:40px;">` + renderAssignmentsList(currentSubjectAssigns, mySubmissions) + `</div>` : '<div class="card" style="text-align:center; padding: 40px; color:gray; border: 2px dashed var(--border); margin-bottom:40px;">ยังไม่มีใบงานในวิชานี้ครับ</div>';
+            }
+
+            // 🌟 แก้ไขจุดสำคัญ (ตัวแก้บั๊กแตกคอลัมน์): ห่อทุกอย่างด้วย div grid-column: 1 / -1
+            subjectsContainer.innerHTML = `
+                <div style="grid-column: 1 / -1; width: 100%; animation: slideUpFade 0.4s ease forwards;">
+                    ${headerHtml}
+                    ${lessonHeaderHtml}
+                    ${lessonsGridHtml}
+                    ${assignHeaderHtml}
+                    ${assignsListHtml}
                 </div>
             `;
         }
-        if (assignContainer) {
-            // --- ส่วนของ 📖 เนื้อหาบทเรียน (โชว์ให้ทุกคนเห็น) ---
-            let html = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;"><h3 style="color:var(--primary-dark); font-family:'Noto Serif Thai', serif;">📖 เนื้อหาบทเรียน</h3>${currentUser?.role === 'teacher' ? `<button class="btn btn-sm btn-primary" onclick="openAddLesson()">+ เพิ่มเนื้อหา</button>` : ''}</div>`;
-            if (displayLessons.length > 0) {
-                html += `<div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap:15px; margin-bottom:40px;">`;
-                html += displayLessons.map((l, index) => {
-                    const embedUrl = getEmbedUrl(l.url, l.content_type);
-                    const lessonControls = currentUser?.role === 'teacher' ? `<div style="margin-top: 10px; text-align: right;"><button class="btn btn-sm" style="background:#fdecea; color:var(--danger); border:1px solid var(--danger); font-size:12px;" onclick="deleteLesson(${l.id})">🗑️ ลบเนื้อหา</button></div>` : '';
-                    return `<div class="card" style="padding:15px; animation-delay: ${index * 0.1}s;"><b style="font-size:16px; display:block; margin-bottom:10px;">${l.title}</b><div style="position:relative; padding-bottom:56.25%; height:0; border-radius:10px; overflow:hidden; background:#000;"><iframe src="${embedUrl}" loading="lazy" style="position:absolute; top:0; left:0; width:100%; height:100%;" frameborder="0" allowfullscreen></iframe></div><a href="${l.url}" target="_blank" style="display:block; margin-top:10px; font-size:12px; color:var(--primary); text-align:center;">🔗 เปิดในหน้าต่างใหม่</a>${lessonControls}</div>`;
-                }).join('');
-                html += `</div>`;
-            } else { html += `<div style="padding:20px; text-align:center; color:gray; background:var(--surface2); border-radius:15px; margin-bottom:40px;">ยังไม่มีเนื้อหาในบทนี้</div>`; }
-
-            // --- ส่วนของ 📝 ใบงานและกิจกรรม (เวอร์ชันอัจฉริยะ) ---
-            html += `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                        <h3 style="color:var(--primary-dark); font-family:'Noto Serif Thai', serif;">📝 ใบงานและกิจกรรม</h3>
-                        ${currentUser?.role === 'teacher' ? `<button class="btn btn-sm btn-primary" onclick="openAddAssignment()">+ เพิ่มใบงาน</button>` : ''}
-                    </div>`;
-
-            if (!currentUser) {
-                // 🔐 1. มุมมองบุคคลทั่วไป: ล็อกไม่ให้เห็นใบงาน
-                html += `
-                    <div class="card" style="text-align:center; padding: 40px 20px; border: 2px dashed var(--border); background: #fdfdfd;">
-                        <div style="font-size: 40px; margin-bottom: 15px;">🔐</div>
-                        <b style="color: var(--primary-dark); display: block; margin-bottom: 8px;">พื้นที่เฉพาะสมาชิกนักเรียน</b>
-                        <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px;">กรุณาเข้าสู่ระบบเพื่อดูรายละเอียดใบงานและส่งผลงานครับ</p>
-                        <button class="btn btn-primary btn-sm" onclick="openAuth(); toggleAuth(false);">🔑 เข้าสู่ระบบทันที</button>
-                    </div>`;
-            } 
-            else if (currentUser.role === 'student') {
-                // 🎓 2. มุมมองนักเรียน: กรองเฉพาะงานที่ยังทำไม่เสร็จ
-                // เงื่อนไข: เก็บงานที่ "ยังไม่ส่ง" หรือ "ยังเป็นแบบร่าง" ไว้
-                const todoList = displayAssigns.filter(a => {
-                    const sub = mySubmissions.find(s => s.assignment_id === a.id);
-                    return !sub || sub.status.includes('แบบร่าง');
-                });
-
-                if (todoList.length > 0) {
-                    html += renderAssignmentsList(todoList, mySubmissions);
-                } else if (displayAssigns.length > 0) {
-                    // ถ้าในวิชานี้มีงาน แต่เด็กทำเสร็จหมดแล้ว
-                    html += `
-                        <div class="card" style="text-align:center; padding: 40px 20px; border: 2px solid var(--success); background: #f0fdf4;">
-                            <div style="font-size: 40px; margin-bottom: 15px;">🎉</div>
-                            <b style="color: var(--success); display: block; margin-bottom: 8px;">เยี่ยมมาก! คุณเคลียร์งานวิชานี้หมดแล้ว</b>
-                            <p style="color: #166534; font-size: 14px;">งานที่ส่งแล้วจะถูกย้ายไปสรุปไว้ที่เมนู "ผลการเรียน" นะครับ</p>
-                        </div>`;
-                } else {
-                    html += `<div style="padding:20px; text-align:center; color:gray;">ยังไม่มีใบงานในบทนี้</div>`;
-                }
-            } 
-            else {
-                // 👨‍🏫 3. มุมมองคุณครู: โชว์ครบถ้วนเสมอเพื่อการจัดการ
-                if (displayAssigns.length > 0) {
-                    html += renderAssignmentsList(displayAssigns, mySubmissions);
-                } else {
-                    html += `<div style="padding:20px; text-align:center; color:gray;">ยังไม่มีใบงานในบทนี้</div>`;
-                }
-            }
-
-            assignContainer.innerHTML = html;
-        }
     }
+
+    // 🌟 ส่วนหน้าใบงานอื่นๆ (ภาพรวม)
     else {
-        // --- ส่วนของหน้าใบงานรวม (ที่กดมาจากเมนู Sidebar) ---
         if (assignHeader) {
-            // 🌟 สร้างรายชื่อวิชาสำหรับใส่ใน Dropdown
             const subjectOptions = displaySubs.map(s => `
                 <option value="${s.id}" ${window.assignmentSubjectFilter == s.id ? 'selected' : ''}>
                     ${s.name}
@@ -307,7 +318,6 @@ async function loadData() {
             `).join('');
 
             if (currentUser && currentUser.role !== 'teacher') {
-                // 👨‍🎓 มุมมองนักเรียน: มี 2 Dropdown (วิชา + สถานะ)
                 assignHeader.innerHTML = `
                     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; width:100%;">
                         <span style="font-size: 1.1rem; font-weight: bold; color: var(--primary-dark);">📝 ใบงานและกิจกรรม</span>
@@ -325,7 +335,6 @@ async function loadData() {
                     </div>
                 `;
             } else { 
-                // 👨‍🏫 มุมมองครู: มี 1 Dropdown (วิชา)
                 assignHeader.innerHTML = `
                     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; width:100%;">
                         <span style="font-size: 1.1rem; font-weight: bold; color: var(--primary-dark);">📝 ใบงานและกิจกรรม</span>
@@ -340,7 +349,6 @@ async function loadData() {
 
         if (assignContainer) {
             if (!currentUser) {
-                // 🔐 ระบบล็อคสำหรับบุคคลทั่วไป (เหมือนเดิมที่คุณครูเคยมี)
                 assignContainer.innerHTML = `
                     <div class="card" style="text-align:center; padding: 60px 30px; border: 2px dashed var(--border); background: linear-gradient(to bottom, #ffffff, #f9f9f9);">
                         <div style="font-size: 60px; margin-bottom: 20px;">🔐</div>
@@ -354,7 +362,6 @@ async function loadData() {
                         </div>
                     </div>`;
             } else {
-                // 🌟 กรองข้อมูลตามวิชาที่เลือกใน Dropdown
                 let finalFilteredList = filteredAssignsForList;
                 if (window.assignmentSubjectFilter !== 'all') {
                     finalFilteredList = finalFilteredList.filter(a => a.subject_id == window.assignmentSubjectFilter);
@@ -365,6 +372,12 @@ async function loadData() {
                     : `<div style="padding:40px; text-align:center; color:gray; background: white; border-radius: 12px; border: 2px dashed var(--border);">ไม่พบใบงานในตัวกรองนี้ครับ 🎉</div>`;
             }
         }
+    }
+    
+    // 🌟 ดันวิชาไปโชว์ที่หน้าแรก (Mobile) เสมอ ถ้าหน้าแรกกำลังเปิดอยู่
+    const mobSubList = document.getElementById('mobile-dashboard-subjects-list');
+    if (mobSubList && document.getElementById('page-dashboard').classList.contains('active')) {
+        mobSubList.innerHTML = subjectsHTML;
     }
 }
 
@@ -992,20 +1005,47 @@ function updateUI() {
     const navItems = document.querySelectorAll('.nav-item');
     const navSubmissions = navItems.length > 3 ? navItems[3] : null;
 
+    const mobileActions = document.getElementById('mobile-top-right-actions');
+
     if (currentUser) {
-        badge.textContent = `${currentUser.full_name} (${currentUser.role === 'teacher' ? 'ครู' : 'นักเรียน'})`;
-        area.innerHTML = `<button class="btn btn-outline" style="width:100%; color:white;" onclick="logout()">🚪 ออกจากระบบ</button>`;
-        document.getElementById('add-sub-btn').style.display = currentUser.role === 'teacher' ? 'block' : 'none';
-        if (navSubmissions) navSubmissions.style.display = currentUser.role === 'teacher' ? 'flex' : 'none';
+        // --- 1. จัดการเมนูด้านซ้าย (จอคอม) ---
+        if(badge) badge.innerHTML = `${currentUser.full_name} (${currentUser.role === 'teacher' ? 'ครู' : 'นักเรียน'}) <button onclick="openEditProfile()" style="background:none; border:none; cursor:pointer; font-size:14px; margin-left:5px;">✏️</button>`;
+        if(area) area.innerHTML = `<button class="btn btn-outline" style="width:100%; color:white;" onclick="logout()">🚪 ออกจากระบบ</button>`;
+        if(document.getElementById('add-sub-btn')) document.getElementById('add-sub-btn').style.display = currentUser.role === 'teacher' ? 'block' : 'none';
+        if(navSubmissions) navSubmissions.style.display = currentUser.role === 'teacher' ? 'flex' : 'none';
+        
+        // --- 2. 📱 จัดการแถบด้านบน (จอมือถือ) ---
+        if (mobileActions) {
+            // 🌟 แก้ไข: นำพื้นหลังออก ให้เหลือแต่ตัวหนังสือสีขาวสะอาดตา
+            let roleText = currentUser.role === 'teacher' ? '👨‍🏫 ครู' : `🎓 ชั้น ${currentUser.class_level || '-'} | เลขที่ ${currentUser.student_no || '-'}`;
+            mobileActions.innerHTML = `
+                <div style="line-height: 1.2; text-align: right;">
+                    <span style="color:white; opacity:0.95; font-weight:bold; font-size:12px;">${roleText}</span><br>
+                    <div style="margin-top: 3px; display: flex; align-items: center; justify-content: flex-end; gap: 5px;">
+                        <span style="color:white; font-size:14px; font-weight:bold;">${currentUser.full_name}</span>
+                        <button onclick="openEditProfile()" style="background:var(--accent); color: var(--primary-dark); border:none; border-radius:50%; width:20px; height:20px; font-size:10px; cursor:pointer; box-shadow:0 2px 5px rgba(0,0,0,0.2);" title="แก้ไขข้อมูล">✏️</button>
+                    </div>
+                </div>
+                <button class="btn btn-sm" style="background:rgba(255,0,0,0.8); border:none; color:white; padding:6px 10px; border-radius:8px; font-size:14px; margin-left:8px; box-shadow:0 2px 5px rgba(0,0,0,0.2);" onclick="logout()" title="ออกจากระบบ">🚪</button>
+            `;
+        }
     } else {
-        badge.textContent = '👤 ผู้เข้าชมทั่วไป';
-        // ⭐ เพิ่มปุ่มสมัครสมาชิกต่อจากเข้าสู่ระบบ
-        area.innerHTML = `
-            <button class="btn btn-accent" style="width:100%; margin-bottom:12px; box-shadow: 0 4px 15px rgba(240,165,0,0.3);" onclick="openAuth(); toggleAuth(false);">🔑 เข้าสู่ระบบ</button>
-            <button class="btn btn-outline" style="width:100%; border: 2px solid rgba(255,255,255,0.6); color: white;" onclick="openAuth(); toggleAuth(true);">📝 สมัครสมาชิกนักเรียน</button>
+        // --- 1. จัดการเมนูด้านซ้าย (จอคอม) ---
+        if(badge) badge.innerHTML = `👤 ผู้เข้าชมทั่วไป`;
+        if(area) area.innerHTML = `
+            <button class="btn btn-accent" style="width:100%; margin-bottom:12px;" onclick="openAuth(); toggleAuth(false);">🔑 เข้าสู่ระบบ</button>
+            <button class="btn btn-outline" style="width:100%; color:white;" onclick="openAuth(); toggleAuth(true);">📝 สมัครสมาชิก</button>
         `;
-        document.getElementById('add-sub-btn').style.display = 'none';
+        if(document.getElementById('add-sub-btn')) document.getElementById('add-sub-btn').style.display = 'none';
         if (navSubmissions) navSubmissions.style.display = 'none';
+        
+        // --- 2. 📱 จัดการแถบด้านบน (จอมือถือ) ---
+        if (mobileActions) {
+            mobileActions.innerHTML = `
+                <button class="btn btn-sm" style="background:rgba(255,255,255,0.2); border:1px solid rgba(255,255,255,0.5); color:white; padding:6px 10px; border-radius:8px; font-size:11px;" onclick="openAuth(); toggleAuth(true);">📝 สมัคร</button>
+                <button class="btn btn-sm btn-accent" style="padding:6px 10px; border-radius:8px; font-size:11px; font-weight:bold;" onclick="openAuth(); toggleAuth(false);">🔑 เข้าระบบ</button>
+            `;
+        }
     }
 }
 
@@ -1707,3 +1747,96 @@ function updateDarkModeUI(isDark) {
         window.addEventListener('DOMContentLoaded', () => updateDarkModeUI(true));
     }
 })();
+
+// ==========================================
+// ✏️ ระบบแก้ไขข้อมูลส่วนตัว (Profile Manager)
+// ==========================================
+function openEditProfile() {
+    if (!currentUser) return;
+    document.getElementById('edit-name').value = currentUser.full_name || '';
+    
+    if(currentUser.role === 'student') {
+        document.getElementById('edit-class').value = currentUser.class_level || '';
+        document.getElementById('edit-no').value = currentUser.student_no || '';
+        document.getElementById('edit-class-group').style.display = 'block';
+        document.getElementById('edit-no-group').style.display = 'block';
+    } else {
+        document.getElementById('edit-class-group').style.display = 'none';
+        document.getElementById('edit-no-group').style.display = 'none';
+    }
+    document.getElementById('edit-password').value = '';
+    openModal('modal-edit-profile');
+}
+
+async function saveProfile() {
+    if (!currentUser) return;
+    const btn = document.getElementById('btn-save-profile');
+    btn.disabled = true; btn.textContent = '⏳ กำลังบันทึก...';
+    
+    const newName = document.getElementById('edit-name').value.trim();
+    const newClass = document.getElementById('edit-class').value;
+    const newNo = document.getElementById('edit-no').value;
+    const newPass = document.getElementById('edit-password').value;
+    
+    if(!newName) { btn.disabled = false; btn.textContent = '💾 บันทึกข้อมูล'; return showToast('❌ ชื่อห้ามว่างครับ'); }
+
+    let updateData = { full_name: newName };
+    if (currentUser.role === 'student') {
+        updateData.class_level = newClass;
+        updateData.student_no = newNo;
+    }
+    if (newPass.trim() !== '') {
+        updateData.password = newPass; // ถ้าระบุรหัสผ่านใหม่ ให้แก้ด้วย
+    }
+    
+    const { data, error } = await sb.from('profiles').update(updateData).eq('id', currentUser.id).select().single();
+    
+    btn.disabled = false; btn.textContent = '💾 บันทึกข้อมูล';
+    
+    if (error) {
+        showToast('❌ แก้ไขไม่สำเร็จ: ' + error.message);
+    } else {
+        currentUser = data; // อัปเดตข้อมูลในระบบให้เป็นค่าใหม่
+        localStorage.setItem('payub_user', JSON.stringify(data));
+        updateUI(); // รีเฟรชป้ายชื่อ
+        closeModal('modal-edit-profile');
+        showToast('✅ อัปเดตข้อมูลส่วนตัวเรียบร้อย!');
+    }
+}
+
+// ควบคุมปุ่มลอยกลับหน้าแรก
+function updateMobileHomeBtn(page) {
+    const homeBtn = document.getElementById('mobile-home-fab');
+    if(homeBtn) {
+        if(window.innerWidth <= 992 && page !== 'dashboard') {
+            homeBtn.style.display = 'flex';
+        } else {
+            homeBtn.style.display = 'none';
+        }
+    }
+}
+
+// แอบเรียกใช้ฟังก์ชันนี้ ทุกครั้งที่เปลี่ยนหน้า
+const originalNavigate = navigate;
+navigate = function(page, el, isShortcut) {
+    originalNavigate(page, el, isShortcut);
+    updateMobileHomeBtn(page);
+};
+
+const originalViewSubject = viewSubject;
+viewSubject = function(subjectId, subjectName) {
+    originalViewSubject(subjectId, subjectName);
+    updateMobileHomeBtn('assignments');
+};
+
+const originalGoBackToSubjects = goBackToSubjects;
+goBackToSubjects = function() {
+    originalGoBackToSubjects();
+    updateMobileHomeBtn('subjects');
+};
+
+// ตรวจสอบเมื่อย่อ/ขยายจอ
+window.addEventListener('resize', () => {
+    const activePageId = document.querySelector('.page.active')?.id.replace('page-', '') || 'dashboard';
+    updateMobileHomeBtn(activePageId);
+});
