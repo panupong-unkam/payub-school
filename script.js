@@ -8,6 +8,28 @@ const GAS_URL = 'https://script.google.com/macros/s/AKfycbzhnOxzTEsnL2B5P4hvVUXT
 
 let currentUser = null;
 let currentSubjectFilter = null;
+// ตัวแปรควบคุมโหมดแก้ไข (เริ่มต้นให้ปิดไว้เพื่อความปลอดภัย)
+let isSubjectEditMode = false;
+
+// ฟังก์ชันเปิด/ปิดโหมดแก้ไข
+function toggleSubjectEditMode() {
+    isSubjectEditMode = !isSubjectEditMode;
+    const btn = document.getElementById('toggle-edit-btn');
+    if (isSubjectEditMode) {
+        btn.innerHTML = '❌ ปิดโหมดแก้ไข';
+        btn.style.borderColor = 'var(--danger)';
+        btn.style.color = 'var(--danger)';
+        btn.style.background = '#ffebee';
+        showToast('🔓 เปิดโหมดแก้ไข: ลากสลับตำแหน่ง หรือแก้ไข/ลบวิชาได้');
+    } else {
+        btn.innerHTML = '✏️ เปิดโหมดแก้ไข';
+        btn.style.borderColor = 'var(--accent)';
+        btn.style.color = 'var(--accent)';
+        btn.style.background = 'transparent';
+        showToast('🔒 ปิดโหมดแก้ไข: ล็อคปุ่มป้องกันการกดผิดเรียบร้อย');
+    }
+    loadData(); // รีเฟรชหน้าเพื่อโชว์/ซ่อนปุ่มตามโหมด
+}
 
 // --- ตัวแปรควบคุมการตรวจงานและฟิลเตอร์ ---
 let currentGradingStep = 'subjects'; 
@@ -190,7 +212,8 @@ async function loadData() {
     // 🌟 แก้ไขจุดที่ 3: สร้าง HTML ของวิชาเตรียมไว้เลย เพื่อให้ใช้ได้ทั้งสองหน้าพร้อมกัน!
     const subjectsHTML = displaySubs.length ? displaySubs.map(s => {
         let icon = s.icon || (s.name.includes('คำนวณ') ? '🧠' : (s.name.includes('หุ่นยนต์') ? '🤖' : '💻'));
-        const controls = currentUser?.role === 'teacher' ? `
+        // 🌟 เช็คว่าต้องเป็นครู และ "ต้องเปิดโหมดแก้ไขอยู่" ถึงจะเห็นปุ่ม
+        const controls = (currentUser?.role === 'teacher' && isSubjectEditMode) ? `
             <div style="position:absolute; top:15px; right:15px; display:flex; gap:8px; z-index:10;">
                 <button onclick="event.stopPropagation(); openEditSubject(${s.id}, '${s.name}', '${icon}')" style="background:var(--primary); color:white; border:none; border-radius:50%; width:35px; height:35px; cursor:pointer; font-size:14px; box-shadow:0 2px 5px rgba(0,0,0,0.2); transition:0.3s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">✏️</button>
                 <button onclick="event.stopPropagation(); deleteSubject(${s.id}, '${s.name}')" style="background:var(--danger); color:white; border:none; border-radius:50%; width:35px; height:35px; cursor:pointer; font-size:14px; box-shadow:0 2px 5px rgba(0,0,0,0.2); transition:0.3s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">🗑️</button>
@@ -201,6 +224,10 @@ async function loadData() {
 
     // 🌟 ดันวิชาไปหน้าบทเรียน (ถ้าเมนูบทเรียนถูกเปิดอยู่)
     if (isOnlineLessonsMenu && !currentSubjectFilter) {
+        // 🌟 แก้ไข: สั่งให้โชว์กล่องปุ่มเพิ่ม/แก้ไขวิชา เฉพาะในหน้ารวม
+        const subjectHeaderFlex = document.querySelector('#page-subjects .header-flex');
+        if (subjectHeaderFlex) subjectHeaderFlex.style.display = 'flex'; 
+
         const subjectHeader = document.querySelector('#page-subjects h2');
         if (subjectHeader) {
             subjectHeader.style.display = 'block';
@@ -209,7 +236,8 @@ async function loadData() {
         if (subjectsContainer) {
             subjectsContainer.innerHTML = subjectsHTML;
 
-            if (currentUser?.role === 'teacher' && displaySubs.length > 0) {
+            // 🌟 เช็คว่าต้องเป็นครู และ "ต้องเปิดโหมดแก้ไขอยู่" ถึงจะลากสลับตำแหน่งได้
+            if (currentUser?.role === 'teacher' && displaySubs.length > 0 && isSubjectEditMode) {
                 new Sortable(subjectsContainer, {
                     animation: 200,
                     ghostClass: 'sortable-ghost',
@@ -225,11 +253,16 @@ async function loadData() {
             }
         }
     } 
+
     // 🌟 ส่วนโชว์เนื้อหาบทเรียนย่อย (คืนชีพเลย์เอาต์แบบรูปที่ 2 อย่างสมบูรณ์!)
     else if (isOnlineLessonsMenu && currentSubjectFilter) {
+        // 🌟 แก้ไข: สั่งให้ซ่อนกล่องปุ่มเพิ่ม/แก้ไขวิชาทั้งหมด เมื่อเข้ามาในหน้าย่อย
+        const subjectHeaderFlex = document.querySelector('#page-subjects .header-flex');
+        if (subjectHeaderFlex) subjectHeaderFlex.style.display = 'none'; 
+        
         const subjectHeader = document.querySelector('#page-subjects h2');
         if (subjectHeader) {
-            subjectHeader.style.display = 'none'; // ซ่อนหัวข้อเดิมไปก่อน เราจะสร้างใหม่ให้มีปุ่มย้อนกลับที่สวยงาม
+            subjectHeader.style.display = 'none'; // ซ่อนหัวข้อเดิมไปก่อน 
         }
         
         if (subjectsContainer) {
@@ -1061,6 +1094,7 @@ function updateUI() {
         if(badge) badge.innerHTML = `${currentUser.full_name} (${currentUser.role === 'teacher' ? 'ครู' : 'นักเรียน'}) <button onclick="openEditProfile()" style="background:none; border:none; cursor:pointer; font-size:14px; margin-left:5px;">✏️</button>`;
         if(area) area.innerHTML = `<button class="btn btn-outline" style="width:100%; color:white;" onclick="logout()">🚪 ออกจากระบบ</button>`;
         if(document.getElementById('add-sub-btn')) document.getElementById('add-sub-btn').style.display = currentUser.role === 'teacher' ? 'block' : 'none';
+        if(document.getElementById('toggle-edit-btn')) document.getElementById('toggle-edit-btn').style.display = currentUser.role === 'teacher' ? 'block' : 'none';
         if(navSubmissions) navSubmissions.style.display = currentUser.role === 'teacher' ? 'flex' : 'none';
         
         // --- 2. 📱 จัดการแถบด้านบน (จอมือถือ) ---
@@ -1878,9 +1912,20 @@ function updateMobileHomeBtn(page) {
     }
 }
 
-// แอบเรียกใช้ฟังก์ชันนี้ ทุกครั้งที่เปลี่ยนหน้า
+// แอบเรียกใช้ฟังก์ชันนี้ ทุกครั้งที่เปลี่ยนหน้า (รวมโค้ดเซฟตี้ไว้ที่นี่จุดเดียว)
 const originalNavigate = navigate;
 navigate = function(page, el, isShortcut) {
+    // 🌟 ระบบเซฟตี้: ถ้าเปลี่ยนหน้า ให้ปิดโหมดแก้ไขกลับเป็นสถานะล็อคเสมอ
+    if (page !== 'subjects') {
+        isSubjectEditMode = false;
+        const btn = document.getElementById('toggle-edit-btn');
+        if (btn) {
+            btn.innerHTML = '✏️ เปิดโหมดแก้ไข';
+            btn.style.borderColor = 'var(--accent)';
+            btn.style.color = 'var(--accent)';
+            btn.style.background = 'transparent';
+        }
+    }
     originalNavigate(page, el, isShortcut);
     updateMobileHomeBtn(page);
 };
