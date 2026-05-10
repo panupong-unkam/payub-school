@@ -38,10 +38,6 @@ let gradingAssignId = null;
 if (typeof window.studentFilterStatus === 'undefined') {
     window.studentFilterStatus = 'all';
 }
-// --- ตัวแปรควบคุมการตรวจงานและฟิลเตอร์ ---
-if (typeof window.studentFilterStatus === 'undefined') {
-    window.studentFilterStatus = 'all';
-}
 // 🌟 เพิ่มบรรทัดนี้: สำหรับจำวิชาที่เลือกในหน้าใบงาน
 if (typeof window.assignmentSubjectFilter === 'undefined') {
     window.assignmentSubjectFilter = 'all';
@@ -86,9 +82,6 @@ function navigate(page, el, isShortcut = false) {
         loadReports();
     }
 
-    if (page === 'reports') {
-        loadReports();
-    }
     // 🌟 เพิ่มการนำทางไปหน้าระบบชุมนุม
     if (page === 'clubs') {
         loadClubs();
