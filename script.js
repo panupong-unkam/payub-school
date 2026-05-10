@@ -1335,15 +1335,16 @@ async function renderTeacherReportSelection(targetId = 'report-content-area') {
 }
 
 // 🌟 ฟังก์ชันอัจฉริยะ: กรองห้องเรียนอัตโนมัติในหน้า ปพ.5
-function updateReportClassOptions() {
-    const subSelect = document.getElementById('rpt-sub-id');
-    const classSelect = document.getElementById('rpt-class');
+function updateReportClassOptions(targetId = 'report-content-area') {
+    // 🌟 ดึงข้อมูลจาก ID ที่ถูกต้องตามหน้าจอที่ใช้งานอยู่
+    const subSelect = document.getElementById(`rpt-sub-id-${targetId}`);
+    const classSelect = document.getElementById(`rpt-class-${targetId}`);
     if (!subSelect || !classSelect) return;
 
     const selectedText = subSelect.options[subSelect.selectedIndex]?.text || "";
     let rooms = [];
     
-    // ตรรกะอ่านชื่อวิชาเพื่อกรองห้อง (ต้องเช็คตัวที่เจาะจงที่สุดก่อน เช่น ม.3/2)
+    // ตรรกะอ่านชื่อวิชาเพื่อกรองห้อง
     if (selectedText.includes("ม.3/2")) rooms = ["ม.3/2"];
     else if (selectedText.includes("ม.1")) rooms = ["ม.1/1", "ม.1/2"];
     else if (selectedText.includes("ม.2")) rooms = ["ม.2/1", "ม.2/2"];
@@ -1358,16 +1359,21 @@ function updateReportClassOptions() {
 }
 
 // --- [ครู] สร้างตารางหมากรุก (Matrix Table) ---
-async function generateTeacherMatrix() {
-    const subId = document.getElementById('rpt-sub-id').value;
-    const className = document.getElementById('rpt-class').value;
-    const output = document.getElementById('matrix-output');
+async function generateTeacherMatrix(targetId = 'report-content-area') {
+    // 🌟 ดึงข้อมูลจาก ID ที่ถูกต้องตามหน้าจอที่ใช้งานอยู่
+    const subIdEl = document.getElementById(`rpt-sub-id-${targetId}`);
+    const classEl = document.getElementById(`rpt-class-${targetId}`);
+    const output = document.getElementById(`matrix-output-${targetId}`);
+    
+    if(!subIdEl || !classEl || !output) return;
+
+    const subId = subIdEl.value;
+    const className = classEl.value;
     
     if(!subId) return output.innerHTML = '❌ กรุณาสร้างและเลือกวิชาก่อนครับ';
     output.innerHTML = '⏳ กำลังคำนวณคะแนน...';
 
     try {
-        // 🌟 แก้ไขจุดที่บั๊ก: เปลี่ยนการเรียงจาก created_at เป็น id
         const { data: assigns, error: err1 } = await sb.from('assignments').select('*').eq('subject_id', subId).order('id', {ascending: true});
         if (err1) throw err1;
         if (!assigns || assigns.length === 0) { output.innerHTML = '<div class="card" style="text-align:center; color:gray;">❌ ยังไม่มีใบงานในวิชานี้</div>'; return; }
