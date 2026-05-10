@@ -467,10 +467,12 @@ input:focus, select:focus, textarea:focus {
         border-radius: 20px; 
     }
     
-    /* จัดการปุ่มโฮมซ้ายล่าง (อันนี้เป็นโค้ดเดิมของคุณครู ปล่อยไว้ครับ) */
+   /* จัดการปุ่มโฮม (ย้ายมาขวาขวา เหนือปุ่มสลับโหมด) */
     #mobile-home-fab {
-        left: 20px;
-        right: auto;
+        right: 30px;     /* 🌟 ให้ชิดขวาตรงกับปุ่มสลับโหมด */
+        bottom: 100px;   /* 🌟 ดันขึ้นไปอยู่เหนือปุ่มสลับโหมด (ปุ่มสลับโหมดอยู่สูง 30px + ขนาดปุ่ม 55px + ช่องว่าง) */
+        left: auto;      /* 🌟 ยกเลิกการชิดซ้ายเดิม */
+        
         background: linear-gradient(135deg, var(--primary), var(--primary-light));
         color: white;
         border-color: var(--primary-light);
