@@ -307,13 +307,6 @@ body.dark-mode .form-group textarea {
     border-color: var(--border) !important;
 }
 
-body.dark-mode .form-group input,
-body.dark-mode .form-group select,
-body.dark-mode .form-group textarea {
-    background-color: #121814;
-    color: var(--text);
-    border-color: var(--border);
-}
 
 /* ==========================================
    🌟 HIGH CONTRAST FIX (ปรับตัวอักษรบนพื้นเหลืองให้อ่านง่าย)
