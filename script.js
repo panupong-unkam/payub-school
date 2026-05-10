@@ -378,6 +378,7 @@ async function loadData() {
     const mobSubList = document.getElementById('mobile-dashboard-subjects-list');
     if (mobSubList && document.getElementById('page-dashboard').classList.contains('active')) {
         mobSubList.innerHTML = subjectsHTML;
+        renderMobileDashboardReport();
     }
 }
 
@@ -999,6 +1000,54 @@ async function register() {
 
 function logout() { currentUser = null; localStorage.removeItem('payub_user'); updateUI(); navigate('dashboard', document.querySelectorAll('.nav-item')[0]); }
 
+// เพิ่มฟังก์ชันนี้ใน script.js เพื่อดึงคะแนนมาโชว์หน้าแรกมือถือ
+async function updateMobileGradeSummary() {
+    const guestView = document.getElementById('grade-guest-view');
+    const userView = document.getElementById('grade-user-view');
+    const itemsList = document.getElementById('mobile-grade-items-list');
+    const totalText = document.getElementById('mobile-total-score-text');
+
+    if (!currentUser) {
+        if(guestView) guestView.style.display = 'block';
+        if(userView) userView.style.display = 'none';
+        return;
+    }
+
+    if(guestView) guestView.style.display = 'none';
+    if(userView) userView.style.display = 'block';
+
+    // ดึงข้อมูลคะแนน (จำลองการดึงจาก Database)
+    // คุณครูสามารถใช้ตัวแปร submissions ที่มีอยู่แล้วมา filter ได้เลย
+    const { data: myScores, error } = await sb
+        .from('submissions')
+        .select('score, assignments(title, total_score)')
+        .eq('student_id', currentUser.id)
+        .not('score', 'is', null);
+
+    if (myScores && myScores.length > 0) {
+        let totalReceived = 0;
+        let totalPossible = 0;
+        
+        itemsList.innerHTML = myScores.map(s => {
+            totalReceived += s.score;
+            totalPossible += s.assignments.total_score;
+            return `
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span style="color: var(--text-muted); text-overflow: ellipsis; white-space: nowrap; overflow: hidden; max-width: 180px;">• ${s.assignments.title}</span>
+                    <span style="font-weight: bold;">${s.score}/${s.assignments.total_score}</span>
+                </div>
+            `;
+        }).join('');
+        
+        totalText.textContent = `${totalReceived} / ${totalPossible}`;
+    } else {
+        itemsList.innerHTML = '<p style="text-align:center; color:gray; font-size:13px;">ยังไม่มีข้อมูลคะแนนที่ตรวจแล้ว</p>';
+    }
+}
+
+// และอย่าลืมเรียกฟังก์ชันนี้ตอน updateUI()
+// updateMobileGradeSummary();loadReports
+
 function updateUI() {
     const area = document.getElementById('auth-btn-area'); 
     const badge = document.getElementById('user-badge');
@@ -1209,50 +1258,46 @@ window.onload = () => {
 
 async function loadReports(searchName = null) {
     const area = document.getElementById('report-content-area');
-    area.innerHTML = '<div style="text-align:center; padding:40px;">⏳ กำลังเตรียมหน้าต่างรายงาน...</div>';
+    if(area) area.innerHTML = '<div style="text-align:center; padding:40px;">⏳ กำลังเตรียมหน้าต่างรายงาน...</div>';
 
     if (currentUser && currentUser.role === 'teacher') {
-        renderTeacherReportSelection();
+        renderTeacherReportSelection('report-content-area'); // ส่ง ID ไปว่าให้โชว์ที่ไหน
     } else if (currentUser && currentUser.role === 'student') {
-        renderStudentIndividualReport(currentUser.id, currentUser.full_name);
+        renderStudentIndividualReport(currentUser.id, currentUser.full_name, 'report-content-area');
     } else {
         if (searchName) handleGuestSearch(searchName); 
-        else renderGuestSearchUI();
+        else renderGuestSearchUI('report-content-area');
     }
 }
 
 // --- [ครู] หน้าเลือกวิชาและห้อง ---
-// --- [ครู] หน้าเลือกวิชาและห้อง ---
-async function renderTeacherReportSelection() {
-    const area = document.getElementById('report-content-area');
+async function renderTeacherReportSelection(targetId = 'report-content-area') {
+    const area = document.getElementById(targetId);
+    if(!area) return;
     try {
-        // อัปเดตให้เรียงวิชาตามที่ลากวางไว้
         const { data: subjects, error } = await sb.from('subjects').select('*').eq('teacher_id', currentUser.id).order('sort_order', { ascending: true });
-        if (error) throw error;
+        
+        // ปรับสไตล์ให้เล็กลงถ้าอยู่หน้าแรกมือถือ
+        const isMobileInbox = targetId.includes('mobile');
+        const padding = isMobileInbox ? '15px' : '25px';
 
         area.innerHTML = `
-            <div class="card" style="padding:25px; border-top: 5px solid var(--primary);">
-                <h4>📂 เลือกรายงานที่ต้องการสรุป</h4>
-                <div style="display:flex; gap:10px; margin-top:15px; flex-wrap:wrap;">
-                    <select id="rpt-sub-id" style="flex:1; min-width:200px; padding:12px; border-radius:10px; border:1px solid var(--border);" onchange="updateReportClassOptions()">
+            <div class="card" style="padding:${padding}; border-top: 5px solid var(--primary); margin-bottom:15px;">
+                <h4 style="font-size:16px;">📂 สรุปผลการเรียน (ครู)</h4>
+                <div style="display:flex; gap:10px; margin-top:15px; flex-direction: column;">
+                    <select id="rpt-sub-id-${targetId}" style="width:100%; padding:12px; border-radius:10px; border:1px solid var(--border);" onchange="updateReportClassOptions('${targetId}')">
                         ${subjects && subjects.length ? subjects.map(s => `<option value="${s.id}">${s.name}</option>`).join('') : '<option disabled>ไม่มีวิชา</option>'}
                     </select>
-                    <select id="rpt-class" style="width:120px; padding:12px; border-radius:10px; border:1px solid var(--border);">
-                        </select>
-                    <button class="btn btn-primary" onclick="generateTeacherMatrix()">📊 ดูตารางคะแนน</button>
+                    <div style="display:flex; gap:8px;">
+                        <select id="rpt-class-${targetId}" style="flex:1; padding:12px; border-radius:10px; border:1px solid var(--border);"></select>
+                        <button class="btn btn-primary" style="padding:10px;" onclick="generateTeacherMatrix('${targetId}')">📊 ดูคะแนน</button>
+                    </div>
                 </div>
             </div>
-            <div id="matrix-output" style="margin-top:20px; overflow-x:auto;"></div>
+            <div id="matrix-output-${targetId}" style="overflow-x:auto;"></div>
         `;
-
-        // ให้ระบบคำนวณห้องเรียนทันทีเมื่อโหลดหน้าต่างเสร็จ
-        setTimeout(() => {
-            updateReportClassOptions();
-        }, 50);
-
-    } catch (err) {
-        area.innerHTML = `<div class="card" style="text-align:center; color:red;">❌ ระบบขัดข้อง: ${err.message}</div>`;
-    }
+        setTimeout(() => updateReportClassOptions(targetId), 50);
+    } catch (err) { area.innerHTML = `❌ ขัดข้อง: ${err.message}`; }
 }
 
 // 🌟 ฟังก์ชันอัจฉริยะ: กรองห้องเรียนอัตโนมัติในหน้า ปพ.5
@@ -1349,35 +1394,52 @@ async function generateTeacherMatrix() {
 }
 
 // --- [ผู้ปกครอง] หน้าค้นหาชื่อ ---
-function renderGuestSearchUI() {
-    const area = document.getElementById('report-content-area');
+function renderGuestSearchUI(targetId = 'report-content-area') {
+    const area = document.getElementById(targetId);
+    if(!area) return;
+    const isMobileInbox = targetId.includes('mobile');
+    
     area.innerHTML = `
-        <div class="card" style="text-align:center; padding:50px 30px; border-top:5px solid var(--accent);">
-            <div style="font-size:50px; margin-bottom:20px;">🔍</div>
-            <h3>ตรวจสอบผลการเรียนรายบุคคล</h3>
-            <p style="color:gray; margin-bottom:30px;">กรุณาพิมพ์ ชื่อ และ นามสกุล (เว้นวรรค 1 ครั้ง)</p>
-            <div style="max-width:400px; margin: 0 auto; display:flex; gap:10px;">
-                <input type="text" id="guest-search-name" placeholder="ตัวอย่าง: สมชาย ใจดี" style="flex:1; padding:15px; border:2px solid var(--border); border-radius:12px; outline:none; font-family:'Sarabun';" onkeypress="if(event.key==='Enter') searchStudentReport()">
-                <button class="btn btn-primary" onclick="searchStudentReport()">ค้นหา</button>
+        <div class="card" style="text-align:center; padding:${isMobileInbox ? '30px 15px' : '50px 30px'}; border-top:5px solid var(--accent);">
+            <div style="font-size:40px; margin-bottom:15px;">🔍</div>
+            <h4 style="margin-bottom:10px;">ค้นหาผลการเรียน</h4>
+            <p style="color:gray; font-size:13px; margin-bottom:20px;">พิมพ์ ชื่อ-นามสกุล (เว้นวรรค 1 ครั้ง)</p>
+            <div style="display:flex; gap:8px; flex-direction:${isMobileInbox ? 'column' : 'row'};">
+                <input type="text" id="guest-search-name-${targetId}" placeholder="เช่น สมชาย ใจดี" style="flex:1; padding:12px; border:2px solid var(--border); border-radius:10px; outline:none;" onkeypress="if(event.key==='Enter') searchStudentReport('${targetId}')">
+                <button class="btn btn-primary" onclick="searchStudentReport('${targetId}')">ค้นหา</button>
             </div>
+            <div id="guest-report-output-${targetId}" style="margin-top:20px;"></div>
         </div>
-        <div id="guest-report-output" style="margin-top:20px;"></div>
     `;
 }
 
-async function searchStudentReport() {
-    const fullName = document.getElementById('guest-search-name').value.trim();
-    const output = document.getElementById('guest-report-output');
+// --- [ผู้ปกครอง] อัปเกรดระบบค้นหาให้รองรับทั้งหน้าคอมและหน้าแรกมือถือ ---
+async function searchStudentReport(targetId = 'report-content-area') {
+    // 🌟 ระบบจะฉลาดขึ้น: รู้ได้เองว่ากำลังถูกกดค้นหาจากหน้าคอม หรือ หน้ามือถือ
+    let inputEl = document.getElementById(`guest-search-name-${targetId}`) || document.getElementById('guest-search-name');
+    let outputEl = document.getElementById(`guest-report-output-${targetId}`) || document.getElementById('guest-report-output');
+
+    if (!inputEl || !outputEl) return;
+
+    const fullName = inputEl.value.trim();
+
     if (!fullName || !fullName.includes(' ')) return showToast('❌ กรุณาใส่ชื่อและนามสกุลให้ถูกต้อง (เว้นวรรค 1 ครั้ง)');
     
-    output.innerHTML = '⏳ กำลังค้นหาข้อมูล...';
+    outputEl.innerHTML = '<div style="text-align:center; padding:20px; color:var(--primary);">⏳ กำลังค้นหาข้อมูล...</div>';
+    
     try {
         const { data: student, error } = await sb.from('profiles').select('*').eq('full_name', fullName).eq('role', 'student').single();
-        if (error || !student) { output.innerHTML = '<div class="card" style="text-align:center; color:red;">❌ ไม่พบข้อมูลนักเรียน กรุณาตรวจสอบการสะกดชื่อ-สกุล</div>'; return; }
         
-        renderStudentIndividualReport(student.id, student.full_name, 'guest-report-output');
+        if (error || !student) { 
+            outputEl.innerHTML = '<div class="card" style="text-align:center; color:red;">❌ ไม่พบข้อมูลนักเรียน กรุณาตรวจสอบการสะกดชื่อ-สกุล</div>'; 
+            return; 
+        }
+        
+        // 🌟 ส่งผลลัพธ์ตารางคะแนน ไปโชว์ให้ถูกกล่อง (แยกมือถือ / คอมพิวเตอร์)
+        renderStudentIndividualReport(student.id, student.full_name, outputEl.id);
+        
     } catch (err) {
-        output.innerHTML = `<div class="card" style="text-align:center; color:red;">❌ ขัดข้อง: ${err.message}</div>`;
+        outputEl.innerHTML = `<div class="card" style="text-align:center; color:red;">❌ ขัดข้อง: ${err.message}</div>`;
     }
 }
 
@@ -1840,3 +1902,21 @@ window.addEventListener('resize', () => {
     const activePageId = document.querySelector('.page.active')?.id.replace('page-', '') || 'dashboard';
     updateMobileHomeBtn(activePageId);
 });
+
+// 🌟 ฟังก์ชันหัวใจหลัก: สั่ง Render รายงานลงหน้าแรกมือถือตามสิทธิ์
+async function renderMobileDashboardReport() {
+    const mobileArea = document.getElementById('mobile-dashboard-report-area');
+    if (!mobileArea || window.innerWidth > 992) return;
+
+    if (currentUser) {
+        if (currentUser.role === 'teacher') {
+            renderTeacherReportSelection('mobile-dashboard-report-area');
+        } else {
+            // ถ้านักเรียนล็อกอิน ให้โชว์ตารางคะแนนตัวเองทันที!
+            renderStudentIndividualReport(currentUser.id, currentUser.full_name, 'mobile-dashboard-report-area');
+        }
+    } else {
+        // ถ้าเป็น Guest ให้โชว์ช่องค้นหา
+        renderGuestSearchUI('mobile-dashboard-report-area');
+    }
+}
