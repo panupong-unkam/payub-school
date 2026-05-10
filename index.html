@@ -61,13 +61,15 @@
   </div>
   <div class="page active" id="page-dashboard">
     <div class="hero-banner">
+      <img src="Krulogo.svg" alt="Kru Logo" class="kru-floating-logo">
+
       <div style="position: relative; z-index: 2;">
-        <h1 style="font-family: 'Noto Serif Thai', serif; font-size: clamp(28px, 6vw, 42px); margin-bottom: 15px; text-shadow: 0 2px 10px rgba(0,0,0,0.2);">
+        <h1 style="font-family: 'Noto Serif Thai', serif; font-size: clamp(24px, 6vw, 42px); margin-bottom: 15px; text-shadow: 0 2px 10px rgba(0,0,0,0.2);">
             ยินดีต้อนรับสู่แหล่งเรียนรู้อนาคต
         </h1>
         <h3 style="font-weight: 400; opacity: 0.95; font-size: 18px; max-width: 600px; line-height: 1.6;">
             โรงเรียนบ้านป่ายุบ (บุ้นกีประชานุเคราะห์) <br>
-            พื้นที่แห่งการแบ่งปันความรู้ด้านวิทยาการคำนวณและเทคโนโลยีหุ่นยนต์
+            พื้นที่แห่งการแบ่งปันความรู้ด้านเทคโนและเทคโนโลยีหุ่นยนต์
         </h3>
         <div style="margin-top: 30px; display: flex; gap: 15px;">
             <button class="btn btn-accent" onclick="navigate('subjects', document.querySelectorAll('.nav-item')[1])">🚀 เริ่มเรียนรู้ออนไลน์</button>
@@ -76,12 +78,26 @@
       </div>
     </div>
 
-    <div class="mobile-only-section" style="margin-top: 20px; margin-bottom: 20px;">
+
+    
+<div class="mobile-only-section" style="margin-top: 20px; margin-bottom: 20px;">
         <h3 style="color: var(--primary-dark); font-family: 'Noto Serif Thai', serif; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
             <span style="font-size: 24px; animation: bounce 2s infinite;">📚</span> ห้องเรียนของคุณ
         </h3>
-        <div id="mobile-dashboard-subjects-list"></div>
+        <div id="mobile-dashboard-subjects-list" style="margin-bottom: 30px;"></div>
+
+        <h3 style="color: var(--primary-dark); font-family: 'Noto Serif Thai', serif; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 24px;">📊</span> รายงานผลการเรียน
+        </h3>
+        <div id="mobile-dashboard-report-area">
+            </div>
     </div>
+
+
+
+
+
+
 
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-top: 20px;">
       <div class="floating-card">
@@ -92,7 +108,7 @@
       <div class="floating-card">
         <div style="font-size: 40px; margin-bottom: 15px;">📢</div>
         <h4 style="font-size: 20px; color: var(--primary-dark); margin-bottom: 10px;">ข่าวประชาสัมพันธ์</h4>
-        <p style="color: var(--text-muted); line-height: 1.6;">เปิดรับนักเรียนและบุคคลทั่วไปเข้าชมเนื้อหาบทเรียนออนไลน์และดาวน์โหลดสื่อการสอนได้ฟรี ไม่มีค่าใช้จ่าย</p>
+        <p style="color: var(--text-muted); line-height: 1.6;">เปิดรับนักเรียนและบุคคลทั่วไปเข้าชมเนื้อหาบทเรียนออนไลน์</p>
       </div>
     </div>
 
