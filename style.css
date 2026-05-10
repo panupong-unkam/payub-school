@@ -461,7 +461,13 @@ input:focus, select:focus, textarea:focus {
         animation: slideUpFade 0.6s ease forwards;
     }
     
-    /* จัดการปุ่มโฮมซ้ายล่าง */
+    /* 🌟 เพิ่มโค้ดตรงนี้เลยครับ เพื่อลดขอบแบนเนอร์ในมือถือ */
+    .hero-banner {
+        padding: 40px 20px !important; /* ลดขอบซ้าย-ขวา ให้ข้อความมีที่กางออก */
+        border-radius: 20px; 
+    }
+    
+    /* จัดการปุ่มโฮมซ้ายล่าง (อันนี้เป็นโค้ดเดิมของคุณครู ปล่อยไว้ครับ) */
     #mobile-home-fab {
         left: 20px;
         right: auto;
@@ -505,4 +511,42 @@ input:focus, select:focus, textarea:focus {
 @keyframes bounce {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-5px); }
+}
+/* ==========================================
+   👨‍🏫 KRU FLOATING LOGO (Desktop Banner)
+   ========================================== */
+
+.kru-floating-logo {
+    position: absolute;
+    z-index: 10;
+    
+    /* 🌟 จัดตำแหน่ง (คุณครูสามารถแก้ตัวเลขเพื่อขยับรูปได้ตามใจชอบเลยครับ) */
+    right: 50px;      /* ขยับซ้าย-ขวา (ตัวเลขยิ่งเยอะ ยิ่งขยับไปทางซ้าย) */
+    bottom: -15px;    /* ขยับบน-ล่าง (ถ้าอยากให้อยู่ข้างบนให้เปลี่ยนจาก bottom เป็น top) */
+    
+    /* 🌟 ขนาดของรูป */
+    width: 340px;     
+    height: auto;
+    
+    /* 🌟 เอฟเฟกต์เงาและขอบให้รูปเด่นทะลุแบนเนอร์ */
+    filter: drop-shadow(0 15px 25px rgba(0,0,0,0.5)); 
+    background: rgba(255, 255, 255, 0.15); /* พื้นหลังขาวโปร่งแสง */
+    padding: 10px; 
+    border-radius: 50%; /* ทำให้ขอบกลม */
+    border: 3px solid rgba(255, 255, 255, 0.8); /* ขอบสีขาวสว่าง */
+    
+    /* 🌟 แอนิเมชันให้รูปขยับลอยขึ้นลงเบาๆ */
+    animation: kruFloatAnim 4s ease-in-out infinite;
+}
+
+@keyframes kruFloatAnim {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); } /* ลอยขึ้น 15px */
+}
+
+/* 📱 สั่งให้ซ่อนรูปนี้เมื่อเปิดในมือถือ (เพื่อไม่ให้รูปบังตัวหนังสือ) */
+@media (max-width: 992px) {
+    .kru-floating-logo {
+        display: none !important;
+    }
 }
