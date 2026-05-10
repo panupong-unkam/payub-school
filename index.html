@@ -121,7 +121,10 @@
   <div class="page" id="page-subjects">
     <div class="header-flex">
       <h2>📚 รายวิชาทั้งหมด</h2>
-      <button class="btn btn-primary" id="add-sub-btn" style="display:none;" onclick="openAddSubject()">+ เพิ่มวิชา</button>
+      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <button class="btn btn-outline" id="toggle-edit-btn" style="display:none; border-color: var(--accent); color: var(--accent);" onclick="toggleSubjectEditMode()">✏️ เปิดโหมดแก้ไข</button>
+        <button class="btn btn-primary" id="add-sub-btn" style="display:none;" onclick="openAddSubject()">+ เพิ่มวิชา</button>
+      </div>
     </div>
     <div id="subjects-list">กำลังโหลดเนื้อหา...</div>
   </div>
