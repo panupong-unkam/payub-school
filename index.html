@@ -392,16 +392,42 @@
         <div class="grading-right">
             <h3 style="color: var(--primary-dark); margin-bottom: 5px; font-size: 22px;">📝 ตรวจผลงาน</h3>
             <p id="grading-student-info" style="font-weight: bold; font-size: 16px; margin-bottom: 5px; color: var(--primary);"></p>
-            <p id="grading-assign-title" style="color: var(--text-muted); font-size: 14px; margin-bottom: 25px; border-bottom: 1px dashed #eee; padding-bottom: 15px;"></p>
+            <p id="grading-assign-title" style="color: var(--text-muted); font-size: 14px; margin-bottom: 15px; border-bottom: 1px dashed #eee; padding-bottom: 15px;"></p>
+
+            <!-- ✅ เพิ่ม: แสดงคะแนนเต็มของใบงาน -->
+            <div id="grading-max-score-banner" style="background: linear-gradient(135deg, var(--primary-dark), var(--primary)); color: white; border-radius: 14px; padding: 14px 18px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between;">
+                <div>
+                    <div style="font-size: 12px; opacity: 0.8; letter-spacing: 0.5px;">คะแนนเต็มของใบงานนี้</div>
+                    <div style="font-size: 28px; font-weight: 700; margin-top: 2px;"><span id="grading-max-score-display">-</span> <span style="font-size: 16px; opacity: 0.8;">คะแนน</span></div>
+                </div>
+                <div style="font-size: 40px; opacity: 0.3;">🎯</div>
+            </div>
             
             <input type="hidden" id="grading-sub-id">
+            <input type="hidden" id="grading-max-score">
+
             <div class="form-group">
-                <label style="font-size: 14px; font-weight: bold; display: block; margin-bottom: 8px; color: #333;">🎯 คะแนนที่ได้:</label>
-                <input type="text" id="grading-score" placeholder="เช่น 10/10 หรือ ผ่าน" style="width: 100%; padding: 15px; border: 2px solid var(--border); border-radius: 12px; font-size: 16px; font-weight: bold; text-align: center; outline: none; transition: 0.3s;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <label style="font-size: 14px; font-weight: bold; color: #333;">✏️ ให้คะแนน:</label>
+                    <!-- ✅ เพิ่ม: สัดส่วนคะแนนแบบ real-time -->
+                    <span id="grading-score-ratio" style="font-size: 13px; font-weight: bold; color: var(--primary-dark); background: #e8f5e9; padding: 3px 10px; border-radius: 20px;">0 / -</span>
+                </div>
+                <!-- ✅ เปลี่ยน: type="text" → type="number" พร้อม max และ oninput validate -->
+                <input type="number" id="grading-score" min="0" placeholder="กรอกคะแนน..." 
+                    style="width: 100%; padding: 15px; border: 2px solid var(--border); border-radius: 12px; font-size: 22px; font-weight: bold; text-align: center; outline: none; transition: 0.3s;"
+                    onfocus="this.style.borderColor='var(--primary)'" 
+                    onblur="this.style.borderColor='var(--border)'"
+                    oninput="validateScoreInput(this)">
+                <!-- ✅ เพิ่ม: Progress bar คะแนน -->
+                <div style="margin-top: 10px; background: #e0e0e0; border-radius: 20px; height: 8px; overflow: hidden;">
+                    <div id="grading-score-bar" style="height: 100%; width: 0%; border-radius: 20px; background: var(--success); transition: width 0.4s ease, background 0.3s;"></div>
+                </div>
+                <div id="grading-score-error" style="display:none; color: var(--danger); font-size: 13px; font-weight: 600; margin-top: 6px;"></div>
             </div>
+
             <div class="form-group" style="flex: 1; display: flex; flex-direction: column; margin-top: 15px;">
                 <label style="font-size: 14px; font-weight: bold; display: block; margin-bottom: 8px; color: #333;">💬 คำติชม/เสนอแนะ:</label>
-                <textarea id="grading-feedback" placeholder="พิมพ์คำแนะนำให้นักเรียน (นักเรียนจะเห็นข้อความนี้)..." style="width: 100%; flex: 1; min-height: 150px; padding: 15px; border: 2px solid var(--border); border-radius: 12px; font-family: 'Sarabun'; font-size: 15px; outline: none; resize: none; transition: 0.3s;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+                <textarea id="grading-feedback" placeholder="พิมพ์คำแนะนำให้นักเรียน (นักเรียนจะเห็นข้อความนี้)..." style="width: 100%; flex: 1; min-height: 120px; padding: 15px; border: 2px solid var(--border); border-radius: 12px; font-family: 'Sarabun'; font-size: 15px; outline: none; resize: none; transition: 0.3s;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'"></textarea>
             </div>
             <button class="btn btn-primary" style="width: 100%; margin-top: 15px; padding: 15px; font-size: 16px; border-radius: 12px; box-shadow: 0 4px 15px rgba(26,95,63,0.3);" onclick="saveGrade()">💾 บันทึกคะแนน</button>
         </div>
