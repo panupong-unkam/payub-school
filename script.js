@@ -646,9 +646,12 @@ async function loadSubmissions() {
 
             container.innerHTML = topBarHtml + listHtml;
         }
-        // 👨‍🏫 มุมมองครู: สเต็ป 3 (รายชื่อนักเรียน) : ระบบเดิมใช้งานได้ 100%
+        // 👨‍🏫 มุมมองครู: สเต็ป 3 (รายชื่อนักเรียน)
         else if (currentGradingStep === 'students') {
-            const { data: students, error } = await sb.from('submissions').select(`*, profiles:student_id (full_name, class_level, student_no), assignments:assignment_id (title, subjects (name))`).eq('assignment_id', gradingAssignId);
+            // ✅ แก้ไข: ดึง max_score จาก assignments มาด้วยเพื่อใช้ใน modal ตรวจงาน
+            const { data: students, error } = await sb.from('submissions')
+                .select(`*, profiles:student_id (full_name, class_level, student_no), assignments:assignment_id (title, max_score, subjects (name))`)
+                .eq('assignment_id', gradingAssignId);
             if(pathText) pathText.innerHTML = `<span onclick="resetGradingStep()" style="cursor:pointer; color:var(--primary); text-decoration:underline;">🏠 วิชา</span> > <span onclick="backToAssignments()" style="cursor:pointer; color:var(--primary); text-decoration:underline;">📝 ใบงาน</span> > 👨‍🎓 ตรวจงาน`;
             
             currentGradingStudentsData = students || [];
@@ -720,18 +723,38 @@ function renderGradingStudentsList() {
         const studentClass = s.profiles?.class_level || '-'; 
         const contentSafe = s.content ? s.content.replace(/'/g, "\\'") : ''; 
         const feedbackSafe = s.feedback ? s.feedback.replace(/'/g, "\\'") : '';
+        // ✅ เพิ่ม: ดึง max_score เพื่อส่งต่อให้ modal
+        const maxScore = s.assignments?.max_score || 10;
         
         let borderColor = 'var(--danger)';
         if (s.status.includes('สมบูรณ์') || s.status.includes('รอตรวจ')) borderColor = '#1565c0';
         if (s.status === 'ตรวจแล้ว') borderColor = 'var(--success)';
         if (s.status.includes('แบบร่าง')) borderColor = 'var(--accent)';
 
+        // ✅ เพิ่ม: แสดงคะแนน/คะแนนเต็ม ถ้าตรวจแล้ว
+        const scoreDisplay = s.status === 'ตรวจแล้ว' 
+            ? `✅ ${s.score}/${maxScore}` 
+            : '🔴 รอตรวจ';
+
         return `
         <div class="card" style="border-left: 5px solid ${borderColor}; animation-delay: ${(index % 10) * 0.05}s;">
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap; gap: 10px;">
-                <div style="flex: 1; min-width: 250px;"><b style="font-size:18px; color:var(--primary-dark);">[เลขที่ ${studentNo}] ${studentName}</b> <span style="color:gray; font-size:14px;">(ชั้น ${studentClass})</span><br><small><b>สถานะ:</b> ${s.status}</small></div>
-                <div style="text-align: right; min-width: 150px;"><span class="guest-tag" style="background:${s.status === 'ตรวจแล้ว' ? '#e8f5e9; color:#2e7d32;' : '#ffebee; color:#c62828;'}">${s.status === 'ตรวจแล้ว' ? `✅ ${s.score}` : '🔴 รอตรวจ'}</span>
-                    <div style="margin-top: 10px;"><button class="btn btn-sm ${s.status === 'ตรวจแล้ว' ? 'btn-outline' : 'btn-primary'}" onclick="openGradingModal(${s.id}, '${studentName}', '${s.assignments?.title}', '${contentSafe}', '${s.score || ''}', '${feedbackSafe}')">${s.status === 'ตรวจแล้ว' ? '✏️ แก้ไขคะแนน' : '📝 ตรวจงาน'}</button></div>
+                <div style="flex: 1; min-width: 250px;">
+                    <b style="font-size:18px; color:var(--primary-dark);">[เลขที่ ${studentNo}] ${studentName}</b> 
+                    <span style="color:gray; font-size:14px;">(ชั้น ${studentClass})</span><br>
+                    <small><b>สถานะ:</b> ${s.status}</small>
+                </div>
+                <div style="text-align: right; min-width: 150px;">
+                    <span class="guest-tag" style="background:${s.status === 'ตรวจแล้ว' ? '#e8f5e9; color:#2e7d32;' : '#ffebee; color:#c62828;'}">
+                        ${scoreDisplay}
+                    </span>
+                    <div style="margin-top: 10px;">
+                        <!-- ✅ แก้ไข: ส่ง maxScore ไปด้วยเพื่อให้ modal รู้ว่าห้ามเกินเท่าไหร่ -->
+                        <button class="btn btn-sm ${s.status === 'ตรวจแล้ว' ? 'btn-outline' : 'btn-primary'}" 
+                            onclick="openGradingModal(${s.id}, '${studentName}', '${s.assignments?.title}', '${contentSafe}', '${s.score || ''}', '${feedbackSafe}', ${maxScore})">
+                            ${s.status === 'ตรวจแล้ว' ? '✏️ แก้ไขคะแนน' : '📝 ตรวจงาน'}
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>`;
@@ -755,24 +778,133 @@ function resetGradingStep() {
     loadSubmissions();
 }
 
-function openGradingModal(subId, studentName, assignTitle, content, score, feedback) {
+function openGradingModal(subId, studentName, assignTitle, content, score, feedback, maxScore = 10) {
     document.getElementById('grading-sub-id').value = subId;
+    document.getElementById('grading-max-score').value = maxScore;
     document.getElementById('grading-student-info').textContent = 'นักเรียน: ' + studentName;
     document.getElementById('grading-assign-title').textContent = 'ใบงาน: ' + assignTitle;
-    document.getElementById('grading-score').value = (score === 'null' || !score) ? '' : score;
+    document.getElementById('grading-max-score-display').textContent = maxScore;
+    document.getElementById('grading-score-ratio').textContent = `${score || 0} / ${maxScore}`;
+    document.getElementById('grading-score-error').style.display = 'none';
+
+    // ตั้งค่า input: max คือคะแนนเต็มของใบงาน
+    const scoreInput = document.getElementById('grading-score');
+    scoreInput.max = maxScore;
+    scoreInput.value = (score === 'null' || !score) ? '' : score;
+
+    // อัปเดต progress bar ถ้ามีคะแนนเดิมอยู่แล้ว
+    updateScoreBar(scoreInput.value, maxScore);
+
     document.getElementById('grading-feedback').value = (feedback === 'null' || !feedback) ? '' : feedback;
-    const iframe = document.getElementById('grading-iframe'); const textDiv = document.getElementById('grading-text-content');
-    if (content.startsWith('http')) { iframe.style.display = 'block'; textDiv.style.display = 'none'; iframe.src = content.includes('drive.google.com') ? content.replace('/view', '/preview') : content; } 
-    else { iframe.style.display = 'none'; textDiv.style.display = 'block'; textDiv.innerHTML = `<h4>ข้อความ:</h4><p>${content}</p>`; }
+    
+    const iframe = document.getElementById('grading-iframe');
+    const textDiv = document.getElementById('grading-text-content');
+    if (content && content.startsWith('http')) {
+        iframe.style.display = 'block';
+        textDiv.style.display = 'none';
+        iframe.src = content.includes('drive.google.com') ? content.replace('/view', '/preview') : content;
+    } else {
+        iframe.style.display = 'none';
+        textDiv.style.display = 'block';
+        textDiv.innerHTML = `<h4 style="margin-bottom:12px;">📄 ข้อความจากนักเรียน:</h4><p style="white-space:pre-wrap; line-height:1.8;">${content || '(ไม่มีข้อความ)'}</p>`;
+    }
     openModal('modal-grading');
+}
+
+// ✅ ใหม่: validate คะแนน real-time ขณะพิมพ์
+function validateScoreInput(input) {
+    const maxScore = parseInt(document.getElementById('grading-max-score').value) || 10;
+    const val = parseFloat(input.value);
+    const errEl = document.getElementById('grading-score-error');
+    const ratio = document.getElementById('grading-score-ratio');
+
+    if (input.value === '') {
+        errEl.style.display = 'none';
+        ratio.textContent = `- / ${maxScore}`;
+        updateScoreBar('', maxScore);
+        return;
+    }
+
+    if (isNaN(val) || val < 0) {
+        errEl.textContent = '❌ กรุณากรอกตัวเลขที่มากกว่าหรือเท่ากับ 0';
+        errEl.style.display = 'block';
+        input.style.borderColor = 'var(--danger)';
+        ratio.textContent = `- / ${maxScore}`;
+        updateScoreBar('', maxScore);
+        return;
+    }
+
+    if (val > maxScore) {
+        // ✅ บังคับ: ถ้าพิมพ์เกิน → ตัดทิ้งอัตโนมัติ + แจ้งเตือน
+        input.value = maxScore;
+        errEl.textContent = `⚠️ คะแนนสูงสุดของใบงานนี้คือ ${maxScore} คะแนน — ปรับให้อัตโนมัติแล้ว`;
+        errEl.style.display = 'block';
+        input.style.borderColor = 'var(--accent)';
+        setTimeout(() => {
+            errEl.style.display = 'none';
+            input.style.borderColor = 'var(--primary)';
+        }, 2500);
+    } else {
+        errEl.style.display = 'none';
+        input.style.borderColor = 'var(--primary)';
+    }
+
+    const finalVal = Math.min(val, maxScore);
+    ratio.textContent = `${finalVal} / ${maxScore}`;
+    updateScoreBar(finalVal, maxScore);
+}
+
+// ✅ ใหม่: อัปเดต progress bar คะแนน
+function updateScoreBar(score, maxScore) {
+    const bar = document.getElementById('grading-score-bar');
+    if (!bar) return;
+    const pct = maxScore > 0 ? Math.min((parseFloat(score) / maxScore) * 100, 100) : 0;
+    bar.style.width = (isNaN(pct) ? 0 : pct) + '%';
+    // เปลี่ยนสีตามเปอร์เซ็นต์
+    if (pct >= 80) bar.style.background = 'var(--success)';
+    else if (pct >= 50) bar.style.background = 'var(--accent)';
+    else bar.style.background = 'var(--danger)';
 }
 
 async function saveGrade() {
     const id = document.getElementById('grading-sub-id').value;
-    const score = document.getElementById('grading-score').value;
-    const feedback = document.getElementById('grading-feedback').value;
-    await sb.from('submissions').update({ score, feedback, status: 'ตรวจแล้ว' }).eq('id', id);
-    closeModal('modal-grading'); loadSubmissions(); showToast('✅ บันทึกคะแนนแล้ว');
+    const maxScore = parseInt(document.getElementById('grading-max-score').value) || 10;
+    const scoreRaw = parseFloat(document.getElementById('grading-score').value);
+    const feedback = document.getElementById('grading-feedback').value.trim();
+    const saveBtn = document.querySelector('#modal-grading .btn-primary');
+    const errEl = document.getElementById('grading-score-error');
+
+    // ✅ validate ก่อนบันทึก
+    if (document.getElementById('grading-score').value === '') {
+        errEl.textContent = '❌ กรุณากรอกคะแนนก่อนบันทึก';
+        errEl.style.display = 'block';
+        return;
+    }
+    if (isNaN(scoreRaw) || scoreRaw < 0) {
+        errEl.textContent = '❌ คะแนนต้องเป็นตัวเลขที่ไม่ติดลบ';
+        errEl.style.display = 'block';
+        return;
+    }
+    // ✅ บังคับ: ห้ามเกินคะแนนเต็มอีกรอบก่อนบันทึก
+    const score = Math.min(scoreRaw, maxScore);
+
+    if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = '⏳ กำลังบันทึก...'; }
+
+    const { error } = await sb.from('submissions')
+        .update({ score, feedback, status: 'ตรวจแล้ว' })
+        .eq('id', id);
+
+    if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = '💾 บันทึกคะแนน'; }
+
+    if (error) {
+        errEl.textContent = '❌ บันทึกไม่สำเร็จ: ' + error.message;
+        errEl.style.display = 'block';
+        return;
+    }
+
+    closeModal('modal-grading');
+    loadSubmissions();
+    showToast(`✅ บันทึกคะแนน ${score}/${maxScore} เรียบร้อย!`);
 }
 
 // ==========================================
