@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flowchart Master: พิมพ์เขียวหุ่นยนต์อัจฉริยะ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Noto+Serif+Thai:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --bg-dark: #0f172a; --surface-dark: #1e293b; --cyber-blue: #0ea5e9;
+            --cyber-blue-glow: rgba(14, 165, 233, 0.4); --neon-green: #10b981;
+            --neon-orange: #f59e0b; --neon-pink: #ec4899; --text-main: #f8fafc;
+            --text-muted: #94a3b8; --border-line: #334155;
+        }
+
+        body {
+            display: flex; justify-content: center; align-items: center; min-height: 100vh;
+            background: radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 100%);
+            color: var(--text-main); font-family: 'Sarabun', sans-serif;
+            padding: 20px; margin: 0; overflow-x: hidden;
+        }
+
+        body::before {
+            content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 30px 30px; z-index: -1;
+        }
+
+        .lesson-container {
+            width: 100%; max-width: 1100px; background: var(--surface-dark);
+            border-radius: 24px; box-shadow: 0 0 40px rgba(0,0,0,0.5), 0 0 15px var(--cyber-blue-glow);
+            overflow: hidden; border: 1px solid var(--border-line);
+            display: flex; flex-direction: column; min-height: 80vh;
+        }
+
+        .lesson-header {
+            background: rgba(15, 23, 42, 0.9); padding: 20px 30px;
+            border-bottom: 1px solid var(--cyber-blue);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .progress-track { height: 5px; background: var(--border-line); width: 100%; display: none; }
+        #progress-bar { height: 100%; background: var(--neon-green); width: 0%; box-shadow: 0 0 10px var(--neon-green); transition: width 0.6s ease; }
+
+        .lesson-body { padding: 40px; position: relative; flex-grow: 1; display: flex; flex-direction: column; }
+        
+        .step { display: none; animation: glitchFadeIn 0.5s ease-out forwards; flex-grow: 1; }
+        .step.active { display: block; }
+
+        @keyframes glitchFadeIn { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 1; transform: translateY(0); } }
+
+        h3 {
+            color: var(--cyber-blue); font-family: 'Noto Serif Thai', serif; font-size: 28px;
+            margin-top: 0; text-shadow: 0 0 10px var(--cyber-blue-glow);
+            border-bottom: 1px dashed var(--border-line); padding-bottom: 15px;
+        }
+        p, li { line-height: 1.8; font-size: 17px; color: #cbd5e1; }
+
+        /* 🔘 Buttons */
+        .btn {
+            padding: 14px 28px; border: none; border-radius: 10px; font-family: 'Sarabun'; font-weight: bold;
+            font-size: 16px; cursor: pointer; transition: 0.3s; display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        .btn-primary { background: var(--cyber-blue); color: white; box-shadow: 0 4px 15px var(--cyber-blue-glow); }
+        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 8px 25px var(--cyber-blue-glow); background: #0284c7; }
+        .btn-outline { background: transparent; color: var(--text-muted); border: 1px solid var(--border-line); }
+        .btn-outline:hover { color: white; border-color: white; }
+
+        .footer-nav {
+            padding: 25px 40px; background: rgba(15, 23, 42, 0.95); border-top: 1px solid var(--border-line);
+            display: none; justify-content: space-between; align-items: center; margin-top: auto;
+        }
+
+        /* 🤖 Symbol Grid */
+        .symbol-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 20px; margin-top: 30px; }
+        .symbol-card {
+            background: rgba(15, 23, 42, 0.6); padding: 25px 15px; border-radius: 18px;
+            border: 1px solid var(--border-line); text-align: center; transition: 0.3s;
+        }
+        .symbol-card svg { width: 70px; height: 50px; margin-bottom: 15px; filter: drop-shadow(0 0 5px rgba(255,255,255,0.2)); }
+        .symbol-card:hover { transform: translateY(-8px); border-color: var(--cyber-blue); box-shadow: 0 10px 25px rgba(0,0,0,0.4); background: rgba(30,41,59,0.9); }
+        .usage-text { font-size: 13px; color: var(--text-muted); margin-top: 12px; text-align: left; line-height: 1.5; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 8px; border-left: 3px solid var(--cyber-blue); }
+
+        /* 📹 Video */
+        .video-container {
+            width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 15px;
+            overflow: hidden; border: 2px solid var(--border-line); margin: 20px 0;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+        }
+
+        /* 🧩 Pure SVG Flowcharts Layout */
+        .logic-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; margin-top: 20px; }
+        .logic-card { background: rgba(0,0,0,0.2); padding: 20px; border-radius: 15px; border: 1px solid var(--border-line); text-align: center; }
+        .svg-container { width: 100%; height: auto; margin-top: 15px; background: #0f172a; border-radius: 12px; padding: 10px; border: 1px solid var(--border-line); box-shadow: inset 0 0 10px rgba(0,0,0,0.3); }
+
+        /* 🎮 Quiz Game */
+        .quiz-option {
+            background: rgba(255,255,255,0.05); border: 2px solid var(--border-line);
+            padding: 15px 20px; border-radius: 12px; margin-bottom: 15px; cursor: pointer;
+            transition: 0.2s; font-size: 16px; color: var(--text-main); text-align: left; width: 100%;
+        }
+        .quiz-option:hover { background: rgba(14, 165, 233, 0.1); border-color: var(--cyber-blue); }
+        .quiz-option.correct { background: rgba(16, 185, 129, 0.2); border-color: var(--neon-green); color: var(--neon-green); font-weight: bold; }
+        .quiz-option.wrong { background: rgba(239, 68, 68, 0.2); border-color: #ef4444; color: #ef4444; }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .lesson-body { padding: 20px; }
+            .grid-2col { grid-template-columns: 1fr !important; }
+        }
+    </style>
+</head>
+<body>
+
+<svg style="width:0; height:0; position:absolute;">
+    <defs>
+        <marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#10b981" />
+        </marker>
+        <marker id="arrow-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#ef4444" />
+        </marker>
+        <marker id="arrow-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#0ea5e9" />
+        </marker>
+    </defs>
+</svg>
+
+<div class="lesson-container">
+    <div class="lesson-header">
+        <h2 style="margin: 0; font-size: 20px; letter-spacing: 1px; color: var(--text-main);">🤖 ALGORITHM & FLOWCHART</h2>
+        <div id="header-guest-info" style="display: none; align-items: center; gap: 12px;">
+            <span style="background: rgba(16, 185, 129, 0.15); color: var(--neon-green); padding: 6px 18px; border-radius: 20px; font-size: 14px; font-weight: bold; border: 1px solid var(--neon-green);" id="display-header-name">Student</span>
+            <button class="btn btn-outline" style="padding: 6px 15px; font-size: 12px;" onclick="location.reload()">EXIT</button>
+        </div>
+    </div>
+    
+    <div class="progress-track" id="progress-container"><div id="progress-bar"></div></div>
+
+    <div class="lesson-body">
+        
+        <div class="step active" id="step-0">
+            <div style="text-align: center; padding: 50px 20px;">
+                <div style="font-size: 80px; margin-bottom: 20px; filter: drop-shadow(0 0 15px var(--cyber-blue));">📟</div>
+                <h2 style="color: white; font-size: 34px; margin-bottom: 10px;">ระบบศูนย์บัญชาการหุ่นยนต์</h2>
+                <p style="color: var(--text-muted); font-size: 18px; margin-bottom: 40px;">กรุณาระบุชื่อของคุณ เพื่อเข้าถึงพิมพ์เขียวระบบอัตโนมัติ</p>
+                <input type="text" id="guest-name-input" placeholder="พิมพ์ชื่อเล่นหรือชื่อจริง..." style="width:100%; max-width:400px; padding:15px 20px; background:rgba(0,0,0,0.3); border:2px solid var(--cyber-blue); border-radius:12px; color:white; font-size:20px; text-align:center; outline:none;" onkeypress="if(event.key === 'Enter') startLesson()">
+                <div style="margin-top: 35px;">
+                    <button class="btn btn-primary" style="padding: 16px 50px; font-size: 18px;" onclick="startLesson()">🚀 เริ่มการปฏิบัติภารกิจ</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="step" id="step-1">
+            <h3>ด่านที่ 1: "พิมพ์เขียว" ที่หุ่นยนต์เข้าใจ</h3>
+            <p>ยินดีต้อนรับคุณ <b id="welcome-name" style="color: var(--neon-green);"></b>! <br>หุ่นยนต์ทำงานตาม <b>อัลกอริทึม (Algorithm)</b> หรือลำดับความคิดที่เราวางแผนไว้ให้ เพื่อความแม่นยำ วิศวกรจึงต้องวาดแผนผังความคิดที่เรียกว่า <b>Flowchart</b> ก่อนลงมือเขียนโค้ดเสมอ</p>
+            <p>ดูแอนิเมชันนี้เพื่อเข้าใจว่าโปรแกรมประมวลผลการทำงานเป็นลำดับอย่างไรครับ</p>
+            
+            <div class="video-container" style="max-width: 800px; margin: 30px auto;">
+                <iframe src="https://www.youtube.com/embed/6iA8q_4eRPA" frameborder="0" allowfullscreen style="width:100%; height:100%;"></iframe>
+            </div>
+        </div>
+
+        <div class="step" id="step-2">
+            <h3>ด่านที่ 2: ถอดรหัส 8 สัญลักษณ์สากล</h3>
+            <p>มาทำความรู้จักกับสัญลักษณ์มาตรฐานวิศวกรรม ที่รูปทรงมีความหมายชัดเจน ห้ามใช้สลับกันเด็ดขาด!</p>
+            <div class="symbol-grid">
+                <div class="symbol-card">
+                    <svg viewBox="0 0 100 40"><rect x="5" y="5" width="90" height="30" rx="15" fill="none" stroke="var(--neon-green)" stroke-width="3"/></svg>
+                    <b style="color:var(--neon-green); display:block;">Terminator</b>
+                    <div class="usage-text">จุดเริ่มต้น (Start) และสิ้นสุด (End) ของโปรแกรม</div>
+                </div>
+                <div class="symbol-card">
+                    <svg viewBox="0 0 100 40"><rect x="5" y="5" width="90" height="30" fill="none" stroke="var(--cyber-blue)" stroke-width="3"/></svg>
+                    <b style="color:var(--cyber-blue); display:block;">Process</b>
+                    <div class="usage-text">การกระทำ หรือประมวลผล เช่น "มอเตอร์หมุน", "บวกเลข"</div>
+                </div>
+                <div class="symbol-card">
+                    <svg viewBox="0 0 100 60"><polygon points="50,5 90,30 50,55 10,30" fill="none" stroke="var(--neon-orange)" stroke-width="3"/></svg>
+                    <b style="color:var(--neon-orange); display:block;">Decision</b>
+                    <div class="usage-text">การตัดสินใจ มีทางออก 2 ทางเสมอคือ ใช่ (Yes) / ไม่ (No)</div>
+                </div>
+                <div class="symbol-card">
+                    <svg viewBox="0 0 100 40"><polygon points="20,5 95,5 80,35 5,35" fill="none" stroke="#a855f7" stroke-width="3"/></svg>
+                    <b style="color:#a855f7; display:block;">Input / Output</b>
+                    <div class="usage-text">รับค่าจากเซ็นเซอร์ (Input) หรือแสดงผลข้อมูล (Output)</div>
+                </div>
+                <div class="symbol-card">
+                    <svg viewBox="0 0 100 40"><polygon points="5,15 95,5 95,35 5,35" fill="none" stroke="var(--neon-pink)" stroke-width="3"/></svg>
+                    <b style="color:var(--neon-pink); display:block;">Manual Input</b>
+                    <div class="usage-text">รับข้อมูลจากการกดปุ่ม หรือพิมพ์คีย์บอร์ดของมนุษย์</div>
+                </div>
+                <div class="symbol-card">
+                    <svg viewBox="0 0 100 40"><path d="M5 5 L80 5 C95 20 95 20 80 35 L5 35 Z" fill="none" stroke="#38bdf8" stroke-width="3"/></svg>
+                    <b style="color:#38bdf8; display:block;">Display</b>
+                    <div class="usage-text">แสดงผลออกทางหน้าจอ Monitor หรือ จอ LCD</div>
+                </div>
+                <div class="symbol-card">
+                    <svg viewBox="0 0 100 40"><path d="M10 20 L80 20 M70 10 L85 20 L70 30" fill="none" stroke="#fef08a" stroke-width="4"/></svg>
+                    <b style="color:#fef08a; display:block;">Flowline</b>
+                    <div class="usage-text">ลูกศรแสดงทิศทางการทำงาน ต้องมีหัวลูกศรชี้ทางเสมอ</div>
+                </div>
+                <div class="symbol-card">
+                    <svg viewBox="0 0 100 60"><circle cx="50" cy="30" r="15" fill="none" stroke="var(--neon-green)" stroke-width="3"/></svg>
+                    <b style="color:var(--neon-green); display:block;">Connector</b>
+                    <div class="usage-text">จุดเชื่อมต่อเส้นลูกศรหลายๆ เส้นมารวมกันในหน้าเดียวกัน</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="step" id="step-3">
+            <h3>ด่านที่ 3: โครงสร้างตรรกะ 3 รูปแบบหลัก</h3>
+            <p>แผนผังด้านล่างถูกวาดขึ้นอย่างถูกต้องตามหลักวิศวกรรม 100% สังเกตทิศทางของลูกศร การแยกทาง และจุดรวมเส้นให้ดีนะครับ</p>
+            
+            <div class="logic-grid">
+                <div class="logic-card" style="border-top: 4px solid var(--cyber-blue);">
+                    <b style="font-size: 18px; color: var(--text-main);">1. ลำดับ (Sequence)</b>
+                    <p style="font-size:14px; margin:5px 0 0 0;">ทำงานตรงไปตรงมา จากบนลงล่าง</p>
+                    <div class="svg-container">
+                        <svg viewBox="0 0 200 250" width="100%" height="250">
+                            <rect x="50" y="10" width="100" height="40" rx="20" fill="none" stroke="var(--neon-green)" stroke-width="2"/>
+                            <text x="100" y="35" fill="var(--text-main)" font-size="14" text-anchor="middle" font-family="Sarabun">เริ่มต้น (Start)</text>
+                            <line x1="100" y1="50" x2="100" y2="80" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-blue)"/>
+                            <rect x="50" y="80" width="100" height="40" fill="none" stroke="var(--cyber-blue)" stroke-width="2"/>
+                            <text x="100" y="105" fill="var(--text-main)" font-size="14" text-anchor="middle" font-family="Sarabun">อาบน้ำ</text>
+                            <line x1="100" y1="120" x2="100" y2="150" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-blue)"/>
+                            <rect x="50" y="150" width="100" height="40" fill="none" stroke="var(--cyber-blue)" stroke-width="2"/>
+                            <text x="100" y="175" fill="var(--text-main)" font-size="14" text-anchor="middle" font-family="Sarabun">แต่งตัว</text>
+                            <line x1="100" y1="190" x2="100" y2="220" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-blue)"/>
+                            <rect x="50" y="220" width="100" height="40" rx="20" fill="none" stroke="var(--neon-green)" stroke-width="2"/>
+                            <text x="100" y="245" fill="var(--text-main)" font-size="14" text-anchor="middle" font-family="Sarabun">จบ (End)</text>
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="logic-card" style="border-top: 4px solid var(--neon-orange);">
+                    <b style="font-size: 18px; color: var(--text-main);">2. เลือกทำ (If-Else)</b>
+                    <p style="font-size:14px; margin:5px 0 0 0;">มีทางแยกให้ตัดสินใจ (ใช่ หรือ ไม่ใช่)</p>
+                    <div class="svg-container">
+                        <svg viewBox="0 0 250 250" width="100%" height="250">
+                            <line x1="125" y1="5" x2="125" y2="20" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-blue)"/>
+                            
+                            <polygon points="125,20 190,60 125,100 60,60" fill="none" stroke="var(--neon-orange)" stroke-width="2"/>
+                            <text x="125" y="65" fill="var(--text-main)" font-size="14" text-anchor="middle" font-family="Sarabun">ฝนตก?</text>
+                            
+                            <line x1="60" y1="60" x2="45" y2="60" stroke="#64748b" stroke-width="2"/>
+                            <line x1="45" y1="60" x2="45" y2="100" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-green)"/>
+                            <text x="30" y="55" fill="var(--neon-green)" font-size="12" font-family="Sarabun">ใช่</text>
+                            <rect x="15" y="100" width="60" height="40" fill="none" stroke="var(--cyber-blue)" stroke-width="2"/>
+                            <text x="45" y="125" fill="var(--text-main)" font-size="12" text-anchor="middle" font-family="Sarabun">กางร่ม</text>
+                            
+                            <line x1="190" y1="60" x2="205" y2="60" stroke="#64748b" stroke-width="2"/>
+                            <line x1="205" y1="60" x2="205" y2="100" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-red)"/>
+                            <text x="215" y="55" fill="#ef4444" font-size="12" font-family="Sarabun">ไม่</text>
+                            <rect x="175" y="100" width="60" height="40" fill="none" stroke="var(--cyber-blue)" stroke-width="2"/>
+                            <text x="205" y="125" fill="var(--text-main)" font-size="12" text-anchor="middle" font-family="Sarabun">ไม่กาง</text>
+
+                            <line x1="45" y1="140" x2="45" y2="170" stroke="#64748b" stroke-width="2"/>
+                            <line x1="45" y1="170" x2="125" y2="170" stroke="#64748b" stroke-width="2"/>
+                            <line x1="205" y1="140" x2="205" y2="170" stroke="#64748b" stroke-width="2"/>
+                            <line x1="205" y1="170" x2="125" y2="170" stroke="#64748b" stroke-width="2"/>
+                            
+                            <circle cx="125" cy="170" r="5" fill="var(--bg-dark)" stroke="var(--neon-green)" stroke-width="2"/>
+                            <line x1="125" y1="175" x2="125" y2="200" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-blue)"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="logic-card" style="border-top: 4px solid var(--neon-green);">
+                    <b style="font-size: 18px; color: var(--text-main);">3. ทำซ้ำ (Loop)</b>
+                    <p style="font-size:14px; margin:5px 0 0 0;">วนกลับไปทำซ้ำ จนกว่าเงื่อนไขจะบอกให้หยุด</p>
+                    <div class="svg-container">
+                        <svg viewBox="0 0 200 250" width="100%" height="250">
+                            <line x1="100" y1="5" x2="100" y2="20" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-blue)"/>
+                            
+                            <rect x="50" y="20" width="100" height="40" fill="none" stroke="var(--cyber-blue)" stroke-width="2"/>
+                            <text x="100" y="45" fill="var(--text-main)" font-size="14" text-anchor="middle" font-family="Sarabun">กินข้าว 1 คำ</text>
+                            
+                            <line x1="100" y1="60" x2="100" y2="90" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-blue)"/>
+                            
+                            <polygon points="100,90 160,130 100,170 40,130" fill="none" stroke="var(--neon-orange)" stroke-width="2"/>
+                            <text x="100" y="135" fill="var(--text-main)" font-size="14" text-anchor="middle" font-family="Sarabun">อิ่มไหม?</text>
+                            
+                            <line x1="160" y1="130" x2="185" y2="130" stroke="#64748b" stroke-width="2"/>
+                            <line x1="185" y1="130" x2="185" y2="10" stroke="#64748b" stroke-width="2"/>
+                            <line x1="185" y1="10" x2="100" y2="10" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-red)"/>
+                            <text x="170" y="125" fill="#ef4444" font-size="12" font-family="Sarabun">ไม่</text>
+                            
+                            <line x1="100" y1="170" x2="100" y2="200" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-green)"/>
+                            <text x="115" y="190" fill="var(--neon-green)" font-size="12" font-family="Sarabun">ใช่</text>
+                            <rect x="50" y="200" width="100" height="40" rx="20" fill="none" stroke="var(--neon-green)" stroke-width="2"/>
+                            <text x="100" y="225" fill="var(--text-main)" font-size="14" text-anchor="middle" font-family="Sarabun">หยุดกิน</text>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="step" id="step-4">
+            <h3>ด่านที่ 4: เจาะลึก "ถังขยะอัจฉริยะ"</h3>
+            <p>มาดูการทำงานของโครงงานยอดฮิตครับ อัลกอริทึมด้านซ้ายแสดงการใช้ <b>"Loop" ครอบ "If-Else"</b> เพื่อให้เซ็นเซอร์คอยตรวจจับมือคนตลอดเวลาโดยไม่มีวันหลับครับ แผนผังนี้วาดอย่างถูกต้อง 100%</p>
+            
+            <div class="grid-2col" style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 30px; margin-top: 20px;">
+                
+                <div style="background: #0f172a; border: 2px solid var(--cyber-blue); border-radius: 15px; padding: 20px; display: flex; flex-direction: column; align-items: center; box-shadow: inset 0 0 20px rgba(0,0,0,0.5);">
+                    <h4 style="color:var(--text-main); margin-top:0; margin-bottom: 20px;">อัลกอริทึม ถังขยะอัจฉริยะ</h4>
+                    <div style="width: 100%; max-width: 400px;">
+                        <svg viewBox="0 0 350 480" width="100%" height="auto">
+                            <rect x="100" y="10" width="100" height="40" rx="20" fill="none" stroke="var(--neon-green)" stroke-width="2"/>
+                            <text x="150" y="35" fill="var(--neon-green)" font-size="14" font-weight="bold" text-anchor="middle" font-family="Sarabun">START</text>
+
+                            <line x1="150" y1="50" x2="150" y2="80" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-blue)"/>
+
+                            <polygon points="100,80 220,80 200,120 80,120" fill="none" stroke="#a855f7" stroke-width="2"/>
+                            <text x="150" y="105" fill="#e9d5ff" font-size="14" text-anchor="middle" font-family="Sarabun">อ่านระยะเซ็นเซอร์</text>
+
+                            <line x1="150" y1="120" x2="150" y2="150" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-blue)"/>
+
+                            <polygon points="150,150 230,190 150,230 70,190" fill="none" stroke="var(--neon-orange)" stroke-width="2"/>
+                            <text x="150" y="195" fill="var(--text-main)" font-size="14" text-anchor="middle" font-family="Sarabun">ระยะ &lt; 20 cm?</text>
+
+                            <line x1="150" y1="230" x2="150" y2="260" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-green)"/>
+                            <text x="165" y="250" fill="var(--neon-green)" font-size="12" font-family="Sarabun">ใช่ (YES)</text>
+
+                            <rect x="100" y="260" width="100" height="40" fill="none" stroke="var(--cyber-blue)" stroke-width="2"/>
+                            <text x="150" y="285" fill="var(--text-main)" font-size="14" text-anchor="middle" font-family="Sarabun">มอเตอร์เปิดฝา</text>
+
+                            <line x1="150" y1="300" x2="150" y2="330" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-blue)"/>
+
+                            <rect x="100" y="330" width="100" height="40" fill="none" stroke="var(--cyber-blue)" stroke-width="2"/>
+                            <text x="150" y="355" fill="var(--text-main)" font-size="14" text-anchor="middle" font-family="Sarabun">หน่วงเวลา 3 วิ</text>
+
+                            <line x1="150" y1="370" x2="150" y2="400" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-blue)"/>
+
+                            <rect x="100" y="400" width="100" height="40" fill="none" stroke="var(--cyber-blue)" stroke-width="2"/>
+                            <text x="150" y="425" fill="var(--text-main)" font-size="14" text-anchor="middle" font-family="Sarabun">มอเตอร์ปิดฝา</text>
+
+                            <line x1="150" y1="440" x2="150" y2="465" stroke="#64748b" stroke-width="2"/>
+                            <line x1="150" y1="465" x2="300" y2="465" stroke="#64748b" stroke-width="2"/>
+                            <line x1="300" y1="465" x2="300" y2="190" stroke="#64748b" stroke-width="2"/>
+
+                            <line x1="230" y1="190" x2="300" y2="190" stroke="#64748b" stroke-width="2"/>
+                            <text x="260" y="185" fill="#ef4444" font-size="12" font-family="Sarabun">ไม่ใช่ (NO)</text>
+
+                            <line x1="300" y1="190" x2="300" y2="65" stroke="#ef4444" stroke-width="2" stroke-dasharray="5,5"/>
+                            <line x1="300" y1="65" x2="150" y2="65" stroke="#ef4444" stroke-width="2" stroke-dasharray="5,5" marker-end="url(#arrow-red)"/>
+                            
+                            <text x="315" y="280" fill="#ef4444" font-size="12" font-family="Sarabun" style="writing-mode: vertical-rl;">วนลูปกลับไปตรวจสอบใหม่</text>
+                        </svg>
+                    </div>
+                </div>
+
+                <div style="display: flex; flex-direction: column; justify-content: center;">
+                    <div class="video-container" style="margin: 0; border-color: var(--neon-green); box-shadow: 0 0 20px rgba(16,185,129,0.2);">
+                        <iframe src="https://www.youtube.com/embed/E25MphzaSOI" frameborder="0" allowfullscreen style="width:100%; height:100%;"></iframe>
+                    </div>
+                    <div style="background: rgba(16,185,129,0.1); padding: 15px; border-radius: 10px; margin-top: 15px; border-left: 4px solid var(--neon-green);">
+                        <b style="color:var(--neon-green);">💡 เกร็ดความรู้:</b><br>
+                        <span style="font-size:14px; color: var(--text-main);">เมื่อดูวิดีโอจบแล้ว ให้ลองเทียบจังหวะที่มือเข้าใกล้ถัง กับจังหวะในลูกศร Flowchart (YES) ดูนะครับ จะเห็นว่าทำงานตรงกันเป๊ะ!</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="step" id="step-5">
+            <h3>ด่านที่ 5: ภารกิจ "ไฟถนนอัตโนมัติ"</h3>
+            <div class="grid-2col" style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 30px; margin-top: 10px; align-items: stretch;">
+                
+                <div style="background: rgba(14, 165, 233, 0.05); border: 2px solid var(--cyber-blue); padding: 35px; border-radius: 20px;">
+                    <h4 style="color: white; margin-top: 0; font-size: 24px; display:flex; align-items:center; gap:10px;">
+                        <span style="font-size:30px;">🛠️</span> ภารกิจวิศวกรฝึกหัด
+                    </h4>
+                    <p style="font-size: 16px; color: var(--text-main); margin-bottom: 20px;">จงวาด Flowchart ควบคุมไฟถนนด้วย LDR โดยมีเงื่อนไขดังนี้:</p>
+                    
+                    <div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 12px; font-size: 16px; line-height: 2;">
+                        <span style="color:var(--neon-green); font-weight:bold;">1.</span> <b>[เริ่มต้น]</b> ระบบเริ่มทำงาน<br>
+                        <span style="color:var(--neon-green); font-weight:bold;">2.</span> <b>[รับข้อมูล]</b> อ่านค่าแสงจาก เซ็นเซอร์แสง LDR<br>
+                        <span style="color:var(--neon-green); font-weight:bold;">3.</span> <b>[เงื่อนไข]</b> สภาพแวดล้อม "มืด" ใช่หรือไม่?<br>
+                        &nbsp;&nbsp;&nbsp;<span style="color:var(--neon-green);">➔ ถ้า ใช่ (มืด)</span> : ให้ <b>เปิดหลอดไฟ</b><br>
+                        &nbsp;&nbsp;&nbsp;<span style="color:#ef4444;">➔ ถ้า ไม่ใช่ (สว่าง)</span> : ให้ <b>ปิดหลอดไฟ</b><br>
+                        <span style="color:var(--neon-green); font-weight:bold;">4.</span> <b>[ทำซ้ำ]</b> ลากเส้นวนลูปกลับไปทำข้อ 2 ตลอดเวลา
+                    </div>
+                    
+                    <div style="margin-top: 25px; padding-top: 20px; border-top: 1px dashed var(--border-line); color: var(--neon-orange); font-size: 15px;">
+                        <b>📌 คำแนะนำ:</b> วาดโครงสร้างคล้ายถังขยะในด่านที่ 4 เลยครับ (แต่มีคำสั่งทั้งฝั่ง Yes และ No) วาดใส่สมุดแล้วถ่ายรูปส่งครูภาณุพงศ์นะครับ
+                    </div>
+                </div>
+
+                <div style="display:flex; flex-direction:column; justify-content:center;">
+                    <div class="video-container" style="margin: 0;">
+                        <iframe src="https://www.youtube.com/embed/V6W35vQkFz0" frameborder="0" allowfullscreen style="width:100%; height:100%;"></iframe>
+                    </div>
+                    <p style="text-align:center; font-size:14px; color:var(--text-muted); margin-top:15px;">ดูคลิปตัวอย่างการทำงาน เพื่อเป็นไอเดียในการวาดครับ</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="step" id="step-6">
+            <h3>ด่านที่ 6: ท้าสมองประลองตรรกะ (FINAL TEST)</h3>
+            <p>มาทำแบบทดสอบเก็บคะแนน 5 แต้มครับ! (ระบบจะสุ่มคำถามและสลับช้อยส์ <b>เพื่อป้องกันการลอกข้อสอบ</b>) เลือกคำตอบที่ถูกต้องที่สุดเพื่อจบภารกิจ</p>
+            
+            <div id="game-area" style="background: rgba(0,0,0,0.2); border: 2px solid var(--neon-green); border-radius: 20px; padding: 30px; text-align: center; max-width: 700px; margin: 0 auto; box-shadow: 0 10px 30px rgba(16,185,129,0.1);">
+                
+                <div style="display: flex; justify-content: space-between; margin-bottom: 20px; font-weight: bold; color: var(--neon-green);">
+                    <span id="question-counter">คำถาม: 1 / 5</span>
+                    <span id="score-counter">คะแนน: 0</span>
+                </div>
+
+                <div id="question-image" style="display:none; margin-bottom: 20px; justify-content: center;"></div>
+                <h4 id="question-text" style="font-size: 22px; color: white; margin-bottom: 30px; line-height: 1.5;">กำลังโหลดคำถาม...</h4>
+                
+                <div id="options-grid" style="display: flex; flex-direction: column; gap: 12px;">
+                    </div>
+            </div>
+
+            <div id="game-result" style="display: none; text-align: center; padding: 40px; background: rgba(0,0,0,0.2); border-radius: 20px; border: 2px solid var(--cyber-blue);">
+                <div style="font-size: 70px; margin-bottom: 10px;">🏆</div>
+                <h3 style="border: none; text-shadow: none; font-size: 32px; color: var(--cyber-blue); margin-bottom: 10px;">ภารกิจสมบูรณ์!</h3>
+                <p style="font-size: 20px; color: white;">รหัสเรียกขาน: <span class="student-name-inject" style="color:var(--neon-green);"></span></p>
+                <p style="font-size: 20px; color: white;">คุณได้คะแนน: <b id="final-score" style="color: var(--neon-orange); font-size: 36px;"></b> / 5</p>
+                <div style="margin-top: 30px;">
+                    <button class="btn btn-primary" style="padding: 16px 40px; font-size: 18px;" onclick="finishEntireMission()">📥 กดเพื่อยืนยันการส่งคะแนน</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="footer-nav" id="footer-controls">
+        <button class="btn btn-outline" id="prevBtn" onclick="moveStep(-1)">⬅️ ถอยกลับ</button>
+        <div style="color: var(--cyber-blue); font-family: monospace; font-size: 16px; font-weight: bold;" id="step-counter">LOADING...</div>
+        <button class="btn btn-primary" id="nextBtn" onclick="moveStep(1)">เดินหน้า ➔</button>
+    </div>
+</div>
+
+<script>
+    // =========================================
+    // NAVIGATION SYSTEM
+    // =========================================
+    let currentStep = 0;
+    const totalSteps = 6;
+    let studentName = "";
+
+    function startLesson() {
+        const input = document.getElementById('guest-name-input').value.trim();
+        if (!input) { alert('⚠️ กรุณาระบุชื่อของคุณก่อนครับ'); return; }
+        studentName = input;
+        
+        document.getElementById('welcome-name').innerText = studentName;
+        document.getElementById('display-header-name').innerText = "👨‍💻 " + studentName;
+        document.querySelectorAll('.student-name-inject').forEach(el => el.innerText = studentName);
+        
+        document.getElementById('header-guest-info').style.display = 'flex';
+        document.getElementById('footer-controls').style.display = 'flex';
+        document.getElementById('progress-container').style.display = 'block';
+
+        currentStep = 1; updateUI();
+    }
+
+    function updateUI() {
+        document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+        document.getElementById('step-' + currentStep).classList.add('active');
+        
+        const progress = (currentStep / totalSteps) * 100;
+        document.getElementById('progress-bar').style.width = progress + '%';
+        document.getElementById('step-counter').innerText = `STEP: 0${currentStep}/0${totalSteps}`;
+        
+        document.getElementById('prevBtn').style.visibility = currentStep === 1 ? 'hidden' : 'visible';
+        
+        // ถ้าอยู่ด่านสุดท้าย ซ่อนปุ่มถัดไป เพราะต้องเล่นเกมให้จบ
+        if (currentStep === totalSteps) {
+            document.getElementById('nextBtn').style.display = 'none';
+            if (!gameStarted) initGame(); // เริ่มเกมเมื่อเข้าด่าน 6 ครั้งแรก
+        } else {
+            document.getElementById('nextBtn').style.display = 'inline-flex';
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function moveStep(n) { currentStep += n; updateUI(); }
+
+    function finishEntireMission() {
+        confetti({ particleCount: 200, spread: 100, origin: { y: 0.5 }, colors: ['#0ea5e9', '#10b981', '#f59e0b'] });
+        setTimeout(() => {
+            alert(`🎉 เก่งมาก ${studentName}! คุณทำคะแนนได้ ${score} / 5\nระบบจะพากลับไปหน้าวิชาเรียนหลักครับ`);
+            window.location.reload(); 
+        }, 2000);
+    }
+
+    // =========================================
+    // THE SMART QUIZ GAME (Anti-Cheating)
+    // =========================================
+    // คลังข้อสอบ (ดึงมาสุ่ม 5 ข้อ) มีภาพประกอบคำถาม (SVG string)
+    const svgOval = `<svg viewBox="0 0 100 40" width="120" height="50"><rect x="5" y="5" width="90" height="30" rx="15" fill="none" stroke="#10b981" stroke-width="4"/></svg>`;
+    const svgDiamond = `<svg viewBox="0 0 100 60" width="120" height="70"><polygon points="50,5 90,30 50,55 10,30" fill="none" stroke="#f59e0b" stroke-width="4"/></svg>`;
+    const svgRect = `<svg viewBox="0 0 100 40" width="120" height="50"><rect x="5" y="5" width="90" height="30" fill="none" stroke="#0ea5e9" stroke-width="4"/></svg>`;
+
+    const quizBank = [
+        { q: "สัญลักษณ์นี้ คืออะไร และทำหน้าที่อะไร?", svg: svgOval, ans: "Terminator (จุดเริ่มต้นและสิ้นสุด)", choices: ["Decision (การตัดสินใจ)", "Process (การประมวลผล)", "Terminator (จุดเริ่มต้นและสิ้นสุด)", "Input (การรับข้อมูล)"] },
+        { q: "สัญลักษณ์นี้ มีเงื่อนไขทางออกกี่ทาง และมีหน้าที่อะไร?", svg: svgDiamond, ans: "มี 2 ทาง (ใช่/ไม่ใช่) - ใช้เพื่อตัดสินใจ", choices: ["มี 1 ทาง - ใช้เริ่มโปรแกรม", "มี 2 ทาง (ใช่/ไม่ใช่) - ใช้เพื่อตัดสินใจ", "มี 3 ทาง - ใช้สั่งมอเตอร์", "ไม่มีทางออก - ใช้จบการทำงาน"] },
+        { q: "ถ้าต้องการสั่งให้หุ่นยนต์ 'เปิดหลอดไฟ' ต้องเขียนลงในสัญลักษณ์ใด?", svg: null, ans: "สี่เหลี่ยมผืนผ้า (Process)", choices: ["วงรี (Terminator)", "สี่เหลี่ยมข้าวหลามตัด (Decision)", "สี่เหลี่ยมผืนผ้า (Process)", "สี่เหลี่ยมด้านขนาน (Input/Output)"] },
+        { q: "โครงสร้างแบบใด ที่ทำให้หุ่นยนต์ทำงานตรวจจับเซ็นเซอร์ได้ตลอดเวลาโดยไม่มีวันหลับ?", svg: null, ans: "โครงสร้างแบบทำซ้ำ (Loop)", choices: ["โครงสร้างแบบลำดับ (Sequence)", "โครงสร้างแบบเส้นตรง", "โครงสร้างแบบทำซ้ำ (Loop)", "โครงสร้างแบบเลือกทำรอบเดียว"] },
+        { q: "ถ้าเราเขียนสัญลักษณ์ Decision (สี่เหลี่ยมข้าวหลามตัด) แต่ลืมลากเส้น 'ไม่ใช่ (No)' จะเกิดอะไรขึ้น?", svg: null, ans: "โปรแกรมจะพัง หรือทำงานไม่ครบเงื่อนไข", choices: ["หุ่นยนต์จะฉลาดขึ้น", "โปรแกรมจะพัง หรือทำงานไม่ครบเงื่อนไข", "คอมพิวเตอร์จะแก้ไขให้เอง", "เซ็นเซอร์จะอ่านค่าได้เร็วขึ้น"] },
+        { q: "ข้อใดคือเป้าหมายหลักของการวาด Flowchart ก่อนเขียนโค้ดจริง?", svg: null, ans: "เพื่อเห็นลำดับความคิดและป้องกันข้อผิดพลาด", choices: ["เพื่อความสวยงามส่งครู", "เพื่อทำให้คอมพิวเตอร์ทำงานไวขึ้น 2 เท่า", "เพื่อเห็นลำดับความคิดและป้องกันข้อผิดพลาด", "เพื่อสร้างกราฟิกให้หุ่นยนต์"] }
+    ];
+
+    let currentQIndex = 0;
+    let score = 0;
+    let gameStarted = false;
+    let selectedQuestions = [];
+
+    // ฟังก์ชันสุ่ม (Fisher-Yates) ป้องกันเด็กข้างๆ ลอก
+    function shuffle(array) {
+        let curId = array.length;
+        while (0 !== curId) {
+            let randId = Math.floor(Math.random() * curId);
+            curId -= 1;
+            let tmp = array[curId]; array[curId] = array[randId]; array[randId] = tmp;
+        }
+        return array;
+    }
+
+    function initGame() {
+        gameStarted = true; score = 0; currentQIndex = 0;
+        // สุ่มเลือก 5 ข้อจากคลัง
+        selectedQuestions = shuffle([...quizBank]).slice(0, 5); 
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        const qData = selectedQuestions[currentQIndex];
+        document.getElementById('question-counter').innerText = `คำถาม: ${currentQIndex + 1} / 5`;
+        document.getElementById('score-counter').innerText = `คะแนน: ${score}`;
+        document.getElementById('question-text').innerText = qData.q;
+
+        const imgBox = document.getElementById('question-image');
+        if (qData.svg) { imgBox.style.display = 'flex'; imgBox.innerHTML = qData.svg; } 
+        else { imgBox.style.display = 'none'; }
+
+        const optionsGrid = document.getElementById('options-grid');
+        optionsGrid.innerHTML = "";
+
+        // สุ่มสลับตำแหน่งตัวเลือก ก ข ค ง
+        const shuffledChoices = shuffle([...qData.choices]);
+
+        shuffledChoices.forEach(choice => {
+            const btn = document.createElement('button');
+            btn.className = 'quiz-option';
+            btn.innerText = choice;
+            btn.onclick = () => checkAnswer(btn, choice, qData.ans);
+            optionsGrid.appendChild(btn);
+        });
+    }
+
+    function checkAnswer(selectedBtn, selectedText, correctText) {
+        // ล็อคปุ่ม
+        const allBtns = document.querySelectorAll('.quiz-option');
+        allBtns.forEach(b => b.style.pointerEvents = 'none');
+
+        if (selectedText === correctText) {
+            selectedBtn.classList.add('correct');
+            score++;
+            document.getElementById('score-counter').innerText = `คะแนน: ${score}`;
+            confetti({ particleCount: 50, spread: 60, origin: { y: 0.8 }, colors: ['#10b981'] });
+        } else {
+            selectedBtn.classList.add('wrong');
+            allBtns.forEach(b => { if(b.innerText === correctText) b.classList.add('correct'); });
+        }
+
+        setTimeout(() => {
+            currentQIndex++;
+            if (currentQIndex < 5) loadQuestion();
+            else showResult();
+        }, 2000); // ให้เวลาเด็กอ่านเฉลย 2 วิ
+    }
+
+    function showResult() {
+        document.getElementById('game-area').style.display = 'none';
+        document.getElementById('game-result').style.display = 'block';
+        document.getElementById('final-score').innerText = score;
+        document.getElementById('footer-controls').style.display = 'none'; 
+    }
+</script>
+
+</body>
+</html>
