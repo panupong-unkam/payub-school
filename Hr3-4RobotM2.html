@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decomposition: วิชาแยกย่อยปัญหา</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Noto+Serif+Thai:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --bg-dark: #0f172a; --surface-dark: #1e293b; --cyber-blue: #0ea5e9;
+            --cyber-blue-glow: rgba(14, 165, 233, 0.4); --neon-green: #10b981;
+            --neon-orange: #f59e0b; --neon-pink: #ec4899; --text-main: #f8fafc;
+            --text-muted: #94a3b8; --border-line: #334155;
+        }
+
+        body {
+            display: flex; justify-content: center; align-items: center; min-height: 100vh;
+            background: radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 100%);
+            color: var(--text-main); font-family: 'Sarabun', sans-serif;
+            padding: 20px; margin: 0; overflow-x: hidden;
+        }
+
+        body::before {
+            content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 30px 30px; z-index: -1;
+        }
+
+        .lesson-container {
+            width: 100%; max-width: 1100px; background: var(--surface-dark);
+            border-radius: 24px; box-shadow: 0 0 40px rgba(0,0,0,0.5), 0 0 15px var(--cyber-blue-glow);
+            overflow: hidden; border: 1px solid var(--border-line);
+            display: flex; flex-direction: column; min-height: 80vh;
+        }
+
+        .lesson-header {
+            background: rgba(15, 23, 42, 0.9); padding: 20px 30px;
+            border-bottom: 1px solid var(--cyber-blue);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .progress-track { height: 5px; background: var(--border-line); width: 100%; display: none; }
+        #progress-bar { height: 100%; background: var(--cyber-blue); width: 0%; box-shadow: 0 0 10px var(--cyber-blue); transition: width 0.6s ease; }
+
+        .lesson-body { padding: 40px; position: relative; flex-grow: 1; display: flex; flex-direction: column; }
+        
+        .step { display: none; animation: glitchFadeIn 0.5s ease-out forwards; flex-grow: 1; }
+        .step.active { display: block; }
+
+        @keyframes glitchFadeIn { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 1; transform: translateY(0); } }
+
+        h3 {
+            color: var(--neon-green); font-family: 'Noto Serif Thai', serif; font-size: 28px;
+            margin-top: 0; text-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+            border-bottom: 1px dashed var(--border-line); padding-bottom: 15px;
+        }
+        p, li { line-height: 1.8; font-size: 17px; color: #cbd5e1; }
+
+        .btn {
+            padding: 14px 28px; border: none; border-radius: 10px; font-family: 'Sarabun'; font-weight: bold;
+            font-size: 16px; cursor: pointer; transition: 0.3s; display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        .btn-primary { background: var(--cyber-blue); color: white; box-shadow: 0 4px 15px var(--cyber-blue-glow); }
+        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 8px 25px var(--cyber-blue-glow); background: #0284c7; }
+        .btn-outline { background: transparent; color: var(--text-muted); border: 1px solid var(--border-line); }
+        .btn-outline:hover { color: white; border-color: white; }
+
+        .footer-nav {
+            padding: 25px 40px; background: rgba(15, 23, 42, 0.95); border-top: 1px solid var(--border-line);
+            display: none; justify-content: space-between; align-items: center; margin-top: auto;
+        }
+
+        .video-container {
+            width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 15px;
+            overflow: hidden; border: 2px solid var(--border-line); margin: 20px 0;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+        }
+
+        /* 🧩 Flexbox Tree Structure */
+        .tree-container { text-align: center; padding: 20px 0; }
+        .tree-root { display: inline-block; background: rgba(16, 185, 129, 0.15); border: 3px solid var(--neon-green); padding: 15px 30px; border-radius: 12px; font-size: 20px; font-weight: bold; color: var(--neon-green); margin-bottom: 10px; }
+        .tree-arrow { font-size: 24px; color: #64748b; margin: 10px 0; }
+        .tree-branches { display: flex; justify-content: center; flex-wrap: wrap; gap: 20px; margin-top: 10px; }
+        .tree-node { flex: 1; min-width: 200px; background: rgba(0,0,0,0.2); border: 2px solid var(--cyber-blue); border-radius: 12px; padding: 15px; text-align: left; }
+        .tree-node-title { font-weight: bold; color: white; font-size: 18px; border-bottom: 1px solid var(--border-line); padding-bottom: 8px; margin-bottom: 10px; text-align: center; }
+        .tree-node-list { list-style-type: none; padding: 0; margin: 0; color: var(--text-muted); font-size: 15px; }
+        .tree-node-list li { margin-bottom: 8px; padding-left: 15px; position: relative; }
+        .tree-node-list li::before { content: '👉'; position: absolute; left: 0; top: 0; font-size: 12px; }
+
+        .quiz-option {
+            background: rgba(255,255,255,0.05); border: 2px solid var(--border-line);
+            padding: 15px 20px; border-radius: 12px; margin-bottom: 15px; cursor: pointer;
+            transition: 0.2s; font-size: 16px; color: var(--text-main); text-align: left; width: 100%;
+        }
+        .quiz-option:hover { background: rgba(14, 165, 233, 0.1); border-color: var(--cyber-blue); }
+        .quiz-option.correct { background: rgba(16, 185, 129, 0.2); border-color: var(--neon-green); color: var(--neon-green); font-weight: bold; }
+        .quiz-option.wrong { background: rgba(239, 68, 68, 0.2); border-color: #ef4444; color: #ef4444; }
+
+        @media (max-width: 900px) {
+            .lesson-body { padding: 20px; }
+            .grid-2col { grid-template-columns: 1fr !important; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="lesson-container">
+    <div class="lesson-header">
+        <h2 style="margin: 0; font-size: 20px; letter-spacing: 1px; color: var(--text-main);">🤖 COMPUTATIONAL THINKING</h2>
+        <div id="header-guest-info" style="display: none; align-items: center; gap: 12px;">
+            <span style="background: rgba(14, 165, 233, 0.15); color: var(--cyber-blue); padding: 6px 18px; border-radius: 20px; font-size: 14px; font-weight: bold; border: 1px solid var(--cyber-blue);" id="display-header-name">Student</span>
+            <button class="btn btn-outline" style="padding: 6px 15px; font-size: 12px;" onclick="location.reload()">EXIT</button>
+        </div>
+    </div>
+    
+    <div class="progress-track" id="progress-container"><div id="progress-bar"></div></div>
+
+    <div class="lesson-body">
+        
+        <div class="step active" id="step-0">
+            <div style="text-align: center; padding: 50px 20px;">
+                <div style="font-size: 80px; margin-bottom: 20px; filter: drop-shadow(0 0 15px var(--neon-green));">🧩</div>
+                <h2 style="color: white; font-size: 34px; margin-bottom: 10px;">บทเรียน: การแยกย่อยปัญหา (Decomposition)</h2>
+                <p style="color: var(--text-muted); font-size: 18px; margin-bottom: 40px;">กรุณาระบุชื่อของคุณ เพื่อเข้าสู่ระบบการเรียนรู้</p>
+                <input type="text" id="guest-name-input" placeholder="พิมพ์ชื่อเล่นหรือชื่อจริง..." style="width:100%; max-width:400px; padding:15px 20px; background:rgba(0,0,0,0.3); border:2px solid var(--neon-green); border-radius:12px; color:white; font-size:20px; text-align:center; outline:none;" onkeypress="if(event.key === 'Enter') startLesson()">
+                <div style="margin-top: 35px;">
+                    <button class="btn btn-primary" style="padding: 16px 50px; font-size: 18px;" onclick="startLesson()">🚀 เข้าสู่บทเรียนชั่วโมงที่ 2</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="step" id="step-1">
+            <h3>ด่านที่ 1: เผชิญหน้ากับ "ปัญหาใหญ่"</h3>
+            <p>ยินดีต้อนรับ <b class="student-name-inject" style="color: var(--cyber-blue);"></b>! <br>ในการสร้างโปรแกรมหรือหุ่นยนต์ เรามักจะเจอกับ <b>"ปัญหาที่ซับซ้อน (Complex Problem)"</b> เช่น "จงสร้างเกม 1 เกม" ฟังดูยากและไม่รู้จะเริ่มตรงไหนใช่ไหมครับ?</p>
+            <p>เคล็ดลับของวิศวกรคือ <b>การแยกย่อยปัญหา (Decomposition)</b> ครับ มาดูคลิปวิดีโอจากสำนักข่าว BBC (อังกฤษ) เพื่อปูพื้นฐานแนวคิดนี้กันก่อนเลย!</p>
+            
+            <div class="video-container" style="max-width: 800px; margin: 30px auto; border-color: var(--neon-green);">
+                <iframe src="https://www.youtube.com/embed/HuGjK4fqcpg?rel=0" frameborder="0" allowfullscreen style="width:100%; height:100%;"></iframe>
+            </div>
+        </div>
+
+        <div class="step" id="step-2">
+            <h3>ด่านที่ 2: กลยุทธ์ "หั่นปัญหา" (Slice & Dice)</h3>
+            <p><b>Decomposition</b> คือการแตกปัญหาชิ้นใหญ่ๆ ให้กลายเป็นปัญหาย่อยๆ (Sub-problems) ชิ้นเล็กลง เพื่อให้เราโฟกัสและแก้ปัญหาทีละส่วนได้ง่ายขึ้นครับ ลองดูตัวอย่างการสร้างจักรยานด้านล่างนี้</p>
+            
+            <div class="tree-container" style="margin-top: 30px; background: rgba(0,0,0,0.1); padding: 30px; border-radius: 20px; border: 1px dashed var(--border-line);">
+                <div class="tree-root" style="border-color: var(--neon-orange); color: var(--neon-orange);">
+                    🚲 การสร้างจักรยาน 1 คัน
+                </div>
+                <div class="tree-arrow">⬇️ แตกปัญหาย่อย ⬇️</div>
+                <div class="tree-branches">
+                    <div class="tree-node" style="border-color: var(--cyber-blue);">
+                        <div class="tree-node-title">1. ระบบล้อและยาง</div>
+                        <ul class="tree-node-list">
+                            <li>ล้อหน้า</li>
+                            <li>ล้อหลัง</li>
+                            <li>ยางใน/ยางนอก</li>
+                        </ul>
+                    </div>
+                    <div class="tree-node" style="border-color: var(--cyber-blue);">
+                        <div class="tree-node-title">2. โครงเหล็ก (เฟรม)</div>
+                        <ul class="tree-node-list">
+                            <li>ตัวถังหลัก</li>
+                            <li>แฮนด์บังคับทิศทาง</li>
+                            <li>เบาะนั่ง</li>
+                        </ul>
+                    </div>
+                    <div class="tree-node" style="border-color: var(--cyber-blue);">
+                        <div class="tree-node-title">3. ระบบโซ่และเกียร์</div>
+                        <ul class="tree-node-list">
+                            <li>บันไดปั่น</li>
+                            <li>โซ่จักรยาน</li>
+                            <li>ระบบเบรก</li>
+                        </ul>
+                    </div>
+                </div>
+                <div style="margin-top: 25px; color: var(--neon-green); font-size: 16px; font-weight: bold; background: rgba(16,185,129,0.1); padding: 10px; border-radius: 10px;">
+                    "เมื่อเราสร้างและประกอบแต่ละส่วนเสร็จ เราก็จะได้จักรยานที่สมบูรณ์ 1 คัน!"
+                </div>
+            </div>
+        </div>
+
+        <div class="step" id="step-3">
+            <h3>ด่านที่ 3: ผ่าตัด "หุ่นยนต์ดูดฝุ่น"</h3>
+            <p>ทีนี้มาดูตัวอย่างในงานหุ่นยนต์กันบ้างครับ ถ้า <b class="student-name-inject"></b> ได้รับโจทย์ให้สร้าง <b>"หุ่นยนต์ดูดฝุ่นอัจฉริยะ"</b> เราสามารถใช้ตรรกะ Decomposition แยกย่อยระบบการทำงาน (System Architecture) ได้อย่างเป็นระเบียบ ดังนี้ครับ:</p>
+            
+            <div class="tree-container" style="margin-top: 30px; background: rgba(0,0,0,0.1); padding: 30px; border-radius: 20px; border: 1px dashed var(--neon-green);">
+                <div class="tree-root">
+                    🤖 หุ่นยนต์ดูดฝุ่นอัจฉริยะ
+                </div>
+                <div class="tree-arrow">⬇️ แบ่งระบบการทำงาน ⬇️</div>
+                <div class="tree-branches">
+                    <div class="tree-node" style="border-color: var(--cyber-blue);">
+                        <div class="tree-node-title">⚙️ 1. ระบบขับเคลื่อน</div>
+                        <ul class="tree-node-list">
+                            <li>มอเตอร์ล้อซ้าย/ขวา</li>
+                            <li>ชุดล้อประคองอิสระ</li>
+                            <li>ระบบคำนวณระยะทาง</li>
+                        </ul>
+                    </div>
+                    <div class="tree-node" style="border-color: var(--neon-orange);">
+                        <div class="tree-node-title">📡 2. ระบบเซ็นเซอร์</div>
+                        <ul class="tree-node-list">
+                            <li>เซ็นเซอร์กันชนหน้า</li>
+                            <li>เซ็นเซอร์กันตกบันได</li>
+                            <li>เรดาร์สแกนพื้นที่ (Lidar)</li>
+                        </ul>
+                    </div>
+                    <div class="tree-node" style="border-color: #a855f7;">
+                        <div class="tree-node-title">🧹 3. ระบบทำความสะอาด</div>
+                        <ul class="tree-node-list">
+                            <li>มอเตอร์พัดลมดูดฝุ่น</li>
+                            <li>แปรงปัดฝุ่นด้านข้าง</li>
+                            <li>กล่องเก็บฝุ่น</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <p style="text-align: center; margin-top: 15px; font-size: 15px; color: var(--text-main);">เห็นไหมครับว่า พอเราแยกย่อยระบบออกมา เราจะรู้ทันทีว่าต้องไปเขียนโค้ดและต่อสายไฟที่ฮาร์ดแวร์ชิ้นไหนบ้าง!</p>
+        </div>
+
+        <div class="step" id="step-4">
+            <h3>ด่านที่ 4: จาก Decomposition สู่การทำงานจริง</h3>
+            <p>อ้างอิงจากคลิปของ BBC ในด่านที่ 1 การแยกย่อยปัญหาไม่จำเป็นต้องใช้แค่กับหุ่นยนต์ แต่ใช้กับ <b>การแบ่งงานให้เพื่อนในกลุ่ม</b> ได้ด้วย ลองดูตัวอย่าง <b>"การสร้างเกมคอมพิวเตอร์"</b> กันครับ</p>
+            
+            <div style="background: rgba(14, 165, 233, 0.1); border: 2px solid var(--cyber-blue); border-radius: 15px; padding: 20px; margin-bottom: 25px;">
+                <h4 style="margin-top:0; color: white; display: flex; align-items: center; gap: 10px;">🎮 โจทย์: ครูสั่งให้สร้าง "เกมผจญภัยตะลุยอวกาศ" 1 เกม</h4>
+                <p style="font-size: 15px; margin:0;">ถ้าให้เด็ก 1 คนทำทุกอย่าง (วาดรูป, แต่งเพลง, เขียนโค้ด) คงใช้เวลาเป็นปีแน่ๆ! เราจึงต้องใช้ Decomposition เพื่อ <b>"แบ่งงานให้เพื่อนๆ 3 คน"</b> ช่วยกันทำดังนี้ครับ</p>
+            </div>
+
+            <div class="grid-2col" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
+                <div style="background: rgba(239, 68, 68, 0.1); border: 2px solid #ef4444; border-radius: 15px; padding: 20px; text-align: center;">
+                    <div style="font-size: 40px; margin-bottom: 10px;">🎨</div>
+                    <h4 style="color:#ef4444; margin-top:0; border-bottom: 1px dashed #ef4444; padding-bottom:10px;">หน้าที่ 1: กราฟิกดีไซน์</h4>
+                    <p style="font-size: 14px; text-align: left; color: var(--text-muted);">ให้เพื่อนคนที่วาดรูปเก่ง รับผิดชอบ:<br>👉 วาดตัวละครนักบินอวกาศ<br>👉 วาดฉากดวงดาว<br>👉 ออกแบบปุ่มกดในเกม</p>
+                </div>
+                <div style="background: rgba(16, 185, 129, 0.1); border: 2px solid var(--neon-green); border-radius: 15px; padding: 20px; text-align: center;">
+                    <div style="font-size: 40px; margin-bottom: 10px;">🎵</div>
+                    <h4 style="color:var(--neon-green); margin-top:0; border-bottom: 1px dashed var(--neon-green); padding-bottom:10px;">หน้าที่ 2: วิศวกรเสียง</h4>
+                    <p style="font-size: 14px; text-align: left; color: var(--text-muted);">ให้เพื่อนที่เก่งดนตรี รับผิดชอบ:<br>👉 ทำเพลงประกอบฉากตื่นเต้น<br>👉 หาเสียงเอฟเฟกต์ตอนยิงปืน<br>👉 หาเสียงระเบิด</p>
+                </div>
+                <div style="background: rgba(245, 158, 11, 0.1); border: 2px solid var(--neon-orange); border-radius: 15px; padding: 20px; text-align: center;">
+                    <div style="font-size: 40px; margin-bottom: 10px;">💻</div>
+                    <h4 style="color:var(--neon-orange); margin-top:0; border-bottom: 1px dashed var(--neon-orange); padding-bottom:10px;">หน้าที่ 3: โปรแกรมเมอร์</h4>
+                    <p style="font-size: 14px; text-align: left; color: var(--text-muted);">ให้คนที่เก่งคอมฯ รับผิดชอบ:<br>👉 เขียนโค้ดบังคับตัวละคร<br>👉 เขียนระบบคิดคะแนน<br>👉 เขียนระบบจับเวลา</p>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 20px; font-weight: bold; color: var(--cyber-blue);">
+                "เมื่อทุกคนทำงานของตัวเองเสร็จ แล้วนำมารวมกัน (Assemble) เราก็จะได้เกมที่สมบูรณ์แบบในเวลาที่รวดเร็ว!"
+            </div>
+        </div>
+
+        <div class="step" id="step-5">
+            <h3>ด่านที่ 5: ภารกิจ "แยกย่อยคำสั่ง VEXcode VR"</h3>
+            
+            <div style="background: rgba(14, 165, 233, 0.05); border: 2px solid var(--cyber-blue); padding: 40px; border-radius: 20px; margin-top: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                <h4 style="color: white; margin-top: 0; font-size: 26px; display:flex; align-items:center; gap:12px; margin-bottom: 25px;">
+                    <span style="font-size:35px;">🛠️</span> ภารกิจวิศวกรของคุณ
+                </h4>
+                
+                <p style="font-size: 18px; color: var(--text-main); margin-bottom: 25px; line-height: 1.6;">
+                    ลองนึกถึงตอนที่เราเขียนโปรแกรมสั่งงานหุ่นยนต์ใน <b>VEXcode VR (สนาม Disk Mover)</b> 
+                    ที่เป้าหมายคือต้องให้หุ่นยนต์เดินทางไปเก็บแผ่นแม่เหล็กแล้วนำกลับมาทิ้งที่ฐานดูครับ
+                </p>
+                
+                <div style="background: rgba(0,0,0,0.3); padding: 30px; border-radius: 15px; font-size: 18px; line-height: 2;">
+                    <b style="font-size: 20px; color: white;">คำสั่ง:</b> จงใช้หลักการ Decomposition แยกย่อยภารกิจ <b>"เก็บแม่เหล็ก 1 ชิ้น กลับมาทิ้งที่จุดเริ่มต้น"</b> ออกเป็น 4 ขั้นตอนย่อยๆ<br><br>
+                    
+                    <span style="color:var(--neon-orange); font-weight: bold; font-size: 20px;">💡 ใบ้ให้ 4 ขั้นตอนหลัก:</span><br>
+                    <div style="margin-left: 10px; margin-top: 10px;">
+                        <span style="color:var(--neon-green); font-weight:bold;">1.</span> การเดินทางไปหาแม่เหล็ก <i>(ขับเคลื่อนไปข้างหน้าอย่างไร?)</i><br>
+                        <span style="color:var(--neon-green); font-weight:bold;">2.</span> การเก็บแม่เหล็ก <i>(ต้องสั่งเปิดแม่เหล็กดูดอย่างไร?)</i><br>
+                        <span style="color:var(--neon-green); font-weight:bold;">3.</span> การเดินทางกลับฐาน <i>(ถอยหลังหรือหันรถกลับอย่างไร?)</i><br>
+                        <span style="color:var(--neon-green); font-weight:bold;">4.</span> การปล่อยแม่เหล็ก <i>(สั่งให้แม่เหล็กทำอะไร?)</i>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 30px; padding-top: 20px; border-top: 1px dashed var(--border-line); color: var(--neon-green); font-size: 16px; background: rgba(16,185,129,0.1); padding: 15px; border-radius: 10px;">
+                    <b>📌 วิธีส่งงาน:</b> เขียนเรียง 4 ข้อนี้ลงในสมุดให้ชัดเจน (พร้อมวงเล็บบอกบล็อกคำสั่งที่ใช้คร่าวๆ เช่น Drive forward, Energize Magnet) 
+                    แล้วถ่ายรูปส่งครูภาณุพงศ์ในระบบส่งงานนะครับ
+                </div>
+            </div>
+        </div>
+
+        <div class="step" id="step-6">
+            <h3>ด่านที่ 6: FINAL QUIZ (ท้าทายความเข้าใจ)</h3>
+            <p>มาทดสอบความเข้าใจเรื่อง การแยกย่อยปัญหา (Decomposition) กันครับ! ระบบจะสุ่มคำถาม 5 ข้อ และสลับตัวเลือกเพื่อป้องกันการลอก!</p>
+            
+            <div id="game-area" style="background: rgba(0,0,0,0.2); border: 2px solid var(--cyber-blue); border-radius: 20px; padding: 30px; text-align: center; max-width: 750px; margin: 0 auto; box-shadow: 0 10px 30px rgba(14,165,233,0.1);">
+                
+                <div style="display: flex; justify-content: space-between; margin-bottom: 20px; font-weight: bold; color: var(--cyber-blue);">
+                    <span id="question-counter">คำถาม: 1 / 5</span>
+                    <span id="score-counter">คะแนน: 0</span>
+                </div>
+
+                <h4 id="question-text" style="font-size: 22px; color: white; margin-bottom: 30px; line-height: 1.5;">กำลังโหลดคำถาม...</h4>
+                
+                <div id="options-grid" style="display: flex; flex-direction: column; gap: 12px;">
+                    </div>
+            </div>
+
+            <div id="game-result" style="display: none; text-align: center; padding: 40px; background: rgba(0,0,0,0.2); border-radius: 20px; border: 2px solid var(--neon-green);">
+                <div style="font-size: 70px; margin-bottom: 10px;">🏆</div>
+                <h3 style="border: none; text-shadow: none; font-size: 32px; color: var(--neon-green); margin-bottom: 10px;">ภารกิจสมบูรณ์!</h3>
+                <p style="font-size: 20px; color: white;">วิศวกร: <span class="student-name-inject" style="color:var(--cyber-blue);"></span></p>
+                <p style="font-size: 20px; color: white;">คุณทำคะแนนได้: <b id="final-score" style="color: var(--neon-orange); font-size: 36px;"></b> / 5</p>
+                <div style="margin-top: 30px;">
+                    <button class="btn btn-primary" style="padding: 16px 40px; font-size: 18px;" onclick="finishEntireMission()">📥 กดเพื่อยืนยันการส่งคะแนน</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="footer-nav" id="footer-controls">
+        <button class="btn btn-outline" id="prevBtn" onclick="moveStep(-1)">⬅️ ถอยกลับ</button>
+        <div style="color: var(--cyber-blue); font-family: monospace; font-size: 16px; font-weight: bold;" id="step-counter">LOADING...</div>
+        <button class="btn btn-primary" id="nextBtn" onclick="moveStep(1)">เดินหน้า ➔</button>
+    </div>
+</div>
+
+<script>
+    // =========================================
+    // NAVIGATION & VIDEO MANAGER
+    // =========================================
+    let currentStep = 0;
+    const totalSteps = 6;
+    let studentName = "";
+
+    function stopAllVideos() {
+        const iframes = document.querySelectorAll('.step iframe');
+        iframes.forEach(iframe => {
+            if(iframe.src.includes('youtube.com')) {
+                let currentSrc = iframe.src;
+                iframe.src = currentSrc;
+            }
+        });
+    }
+
+    function startLesson() {
+        const input = document.getElementById('guest-name-input').value.trim();
+        if (!input) { alert('⚠️ กรุณาระบุชื่อของคุณก่อนครับ'); return; }
+        studentName = input;
+        
+        document.querySelectorAll('.student-name-inject').forEach(el => el.innerText = studentName);
+        document.getElementById('display-header-name').innerText = "👨‍💻 " + studentName;
+        
+        document.getElementById('header-guest-info').style.display = 'flex';
+        document.getElementById('footer-controls').style.display = 'flex';
+        document.getElementById('progress-container').style.display = 'block';
+
+        currentStep = 1; updateUI();
+    }
+
+    function updateUI() {
+        stopAllVideos();
+
+        document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+        document.getElementById('step-' + currentStep).classList.add('active');
+        
+        const progress = (currentStep / totalSteps) * 100;
+        document.getElementById('progress-bar').style.width = progress + '%';
+        document.getElementById('step-counter').innerText = `STEP: 0${currentStep}/0${totalSteps}`;
+        
+        document.getElementById('prevBtn').style.visibility = currentStep === 1 ? 'hidden' : 'visible';
+        
+        if (currentStep === totalSteps) {
+            document.getElementById('nextBtn').style.display = 'none';
+            if (!gameStarted) initGame();
+        } else {
+            document.getElementById('nextBtn').style.display = 'inline-flex';
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function moveStep(n) { currentStep += n; updateUI(); }
+
+    function finishEntireMission() {
+        confetti({ particleCount: 200, spread: 100, origin: { y: 0.5 }, colors: ['#0ea5e9', '#10b981', '#f59e0b'] });
+        setTimeout(() => {
+            alert(`🎉 เก่งมาก ${studentName}! ระบบจะพากลับไปหน้าวิชาเรียนหลักครับ`);
+            window.location.reload(); 
+        }, 2000);
+    }
+
+    // =========================================
+    // ANTI-CHEAT QUIZ GAME (Decomposition Topic)
+    // =========================================
+    const quizBank = [
+        { q: "ความหมายของคำว่า Decomposition (การแยกย่อยปัญหา) คือข้อใด?", ans: "การแบ่งปัญหาชิ้นใหญ่ๆ ออกเป็นปัญหาย่อยๆ เพื่อให้แก้ได้ง่ายขึ้น", choices: ["การเขียนโปรแกรมยาวๆ ไว้ในฟังก์ชันเดียว", "การเขียน Flowchart โดยไม่ใช้สัญลักษณ์ใดๆ เลย", "การแบ่งปัญหาชิ้นใหญ่ๆ ออกเป็นปัญหาย่อยๆ เพื่อให้แก้ได้ง่ายขึ้น", "การลบส่วนประกอบของหุ่นยนต์ทิ้งไปเพื่อประหยัดไฟ"] },
+        { q: "จากตัวอย่างการสร้าง 'เกมผจญภัยอวกาศ' การแยกย่อยปัญหา (Decomposition) มีประโยชน์อย่างไร?", ans: "ทำให้สามารถแบ่งงาน (กราฟิก, เสียง, โค้ด) ให้เพื่อนๆ ช่วยกันทำได้", choices: ["ทำให้คอมพิวเตอร์ทำงานไวขึ้น 2 เท่า", "ทำให้สามารถแบ่งงาน (กราฟิก, เสียง, โค้ด) ให้เพื่อนๆ ช่วยกันทำได้", "ทำให้ไม่ต้องใช้เมาส์และคีย์บอร์ดในการเล่นเกม", "ทำให้เกมมีภาพที่สวยงามระดับ 4K โดยอัตโนมัติ"] },
+        { q: "หากได้รับโจทย์ 'สร้างหุ่นยนต์ดูดฝุ่น' ข้อใดคือการแบ่งระบบย่อย (Decomposition) ที่เหมาะสมที่สุด?", ans: "ระบบขับเคลื่อน, ระบบเซ็นเซอร์ตรวจจับ, ระบบดูดฝุ่น", choices: ["ทาสีหุ่นยนต์, ติดสติ๊กเกอร์, ตั้งชื่อหุ่นยนต์", "ระบบขับเคลื่อน, ระบบเซ็นเซอร์ตรวจจับ, ระบบดูดฝุ่น", "ระบบสืบพันธุ์, ระบบหายใจ, ระบบย่อยอาหาร", "ซื้อคอมพิวเตอร์ใหม่, โหลดโปรแกรม, เสียบปลั๊กไฟ"] },
+        { q: "ในการเขียนโปรแกรม VEXcode VR การไปเก็บแม่เหล็ก 1 ชิ้น เราควรแยกย่อยลำดับการทำงานอย่างไร?", ans: "1.เดินไปหาแม่เหล็ก 2.เปิดแม่เหล็ก 3.เดินกลับ 4.ปิดแม่เหล็ก", choices: ["1.เปิดแม่เหล็ก 2.เดินกลับ 3.เดินไปหาแม่เหล็ก 4.ปิดแม่เหล็ก", "1.เดินไปหาแม่เหล็ก 2.ปิดแม่เหล็ก 3.เดินกลับ 4.เปิดแม่เหล็ก", "1.ปิดแม่เหล็ก 2.เปิดแม่เหล็ก 3.เดินไปหาแม่เหล็ก 4.เดินกลับ", "1.เดินไปหาแม่เหล็ก 2.เปิดแม่เหล็ก 3.เดินกลับ 4.ปิดแม่เหล็ก"] },
+        { q: "หากเราไม่ยอมแยกย่อยปัญหา (Decomposition) เลย แต่เลือกที่จะเขียนโค้ดต่อกันยาวๆ รวดเดียว จะเกิดผลเสียอย่างไร?", ans: "เมื่อเกิดข้อผิดพลาด (Bug) จะหาจุดแก้ไขได้ยากมาก", choices: ["เมื่อเกิดข้อผิดพลาด (Bug) จะหาจุดแก้ไขได้ยากมาก", "หุ่นยนต์จะเกิดอาการเมนบอร์ดไหม้", "คอมพิวเตอร์จะไม่ยอมให้เราบันทึกไฟล์เด็ดขาด", "แบตเตอรี่ของหุ่นยนต์จะหมดไวผิดปกติ"] }
+    ];
+
+    let currentQIndex = 0; let score = 0; let gameStarted = false; let selectedQuestions = [];
+
+    function shuffle(array) {
+        let curId = array.length;
+        while (0 !== curId) {
+            let randId = Math.floor(Math.random() * curId);
+            curId -= 1;
+            let tmp = array[curId]; array[curId] = array[randId]; array[randId] = tmp;
+        }
+        return array;
+    }
+
+    function initGame() {
+        gameStarted = true; score = 0; currentQIndex = 0;
+        selectedQuestions = shuffle([...quizBank]).slice(0, 5); 
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        const qData = selectedQuestions[currentQIndex];
+        document.getElementById('question-counter').innerText = `คำถาม: ${currentQIndex + 1} / 5`;
+        document.getElementById('score-counter').innerText = `คะแนน: ${score}`;
+        document.getElementById('question-text').innerText = qData.q;
+
+        const optionsGrid = document.getElementById('options-grid');
+        optionsGrid.innerHTML = "";
+
+        const shuffledChoices = shuffle([...qData.choices]);
+        shuffledChoices.forEach(choice => {
+            const btn = document.createElement('button');
+            btn.className = 'quiz-option';
+            btn.innerText = choice;
+            btn.onclick = () => checkAnswer(btn, choice, qData.ans);
+            optionsGrid.appendChild(btn);
+        });
+    }
+
+    function checkAnswer(selectedBtn, selectedText, correctText) {
+        const allBtns = document.querySelectorAll('.quiz-option');
+        allBtns.forEach(b => b.style.pointerEvents = 'none');
+
+        if (selectedText === correctText) {
+            selectedBtn.classList.add('correct');
+            score++; document.getElementById('score-counter').innerText = `คะแนน: ${score}`;
+            confetti({ particleCount: 50, spread: 60, origin: { y: 0.8 }, colors: ['#0ea5e9'] });
+        } else {
+            selectedBtn.classList.add('wrong');
+            allBtns.forEach(b => { if(b.innerText === correctText) b.classList.add('correct'); });
+        }
+
+        setTimeout(() => {
+            currentQIndex++;
+            if (currentQIndex < 5) loadQuestion();
+            else showResult();
+        }, 2200); 
+    }
+
+    function showResult() {
+        document.getElementById('game-area').style.display = 'none';
+        document.getElementById('game-result').style.display = 'block';
+        document.getElementById('final-score').innerText = score;
+        document.getElementById('footer-controls').style.display = 'none'; 
+    }
+</script>
+
+</body>
+</html>
