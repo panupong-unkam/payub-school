@@ -104,7 +104,6 @@
         .quiz-option.correct { background: rgba(16, 185, 129, 0.2); border-color: var(--neon-green); color: var(--neon-green); font-weight: bold; }
         .quiz-option.wrong { background: rgba(239, 68, 68, 0.2); border-color: #ef4444; color: #ef4444; }
 
-        /* Responsive */
         @media (max-width: 900px) {
             .lesson-body { padding: 20px; }
             .grid-2col { grid-template-columns: 1fr !important; }
@@ -115,14 +114,14 @@
 
 <svg style="width:0; height:0; position:absolute;">
     <defs>
+        <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b" />
+        </marker>
         <marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
             <path d="M 0 0 L 10 5 L 0 10 z" fill="#10b981" />
         </marker>
         <marker id="arrow-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
             <path d="M 0 0 L 10 5 L 0 10 z" fill="#ef4444" />
-        </marker>
-        <marker id="arrow-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
-            <path d="M 0 0 L 10 5 L 0 10 z" fill="#0ea5e9" />
         </marker>
     </defs>
 </svg>
@@ -158,7 +157,7 @@
             <p>ดูแอนิเมชันนี้เพื่อเข้าใจว่าโปรแกรมประมวลผลการทำงานเป็นลำดับอย่างไรครับ</p>
             
             <div class="video-container" style="max-width: 800px; margin: 30px auto;">
-                <iframe src="https://www.youtube.com/embed/6iA8q_4eRPA" frameborder="0" allowfullscreen style="width:100%; height:100%;"></iframe>
+                <iframe src="https://www.youtube.com/embed/fGkxXzrFj4s?rel=0" frameborder="0" allowfullscreen style="width:100%; height:100%;"></iframe>
             </div>
         </div>
 
@@ -169,7 +168,7 @@
                 <div class="symbol-card">
                     <svg viewBox="0 0 100 40"><rect x="5" y="5" width="90" height="30" rx="15" fill="none" stroke="var(--neon-green)" stroke-width="3"/></svg>
                     <b style="color:var(--neon-green); display:block;">Terminator</b>
-                    <div class="usage-text">จุดเริ่มต้น (Start) และสิ้นสุด (End) ของโปรแกรม</div>
+                    <div class="usage-text">จุดเริ่มต้น (Start) และสิ้นสุด (End) ของโปรแกรม (วาดเป็นวงรีหรือแคปซูลเท่านั้น)</div>
                 </div>
                 <div class="symbol-card">
                     <svg viewBox="0 0 100 40"><rect x="5" y="5" width="90" height="30" fill="none" stroke="var(--cyber-blue)" stroke-width="3"/></svg>
@@ -179,7 +178,7 @@
                 <div class="symbol-card">
                     <svg viewBox="0 0 100 60"><polygon points="50,5 90,30 50,55 10,30" fill="none" stroke="var(--neon-orange)" stroke-width="3"/></svg>
                     <b style="color:var(--neon-orange); display:block;">Decision</b>
-                    <div class="usage-text">การตัดสินใจ มีทางออก 2 ทางเสมอคือ ใช่ (Yes) / ไม่ (No)</div>
+                    <div class="usage-text">การตัดสินใจแบบมีเงื่อนไข ต้องมีทางแยก 2 ทางเสมอคือ ใช่ (Yes) / ไม่ (No)</div>
                 </div>
                 <div class="symbol-card">
                     <svg viewBox="0 0 100 40"><polygon points="20,5 95,5 80,35 5,35" fill="none" stroke="#a855f7" stroke-width="3"/></svg>
@@ -189,22 +188,22 @@
                 <div class="symbol-card">
                     <svg viewBox="0 0 100 40"><polygon points="5,15 95,5 95,35 5,35" fill="none" stroke="var(--neon-pink)" stroke-width="3"/></svg>
                     <b style="color:var(--neon-pink); display:block;">Manual Input</b>
-                    <div class="usage-text">รับข้อมูลจากการกดปุ่ม หรือพิมพ์คีย์บอร์ดของมนุษย์</div>
+                    <div class="usage-text">รับข้อมูลจากการกดปุ่มสวิตช์ หรือพิมพ์คีย์บอร์ดของมนุษย์</div>
                 </div>
                 <div class="symbol-card">
                     <svg viewBox="0 0 100 40"><path d="M5 5 L80 5 C95 20 95 20 80 35 L5 35 Z" fill="none" stroke="#38bdf8" stroke-width="3"/></svg>
                     <b style="color:#38bdf8; display:block;">Display</b>
-                    <div class="usage-text">แสดงผลออกทางหน้าจอ Monitor หรือ จอ LCD</div>
+                    <div class="usage-text">แสดงผลข้อความออกทางหน้าจอคอมพิวเตอร์ หรือ จอ LCD</div>
                 </div>
                 <div class="symbol-card">
                     <svg viewBox="0 0 100 40"><path d="M10 20 L80 20 M70 10 L85 20 L70 30" fill="none" stroke="#fef08a" stroke-width="4"/></svg>
                     <b style="color:#fef08a; display:block;">Flowline</b>
-                    <div class="usage-text">ลูกศรแสดงทิศทางการทำงาน ต้องมีหัวลูกศรชี้ทางเสมอ</div>
+                    <div class="usage-text">ลูกศรเชื่อมต่อแสดงทิศทางการทำงาน ต้องมีหัวลูกศรชี้ทางชัดเจน</div>
                 </div>
                 <div class="symbol-card">
                     <svg viewBox="0 0 100 60"><circle cx="50" cy="30" r="15" fill="none" stroke="var(--neon-green)" stroke-width="3"/></svg>
                     <b style="color:var(--neon-green); display:block;">Connector</b>
-                    <div class="usage-text">จุดเชื่อมต่อเส้นลูกศรหลายๆ เส้นมารวมกันในหน้าเดียวกัน</div>
+                    <div class="usage-text">จุดเชื่อมต่อลูกศรหลายๆ เส้นมารวมกันก่อนส่งไปสัญลักษณ์ถัดไป</div>
                 </div>
             </div>
         </div>
@@ -218,18 +217,24 @@
                     <b style="font-size: 18px; color: var(--text-main);">1. ลำดับ (Sequence)</b>
                     <p style="font-size:14px; margin:5px 0 0 0;">ทำงานตรงไปตรงมา จากบนลงล่าง</p>
                     <div class="svg-container">
-                        <svg viewBox="0 0 200 250" width="100%" height="250">
-                            <rect x="50" y="10" width="100" height="40" rx="20" fill="none" stroke="var(--neon-green)" stroke-width="2"/>
-                            <text x="100" y="35" fill="var(--text-main)" font-size="14" text-anchor="middle" font-family="Sarabun">เริ่มต้น (Start)</text>
-                            <line x1="100" y1="50" x2="100" y2="80" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-blue)"/>
-                            <rect x="50" y="80" width="100" height="40" fill="none" stroke="var(--cyber-blue)" stroke-width="2"/>
-                            <text x="100" y="105" fill="var(--text-main)" font-size="14" text-anchor="middle" font-family="Sarabun">อาบน้ำ</text>
-                            <line x1="100" y1="120" x2="100" y2="150" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-blue)"/>
-                            <rect x="50" y="150" width="100" height="40" fill="none" stroke="var(--cyber-blue)" stroke-width="2"/>
-                            <text x="100" y="175" fill="var(--text-main)" font-size="14" text-anchor="middle" font-family="Sarabun">แต่งตัว</text>
-                            <line x1="100" y1="190" x2="100" y2="220" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-blue)"/>
-                            <rect x="50" y="220" width="100" height="40" rx="20" fill="none" stroke="var(--neon-green)" stroke-width="2"/>
-                            <text x="100" y="245" fill="var(--text-main)" font-size="14" text-anchor="middle" font-family="Sarabun">จบ (End)</text>
+                        <svg viewBox="0 0 200 300" width="100%" height="250">
+                            <rect x="50" y="20" width="100" height="40" rx="20" fill="none" stroke="#10b981" stroke-width="2"/>
+                            <text x="100" y="45" fill="white" font-size="14" text-anchor="middle" font-family="Sarabun">เริ่มต้น (Start)</text>
+                            
+                            <path d="M 100 60 L 100 90" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+                            
+                            <rect x="50" y="90" width="100" height="40" fill="none" stroke="#0ea5e9" stroke-width="2"/>
+                            <text x="100" y="115" fill="white" font-size="14" text-anchor="middle" font-family="Sarabun">อาบน้ำ</text>
+                            
+                            <path d="M 100 130 L 100 160" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+                            
+                            <rect x="50" y="160" width="100" height="40" fill="none" stroke="#0ea5e9" stroke-width="2"/>
+                            <text x="100" y="185" fill="white" font-size="14" text-anchor="middle" font-family="Sarabun">แต่งตัว</text>
+                            
+                            <path d="M 100 200 L 100 230" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+                            
+                            <rect x="50" y="230" width="100" height="40" rx="20" fill="none" stroke="#10b981" stroke-width="2"/>
+                            <text x="100" y="255" fill="white" font-size="14" text-anchor="middle" font-family="Sarabun">สิ้นสุด (End)</text>
                         </svg>
                     </div>
                 </div>
@@ -238,31 +243,29 @@
                     <b style="font-size: 18px; color: var(--text-main);">2. เลือกทำ (If-Else)</b>
                     <p style="font-size:14px; margin:5px 0 0 0;">มีทางแยกให้ตัดสินใจ (ใช่ หรือ ไม่ใช่)</p>
                     <div class="svg-container">
-                        <svg viewBox="0 0 250 250" width="100%" height="250">
-                            <line x1="125" y1="5" x2="125" y2="20" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-blue)"/>
+                        <svg viewBox="0 0 300 250" width="100%" height="250">
+                            <path d="M 150 10 L 150 40" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
                             
-                            <polygon points="125,20 190,60 125,100 60,60" fill="none" stroke="var(--neon-orange)" stroke-width="2"/>
-                            <text x="125" y="65" fill="var(--text-main)" font-size="14" text-anchor="middle" font-family="Sarabun">ฝนตก?</text>
+                            <polygon points="150,40 230,80 150,120 70,80" fill="none" stroke="#f59e0b" stroke-width="2"/>
+                            <text x="150" y="85" fill="white" font-size="14" text-anchor="middle" font-family="Sarabun">ฝนตก?</text>
                             
-                            <line x1="60" y1="60" x2="45" y2="60" stroke="#64748b" stroke-width="2"/>
-                            <line x1="45" y1="60" x2="45" y2="100" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-green)"/>
-                            <text x="30" y="55" fill="var(--neon-green)" font-size="12" font-family="Sarabun">ใช่</text>
-                            <rect x="15" y="100" width="60" height="40" fill="none" stroke="var(--cyber-blue)" stroke-width="2"/>
-                            <text x="45" y="125" fill="var(--text-main)" font-size="12" text-anchor="middle" font-family="Sarabun">กางร่ม</text>
+                            <path d="M 70 80 L 40 80 L 40 120" fill="none" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-green)"/>
+                            <text x="50" y="75" fill="#10b981" font-size="12" font-family="Sarabun">ใช่ (YES)</text>
                             
-                            <line x1="190" y1="60" x2="205" y2="60" stroke="#64748b" stroke-width="2"/>
-                            <line x1="205" y1="60" x2="205" y2="100" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-red)"/>
-                            <text x="215" y="55" fill="#ef4444" font-size="12" font-family="Sarabun">ไม่</text>
-                            <rect x="175" y="100" width="60" height="40" fill="none" stroke="var(--cyber-blue)" stroke-width="2"/>
-                            <text x="205" y="125" fill="var(--text-main)" font-size="12" text-anchor="middle" font-family="Sarabun">ไม่กาง</text>
-
-                            <line x1="45" y1="140" x2="45" y2="170" stroke="#64748b" stroke-width="2"/>
-                            <line x1="45" y1="170" x2="125" y2="170" stroke="#64748b" stroke-width="2"/>
-                            <line x1="205" y1="140" x2="205" y2="170" stroke="#64748b" stroke-width="2"/>
-                            <line x1="205" y1="170" x2="125" y2="170" stroke="#64748b" stroke-width="2"/>
+                            <rect x="10" y="120" width="60" height="40" fill="none" stroke="#0ea5e9" stroke-width="2"/>
+                            <text x="40" y="145" fill="white" font-size="12" text-anchor="middle" font-family="Sarabun">กางร่ม</text>
                             
-                            <circle cx="125" cy="170" r="5" fill="var(--bg-dark)" stroke="var(--neon-green)" stroke-width="2"/>
-                            <line x1="125" y1="175" x2="125" y2="200" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-blue)"/>
+                            <path d="M 230 80 L 260 80 L 260 120" fill="none" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-red)"/>
+                            <text x="220" y="75" fill="#ef4444" font-size="12" font-family="Sarabun">ไม่ (NO)</text>
+                            
+                            <rect x="230" y="120" width="60" height="40" fill="none" stroke="#0ea5e9" stroke-width="2"/>
+                            <text x="260" y="145" fill="white" font-size="12" text-anchor="middle" font-family="Sarabun">ไม่กางร่ม</text>
+                            
+                            <path d="M 40 160 L 40 190 L 150 190" fill="none" stroke="#64748b" stroke-width="2"/>
+                            <path d="M 260 160 L 260 190 L 150 190" fill="none" stroke="#64748b" stroke-width="2"/>
+                            
+                            <circle cx="150" cy="190" r="4" fill="#10b981"/>
+                            <path d="M 150 190 L 150 220" fill="none" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
                         </svg>
                     </div>
                 </div>
@@ -271,26 +274,27 @@
                     <b style="font-size: 18px; color: var(--text-main);">3. ทำซ้ำ (Loop)</b>
                     <p style="font-size:14px; margin:5px 0 0 0;">วนกลับไปทำซ้ำ จนกว่าเงื่อนไขจะบอกให้หยุด</p>
                     <div class="svg-container">
-                        <svg viewBox="0 0 200 250" width="100%" height="250">
-                            <line x1="100" y1="5" x2="100" y2="20" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-blue)"/>
+                        <svg viewBox="0 0 300 250" width="100%" height="250">
+                            <path d="M 150 10 L 150 40" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
                             
-                            <rect x="50" y="20" width="100" height="40" fill="none" stroke="var(--cyber-blue)" stroke-width="2"/>
-                            <text x="100" y="45" fill="var(--text-main)" font-size="14" text-anchor="middle" font-family="Sarabun">กินข้าว 1 คำ</text>
+                            <circle cx="150" cy="40" r="3" fill="#0ea5e9"/>
                             
-                            <line x1="100" y1="60" x2="100" y2="90" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-blue)"/>
+                            <rect x="100" y="40" width="100" height="40" fill="none" stroke="#0ea5e9" stroke-width="2"/>
+                            <text x="150" y="65" fill="white" font-size="14" text-anchor="middle" font-family="Sarabun">กินข้าว 1 คำ</text>
                             
-                            <polygon points="100,90 160,130 100,170 40,130" fill="none" stroke="var(--neon-orange)" stroke-width="2"/>
-                            <text x="100" y="135" fill="var(--text-main)" font-size="14" text-anchor="middle" font-family="Sarabun">อิ่มไหม?</text>
+                            <path d="M 150 80 L 150 110" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
                             
-                            <line x1="160" y1="130" x2="185" y2="130" stroke="#64748b" stroke-width="2"/>
-                            <line x1="185" y1="130" x2="185" y2="10" stroke="#64748b" stroke-width="2"/>
-                            <line x1="185" y1="10" x2="100" y2="10" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-red)"/>
-                            <text x="170" y="125" fill="#ef4444" font-size="12" font-family="Sarabun">ไม่</text>
+                            <polygon points="150,110 230,150 150,190 70,150" fill="none" stroke="#f59e0b" stroke-width="2"/>
+                            <text x="150" y="155" fill="white" font-size="14" text-anchor="middle" font-family="Sarabun">อิ่มไหม?</text>
                             
-                            <line x1="100" y1="170" x2="100" y2="200" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-green)"/>
-                            <text x="115" y="190" fill="var(--neon-green)" font-size="12" font-family="Sarabun">ใช่</text>
-                            <rect x="50" y="200" width="100" height="40" rx="20" fill="none" stroke="var(--neon-green)" stroke-width="2"/>
-                            <text x="100" y="225" fill="var(--text-main)" font-size="14" text-anchor="middle" font-family="Sarabun">หยุดกิน</text>
+                            <path d="M 230 150 L 270 150 L 270 30 L 150 30 L 150 40" fill="none" stroke="#ef4444" stroke-width="2" stroke-dasharray="4,4" marker-end="url(#arrow-red)"/>
+                            <text x="235" y="140" fill="#ef4444" font-size="12" font-family="Sarabun">ไม่ (ทำซ้ำ)</text>
+                            
+                            <path d="M 150 190 L 150 220" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-green)"/>
+                            <text x="165" y="210" fill="#10b981" font-size="12" font-family="Sarabun">ใช่</text>
+                            
+                            <rect x="100" y="220" width="100" height="40" rx="20" fill="none" stroke="#10b981" stroke-width="2"/>
+                            <text x="150" y="245" fill="white" font-size="14" text-anchor="middle" font-family="Sarabun">หยุดกิน</text>
                         </svg>
                     </div>
                 </div>
@@ -299,65 +303,60 @@
 
         <div class="step" id="step-4">
             <h3>ด่านที่ 4: เจาะลึก "ถังขยะอัจฉริยะ"</h3>
-            <p>มาดูการทำงานของโครงงานยอดฮิตครับ อัลกอริทึมด้านซ้ายแสดงการใช้ <b>"Loop" ครอบ "If-Else"</b> เพื่อให้เซ็นเซอร์คอยตรวจจับมือคนตลอดเวลาโดยไม่มีวันหลับครับ แผนผังนี้วาดอย่างถูกต้อง 100%</p>
+            <p>มาดูการทำงานของโครงงานยอดฮิตกันครับ อัลกอริทึมด้านซ้ายแสดงการใช้ <b>"Loop" ครอบ "If-Else"</b> เพื่อให้เซ็นเซอร์คอยตรวจจับมือคนตลอดเวลาโดยไม่มีวันหลับ! (แผนผังนี้ถูกต้อง 100%)</p>
             
             <div class="grid-2col" style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 30px; margin-top: 20px;">
                 
                 <div style="background: #0f172a; border: 2px solid var(--cyber-blue); border-radius: 15px; padding: 20px; display: flex; flex-direction: column; align-items: center; box-shadow: inset 0 0 20px rgba(0,0,0,0.5);">
                     <h4 style="color:var(--text-main); margin-top:0; margin-bottom: 20px;">อัลกอริทึม ถังขยะอัจฉริยะ</h4>
                     <div style="width: 100%; max-width: 400px;">
-                        <svg viewBox="0 0 350 480" width="100%" height="auto">
-                            <rect x="100" y="10" width="100" height="40" rx="20" fill="none" stroke="var(--neon-green)" stroke-width="2"/>
-                            <text x="150" y="35" fill="var(--neon-green)" font-size="14" font-weight="bold" text-anchor="middle" font-family="Sarabun">START</text>
+                        <svg viewBox="0 0 350 500" width="100%" height="auto">
+                            <rect x="125" y="10" width="100" height="40" rx="20" fill="none" stroke="#10b981" stroke-width="2"/>
+                            <text x="175" y="35" fill="#10b981" font-size="14" font-weight="bold" text-anchor="middle" font-family="Sarabun">เริ่มต้น (START)</text>
 
-                            <line x1="150" y1="50" x2="150" y2="80" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-blue)"/>
+                            <path d="M 175 50 L 175 80" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+                            <circle cx="175" cy="80" r="3" fill="#0ea5e9"/>
 
-                            <polygon points="100,80 220,80 200,120 80,120" fill="none" stroke="#a855f7" stroke-width="2"/>
-                            <text x="150" y="105" fill="#e9d5ff" font-size="14" text-anchor="middle" font-family="Sarabun">อ่านระยะเซ็นเซอร์</text>
+                            <polygon points="140,80 250,80 230,120 120,120" fill="none" stroke="#a855f7" stroke-width="2"/>
+                            <text x="185" y="105" fill="#e9d5ff" font-size="12" text-anchor="middle" font-family="Sarabun">อ่านระยะจากเซ็นเซอร์</text>
 
-                            <line x1="150" y1="120" x2="150" y2="150" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-blue)"/>
+                            <path d="M 175 120 L 175 150" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
 
-                            <polygon points="150,150 230,190 150,230 70,190" fill="none" stroke="var(--neon-orange)" stroke-width="2"/>
-                            <text x="150" y="195" fill="var(--text-main)" font-size="14" text-anchor="middle" font-family="Sarabun">ระยะ &lt; 20 cm?</text>
+                            <polygon points="175,150 260,190 175,230 90,190" fill="none" stroke="#f59e0b" stroke-width="2"/>
+                            <text x="175" y="195" fill="white" font-size="12" text-anchor="middle" font-family="Sarabun">ระยะ &lt; 20 cm?</text>
 
-                            <line x1="150" y1="230" x2="150" y2="260" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-green)"/>
-                            <text x="165" y="250" fill="var(--neon-green)" font-size="12" font-family="Sarabun">ใช่ (YES)</text>
+                            <path d="M 175 230 L 175 260" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-green)"/>
+                            <text x="185" y="250" fill="#10b981" font-size="12" font-family="Sarabun">ใช่ (YES)</text>
 
-                            <rect x="100" y="260" width="100" height="40" fill="none" stroke="var(--cyber-blue)" stroke-width="2"/>
-                            <text x="150" y="285" fill="var(--text-main)" font-size="14" text-anchor="middle" font-family="Sarabun">มอเตอร์เปิดฝา</text>
+                            <rect x="125" y="260" width="100" height="40" fill="none" stroke="#0ea5e9" stroke-width="2"/>
+                            <text x="175" y="285" fill="white" font-size="12" text-anchor="middle" font-family="Sarabun">มอเตอร์เปิดฝา</text>
 
-                            <line x1="150" y1="300" x2="150" y2="330" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-blue)"/>
+                            <path d="M 175 300 L 175 330" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
 
-                            <rect x="100" y="330" width="100" height="40" fill="none" stroke="var(--cyber-blue)" stroke-width="2"/>
-                            <text x="150" y="355" fill="var(--text-main)" font-size="14" text-anchor="middle" font-family="Sarabun">หน่วงเวลา 3 วิ</text>
+                            <rect x="125" y="330" width="100" height="40" fill="none" stroke="#0ea5e9" stroke-width="2"/>
+                            <text x="175" y="355" fill="white" font-size="12" text-anchor="middle" font-family="Sarabun">หน่วงเวลา 3 วิ</text>
 
-                            <line x1="150" y1="370" x2="150" y2="400" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-blue)"/>
+                            <path d="M 175 370 L 175 400" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
 
-                            <rect x="100" y="400" width="100" height="40" fill="none" stroke="var(--cyber-blue)" stroke-width="2"/>
-                            <text x="150" y="425" fill="var(--text-main)" font-size="14" text-anchor="middle" font-family="Sarabun">มอเตอร์ปิดฝา</text>
+                            <rect x="125" y="400" width="100" height="40" fill="none" stroke="#0ea5e9" stroke-width="2"/>
+                            <text x="175" y="425" fill="white" font-size="12" text-anchor="middle" font-family="Sarabun">มอเตอร์ปิดฝา</text>
 
-                            <line x1="150" y1="440" x2="150" y2="465" stroke="#64748b" stroke-width="2"/>
-                            <line x1="150" y1="465" x2="300" y2="465" stroke="#64748b" stroke-width="2"/>
-                            <line x1="300" y1="465" x2="300" y2="190" stroke="#64748b" stroke-width="2"/>
+                            <path d="M 175 440 L 175 470 L 60 470 L 60 70 L 175 70 L 175 80" fill="none" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
 
-                            <line x1="230" y1="190" x2="300" y2="190" stroke="#64748b" stroke-width="2"/>
-                            <text x="260" y="185" fill="#ef4444" font-size="12" font-family="Sarabun">ไม่ใช่ (NO)</text>
-
-                            <line x1="300" y1="190" x2="300" y2="65" stroke="#ef4444" stroke-width="2" stroke-dasharray="5,5"/>
-                            <line x1="300" y1="65" x2="150" y2="65" stroke="#ef4444" stroke-width="2" stroke-dasharray="5,5" marker-end="url(#arrow-red)"/>
-                            
-                            <text x="315" y="280" fill="#ef4444" font-size="12" font-family="Sarabun" style="writing-mode: vertical-rl;">วนลูปกลับไปตรวจสอบใหม่</text>
+                            <path d="M 260 190 L 320 190 L 320 70 L 175 70" fill="none" stroke="#ef4444" stroke-width="2" stroke-dasharray="5,5" marker-end="url(#arrow-red)"/>
+                            <text x="265" y="185" fill="#ef4444" font-size="12" font-family="Sarabun">ไม่ใช่ (NO)</text>
+                            <text x="330" y="140" fill="#ef4444" font-size="12" writing-mode="vertical-rl" font-family="Sarabun">วนกลับไปอ่านใหม่</text>
                         </svg>
                     </div>
                 </div>
 
                 <div style="display: flex; flex-direction: column; justify-content: center;">
                     <div class="video-container" style="margin: 0; border-color: var(--neon-green); box-shadow: 0 0 20px rgba(16,185,129,0.2);">
-                        <iframe src="https://www.youtube.com/embed/E25MphzaSOI" frameborder="0" allowfullscreen style="width:100%; height:100%;"></iframe>
+                        <iframe src="https://www.youtube.com/embed/DI1rUd3EwiA?rel=0" frameborder="0" allowfullscreen style="width:100%; height:100%;"></iframe>
                     </div>
                     <div style="background: rgba(16,185,129,0.1); padding: 15px; border-radius: 10px; margin-top: 15px; border-left: 4px solid var(--neon-green);">
                         <b style="color:var(--neon-green);">💡 เกร็ดความรู้:</b><br>
-                        <span style="font-size:14px; color: var(--text-main);">เมื่อดูวิดีโอจบแล้ว ให้ลองเทียบจังหวะที่มือเข้าใกล้ถัง กับจังหวะในลูกศร Flowchart (YES) ดูนะครับ จะเห็นว่าทำงานตรงกันเป๊ะ!</span>
+                        <span style="font-size:14px; color: var(--text-main);">เมื่อดูวิดีโอจบแล้ว ให้ลองเทียบจังหวะที่มือเข้าใกล้ถัง กับจังหวะในลูกศร Flowchart (เส้น YES) ดูนะครับ จะเห็นว่าการทำงานสอดคล้องกันเป๊ะ!</span>
                     </div>
                 </div>
             </div>
@@ -374,7 +373,7 @@
                     <p style="font-size: 16px; color: var(--text-main); margin-bottom: 20px;">จงวาด Flowchart ควบคุมไฟถนนด้วย LDR โดยมีเงื่อนไขดังนี้:</p>
                     
                     <div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 12px; font-size: 16px; line-height: 2;">
-                        <span style="color:var(--neon-green); font-weight:bold;">1.</span> <b>[เริ่มต้น]</b> ระบบเริ่มทำงาน<br>
+                        <span style="color:var(--neon-green); font-weight:bold;">1.</span> <b>[เริ่มต้น]</b> ระบบเริ่มทำงาน (ใช้สัญลักษณ์อะไร?)<br>
                         <span style="color:var(--neon-green); font-weight:bold;">2.</span> <b>[รับข้อมูล]</b> อ่านค่าแสงจาก เซ็นเซอร์แสง LDR<br>
                         <span style="color:var(--neon-green); font-weight:bold;">3.</span> <b>[เงื่อนไข]</b> สภาพแวดล้อม "มืด" ใช่หรือไม่?<br>
                         &nbsp;&nbsp;&nbsp;<span style="color:var(--neon-green);">➔ ถ้า ใช่ (มืด)</span> : ให้ <b>เปิดหลอดไฟ</b><br>
@@ -383,13 +382,13 @@
                     </div>
                     
                     <div style="margin-top: 25px; padding-top: 20px; border-top: 1px dashed var(--border-line); color: var(--neon-orange); font-size: 15px;">
-                        <b>📌 คำแนะนำ:</b> วาดโครงสร้างคล้ายถังขยะในด่านที่ 4 เลยครับ (แต่มีคำสั่งทั้งฝั่ง Yes และ No) วาดใส่สมุดแล้วถ่ายรูปส่งครูภาณุพงศ์นะครับ
+                        <b>📌 คำแนะนำ:</b> วาดโครงสร้างคล้ายถังขยะในด่านที่ 4 เลยครับ (แต่มีคำสั่งประมวลผลทั้งฝั่ง Yes และ No) วาดใส่สมุดแล้วถ่ายรูปส่งครูภาณุพงศ์นะครับ
                     </div>
                 </div>
 
                 <div style="display:flex; flex-direction:column; justify-content:center;">
                     <div class="video-container" style="margin: 0;">
-                        <iframe src="https://www.youtube.com/embed/V6W35vQkFz0" frameborder="0" allowfullscreen style="width:100%; height:100%;"></iframe>
+                        <iframe src="https://www.youtube.com/embed/cxWEDEnNsZY?rel=0" frameborder="0" allowfullscreen style="width:100%; height:100%;"></iframe>
                     </div>
                     <p style="text-align:center; font-size:14px; color:var(--text-muted); margin-top:15px;">ดูคลิปตัวอย่างการทำงาน เพื่อเป็นไอเดียในการวาดครับ</p>
                 </div>
@@ -398,7 +397,7 @@
 
         <div class="step" id="step-6">
             <h3>ด่านที่ 6: ท้าสมองประลองตรรกะ (FINAL TEST)</h3>
-            <p>มาทำแบบทดสอบเก็บคะแนน 5 แต้มครับ! (ระบบจะสุ่มคำถามและสลับช้อยส์ <b>เพื่อป้องกันการลอกข้อสอบ</b>) เลือกคำตอบที่ถูกต้องที่สุดเพื่อจบภารกิจ</p>
+            <p>มาทำแบบทดสอบเก็บคะแนน 5 แต้มครับ! (ระบบจะสุ่มคำถามและสลับตัวเลือกตลอดเวลา <b>เพื่อป้องกันการลอกข้อสอบเพื่อนที่นั่งข้างๆ!</b>) เลือกคำตอบที่ถูกต้องที่สุดเพื่อจบภารกิจ</p>
             
             <div id="game-area" style="background: rgba(0,0,0,0.2); border: 2px solid var(--neon-green); border-radius: 20px; padding: 30px; text-align: center; max-width: 700px; margin: 0 auto; box-shadow: 0 10px 30px rgba(16,185,129,0.1);">
                 
@@ -436,11 +435,23 @@
 
 <script>
     // =========================================
-    // NAVIGATION SYSTEM
+    // NAVIGATION SYSTEM & VIDEO MANAGER
     // =========================================
     let currentStep = 0;
     const totalSteps = 6;
     let studentName = "";
+
+    // ฟังก์ชันสำหรับ "ปิด" การเล่นวิดีโอทุกตัวเมื่อเปลี่ยนหน้า
+    function stopAllVideos() {
+        const iframes = document.querySelectorAll('.step iframe');
+        iframes.forEach(iframe => {
+            if(iframe.src.includes('youtube.com')) {
+                // เทคนิคการหยุดวิดีโอคือการรีเซ็ตลิงก์ (src) ของ iframe ใหม่
+                let currentSrc = iframe.src;
+                iframe.src = currentSrc;
+            }
+        });
+    }
 
     function startLesson() {
         const input = document.getElementById('guest-name-input').value.trim();
@@ -459,6 +470,9 @@
     }
 
     function updateUI() {
+        // ทำการตัดการเล่นวิดีโอก่อนที่จะซ่อนหน้าต่าง
+        stopAllVideos();
+
         document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
         document.getElementById('step-' + currentStep).classList.add('active');
         
@@ -478,7 +492,10 @@
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    function moveStep(n) { currentStep += n; updateUI(); }
+    function moveStep(n) { 
+        currentStep += n; 
+        updateUI(); 
+    }
 
     function finishEntireMission() {
         confetti({ particleCount: 200, spread: 100, origin: { y: 0.5 }, colors: ['#0ea5e9', '#10b981', '#f59e0b'] });
@@ -491,18 +508,17 @@
     // =========================================
     // THE SMART QUIZ GAME (Anti-Cheating)
     // =========================================
-    // คลังข้อสอบ (ดึงมาสุ่ม 5 ข้อ) มีภาพประกอบคำถาม (SVG string)
     const svgOval = `<svg viewBox="0 0 100 40" width="120" height="50"><rect x="5" y="5" width="90" height="30" rx="15" fill="none" stroke="#10b981" stroke-width="4"/></svg>`;
     const svgDiamond = `<svg viewBox="0 0 100 60" width="120" height="70"><polygon points="50,5 90,30 50,55 10,30" fill="none" stroke="#f59e0b" stroke-width="4"/></svg>`;
-    const svgRect = `<svg viewBox="0 0 100 40" width="120" height="50"><rect x="5" y="5" width="90" height="30" fill="none" stroke="#0ea5e9" stroke-width="4"/></svg>`;
+    const svgParallelogram = `<svg viewBox="0 0 100 40" width="120" height="50"><polygon points="20,5 95,5 80,35 5,35" fill="none" stroke="#a855f7" stroke-width="4"/></svg>`;
 
     const quizBank = [
-        { q: "สัญลักษณ์นี้ คืออะไร และทำหน้าที่อะไร?", svg: svgOval, ans: "Terminator (จุดเริ่มต้นและสิ้นสุด)", choices: ["Decision (การตัดสินใจ)", "Process (การประมวลผล)", "Terminator (จุดเริ่มต้นและสิ้นสุด)", "Input (การรับข้อมูล)"] },
-        { q: "สัญลักษณ์นี้ มีเงื่อนไขทางออกกี่ทาง และมีหน้าที่อะไร?", svg: svgDiamond, ans: "มี 2 ทาง (ใช่/ไม่ใช่) - ใช้เพื่อตัดสินใจ", choices: ["มี 1 ทาง - ใช้เริ่มโปรแกรม", "มี 2 ทาง (ใช่/ไม่ใช่) - ใช้เพื่อตัดสินใจ", "มี 3 ทาง - ใช้สั่งมอเตอร์", "ไม่มีทางออก - ใช้จบการทำงาน"] },
-        { q: "ถ้าต้องการสั่งให้หุ่นยนต์ 'เปิดหลอดไฟ' ต้องเขียนลงในสัญลักษณ์ใด?", svg: null, ans: "สี่เหลี่ยมผืนผ้า (Process)", choices: ["วงรี (Terminator)", "สี่เหลี่ยมข้าวหลามตัด (Decision)", "สี่เหลี่ยมผืนผ้า (Process)", "สี่เหลี่ยมด้านขนาน (Input/Output)"] },
-        { q: "โครงสร้างแบบใด ที่ทำให้หุ่นยนต์ทำงานตรวจจับเซ็นเซอร์ได้ตลอดเวลาโดยไม่มีวันหลับ?", svg: null, ans: "โครงสร้างแบบทำซ้ำ (Loop)", choices: ["โครงสร้างแบบลำดับ (Sequence)", "โครงสร้างแบบเส้นตรง", "โครงสร้างแบบทำซ้ำ (Loop)", "โครงสร้างแบบเลือกทำรอบเดียว"] },
-        { q: "ถ้าเราเขียนสัญลักษณ์ Decision (สี่เหลี่ยมข้าวหลามตัด) แต่ลืมลากเส้น 'ไม่ใช่ (No)' จะเกิดอะไรขึ้น?", svg: null, ans: "โปรแกรมจะพัง หรือทำงานไม่ครบเงื่อนไข", choices: ["หุ่นยนต์จะฉลาดขึ้น", "โปรแกรมจะพัง หรือทำงานไม่ครบเงื่อนไข", "คอมพิวเตอร์จะแก้ไขให้เอง", "เซ็นเซอร์จะอ่านค่าได้เร็วขึ้น"] },
-        { q: "ข้อใดคือเป้าหมายหลักของการวาด Flowchart ก่อนเขียนโค้ดจริง?", svg: null, ans: "เพื่อเห็นลำดับความคิดและป้องกันข้อผิดพลาด", choices: ["เพื่อความสวยงามส่งครู", "เพื่อทำให้คอมพิวเตอร์ทำงานไวขึ้น 2 เท่า", "เพื่อเห็นลำดับความคิดและป้องกันข้อผิดพลาด", "เพื่อสร้างกราฟิกให้หุ่นยนต์"] }
+        { q: "สัญลักษณ์นี้ (รูปแคปซูล/วงรี) คืออะไร และทำหน้าที่อะไร?", svg: svgOval, ans: "Terminator (ใช้บอกจุดเริ่มต้นและสิ้นสุดโปรแกรม)", choices: ["Decision (การตัดสินใจแยกทาง)", "Process (การประมวลผลให้หุ่นยนต์ทำงาน)", "Terminator (ใช้บอกจุดเริ่มต้นและสิ้นสุดโปรแกรม)", "Input (การรับข้อมูลจากเซ็นเซอร์)"] },
+        { q: "สัญลักษณ์นี้ (รูปสี่เหลี่ยมข้าวหลามตัด) มีเงื่อนไขทางออกกี่ทาง?", svg: svgDiamond, ans: "มี 2 ทาง (ใช่/ไม่ใช่) - ใช้เพื่อตั้งเงื่อนไขตัดสินใจ", choices: ["มี 1 ทาง - ใช้เริ่มโปรแกรม", "มี 2 ทาง (ใช่/ไม่ใช่) - ใช้เพื่อตั้งเงื่อนไขตัดสินใจ", "มี 3 ทาง - ใช้สั่งงานมอเตอร์หลายตัว", "ไม่มีทางออก - ใช้เมื่อต้องการหยุดโปรแกรม"] },
+        { q: "ถ้าต้องการให้หุ่นยนต์ 'อ่านค่าแสงจากเซ็นเซอร์ LDR' ต้องใช้สัญลักษณ์รูปใด?", svg: svgParallelogram, ans: "สี่เหลี่ยมด้านขนาน (Input)", choices: ["สี่เหลี่ยมผืนผ้า (Process)", "สี่เหลี่ยมข้าวหลามตัด (Decision)", "สี่เหลี่ยมด้านขนาน (Input)", "วงรี (Terminator)"] },
+        { q: "โครงสร้างแบบใด ที่ทำให้ระบบ 'ถังขยะอัจฉริยะ' คอยตรวจจับมือคนได้ตลอดเวลาโดยที่โปรแกรมไม่ปิดตัวเอง?", svg: null, ans: "โครงสร้างแบบทำซ้ำ (Loop) โดยลากเส้นกลับไปด้านบน", choices: ["โครงสร้างแบบลำดับ (Sequence)", "โครงสร้างแบบเส้นตรง", "โครงสร้างแบบทำซ้ำ (Loop) โดยลากเส้นกลับไปด้านบน", "โครงสร้างแบบทางเลือกทางเดียว (Single If)"] },
+        { q: "ถ้าเราเขียนสัญลักษณ์ Decision (สี่เหลี่ยมข้าวหลามตัด) แต่ลืมลากเส้นทางออกฝั่ง 'ไม่ใช่ (No)' จะเกิดอะไรขึ้น?", svg: null, ans: "โปรแกรมจะพัง หรือทำงานไม่ครบเงื่อนไข (Error)", choices: ["หุ่นยนต์จะฉลาดขึ้นและทำงานไวขึ้น", "โปรแกรมจะพัง หรือทำงานไม่ครบเงื่อนไข (Error)", "คอมพิวเตอร์จะแก้ไขเส้นนั้นให้เองอัตโนมัติ", "ไม่เกิดอะไรขึ้น โปรแกรมยังคงทำงานได้ปกติ"] },
+        { q: "ข้อใดคือ 'เหตุผลสำคัญที่สุด' ที่วิศวกรต้องวาด Flowchart ก่อนเขียนโค้ดใส่หุ่นยนต์จริง?", svg: null, ans: "เพื่อให้เห็นลำดับความคิดที่ชัดเจน ป้องกันการทำงานผิดพลาด", choices: ["เพื่อความสวยงามเวลานำไปนำเสนองาน", "เพื่อทำให้คอมพิวเตอร์ทำงานไวขึ้นกว่าเดิม 2 เท่า", "เพื่อให้เห็นลำดับความคิดที่ชัดเจน ป้องกันการทำงานผิดพลาด", "เพื่อสร้างกราฟิกให้หุ่นยนต์แสดงผลบนหน้าจอ"] }
     ];
 
     let currentQIndex = 0;
@@ -572,7 +588,7 @@
             currentQIndex++;
             if (currentQIndex < 5) loadQuestion();
             else showResult();
-        }, 2000); // ให้เวลาเด็กอ่านเฉลย 2 วิ
+        }, 2200); // ให้เวลาเด็กอ่านเฉลย 2.2 วิ
     }
 
     function showResult() {
