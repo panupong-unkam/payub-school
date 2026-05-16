@@ -25,7 +25,7 @@
 <div class="mobile-header">
   <div style="display: flex; align-items: center; gap: 12px;">
     <button class="hamburger-btn" onclick="toggleSidebar()" style="background:transparent; border:none; color:white; font-size:26px; padding:0;">☰</button>
-    <img src="logo.svg" alt="โรงเรียนบ้านป่ายุบ" style="width: 38px; height: 38px; filter: drop-shadow(0 0 5px rgba(255,255,255,0.4)); animation: floatingMobileLogo 3s ease-in-out infinite;">
+    <img src="logo.svg" alt="Logo" style="width: 38px; height: 38px; filter: drop-shadow(0 0 5px rgba(255,255,255,0.4)); animation: floatingMobileLogo 3s ease-in-out infinite;">
     
     <div style="font-family:'Noto Serif Thai',serif; line-height: 1.2;">
         <div class="shimmer-text" style="font-weight:700; font-size: 16px;">Computer Science</div>
@@ -69,7 +69,7 @@
   </div>
   <div class="page active" id="page-dashboard">
     <div class="hero-banner">
-      <img src="Krulogo.svg" alt="Kru Logo ครูภาณุพงศ์ อุ่นคำ ครูวิทยาการคำนวณ โรงเรียนบ้านป่ายุบ" class="kru-floating-logo">
+      <img src="Krulogo.svg" alt="Kru Logo" class="kru-floating-logo">
 
       <div style="position: relative; z-index: 2;">
         <h1 style="font-family: 'Noto Serif Thai', serif; font-size: clamp(24px, 6vw, 42px); margin-bottom: 15px; text-shadow: 0 2px 10px rgba(0,0,0,0.2);">
@@ -351,6 +351,62 @@
   </div>
 </div>
 
+<!-- ✅ ใหม่: Modal แก้ไขเนื้อหาบทเรียน -->
+<div class="modal-overlay" id="modal-edit-lesson">
+  <div class="modal auth-card" style="max-width: 450px; padding: 35px 30px;">
+    <h3 style="color: var(--primary-dark); font-size: 22px; margin-bottom: 5px;">✏️ แก้ไขเนื้อหาบทเรียน</h3>
+    <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 25px;">แก้ไขชื่อ, ประเภท หรือลิงก์ของเนื้อหา</p>
+    <input type="hidden" id="edit-lesson-id">
+    <div class="form-group" style="margin-bottom: 15px;">
+      <label style="font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; display:block;">ชื่อเนื้อหา</label>
+      <input type="text" id="edit-lesson-title" placeholder="ชื่อเนื้อหา..." style="width: 100%; padding: 14px; border: 2px solid var(--border); border-radius: 12px; font-family: 'Sarabun'; outline: none; transition: 0.3s;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'">
+    </div>
+    <div class="form-group" style="margin-bottom: 15px;">
+      <label style="font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; display:block;">ประเภทเนื้อหา</label>
+      <select id="edit-lesson-type" style="width: 100%; padding: 14px; border: 2px solid var(--border); border-radius: 12px; font-family: 'Sarabun'; outline: none; transition: 0.3s;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'">
+        <option value="youtube">📺 วิดีโอ YouTube</option>
+        <option value="canva">🎨 สไลด์ Canva / CAI</option>
+        <option value="slide">📊 สไลด์ Google Slides / PPT</option>
+        <option value="form">📝 ข้อสอบ Google Forms</option>
+        <option value="link">🌐 เว็บไซต์อื่นๆ</option>
+      </select>
+    </div>
+    <div class="form-group" style="margin-bottom: 25px;">
+      <label style="font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; display:block;">ลิงก์ (URL)</label>
+      <input type="text" id="edit-lesson-url" placeholder="วางลิงก์ใหม่..." style="width: 100%; padding: 14px; border: 2px solid var(--border); border-radius: 12px; font-family: 'Sarabun'; outline: none; transition: 0.3s;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'">
+    </div>
+    <div style="display: flex; gap: 12px;">
+      <button class="btn" style="flex: 1; background: var(--surface2); border: 2px solid var(--border);" onclick="closeModal('modal-edit-lesson')">❌ ยกเลิก</button>
+      <button class="btn btn-primary" style="flex: 1;" onclick="saveEditLesson()">💾 บันทึกการแก้ไข</button>
+    </div>
+  </div>
+</div>
+
+<!-- ✅ ใหม่: Modal แก้ไขใบงาน -->
+<div class="modal-overlay" id="modal-edit-assignment">
+  <div class="modal auth-card" style="max-width: 480px; padding: 35px 30px;">
+    <h3 style="color: var(--primary-dark); font-size: 22px; margin-bottom: 5px;">✏️ แก้ไขใบงาน</h3>
+    <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 25px;">แก้ไขรายละเอียดใบงานและกิจกรรม</p>
+    <input type="hidden" id="edit-assign-id">
+    <div class="form-group" style="margin-bottom: 15px;">
+      <label style="font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; display:block;">ชื่อใบงาน</label>
+      <input type="text" id="edit-assign-title" placeholder="ชื่อใบงาน..." style="width: 100%; padding: 14px; border: 2px solid var(--border); border-radius: 12px; font-family: 'Sarabun'; outline: none; transition: 0.3s;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'">
+    </div>
+    <div class="form-group" style="margin-bottom: 15px;">
+      <label style="font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; display:block;">คะแนนเต็ม</label>
+      <input type="number" id="edit-assign-maxscore" min="1" max="100" placeholder="เช่น 10" style="width: 100%; padding: 14px; border: 2px solid var(--border); border-radius: 12px; font-family: 'Sarabun'; outline: none; transition: 0.3s;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'">
+    </div>
+    <div class="form-group" style="margin-bottom: 25px;">
+      <label style="font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; display:block;">ส่งให้ห้องเรียน</label>
+      <select id="edit-assign-target" style="width: 100%; padding: 14px; border: 2px solid var(--border); border-radius: 12px; font-family: 'Sarabun'; outline: none; transition: 0.3s;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'"></select>
+    </div>
+    <div style="display: flex; gap: 12px;">
+      <button class="btn" style="flex: 1; background: var(--surface2); border: 2px solid var(--border);" onclick="closeModal('modal-edit-assignment')">❌ ยกเลิก</button>
+      <button class="btn btn-primary" style="flex: 1;" onclick="saveEditAssignment()">💾 บันทึกการแก้ไข</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modal-submit-work">
   <div class="modal auth-card" style="max-width: 450px; padding: 35px 30px;">
     <h3 style="color: var(--primary-dark); font-size: 22px; margin-bottom: 5px;">📤 ส่ง/แก้ไข ผลงาน</h3>
@@ -400,42 +456,16 @@
         <div class="grading-right">
             <h3 style="color: var(--primary-dark); margin-bottom: 5px; font-size: 22px;">📝 ตรวจผลงาน</h3>
             <p id="grading-student-info" style="font-weight: bold; font-size: 16px; margin-bottom: 5px; color: var(--primary);"></p>
-            <p id="grading-assign-title" style="color: var(--text-muted); font-size: 14px; margin-bottom: 15px; border-bottom: 1px dashed #eee; padding-bottom: 15px;"></p>
-
-            <!-- ✅ เพิ่ม: แสดงคะแนนเต็มของใบงาน -->
-            <div id="grading-max-score-banner" style="background: linear-gradient(135deg, var(--primary-dark), var(--primary)); color: white; border-radius: 14px; padding: 14px 18px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between;">
-                <div>
-                    <div style="font-size: 12px; opacity: 0.8; letter-spacing: 0.5px;">คะแนนเต็มของใบงานนี้</div>
-                    <div style="font-size: 28px; font-weight: 700; margin-top: 2px;"><span id="grading-max-score-display">-</span> <span style="font-size: 16px; opacity: 0.8;">คะแนน</span></div>
-                </div>
-                <div style="font-size: 40px; opacity: 0.3;">🎯</div>
-            </div>
+            <p id="grading-assign-title" style="color: var(--text-muted); font-size: 14px; margin-bottom: 25px; border-bottom: 1px dashed #eee; padding-bottom: 15px;"></p>
             
             <input type="hidden" id="grading-sub-id">
-            <input type="hidden" id="grading-max-score">
-
             <div class="form-group">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                    <label style="font-size: 14px; font-weight: bold; color: #333;">✏️ ให้คะแนน:</label>
-                    <!-- ✅ เพิ่ม: สัดส่วนคะแนนแบบ real-time -->
-                    <span id="grading-score-ratio" style="font-size: 13px; font-weight: bold; color: var(--primary-dark); background: #e8f5e9; padding: 3px 10px; border-radius: 20px;">0 / -</span>
-                </div>
-                <!-- ✅ เปลี่ยน: type="text" → type="number" พร้อม max และ oninput validate -->
-                <input type="number" id="grading-score" min="0" placeholder="กรอกคะแนน..." 
-                    style="width: 100%; padding: 15px; border: 2px solid var(--border); border-radius: 12px; font-size: 22px; font-weight: bold; text-align: center; outline: none; transition: 0.3s;"
-                    onfocus="this.style.borderColor='var(--primary)'" 
-                    onblur="this.style.borderColor='var(--border)'"
-                    oninput="validateScoreInput(this)">
-                <!-- ✅ เพิ่ม: Progress bar คะแนน -->
-                <div style="margin-top: 10px; background: #e0e0e0; border-radius: 20px; height: 8px; overflow: hidden;">
-                    <div id="grading-score-bar" style="height: 100%; width: 0%; border-radius: 20px; background: var(--success); transition: width 0.4s ease, background 0.3s;"></div>
-                </div>
-                <div id="grading-score-error" style="display:none; color: var(--danger); font-size: 13px; font-weight: 600; margin-top: 6px;"></div>
+                <label style="font-size: 14px; font-weight: bold; display: block; margin-bottom: 8px; color: #333;">🎯 คะแนนที่ได้:</label>
+                <input type="text" id="grading-score" placeholder="เช่น 10/10 หรือ ผ่าน" style="width: 100%; padding: 15px; border: 2px solid var(--border); border-radius: 12px; font-size: 16px; font-weight: bold; text-align: center; outline: none; transition: 0.3s;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'">
             </div>
-
             <div class="form-group" style="flex: 1; display: flex; flex-direction: column; margin-top: 15px;">
                 <label style="font-size: 14px; font-weight: bold; display: block; margin-bottom: 8px; color: #333;">💬 คำติชม/เสนอแนะ:</label>
-                <textarea id="grading-feedback" placeholder="พิมพ์คำแนะนำให้นักเรียน (นักเรียนจะเห็นข้อความนี้)..." style="width: 100%; flex: 1; min-height: 120px; padding: 15px; border: 2px solid var(--border); border-radius: 12px; font-family: 'Sarabun'; font-size: 15px; outline: none; resize: none; transition: 0.3s;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+                <textarea id="grading-feedback" placeholder="พิมพ์คำแนะนำให้นักเรียน (นักเรียนจะเห็นข้อความนี้)..." style="width: 100%; flex: 1; min-height: 150px; padding: 15px; border: 2px solid var(--border); border-radius: 12px; font-family: 'Sarabun'; font-size: 15px; outline: none; resize: none; transition: 0.3s;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'"></textarea>
             </div>
             <button class="btn btn-primary" style="width: 100%; margin-top: 15px; padding: 15px; font-size: 16px; border-radius: 12px; box-shadow: 0 4px 15px rgba(26,95,63,0.3);" onclick="saveGrade()">💾 บันทึกคะแนน</button>
         </div>
