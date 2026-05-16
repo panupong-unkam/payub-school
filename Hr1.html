@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>นักสำรวจ AI อัจฉริยะ - โรงเรียนบ้านป่ายุบ (บุ้นกีประชานุเคราะห์)</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap');
+        
+        :root {
+            --primary: #4f46e5;
+            --primary-dark: #4338ca;
+            --secondary: #f8fafc;
+            --text-main: #1e293b;
+            --text-light: #64748b;
+            --accent: #f59e0b;
+            --success: #10b981;
+            --danger: #ef4444;
+        }
+
+        body {
+            font-family: 'Kanit', sans-serif;
+            background-color: #f1f5f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            color: var(--text-main);
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 950px;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 40px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        /* Top Progress Bar */
+        .progress-container {
+            width: 100%; background: #e2e8f0; height: 8px; position: sticky; top: 0; z-index: 100;
+        }
+        .progress-bar {
+            height: 100%; background: linear-gradient(90deg, #3b82f6, #8b5cf6); width: 0%;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden;
+        }
+        .progress-bar::after {
+            content: ""; position: absolute; top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transform: translateX(-100%); animation: shimmer 2s infinite;
+        }
+
+        /* Screen Transitions */
+        .screen {
+            display: none; padding: 40px; opacity: 0; transform: translateY(15px);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .screen.active { display: block; opacity: 1; transform: translateY(0); }
+
+        h1 { color: var(--primary-dark); font-size: 32px; text-align: center; margin-bottom: 5px; }
+        h2 { color: #334155; font-size: 26px; border-left: 6px solid var(--primary); padding-left: 15px; margin-bottom: 20px;}
+        p { font-size: 18px; line-height: 1.7; }
+        
+        .hero-img {
+            width: 100%; height: 280px; object-fit: cover; border-radius: 16px; margin-bottom: 25px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.08); transition: transform 0.4s;
+        }
+        .hero-img:hover { transform: scale(1.015); }
+
+        /* Floating Cards */
+        .card {
+            background: white; padding: 25px; border-radius: 16px; border: 1px solid #e2e8f0; margin-bottom: 25px;
+            transition: transform 0.3s, box-shadow 0.3s; box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        }
+        .card:hover { transform: translateY(-3px); box-shadow: 0 12px 20px rgba(0,0,0,0.06); }
+
+        /* Form Inputs */
+        .input-group { margin-bottom: 20px; }
+        label { font-weight: 600; display: block; margin-bottom: 8px; color: #475569;}
+        input[type="text"] {
+            width: 100%; padding: 14px; border: 2px solid #cbd5e1; border-radius: 10px; font-size: 16px; font-family: 'Kanit';
+            box-sizing: border-box; transition: 0.3s; background: #f8fafc;
+        }
+        input[type="text"]:focus { outline: none; border-color: var(--primary); background: white; box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15); }
+
+        /* Buttons */
+        .nav-buttons { display: flex; gap: 15px; margin-top: 30px; border-top: 2px dashed #e2e8f0; padding-top: 25px; }
+        .btn {
+            flex: 1; padding: 15px; border: none; border-radius: 10px; font-size: 18px; font-family: 'Kanit'; font-weight: 600;
+            cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        .btn:hover { transform: translateY(-2px); }
+        .btn:active { transform: translateY(0); }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-outline { background: white; color: var(--text-light); border: 2px solid #cbd5e1; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+
+        /* Highlight Boxes */
+        .info-box { background: #eff6ff; border-left: 5px solid #3b82f6; padding: 20px; border-radius: 0 12px 12px 0; margin: 25px 0;}
+        .warning-box { background: #fffbeb; border-left: 5px solid #f59e0b; padding: 20px; border-radius: 0 12px 12px 0; margin: 25px 0;}
+
+        /* Quiz UI */
+        .quiz-card { padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 20px; background: #fff; }
+        .choices-grid { display: flex; gap: 12px; margin: 15px 0; }
+        .choice-btn {
+            flex: 1; padding: 12px; border: 2px solid #e2e8f0; background: white; border-radius: 10px; cursor: pointer; transition: 0.2s; font-family: 'Kanit'; font-size: 16px;
+        }
+        .choice-btn.selected-ai { background: #dcfce7; border-color: #10b981; color: #065f46; font-weight: 600; }
+        .choice-btn.selected-not { background: #fee2e2; border-color: #ef4444; color: #991b1b; font-weight: 600; }
+
+        /* --- Mind Map Pro Toolbar & Canvas --- */
+        #canvas-container {
+            border: 2px solid #cbd5e1; border-radius: 16px; overflow: hidden; background: #f8fafc;
+            margin-bottom: 20px; position: relative; cursor: crosshair; box-shadow: inset 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .canvas-toolbar {
+            display: flex; gap: 10px; padding: 12px; background: white; border-bottom: 1px solid #e2e8f0; 
+            justify-content: center; align-items: center; flex-wrap: wrap; position: sticky; top: 0; z-index: 10;
+        }
+        .tool-group { display: flex; gap: 5px; padding-right: 15px; border-right: 1px solid #e2e8f0; }
+        .tool-btn {
+            width: 42px; height: 42px; border-radius: 8px; border: 1px solid #cbd5e1; background: white;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; transition: 0.2s;
+        }
+        .tool-btn:hover { background: #f1f5f9; }
+        .tool-btn.active { background: var(--primary); color: white; border-color: var(--primary); transform: scale(1.05); }
+        
+        .color-dot { width: 26px; height: 26px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 0 1px #cbd5e1; cursor: pointer; transition: 0.2s;}
+        .color-dot.active { box-shadow: 0 0 0 2px var(--primary); transform: scale(1.2); }
+
+        #canvas-wrapper { position: relative; width: 100%; height: 550px; }
+        canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; touch-action: none;}
+
+        /* Text Input for Canvas */
+        #text-input-overlay {
+            position: absolute; display: none; z-index: 1000;
+        }
+        #text-input-overlay input {
+            padding: 10px; border: 2px solid var(--primary); border-radius: 8px; outline: none; font-family: 'Kanit'; font-size: 18px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15); width: 250px;
+        }
+
+        /* Result Report */
+        #export-area { padding: 40px; background: white; border: 1px solid #ddd; border-radius: 10px; margin-top: 20px;}
+        .res-item { border-bottom: 1px dashed #cbd5e1; padding: 15px 0; }
+        .final-img { width: 100%; border: 1px solid #ccc; border-radius: 8px; margin-top: 15px; }
+
+        @keyframes shimmer { 100% { transform: translateX(100%); } }
+
+        @media print {
+            .nav-buttons, .canvas-toolbar, .btn, .progress-container, .hide-on-print { display: none !important; }
+            body { background: white; }
+            .app-container { box-shadow: none; width: 100%; max-width: 100%; }
+            .screen { display: none !important; }
+            #screen-6 { display: block !important; padding: 0; opacity: 1; transform: none; }
+            #export-area { border: none; padding: 0; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
+
+    <div id="screen-0" class="screen active">
+        <img src="https://images.unsplash.com/photo-1620712943543-bcc4688e7485?q=80&w=1000&auto=format&fit=crop" class="hero-img" alt="Welcome AI">
+        <h1>🤖 ยินดีต้อนรับสู่นักสำรวจ AI</h1>
+        <p style="text-align:center; color: var(--text-light); margin-top: -5px;">รายวิชา วิทยาการคำนวณ ม.3 | โรงเรียนบ้านป่ายุบ (บุ้นกีประชานุเคราะห์)</p>
+        
+        <div class="card" style="margin-top: 30px; background: #fdfbf7;">
+            <div class="input-group">
+                <label>👤 ชื่อ - นามสกุล:</label>
+                <input type="text" id="stuName" placeholder="กรอกชื่อของคุณ...">
+            </div>
+            <div style="display: flex; gap: 15px;">
+                <div class="input-group" style="flex: 1;">
+                    <label>🏫 ชั้น ม.3/</label>
+                    <input type="text" id="stuClass" placeholder="เช่น 1">
+                </div>
+                <div class="input-group" style="flex: 1;">
+                    <label>🔢 เลขที่:</label>
+                    <input type="text" id="stuNo" placeholder="เลขที่...">
+                </div>
+            </div>
+            <button class="btn btn-primary" style="width: 100%;" onclick="nextScreen(1)">🚀 เริ่มบทเรียนแอนิเมชัน <i class="fa-solid fa-arrow-right"></i></button>
+        </div>
+    </div>
+
+    <div id="screen-1" class="screen">
+        <h2>🎮 คอมพิวเตอร์ทายใจเราได้อย่างไร?</h2>
+        <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=1000&auto=format&fit=crop" class="hero-img" alt="Tech Background">
+        <p>หลังจากที่นักเรียนได้ลองวาดรูปในเกม <strong>Quick, Draw!</strong> ของ Google มาแล้ว...</p>
+        <div class="info-box">
+            <strong>🤔 ลองหยุดคิด:</strong> ทั้งที่ลายเส้นของเรายึกยือ และแต่ละคนวาดไม่เหมือนกันเลย ทำไมคอมพิวเตอร์ถึงทายถูกอย่างรวดเร็ว?
+        </div>
+        <p><strong>💡 คำตอบคือ:</strong> มันจดจำ "รูปแบบ" จากคนทั่วโลกที่เคยเข้าวาดไว้หลายล้านภาพ แล้วนำมาเปรียบเทียบหาความน่าจะเป็น ระบบที่ฉลาดแบบนี้คือ <strong>ปัญญาประดิษฐ์ (AI)</strong> ครับ</p>
+        <div class="nav-buttons">
+            <button class="btn btn-outline" onclick="prevScreen(0)"><i class="fa-solid fa-chevron-left"></i> ย้อนกลับ</button>
+            <button class="btn btn-primary" onclick="nextScreen(2)">อ่านต่อ <i class="fa-solid fa-chevron-right"></i></button>
+        </div>
+    </div>
+
+    <div id="screen-2" class="screen">
+        <h2>🔍 แยกแยะ: แบบไหนถึงเรียกว่า AI?</h2>
+        <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+            <div class="card" style="flex: 1; min-width: 250px;">
+                <h3 style="color: var(--danger); margin-top: 0;"><i class="fa-solid fa-xmark-circle"></i> ไม่ใช่ AI</h3>
+                <p style="font-weight: 600; font-size: 19px;">ประตูเซนเซอร์ / พัดลมตั้งเวลา</p>
+                <p style="font-size: 15px; color: var(--text-light);">ทำงานตามกฎตายตัว (Rule-based) ถ้ามีคนเดินผ่าน -> ประตูเปิด ไม่มีการเรียนรู้เพิ่ม</p>
+            </div>
+            <div class="card" style="flex: 1; min-width: 250px; border-color: var(--success); border-width: 2px;">
+                <h3 style="color: var(--success); margin-top: 0;"><i class="fa-solid fa-check-circle"></i> เป็นระบบ AI</h3>
+                <p style="font-weight: 600; font-size: 19px;">TikTok / Google Translate</p>
+                <p style="font-size: 15px; color: var(--text-light);">แอบเรียนรู้พฤติกรรมเรา และปรับเปลี่ยนการทำงานให้เก่งขึ้นเองเรื่อยๆ (Machine Learning)</p>
+            </div>
+        </div>
+        <div class="nav-buttons">
+            <button class="btn btn-outline" onclick="prevScreen(1)"><i class="fa-solid fa-chevron-left"></i> ย้อนกลับ</button>
+            <button class="btn btn-primary" onclick="nextScreen(3)">อ่านต่อ <i class="fa-solid fa-chevron-right"></i></button>
+        </div>
+    </div>
+
+    <div id="screen-3" class="screen">
+        <h2>🧠 อาหารสมองของ AI คืออะไร?</h2>
+        <img src="https://images.unsplash.com/photo-1527474305487-b87b222841cc?q=80&w=1000&auto=format&fit=crop" class="hero-img" alt="Baby learning">
+        <p>ให้จินตนาการว่า <strong>AI เปรียบเสมือนเด็กทารกแรกเกิด</strong> 👶</p>
+        <p>เด็กจะไม่รู้ว่าตัวไหนคือ "สุนัข" จนกว่าคุณพ่อคุณแม่จะเอารูปสุนัขมาเปิดให้ดูซ้ำๆ บ่อยๆ จนสมองเด็กจดจำลักษณะเด่นได้</p>
+        <div class="warning-box">
+            <h3 style="margin:0; color: #b45309;">📊 ข้อมูล (Data) คือหัวใจ!</h3>
+            <p style="margin: 5px 0 0 0;">ปัจจัยสำคัญที่ทำให้ AI ฉลาดคือ <strong>"ชุดข้อมูล (Dataset)"</strong> ยิ่งมีข้อมูลมาก AI ก็ยิ่งแม่นยำครับ</p>
+        </div>
+        <div class="nav-buttons">
+            <button class="btn btn-outline" onclick="prevScreen(2)"><i class="fa-solid fa-chevron-left"></i> ย้อนกลับ</button>
+            <button class="btn btn-success" onclick="nextScreen(4)">✍️ เริ่มทำใบงาน <i class="fa-solid fa-pencil"></i></button>
+        </div>
+    </div>
+
+    <div id="screen-4" class="screen">
+        <h2>📝 ใบงานส่วนที่ 1: ตรวจสอบความเข้าใจ</h2>
+        <div id="quiz-container"></div>
+        <div class="nav-buttons">
+            <button class="btn btn-outline" onclick="prevScreen(3)">ย้อนกลับ</button>
+            <button class="btn btn-primary" onclick="nextScreen(5)">วาด Mind Map ต่อ <i class="fa-solid fa-draw-polygon"></i></button>
+        </div>
+    </div>
+
+    <div id="screen-5" class="screen">
+        <h2>🎨 ใบงานส่วนที่ 2: Mind Map AI รอบตัวเรา</h2>
+        <div class="info-box" style="margin-top:0;">
+            <strong>คำชี้แจง:</strong> ออกแบบแผนผังความคิด ยกตัวอย่าง AI 4 ชนิด และระบุว่าต้องใช้ <strong>"ข้อมูล"</strong> อะไรในการสอนมัน <br>
+            <small style="color: var(--primary-dark);"><i>(เลือกวงกลม/สี่เหลี่ยม แล้วลากบนกระดาน หรือคลิกตัวอักษร <b>T</b> แล้วคลิกบนกระดานเพื่อพิมพ์)</i></small>
+        </div>
+
+        <div id="canvas-container">
+            <div class="canvas-toolbar">
+                <div class="tool-group">
+                    <button class="tool-btn active" id="tool-pen" onclick="setMode('pen')" title="ปากกาวาดเส้น"><i class="fa-solid fa-pen-nib"></i></button>
+                    <button class="tool-btn" id="tool-circle" onclick="setMode('circle')" title="วงกลม"><i class="fa-regular fa-circle"></i></button>
+                    <button class="tool-btn" id="tool-rect" onclick="setMode('rect')" title="สี่เหลี่ยม"><i class="fa-regular fa-square"></i></button>
+                    <button class="tool-btn" id="tool-text" onclick="setMode('text')" title="พิมพ์ข้อความ"><i class="fa-solid fa-font"></i></button>
+                </div>
+                <div class="tool-group">
+                    <div class="color-dot active" style="background:#0f172a;" onclick="setInk('#0f172a', this)"></div>
+                    <div class="color-dot" style="background:#3b82f6;" onclick="setInk('#3b82f6', this)"></div>
+                    <div class="color-dot" style="background:#ef4444;" onclick="setInk('#ef4444', this)"></div>
+                    <div class="color-dot" style="background:#10b981;" onclick="setInk('#10b981', this)"></div>
+                </div>
+                <button class="tool-btn" id="tool-eraser" onclick="setMode('eraser')" title="ยางลบ"><i class="fa-solid fa-eraser"></i></button>
+                <button class="tool-btn" style="color:var(--danger);" onclick="clearCanvas()" title="ล้างทั้งหมด"><i class="fa-solid fa-trash-can"></i></button>
+            </div>
+            
+            <div id="canvas-wrapper">
+                <canvas id="drawingCanvas"></canvas>
+                <canvas id="previewCanvas"></canvas>
+                <div id="text-input-overlay">
+                    <input type="text" id="canvasTextInput" placeholder="พิมพ์ข้อความแล้วกด Enter...">
+                </div>
+            </div>
+        </div>
+
+        <div class="nav-buttons">
+            <button class="btn btn-outline" onclick="prevScreen(4)">ย้อนกลับ</button>
+            <button class="btn btn-success" style="background:#ea580c;" onclick="finalSubmit()"><i class="fa-solid fa-paper-plane"></i> ส่งงานและดาวน์โหลด</button>
+        </div>
+    </div>
+
+    <div id="screen-6" class="screen">
+        <h2 style="border:none; text-align:center; color: var(--success); padding:0;"><i class="fa-solid fa-circle-check"></i> ส่งงานสำเร็จแล้ว!</h2>
+        <p style="text-align:center;">ดาวน์โหลดผลงานเป็น PDF หรือไฟล์ภาพ เพื่อเก็บไว้ส่งคุณครูได้เลยครับ</p>
+        
+        <div style="display:flex; gap:10px; margin-bottom:20px; justify-content: center;" class="hide-on-print">
+            <button class="btn btn-danger" onclick="exportPDF()"><i class="fa-solid fa-file-pdf"></i> โหลด PDF</button>
+            <button class="btn btn-primary" onclick="exportIMG()"><i class="fa-solid fa-file-image"></i> โหลดรูปภาพ</button>
+        </div>
+
+        <div id="export-area">
+            <div style="text-align:center; border-bottom: 2px solid #4f46e5; padding-bottom:15px; margin-bottom:20px;">
+                <h2 style="border:none; margin:0; padding:0; color:#4f46e5;">ใบรายงานผลการเรียนรู้: นักสำรวจ AI</h2>
+                <p style="margin:5px 0 0 0; color:var(--text-light);">โรงเรียนบ้านป่ายุบ (บุ้นกีประชานุเคราะห์)</p>
+            </div>
+
+            <div style="background:#f1f5f9; padding:15px; border-radius:10px; margin-bottom:20px; border:1px solid #cbd5e1;">
+                <h3 id="resName" style="margin:0; font-size:20px; color: var(--primary-dark);">ชื่อ: </h3>
+                <p id="resMeta" style="margin:5px 0 0 0; font-weight:500;"></p>
+            </div>
+
+            <h4 style="color:var(--primary-dark); font-size: 19px; border-left: 4px solid var(--primary); padding-left: 10px;">ตอนที่ 1: การจำแนกประเภท AI</h4>
+            <div id="resQuiz"></div>
+
+            <h4 style="color:var(--primary-dark); font-size: 19px; border-left: 4px solid var(--primary); padding-left: 10px; margin-top:30px;">ตอนที่ 2: แผนผังความคิด (Mind Map)</h4>
+            <img id="resCanvasImg" class="final-img" src="">
+        </div>
+
+        <button class="btn btn-outline hide-on-print" onclick="location.reload()" style="margin-top:20px; width: 100%;">เริ่มบทเรียนใหม่</button>
+    </div>
+
+</div>
+
+<script>
+    // --- Global Logic ---
+    let currentScreen = 0;
+    const questions = [
+        "1. ระบบพัดลมที่มีปุ่มตั้งเวลาปิดล่วงหน้า 2 ชั่วโมง",
+        "2. แอป TikTok ที่เลือกคลิปวิดีโอให้เราดูตามความชอบ",
+        "3. ประตูเซนเซอร์หน้าเซเว่นอีเลฟเว่นที่เปิดเมื่อคนเดินผ่าน",
+        "4. Google Translate ที่แปลประโยคได้ลื่นไหลเหมือนมนุษย์"
+    ];
+    let quizAnswers = [{},{},{},{}];
+
+    function nextScreen(id) {
+        if(currentScreen === 0 && !document.getElementById('stuName').value) {
+            alert("⚠️ กรุณากรอกชื่อก่อนเริ่มเรียนครับ"); return;
+        }
+        
+        const cur = document.getElementById(`screen-${currentScreen}`);
+        const nxt = document.getElementById(`screen-${id}`);
+        cur.style.opacity = '0';
+        cur.style.transform = 'translateY(-15px)';
+        
+        setTimeout(() => {
+            cur.classList.remove('active');
+            nxt.classList.add('active');
+            currentScreen = id;
+            document.getElementById('progressBar').style.width = (id/6)*100 + '%';
+            window.scrollTo({top:0, behavior:'smooth'});
+            
+            if(id === 5) {
+                // Initialize Canvas exactly when screen is visible
+                setTimeout(initMindMap, 100);
+            }
+            
+            setTimeout(() => {
+                nxt.style.opacity = '1';
+                nxt.style.transform = 'translateY(0)';
+            }, 50);
+        }, 400);
+    }
+
+    function prevScreen(id) { 
+        const cur = document.getElementById(`screen-${currentScreen}`);
+        const nxt = document.getElementById(`screen-${id}`);
+        cur.style.opacity = '0';
+        cur.style.transform = 'translateY(15px)';
+        setTimeout(() => {
+            cur.classList.remove('active');
+            nxt.classList.add('active');
+            currentScreen = id;
+            document.getElementById('progressBar').style.width = (id/6)*100 + '%';
+            window.scrollTo({top:0, behavior:'smooth'});
+            setTimeout(() => {
+                nxt.style.opacity = '1';
+                nxt.style.transform = 'translateY(0)';
+            }, 50);
+        }, 400);
+    }
+
+    // --- Quiz Render ---
+    function renderQuiz() {
+        const div = document.getElementById('quiz-container');
+        questions.forEach((q, i) => {
+            div.innerHTML += `
+                <div class="quiz-card">
+                    <div style="font-size:18px; font-weight:500; margin-bottom:10px;">${q}</div>
+                    <div class="choices-grid">
+                        <button class="choice-btn" id="q-ai-${i}" onclick="ans(${i},'AI')">✔️ เป็น AI</button>
+                        <button class="choice-btn" id="q-not-${i}" onclick="ans(${i},'NOT')">❌ ไม่ใช่ AI</button>
+                    </div>
+                    <input type="text" id="ans-res-${i}" placeholder="บอกเหตุผลสั้นๆ..." onchange="quizAnswers[${i}].res=this.value">
+                </div>
+            `;
+        });
+    }
+    function ans(i, type) {
+        quizAnswers[i].choice = type;
+        document.getElementById(`q-ai-${i}`).className = 'choice-btn' + (type==='AI'?' selected-ai':'');
+        document.getElementById(`q-not-${i}`).className = 'choice-btn' + (type==='NOT'?' selected-not':'');
+    }
+    renderQuiz();
+
+    // --- Mind Map Pro Studio Logic (BUG FIXED) ---
+    const canvas = document.getElementById('drawingCanvas');
+    const preview = document.getElementById('previewCanvas');
+    const ctx = canvas.getContext('2d');
+    const pctx = preview.getContext('2d');
+    
+    let drawing = false;
+    let mode = 'pen'; // pen, circle, rect, text, eraser
+    let color = '#0f172a';
+    let startX, startY;
+
+    function initMindMap() {
+        const wrapper = document.getElementById('canvas-wrapper');
+        const w = wrapper.offsetWidth || 800; // Fallback
+        canvas.width = preview.width = w;
+        canvas.height = preview.height = 550;
+        
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0,0,canvas.width, canvas.height);
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        pctx.lineCap = 'round';
+        pctx.lineJoin = 'round';
+    }
+
+    function setMode(m) {
+        mode = m;
+        document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+        const activeBtn = document.getElementById('tool-'+(m==='eraser'?'eraser':m));
+        if(activeBtn) activeBtn.classList.add('active');
+    }
+
+    function setInk(c, el) {
+        color = c;
+        document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
+        el.classList.add('active');
+        if(mode === 'eraser') setMode('pen');
+    }
+
+    // Fixed getPos to prevent crash on touch devices
+    function getPos(e) {
+        const rect = preview.getBoundingClientRect();
+        let clientX, clientY;
+
+        if(e.touches && e.touches.length > 0) {
+            clientX = e.touches[0].clientX;
+            clientY = e.touches[0].clientY;
+        } else if (e.changedTouches && e.changedTouches.length > 0) {
+            clientX = e.changedTouches[0].clientX;
+            clientY = e.changedTouches[0].clientY;
+        } else {
+            clientX = e.clientX;
+            clientY = e.clientY;
+        }
+
+        let scaleX = preview.width / rect.width;
+        let scaleY = preview.height / rect.height;
+
+        return { 
+            x: (clientX - rect.left) * scaleX, 
+            y: (clientY - rect.top) * scaleY 
+        };
+    }
+
+    function start(e) {
+        // Prevent default only if it's touch to avoid double firing, but we need click for text
+        if(mode === 'text') {
+            const pos = getPos(e);
+            showTextInput(pos.x, pos.y);
+            return;
+        }
+
+        drawing = true;
+        const pos = getPos(e);
+        startX = pos.x; startY = pos.y;
+        
+        ctx.beginPath();
+        ctx.moveTo(pos.x, pos.y);
+    }
+
+    function move(e) {
+        if(!drawing) return;
+        if(e.cancelable) e.preventDefault(); // Stop screen scrolling while drawing
+        const pos = getPos(e);
+        
+        if(mode === 'pen' || mode === 'eraser') {
+            ctx.lineTo(pos.x, pos.y);
+            ctx.strokeStyle = mode === 'eraser' ? '#ffffff' : color;
+            ctx.lineWidth = mode === 'eraser' ? 35 : 4;
+            ctx.stroke();
+        } else {
+            // Preview shapes
+            pctx.clearRect(0,0,preview.width, preview.height);
+            pctx.strokeStyle = color;
+            pctx.lineWidth = 3;
+            pctx.setLineDash([5, 5]);
+            
+            if(mode === 'rect') {
+                pctx.strokeRect(startX, startY, pos.x - startX, pos.y - startY);
+            } else if(mode === 'circle') {
+                drawEllipse(pctx, startX, startY, pos.x, pos.y);
+            }
+        }
+    }
+
+    function stop(e) {
+        if(!drawing) return;
+        drawing = false;
+        const pos = getPos(e);
+        pctx.clearRect(0,0,preview.width, preview.height);
+        
+        if(mode === 'rect') {
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 3;
+            ctx.setLineDash([]);
+            ctx.strokeRect(startX, startY, pos.x - startX, pos.y - startY);
+        } else if(mode === 'circle') {
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 3;
+            ctx.setLineDash([]);
+            drawEllipse(ctx, startX, startY, pos.x, pos.y);
+        }
+    }
+
+    function drawEllipse(context, x1, y1, x2, y2) {
+        const radiusX = Math.abs(x2 - x1) / 2;
+        const radiusY = Math.abs(y2 - y1) / 2;
+        const centerX = x1 + (x2 - x1) / 2;
+        const centerY = y1 + (y2 - y1) / 2;
+        context.beginPath();
+        context.ellipse(centerX, centerY, radiusX, radiusY, 0, 0, 2 * Math.PI);
+        context.stroke();
+    }
+
+    // Robust Text Input Logic
+    function showTextInput(x, y) {
+        const overlay = document.getElementById('text-input-overlay');
+        const input = document.getElementById('canvasTextInput');
+        
+        // Adjust coordinate so input box aligns with click
+        overlay.style.left = x + 'px';
+        overlay.style.top = (y - 15) + 'px'; 
+        overlay.style.display = 'block';
+        input.value = "";
+        
+        setTimeout(() => input.focus(), 50);
+        
+        input.onkeydown = (e) => {
+            if(e.key === 'Enter') commitText(x, y);
+        };
+        input.onblur = () => { commitText(x, y); };
+    }
+
+    function commitText(x, y) {
+        const overlay = document.getElementById('text-input-overlay');
+        const input = document.getElementById('canvasTextInput');
+        if(overlay.style.display === 'none') return;
+        
+        if(input.value.trim() !== "") {
+            ctx.fillStyle = color;
+            ctx.font = "500 22px Kanit";
+            ctx.textBaseline = "middle";
+            ctx.fillText(input.value, x + 5, y + 10);
+        }
+        overlay.style.display = 'none';
+        setMode('pen'); // กลับไปเป็นปากกาอัตโนมัติ
+    }
+
+    function clearCanvas() {
+        if(confirm("ล้างกระดานวาดรูปทั้งหมดหรือไม่?")) {
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0,0,canvas.width, canvas.height);
+        }
+    }
+
+    // Use preview canvas to catch events
+    preview.addEventListener('mousedown', start);
+    window.addEventListener('mousemove', move);
+    window.addEventListener('mouseup', stop);
+    
+    preview.addEventListener('touchstart', start, {passive:false});
+    window.addEventListener('touchmove', move, {passive:false});
+    window.addEventListener('touchend', stop);
+
+    // --- Submission & Export ---
+    function finalSubmit() {
+        if(!confirm("แน่ใจหรือไม่ว่าต้องการส่งผลงานและดูผลลัพธ์?")) return;
+        document.getElementById('resName').innerText = "ชื่อ-นามสกุล: " + document.getElementById('stuName').value;
+        document.getElementById('resMeta').innerText = `ชั้น ม.3/${document.getElementById('stuClass').value} | เลขที่: ${document.getElementById('stuNo').value}`;
+        
+        let html = "";
+        questions.forEach((q, i) => {
+            const c = quizAnswers[i].choice;
+            const badge = c === 'AI' ? '<b style="color:var(--success)">✔️ เป็น AI</b>' : (c === 'NOT' ? '<b style="color:var(--danger)">❌ ไม่ใช่ AI</b>' : '<b style="color:gray">ไม่ได้ตอบ</b>');
+            html += `<div class="res-item"><b style="font-size:17px;">${q}</b><br><span style="display:inline-block; margin:5px 0;">ตอบ: ${badge}</span><br><span style="color:var(--text-light);">เหตุผล: ${quizAnswers[i].res || '-'}</span></div>`;
+        });
+        document.getElementById('resQuiz').innerHTML = html;
+        document.getElementById('resCanvasImg').src = canvas.toDataURL("image/png");
+        
+        nextScreen(6);
+    }
+
+    function exportPDF() {
+        const el = document.getElementById('export-area');
+        const name = document.getElementById('stuName').value || 'Student';
+        html2pdf().set({
+            margin: 0.5, filename: `ใบงานAI_${name}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true },
+            jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+        }).from(el).save();
+    }
+
+    function exportIMG() {
+        const el = document.getElementById('export-area');
+        const name = document.getElementById('stuName').value || 'Student';
+        domtoimage.toJpeg(el, { quality: 0.95, bgcolor: '#fff' })
+            .then(dataUrl => {
+                const link = document.createElement('a');
+                link.download = `ใบงานAI_${name}.jpg`;
+                link.href = dataUrl;
+                link.click();
+            });
+    }
+</script>
+
+</body>
+</html>
