@@ -1078,6 +1078,19 @@ async function saveEditAssignment() {
 // 6. ระบบฟังก์ชันช่วยเหลือ (Utilities & Auth)
 // ==========================================
 
+// ✅ ฟังก์ชันดึงห้องเรียนจาก Supabase (ใช้ใน openEditAssignment และ updateTargetClassOptions)
+let _cachedClassLevels = null;
+async function fetchClassLevels() {
+    if (_cachedClassLevels) return _cachedClassLevels;
+    const { data } = await sb.from('profiles')
+        .select('class_level')
+        .eq('role', 'student')
+        .not('class_level', 'is', null);
+    const unique = [...new Set((data || []).map(r => r.class_level).filter(Boolean))].sort();
+    _cachedClassLevels = unique;
+    return unique;
+}
+
 // ⭐ ฟังก์ชันเช็คสิทธิ์ที่หายไป (ตัวที่ทำให้กดเมนูระบบส่งงานไม่ได้)
 function checkAuth(page, el) { 
     if (!currentUser) { 
