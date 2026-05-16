@@ -1158,52 +1158,7 @@ async function register() {
 
 function logout() { currentUser = null; localStorage.removeItem('payub_user'); updateUI(); navigate('dashboard', document.querySelectorAll('.nav-item')[0]); }
 
-// เพิ่มฟังก์ชันนี้ใน script.js เพื่อดึงคะแนนมาโชว์หน้าแรกมือถือ
-async function updateMobileGradeSummary() {
-    const guestView = document.getElementById('grade-guest-view');
-    const userView = document.getElementById('grade-user-view');
-    const itemsList = document.getElementById('mobile-grade-items-list');
-    const totalText = document.getElementById('mobile-total-score-text');
 
-    if (!currentUser) {
-        if(guestView) guestView.style.display = 'block';
-        if(userView) userView.style.display = 'none';
-        return;
-    }
-
-    if(guestView) guestView.style.display = 'none';
-    if(userView) userView.style.display = 'block';
-
-    // ดึงข้อมูลคะแนน (จำลองการดึงจาก Database)
-    // คุณครูสามารถใช้ตัวแปร submissions ที่มีอยู่แล้วมา filter ได้เลย
-    const { data: myScores, error } = await sb
-        .from('submissions')
-        .select('score, assignments(title, total_score)')
-        .eq('student_id', currentUser.id)
-        .not('score', 'is', null);
-
-    if (myScores && myScores.length > 0) {
-        let totalReceived = 0;
-        let totalPossible = 0;
-        
-        itemsList.innerHTML = myScores.map(s => {
-            totalReceived += s.score;
-            totalPossible += s.assignments.total_score;
-            return `
-                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                    <span style="color: var(--text-muted); text-overflow: ellipsis; white-space: nowrap; overflow: hidden; max-width: 180px;">• ${s.assignments.title}</span>
-                    <span style="font-weight: bold;">${s.score}/${s.assignments.total_score}</span>
-                </div>
-            `;
-        }).join('');
-        
-        totalText.textContent = `${totalReceived} / ${totalPossible}`;
-    } else {
-        itemsList.innerHTML = '<p style="text-align:center; color:gray; font-size:13px;">ยังไม่มีข้อมูลคะแนนที่ตรวจแล้ว</p>';
-    }
-}
-
-// และอย่าลืมเรียกฟังก์ชันนี้ตอน updateUI()
 // updateMobileGradeSummary();loadReports
 
 function updateUI() {
