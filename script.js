@@ -283,7 +283,18 @@ async function loadData() {
                     embedHtml = `<iframe src="${embedUrl}" style="width:100%; aspect-ratio: 16/9; border:none; border-radius:12px; margin-bottom:15px; background:#f5f7f5;" allowfullscreen></iframe>`;
                 }
                 
-                const delBtn = currentUser?.role === 'teacher' ? `<div style="text-align:right; margin-top:15px; border-top: 1px dashed var(--border); padding-top: 15px;"><button class="btn btn-sm" style="background:#ffebee; color:#c62828; border:1px solid #ffcdd2; width: 100%;" onclick="deleteLesson(${l.id})">🗑️ ลบเนื้อหา</button></div>` : '';
+                // ✅ เพิ่มปุ่มแก้ไข + ลบ เฉพาะครู
+                const teacherLessonBtns = currentUser?.role === 'teacher' ? `
+                    <div style="display:flex; gap:8px; margin-top:15px; border-top: 1px dashed var(--border); padding-top: 15px;">
+                        <button class="btn btn-sm" style="flex:1; background:#e3f2fd; color:#1565c0; border:1px solid #90caf9;" 
+                            onclick="openEditLesson(${l.id}, '${l.title.replace(/'/g,"\\'")}', '${l.content_type}', '${l.url.replace(/'/g,"\\'")}')">
+                            ✏️ แก้ไข
+                        </button>
+                        <button class="btn btn-sm" style="flex:1; background:#ffebee; color:#c62828; border:1px solid #ffcdd2;" 
+                            onclick="deleteLesson(${l.id})">
+                            🗑️ ลบเนื้อหา
+                        </button>
+                    </div>` : '';
 
                 return `
                 <div class="card" style="padding:20px; display:flex; flex-direction:column; animation-delay: ${index * 0.1}s; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid var(--border);">
@@ -292,7 +303,7 @@ async function loadData() {
                     <div style="margin-top:auto; text-align:center;">
                         <a href="${l.url}" target="_blank" style="color:var(--text-muted); font-size:13px; text-decoration:underline; font-weight:bold;">🔗 เปิดในหน้าต่างใหม่</a>
                     </div>
-                    ${delBtn}
+                    ${teacherLessonBtns}
                 </div>`;
             }).join('') + `</div>` : '<div class="card" style="text-align:center; padding: 40px; color:gray; margin-bottom: 50px; border: 2px dashed var(--border);">ยังไม่มีเนื้อหาบทเรียนครับ</div>';
 
@@ -426,7 +437,21 @@ function renderAssignmentsList(assignmentsArray, mySubmissions) {
             }
         }
         
-        const teacherControls = currentUser?.role === 'teacher' ? `<div style="margin-top: 15px; display: flex; gap: 8px;"><button class="btn btn-sm" style="background:var(--surface2); color:var(--primary); border:1px solid var(--primary);" onclick="renameAssignment(${a.id}, '${a.title}')">✏️ เปลี่ยนชื่อ</button><button class="btn btn-sm" style="background:#fdecea; color:var(--danger); border:1px solid var(--danger);" onclick="deleteAssignment(${a.id}, '${a.title}')">🗑️ ลบใบงาน</button></div>` : '';
+        const teacherControls = currentUser?.role === 'teacher' ? `
+            <div style="display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;">
+                <button class="btn btn-sm" style="background:#e3f2fd; color:#1565c0; border:1px solid #90caf9;" 
+                    onclick="openEditAssignment(${a.id}, '${a.title.replace(/'/g,"\\'")}', ${a.max_score || 10}, '${a.target_classes || 'all'}')">
+                    ✏️ แก้ไข
+                </button>
+                <button class="btn btn-sm" style="background:var(--surface2); color:var(--primary); border:1px solid var(--primary);" 
+                    onclick="renameAssignment(${a.id}, '${a.title.replace(/'/g,"\\'")}')">
+                    🔤 เปลี่ยนชื่อ
+                </button>
+                <button class="btn btn-sm" style="background:#fdecea; color:var(--danger); border:1px solid var(--danger);" 
+                    onclick="deleteAssignment(${a.id}, '${a.title.replace(/'/g,"\\'")}')">
+                    🗑️ ลบใบงาน
+                </button>
+            </div>` : '';
         const actionBtn = currentUser?.role === 'teacher' ? `<button class="btn btn-outline" style="border:2px solid var(--primary); color:var(--primary);" onclick="goToGradingSpecific(${a.subject_id}, ${a.id})">👀 ตรวจงาน</button>` : `<button class="btn ${btnColor}" onclick="openSubmitModal(${a.id}, '${a.title}', '${a.folder_id || ''}')">${btnText}</button>`;
             
         return `<div class="card" style="animation-delay: ${index * 0.1}s;"><div style="display:flex; justify-content:space-between; align-items:flex-start;"><div style="flex:1;"><b style="font-size:18px;">📝 ${a.title}</b> ${statusBadge}<br><small style="color:gray;">วิชา: ${a.subjects?.name}</small>${teacherControls}${feedbackHtml}</div>${actionBtn}</div></div>`;
@@ -646,12 +671,9 @@ async function loadSubmissions() {
 
             container.innerHTML = topBarHtml + listHtml;
         }
-        // 👨‍🏫 มุมมองครู: สเต็ป 3 (รายชื่อนักเรียน)
+        // 👨‍🏫 มุมมองครู: สเต็ป 3 (รายชื่อนักเรียน) : ระบบเดิมใช้งานได้ 100%
         else if (currentGradingStep === 'students') {
-            // ✅ แก้ไข: ดึง max_score จาก assignments มาด้วยเพื่อใช้ใน modal ตรวจงาน
-            const { data: students, error } = await sb.from('submissions')
-                .select(`*, profiles:student_id (full_name, class_level, student_no), assignments:assignment_id (title, max_score, subjects (name))`)
-                .eq('assignment_id', gradingAssignId);
+            const { data: students, error } = await sb.from('submissions').select(`*, profiles:student_id (full_name, class_level, student_no), assignments:assignment_id (title, subjects (name))`).eq('assignment_id', gradingAssignId);
             if(pathText) pathText.innerHTML = `<span onclick="resetGradingStep()" style="cursor:pointer; color:var(--primary); text-decoration:underline;">🏠 วิชา</span> > <span onclick="backToAssignments()" style="cursor:pointer; color:var(--primary); text-decoration:underline;">📝 ใบงาน</span> > 👨‍🎓 ตรวจงาน`;
             
             currentGradingStudentsData = students || [];
@@ -723,38 +745,18 @@ function renderGradingStudentsList() {
         const studentClass = s.profiles?.class_level || '-'; 
         const contentSafe = s.content ? s.content.replace(/'/g, "\\'") : ''; 
         const feedbackSafe = s.feedback ? s.feedback.replace(/'/g, "\\'") : '';
-        // ✅ เพิ่ม: ดึง max_score เพื่อส่งต่อให้ modal
-        const maxScore = s.assignments?.max_score || 10;
         
         let borderColor = 'var(--danger)';
         if (s.status.includes('สมบูรณ์') || s.status.includes('รอตรวจ')) borderColor = '#1565c0';
         if (s.status === 'ตรวจแล้ว') borderColor = 'var(--success)';
         if (s.status.includes('แบบร่าง')) borderColor = 'var(--accent)';
 
-        // ✅ เพิ่ม: แสดงคะแนน/คะแนนเต็ม ถ้าตรวจแล้ว
-        const scoreDisplay = s.status === 'ตรวจแล้ว' 
-            ? `✅ ${s.score}/${maxScore}` 
-            : '🔴 รอตรวจ';
-
         return `
         <div class="card" style="border-left: 5px solid ${borderColor}; animation-delay: ${(index % 10) * 0.05}s;">
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap; gap: 10px;">
-                <div style="flex: 1; min-width: 250px;">
-                    <b style="font-size:18px; color:var(--primary-dark);">[เลขที่ ${studentNo}] ${studentName}</b> 
-                    <span style="color:gray; font-size:14px;">(ชั้น ${studentClass})</span><br>
-                    <small><b>สถานะ:</b> ${s.status}</small>
-                </div>
-                <div style="text-align: right; min-width: 150px;">
-                    <span class="guest-tag" style="background:${s.status === 'ตรวจแล้ว' ? '#e8f5e9; color:#2e7d32;' : '#ffebee; color:#c62828;'}">
-                        ${scoreDisplay}
-                    </span>
-                    <div style="margin-top: 10px;">
-                        <!-- ✅ แก้ไข: ส่ง maxScore ไปด้วยเพื่อให้ modal รู้ว่าห้ามเกินเท่าไหร่ -->
-                        <button class="btn btn-sm ${s.status === 'ตรวจแล้ว' ? 'btn-outline' : 'btn-primary'}" 
-                            onclick="openGradingModal(${s.id}, '${studentName}', '${s.assignments?.title}', '${contentSafe}', '${s.score || ''}', '${feedbackSafe}', ${maxScore})">
-                            ${s.status === 'ตรวจแล้ว' ? '✏️ แก้ไขคะแนน' : '📝 ตรวจงาน'}
-                        </button>
-                    </div>
+                <div style="flex: 1; min-width: 250px;"><b style="font-size:18px; color:var(--primary-dark);">[เลขที่ ${studentNo}] ${studentName}</b> <span style="color:gray; font-size:14px;">(ชั้น ${studentClass})</span><br><small><b>สถานะ:</b> ${s.status}</small></div>
+                <div style="text-align: right; min-width: 150px;"><span class="guest-tag" style="background:${s.status === 'ตรวจแล้ว' ? '#e8f5e9; color:#2e7d32;' : '#ffebee; color:#c62828;'}">${s.status === 'ตรวจแล้ว' ? `✅ ${s.score}` : '🔴 รอตรวจ'}</span>
+                    <div style="margin-top: 10px;"><button class="btn btn-sm ${s.status === 'ตรวจแล้ว' ? 'btn-outline' : 'btn-primary'}" onclick="openGradingModal(${s.id}, '${studentName}', '${s.assignments?.title}', '${contentSafe}', '${s.score || ''}', '${feedbackSafe}')">${s.status === 'ตรวจแล้ว' ? '✏️ แก้ไขคะแนน' : '📝 ตรวจงาน'}</button></div>
                 </div>
             </div>
         </div>`;
@@ -778,133 +780,24 @@ function resetGradingStep() {
     loadSubmissions();
 }
 
-function openGradingModal(subId, studentName, assignTitle, content, score, feedback, maxScore = 10) {
+function openGradingModal(subId, studentName, assignTitle, content, score, feedback) {
     document.getElementById('grading-sub-id').value = subId;
-    document.getElementById('grading-max-score').value = maxScore;
     document.getElementById('grading-student-info').textContent = 'นักเรียน: ' + studentName;
     document.getElementById('grading-assign-title').textContent = 'ใบงาน: ' + assignTitle;
-    document.getElementById('grading-max-score-display').textContent = maxScore;
-    document.getElementById('grading-score-ratio').textContent = `${score || 0} / ${maxScore}`;
-    document.getElementById('grading-score-error').style.display = 'none';
-
-    // ตั้งค่า input: max คือคะแนนเต็มของใบงาน
-    const scoreInput = document.getElementById('grading-score');
-    scoreInput.max = maxScore;
-    scoreInput.value = (score === 'null' || !score) ? '' : score;
-
-    // อัปเดต progress bar ถ้ามีคะแนนเดิมอยู่แล้ว
-    updateScoreBar(scoreInput.value, maxScore);
-
+    document.getElementById('grading-score').value = (score === 'null' || !score) ? '' : score;
     document.getElementById('grading-feedback').value = (feedback === 'null' || !feedback) ? '' : feedback;
-    
-    const iframe = document.getElementById('grading-iframe');
-    const textDiv = document.getElementById('grading-text-content');
-    if (content && content.startsWith('http')) {
-        iframe.style.display = 'block';
-        textDiv.style.display = 'none';
-        iframe.src = content.includes('drive.google.com') ? content.replace('/view', '/preview') : content;
-    } else {
-        iframe.style.display = 'none';
-        textDiv.style.display = 'block';
-        textDiv.innerHTML = `<h4 style="margin-bottom:12px;">📄 ข้อความจากนักเรียน:</h4><p style="white-space:pre-wrap; line-height:1.8;">${content || '(ไม่มีข้อความ)'}</p>`;
-    }
+    const iframe = document.getElementById('grading-iframe'); const textDiv = document.getElementById('grading-text-content');
+    if (content.startsWith('http')) { iframe.style.display = 'block'; textDiv.style.display = 'none'; iframe.src = content.includes('drive.google.com') ? content.replace('/view', '/preview') : content; } 
+    else { iframe.style.display = 'none'; textDiv.style.display = 'block'; textDiv.innerHTML = `<h4>ข้อความ:</h4><p>${content}</p>`; }
     openModal('modal-grading');
-}
-
-// ✅ ใหม่: validate คะแนน real-time ขณะพิมพ์
-function validateScoreInput(input) {
-    const maxScore = parseInt(document.getElementById('grading-max-score').value) || 10;
-    const val = parseFloat(input.value);
-    const errEl = document.getElementById('grading-score-error');
-    const ratio = document.getElementById('grading-score-ratio');
-
-    if (input.value === '') {
-        errEl.style.display = 'none';
-        ratio.textContent = `- / ${maxScore}`;
-        updateScoreBar('', maxScore);
-        return;
-    }
-
-    if (isNaN(val) || val < 0) {
-        errEl.textContent = '❌ กรุณากรอกตัวเลขที่มากกว่าหรือเท่ากับ 0';
-        errEl.style.display = 'block';
-        input.style.borderColor = 'var(--danger)';
-        ratio.textContent = `- / ${maxScore}`;
-        updateScoreBar('', maxScore);
-        return;
-    }
-
-    if (val > maxScore) {
-        // ✅ บังคับ: ถ้าพิมพ์เกิน → ตัดทิ้งอัตโนมัติ + แจ้งเตือน
-        input.value = maxScore;
-        errEl.textContent = `⚠️ คะแนนสูงสุดของใบงานนี้คือ ${maxScore} คะแนน — ปรับให้อัตโนมัติแล้ว`;
-        errEl.style.display = 'block';
-        input.style.borderColor = 'var(--accent)';
-        setTimeout(() => {
-            errEl.style.display = 'none';
-            input.style.borderColor = 'var(--primary)';
-        }, 2500);
-    } else {
-        errEl.style.display = 'none';
-        input.style.borderColor = 'var(--primary)';
-    }
-
-    const finalVal = Math.min(val, maxScore);
-    ratio.textContent = `${finalVal} / ${maxScore}`;
-    updateScoreBar(finalVal, maxScore);
-}
-
-// ✅ ใหม่: อัปเดต progress bar คะแนน
-function updateScoreBar(score, maxScore) {
-    const bar = document.getElementById('grading-score-bar');
-    if (!bar) return;
-    const pct = maxScore > 0 ? Math.min((parseFloat(score) / maxScore) * 100, 100) : 0;
-    bar.style.width = (isNaN(pct) ? 0 : pct) + '%';
-    // เปลี่ยนสีตามเปอร์เซ็นต์
-    if (pct >= 80) bar.style.background = 'var(--success)';
-    else if (pct >= 50) bar.style.background = 'var(--accent)';
-    else bar.style.background = 'var(--danger)';
 }
 
 async function saveGrade() {
     const id = document.getElementById('grading-sub-id').value;
-    const maxScore = parseInt(document.getElementById('grading-max-score').value) || 10;
-    const scoreRaw = parseFloat(document.getElementById('grading-score').value);
-    const feedback = document.getElementById('grading-feedback').value.trim();
-    const saveBtn = document.querySelector('#modal-grading .btn-primary');
-    const errEl = document.getElementById('grading-score-error');
-
-    // ✅ validate ก่อนบันทึก
-    if (document.getElementById('grading-score').value === '') {
-        errEl.textContent = '❌ กรุณากรอกคะแนนก่อนบันทึก';
-        errEl.style.display = 'block';
-        return;
-    }
-    if (isNaN(scoreRaw) || scoreRaw < 0) {
-        errEl.textContent = '❌ คะแนนต้องเป็นตัวเลขที่ไม่ติดลบ';
-        errEl.style.display = 'block';
-        return;
-    }
-    // ✅ บังคับ: ห้ามเกินคะแนนเต็มอีกรอบก่อนบันทึก
-    const score = Math.min(scoreRaw, maxScore);
-
-    if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = '⏳ กำลังบันทึก...'; }
-
-    const { error } = await sb.from('submissions')
-        .update({ score, feedback, status: 'ตรวจแล้ว' })
-        .eq('id', id);
-
-    if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = '💾 บันทึกคะแนน'; }
-
-    if (error) {
-        errEl.textContent = '❌ บันทึกไม่สำเร็จ: ' + error.message;
-        errEl.style.display = 'block';
-        return;
-    }
-
-    closeModal('modal-grading');
-    loadSubmissions();
-    showToast(`✅ บันทึกคะแนน ${score}/${maxScore} เรียบร้อย!`);
+    const score = document.getElementById('grading-score').value;
+    const feedback = document.getElementById('grading-feedback').value;
+    await sb.from('submissions').update({ score, feedback, status: 'ตรวจแล้ว' }).eq('id', id);
+    closeModal('modal-grading'); loadSubmissions(); showToast('✅ บันทึกคะแนนแล้ว');
 }
 
 // ==========================================
@@ -1113,6 +1006,74 @@ async function deleteLesson(id) {
     }
 }
 
+// ✅ ใหม่: เปิด modal แก้ไขเนื้อหาบทเรียน
+function openEditLesson(id, title, type, url) {
+    document.getElementById('edit-lesson-id').value = id;
+    document.getElementById('edit-lesson-title').value = title;
+    document.getElementById('edit-lesson-url').value = url;
+    // ตั้งค่า select ให้ตรงกับประเภทเดิม
+    const typeSelect = document.getElementById('edit-lesson-type');
+    for (let opt of typeSelect.options) {
+        opt.selected = opt.value === type;
+    }
+    openModal('modal-edit-lesson');
+}
+
+// ✅ ใหม่: บันทึกการแก้ไขเนื้อหาบทเรียน
+async function saveEditLesson() {
+    const id = document.getElementById('edit-lesson-id').value;
+    const title = document.getElementById('edit-lesson-title').value.trim();
+    const type = document.getElementById('edit-lesson-type').value;
+    const url = document.getElementById('edit-lesson-url').value.trim();
+
+    if (!title) return showToast('❌ กรุณากรอกชื่อเนื้อหา');
+    if (!url) return showToast('❌ กรุณากรอกลิงก์');
+
+    const { error } = await sb.from('lessons')
+        .update({ title, content_type: type, url })
+        .eq('id', id);
+
+    if (error) { showToast('❌ แก้ไขไม่สำเร็จ: ' + error.message); return; }
+    closeModal('modal-edit-lesson');
+    showToast('✅ แก้ไขเนื้อหาเรียบร้อยแล้ว');
+    loadData();
+}
+
+// ✅ ใหม่: เปิด modal แก้ไขใบงาน
+async function openEditAssignment(id, title, maxScore, targetClasses) {
+    document.getElementById('edit-assign-id').value = id;
+    document.getElementById('edit-assign-title').value = title;
+    document.getElementById('edit-assign-maxscore').value = maxScore;
+
+    // โหลดห้องเรียนแบบ dynamic
+    const allRooms = await fetchClassLevels();
+    const targetSelect = document.getElementById('edit-assign-target');
+    targetSelect.innerHTML = `<option value="all" ${targetClasses === 'all' ? 'selected' : ''}>✅ ทุกห้องเรียน</option>`
+        + allRooms.map(r => `<option value="${r}" ${targetClasses === r ? 'selected' : ''}>👤 เฉพาะชั้น ${r}</option>`).join('');
+
+    openModal('modal-edit-assignment');
+}
+
+// ✅ ใหม่: บันทึกการแก้ไขใบงาน
+async function saveEditAssignment() {
+    const id = document.getElementById('edit-assign-id').value;
+    const title = document.getElementById('edit-assign-title').value.trim();
+    const maxScore = parseInt(document.getElementById('edit-assign-maxscore').value);
+    const targetClasses = document.getElementById('edit-assign-target').value;
+
+    if (!title) return showToast('❌ กรุณากรอกชื่อใบงาน');
+    if (!maxScore || maxScore < 1) return showToast('❌ คะแนนเต็มต้องมากกว่า 0');
+
+    const { error } = await sb.from('assignments')
+        .update({ title, max_score: maxScore, target_classes: targetClasses })
+        .eq('id', id);
+
+    if (error) { showToast('❌ แก้ไขไม่สำเร็จ: ' + error.message); return; }
+    closeModal('modal-edit-assignment');
+    showToast('✅ แก้ไขใบงานเรียบร้อยแล้ว');
+    loadData();
+}
+
 // ==========================================
 // 6. ระบบฟังก์ชันช่วยเหลือ (Utilities & Auth)
 // ==========================================
@@ -1158,7 +1119,52 @@ async function register() {
 
 function logout() { currentUser = null; localStorage.removeItem('payub_user'); updateUI(); navigate('dashboard', document.querySelectorAll('.nav-item')[0]); }
 
+// เพิ่มฟังก์ชันนี้ใน script.js เพื่อดึงคะแนนมาโชว์หน้าแรกมือถือ
+async function updateMobileGradeSummary() {
+    const guestView = document.getElementById('grade-guest-view');
+    const userView = document.getElementById('grade-user-view');
+    const itemsList = document.getElementById('mobile-grade-items-list');
+    const totalText = document.getElementById('mobile-total-score-text');
 
+    if (!currentUser) {
+        if(guestView) guestView.style.display = 'block';
+        if(userView) userView.style.display = 'none';
+        return;
+    }
+
+    if(guestView) guestView.style.display = 'none';
+    if(userView) userView.style.display = 'block';
+
+    // ดึงข้อมูลคะแนน (จำลองการดึงจาก Database)
+    // คุณครูสามารถใช้ตัวแปร submissions ที่มีอยู่แล้วมา filter ได้เลย
+    const { data: myScores, error } = await sb
+        .from('submissions')
+        .select('score, assignments(title, total_score)')
+        .eq('student_id', currentUser.id)
+        .not('score', 'is', null);
+
+    if (myScores && myScores.length > 0) {
+        let totalReceived = 0;
+        let totalPossible = 0;
+        
+        itemsList.innerHTML = myScores.map(s => {
+            totalReceived += s.score;
+            totalPossible += s.assignments.total_score;
+            return `
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span style="color: var(--text-muted); text-overflow: ellipsis; white-space: nowrap; overflow: hidden; max-width: 180px;">• ${s.assignments.title}</span>
+                    <span style="font-weight: bold;">${s.score}/${s.assignments.total_score}</span>
+                </div>
+            `;
+        }).join('');
+        
+        totalText.textContent = `${totalReceived} / ${totalPossible}`;
+    } else {
+        itemsList.innerHTML = '<p style="text-align:center; color:gray; font-size:13px;">ยังไม่มีข้อมูลคะแนนที่ตรวจแล้ว</p>';
+    }
+}
+
+// และอย่าลืมเรียกฟังก์ชันนี้ตอน updateUI()
 // updateMobileGradeSummary();loadReports
 
 function updateUI() {
