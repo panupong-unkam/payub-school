@@ -279,8 +279,25 @@ async function loadData() {
             const lessonsGridHtml = displayLessons.length ? `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; margin-bottom: 50px;">` + displayLessons.map((l, index) => {
                 let embedHtml = '';
                 const embedUrl = getEmbedUrl(l.url, l.content_type);
+                const lessonIcon = l.content_type === 'youtube' ? '▶️' : l.content_type === 'canva' ? '🎨' : l.content_type === 'slide' ? '📊' : '🔗';
+                const lessonTypeName = l.content_type === 'youtube' ? 'YouTube Video' : l.content_type === 'canva' ? 'Canva' : l.content_type === 'slide' ? 'Google Slides' : 'เนื้อหา';
+                const thumbId = 'thumb_' + l.id;
+                const frameId = 'frame_' + l.id;
                 if (embedUrl) {
-                    embedHtml = `<iframe src="${embedUrl}" style="width:100%; aspect-ratio: 16/9; border:none; border-radius:12px; margin-bottom:15px; background:#f5f7f5;" allowfullscreen></iframe>`;
+                    embedHtml = `
+                    <div id="${thumbId}" style="width:100%; aspect-ratio:16/9; border-radius:12px; margin-bottom:15px; background:linear-gradient(135deg,#e8f5e9,#c8e6c9); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; cursor:pointer; border:2px dashed #81c784; transition:0.2s;"
+                        onclick="document.getElementById('${thumbId}').style.display='none'; document.getElementById('${frameId}').style.display='block';"
+                        onmouseover="this.style.background='linear-gradient(135deg,#c8e6c9,#a5d6a7)'"
+                        onmouseout="this.style.background='linear-gradient(135deg,#e8f5e9,#c8e6c9)'">
+                        <div style="font-size:40px;">${lessonIcon}</div>
+                        <div style="font-size:14px; color:#2e7d32; font-weight:bold;">${lessonTypeName}</div>
+                        <div style="font-size:12px; color:#4caf50; background:rgba(255,255,255,0.7); padding:5px 12px; border-radius:20px;">▶ คลิกเพื่อโหลด</div>
+                    </div>
+                    <iframe id="${frameId}" src="${embedUrl}" style="width:100%; aspect-ratio:16/9; border:none; border-radius:12px; margin-bottom:15px; background:#f5f7f5; display:none;"
+                        allowfullscreen
+                        onload="this.style.display='block';"
+                        onerror="this.style.display='none'; document.getElementById('${thumbId}').style.display='flex'; document.getElementById('${thumbId}').innerHTML='<div style=\\'font-size:36px;\\'>⚠️</div><div style=\\'font-size:13px;color:#c62828;font-weight:bold;\\'>โหลดไม่ได้ (ถูกบล็อก)</div><div style=\\'font-size:12px;color:#666;text-align:center;padding:0 15px;\\'>กรุณาเปิดในหน้าต่างใหม่</div>';">
+                    </iframe>`;
                 }
                 
                 // ✅ เพิ่มปุ่มแก้ไข + ลบ เฉพาะครู
@@ -2107,8 +2124,8 @@ function initEnhancements() {
     // 5. Notifications
     setTimeout(() => loadNotifications(), 800);
 
-    // 6. Mascot greet
-    setTimeout(() => greetMascot(), 2800);
+    // 6. Mascot greet + auto-hide after 3s
+    setTimeout(() => { greetMascot(); initMascotAutoHide(); }, 2800);
 
     // 7. Keyboard shortcuts
     setupKeyboardShortcuts();
@@ -2541,18 +2558,42 @@ function greetMascot() {
 }
 
 function mascotInteract() {
+    const mascot = document.getElementById('mascot');
     const bubble = document.getElementById('mascot-bubble');
     const text = document.getElementById('mascot-bubble-text');
     if (!bubble || !text) return;
     const msg = MASCOT_MESSAGES[Math.floor(Math.random() * MASCOT_MESSAGES.length)];
     text.textContent = msg;
     bubble.classList.add('show');
+    // Show mascot briefly when clicked
+    if (mascot) {
+        mascot.classList.remove('mascot-hidden');
+        clearTimeout(window._mascotHideTimer);
+        window._mascotHideTimer = setTimeout(() => mascot.classList.add('mascot-hidden'), 3000);
+    }
     // Confetti easter egg
     if (typeof confetti === 'function') {
         confetti({ particleCount: 30, spread: 50, origin: { x: 0.1, y: 0.9 }, colors: ['#1a5f3f', '#f0a500', '#2d8a5e'] });
     }
     clearTimeout(window._mascotTimer);
     window._mascotTimer = setTimeout(() => bubble.classList.remove('show'), 4000);
+}
+
+function initMascotAutoHide() {
+    const mascot = document.getElementById('mascot');
+    if (!mascot) return;
+    // Hide after 3 seconds
+    clearTimeout(window._mascotHideTimer);
+    window._mascotHideTimer = setTimeout(() => mascot.classList.add('mascot-hidden'), 3000);
+    // Re-show briefly when hovered, then hide again after 3s of no interaction
+    mascot.addEventListener('mouseenter', () => {
+        mascot.classList.remove('mascot-hidden');
+        clearTimeout(window._mascotHideTimer);
+    });
+    mascot.addEventListener('mouseleave', () => {
+        clearTimeout(window._mascotHideTimer);
+        window._mascotHideTimer = setTimeout(() => mascot.classList.add('mascot-hidden'), 3000);
+    });
 }
 
 // ----- ⌨️ KEYBOARD SHORTCUTS -----
@@ -3676,27 +3717,67 @@ function showGameInstructions() {
 // 🔌 CIRCUIT LAB SIMULATOR (RP2040)
 // ==========================================
 
+// ── Cytron Maker Pi RP2040 pin layout ──────────────────────────────────────
+// Board body: 380 x 252 (landscape). All x,y are LOCAL to board origin.
 const PICO_PINS = [
-    // Left side
-    { name: 'GP0',  x: 50,  y: 90,  side: 'L', kind: 'gpio', idx: 0 },
-    { name: 'GP1',  x: 50,  y: 116, side: 'L', kind: 'gpio', idx: 1 },
-    { name: 'GND',  x: 50,  y: 142, side: 'L', kind: 'gnd' },
-    { name: 'GP2',  x: 50,  y: 168, side: 'L', kind: 'gpio', idx: 2 },
-    { name: 'GP3',  x: 50,  y: 194, side: 'L', kind: 'gpio', idx: 3 },
-    { name: 'GP4',  x: 50,  y: 220, side: 'L', kind: 'gpio', idx: 4 },
-    { name: 'GP5',  x: 50,  y: 246, side: 'L', kind: 'gpio', idx: 5 },
-    { name: 'ADC0', x: 50,  y: 272, side: 'L', kind: 'adc', idx: 26 },
-    { name: 'ADC1', x: 50,  y: 298, side: 'L', kind: 'adc', idx: 27 },
-    // Right side
-    { name: 'VBUS', x: 195, y: 90,  side: 'R', kind: 'vbus' },
-    { name: '3V3',  x: 195, y: 116, side: 'R', kind: '3v3' },
-    { name: 'GND',  x: 195, y: 142, side: 'R', kind: 'gnd', alt: 1 },
-    { name: 'GP15', x: 195, y: 168, side: 'R', kind: 'gpio', idx: 15 },
-    { name: 'GP14', x: 195, y: 194, side: 'R', kind: 'gpio', idx: 14 },
-    { name: 'GP13', x: 195, y: 220, side: 'R', kind: 'gpio', idx: 13 },
-    { name: 'GP12', x: 195, y: 246, side: 'R', kind: 'gpio', idx: 12 },
-    { name: 'GP11', x: 195, y: 272, side: 'R', kind: 'gpio', idx: 11 },
-    { name: 'GP10', x: 195, y: 298, side: 'R', kind: 'gpio', idx: 10 }
+    // GROVE 1 — left side (4-pin JST: GND,3V3,GP1,GP0)
+    { name: 'GP0',  x: 10,  y: 48,  side: 'L', kind: 'gpio', idx: 0  },
+    { name: 'GP1',  x: 10,  y: 63,  side: 'L', kind: 'gpio', idx: 1  },
+    { name: '3V3',  x: 10,  y: 78,  side: 'L', kind: '3v3'            },
+    { name: 'GND',  x: 10,  y: 93,  side: 'L', kind: 'gnd'            },
+    // MOTOR 2 — top terminal (M2B=GP11, M2A=GP10)
+    { name: 'GP11', x: 41,  y: 12,  side: 'T', kind: 'gpio', idx: 11 },
+    { name: 'GP10', x: 59,  y: 12,  side: 'T', kind: 'gpio', idx: 10 },
+    // MOTOR 1 — top terminal (M1B=GP9, M1A=GP8)
+    { name: 'GP9',  x: 134, y: 12,  side: 'T', kind: 'gpio', idx: 9  },
+    { name: 'GP8',  x: 152, y: 12,  side: 'T', kind: 'gpio', idx: 8  },
+    // VIN — top screw terminal
+    { name: 'VBUS', x: 213, y: 12,  side: 'T', kind: 'vbus'           },
+    { name: 'GND',  x: 231, y: 12,  side: 'T', kind: 'gnd', alt: 1   },
+    // GROVE 7 — right side (GP20, GP21, 3V3, GND) — 4-pin Grove connector
+    { name: 'GP20', x: 370, y: 44,  side: 'R', kind: 'gpio', idx: 20 },
+    { name: 'GP21', x: 370, y: 59,  side: 'R', kind: 'gpio', idx: 21 },
+    { name: '3V3',  x: 370, y: 74,  side: 'R', kind: '3v3',  alt: 6  },
+    { name: 'GND',  x: 370, y: 89,  side: 'R', kind: 'gnd',  alt: 2  },
+    // SERVO — right side: 4 rows × 3-pin (–=GND, +=VCC, S=Signal)
+    // label field overrides the text shown next to the pin
+    { name: 'GND',  x: 357, y: 122, side: 'R', kind: 'gnd',  alt: 8,  r: 5, label: ''   },
+    { name: 'VCC',  x: 367, y: 122, side: 'R', kind: 'vbus', alt: 1,  r: 5, label: ''   },
+    { name: 'GP12', x: 377, y: 122, side: 'R', kind: 'gpio', idx: 12, r: 5, label: 'S1' },
+    { name: 'GND',  x: 357, y: 140, side: 'R', kind: 'gnd',  alt: 9,  r: 5, label: ''   },
+    { name: 'VCC',  x: 367, y: 140, side: 'R', kind: 'vbus', alt: 2,  r: 5, label: ''   },
+    { name: 'GP13', x: 377, y: 140, side: 'R', kind: 'gpio', idx: 13, r: 5, label: 'S2' },
+    { name: 'GND',  x: 357, y: 158, side: 'R', kind: 'gnd',  alt: 10, r: 5, label: ''   },
+    { name: 'VCC',  x: 367, y: 158, side: 'R', kind: 'vbus', alt: 3,  r: 5, label: ''   },
+    { name: 'GP14', x: 377, y: 158, side: 'R', kind: 'gpio', idx: 14, r: 5, label: 'S3' },
+    { name: 'GND',  x: 357, y: 176, side: 'R', kind: 'gnd',  alt: 11, r: 5, label: ''   },
+    { name: 'VCC',  x: 367, y: 176, side: 'R', kind: 'vbus', alt: 4,  r: 5, label: ''   },
+    { name: 'GP15', x: 377, y: 176, side: 'R', kind: 'gpio', idx: 15, r: 5, label: 'S4' },
+    // GROVE 2 — bottom (gx=5  → hole-centers at 14,30,46,62)
+    { name: 'GND',  x: 14,  y: 240, side: 'B', kind: 'gnd',  alt: 3  },
+    { name: '3V3',  x: 30,  y: 240, side: 'B', kind: '3v3',  alt: 1  },
+    { name: 'GP2',  x: 46,  y: 240, side: 'B', kind: 'gpio', idx: 2  },
+    { name: 'GP3',  x: 62,  y: 240, side: 'B', kind: 'gpio', idx: 3  },
+    // GROVE 3 — bottom (gx=80 → hole-centers at 89,105,121,137)
+    { name: 'GND',  x: 89,  y: 240, side: 'B', kind: 'gnd',  alt: 4  },
+    { name: '3V3',  x: 105, y: 240, side: 'B', kind: '3v3',  alt: 2  },
+    { name: 'GP4',  x: 121, y: 240, side: 'B', kind: 'gpio', idx: 4  },
+    { name: 'GP5',  x: 137, y: 240, side: 'B', kind: 'gpio', idx: 5  },
+    // GROVE 4 — bottom (gx=155 → hole-centers at 164,180,196,212)
+    { name: 'GND',  x: 164, y: 240, side: 'B', kind: 'gnd',  alt: 5  },
+    { name: '3V3',  x: 180, y: 240, side: 'B', kind: '3v3',  alt: 3  },
+    { name: 'GP6',  x: 196, y: 240, side: 'B', kind: 'gpio', idx: 6  },
+    { name: 'GP7',  x: 212, y: 240, side: 'B', kind: 'gpio', idx: 7  },
+    // GROVE 5 — bottom (gx=230 → hole-centers at 239,255,271,287)
+    { name: 'GND',  x: 239, y: 240, side: 'B', kind: 'gnd',  alt: 6  },
+    { name: '3V3',  x: 255, y: 240, side: 'B', kind: '3v3',  alt: 4  },
+    { name: 'GP16', x: 271, y: 240, side: 'B', kind: 'gpio', idx: 16 },
+    { name: 'GP17', x: 287, y: 240, side: 'B', kind: 'gpio', idx: 17 },
+    // GROVE 6 — bottom (gx=305 → hole-centers at 314,330,346,362)
+    { name: 'GND',  x: 314, y: 240, side: 'B', kind: 'gnd',  alt: 7  },
+    { name: '3V3',  x: 330, y: 240, side: 'B', kind: '3v3',  alt: 5  },
+    { name: 'ADC0', x: 346, y: 240, side: 'B', kind: 'adc',  idx: 26 },
+    { name: 'ADC1', x: 362, y: 240, side: 'B', kind: 'adc',  idx: 27 },
 ];
 
 const PART_DEFS = {
@@ -3712,7 +3793,8 @@ const PART_DEFS = {
     ultra:      { name: 'HC-SR04',     icon: '📡', kind: 'ultra', pins: ['trig', 'echo', 'v', 'g'] },
     dht:        { name: 'DHT11',       icon: '🌡️', kind: 'dht', pins: ['data', 'v', 'g'] },
     soil:       { name: 'Soil Sensor', icon: '🌱', kind: 'soil', pins: ['sig', 'v', 'g'] },
-    pump:       { name: 'Water Pump',  icon: '💧', kind: 'pump', pins: ['+', '-'] }
+    pump:       { name: 'Water Pump',  icon: '💧', kind: 'pump', pins: ['+', '-'] },
+    motor:      { name: 'DC Motor',    icon: '⚙️', kind: 'motor', pins: ['in1', 'in2'] }
 };
 
 const WIRE_COLORS = {
@@ -3729,7 +3811,7 @@ const STARTER_CODE = {
 from machine import Pin
 import time
 
-led = Pin(15, Pin.OUT)
+led = Pin(2, Pin.OUT)   # GROVE 2 — Signal1
 
 while True:
     led.on()
@@ -3741,7 +3823,7 @@ while True:
 from machine import Pin
 import time
 
-led = Pin(15, Pin.OUT)
+led = Pin(2, Pin.OUT)   # GROVE 2 — Signal1
 
 while True:
     led.on()
@@ -3753,9 +3835,9 @@ while True:
 from machine import Pin
 import time
 
-red = Pin(15, Pin.OUT)
-yellow = Pin(14, Pin.OUT)
-green = Pin(13, Pin.OUT)
+red    = Pin(2, Pin.OUT)   # GROVE 2 — Signal1
+yellow = Pin(4, Pin.OUT)   # GROVE 3 — Signal1
+green  = Pin(6, Pin.OUT)   # GROVE 4 — Signal1
 
 while True:
     red.on()
@@ -3770,67 +3852,74 @@ while True:
 `,
         m3: `# ภารกิจ 3: กดปุ่ม → LED ติด
 from machine import Pin
+import time
 
-led = Pin(15, Pin.OUT)
-btn = Pin(14, Pin.IN)
+led = Pin(2, Pin.OUT)   # GROVE 2 — Signal1
+btn = Pin(4, Pin.IN)    # GROVE 3 — Signal1
 
 while True:
     if btn.value() == 1:
-        led.on()
+        led.on()    # กดปุ่ม → LED ติด
     else:
-        led.off()
+        led.off()   # ปล่อยปุ่ม → LED ดับ
+    time.sleep(0.05)  # อ่านค่าทุก 50ms
 `,
         m4: `# ภารกิจ 4: Buzzer Music
 from machine import Pin
 import time
 
-buzzer = Pin(15, Pin.OUT)
+buzzer = Pin(6, Pin.OUT)   # GROVE 4 — Signal1
 
-# เล่นเพลงสั้น ๆ
-for i in range(5):
-    buzzer.on()
-    time.sleep(0.2)
-    buzzer.off()
-    time.sleep(0.1)
+while True:
+    # เล่นเสียงสั้น ๆ 5 ครั้ง
+    for i in range(5):
+        buzzer.on()
+        time.sleep(0.2)
+        buzzer.off()
+        time.sleep(0.1)
+    time.sleep(2)   # หยุดก่อนรอบถัดไป
 `,
         m5: `# ภารกิจ 5: Smart Night Light
 from machine import Pin, ADC
+import time
 
-ldr = ADC(26)
-led = Pin(15, Pin.OUT)
+ldr = ADC(26)              # GROVE 6 — ADC0
+led = Pin(2, Pin.OUT)      # GROVE 2 — Signal1
 
 while True:
     light = ldr.read_u16()
     if light < 20000:
-        led.on()
+        led.on()    # มืด → เปิดไฟ
     else:
-        led.off()
+        led.off()   # สว่าง → ปิดไฟ
+    time.sleep(0.1)  # อ่านค่าทุก 100ms
 `,
         m6: `# ภารกิจ 6: Servo Control
 from machine import Pin, PWM
 import time
 
-servo = PWM(Pin(15))
-servo.freq(50)
+servo = PWM(Pin(12))       # S1 Connector — Signal (GP12)
+servo.freq(50)             # ความถี่ 50 Hz สำหรับ Servo
 
-# กวาด 0° -> 90° -> 180°
-servo.duty_u16(1638)   # 0°
-time.sleep(1)
-servo.duty_u16(4915)   # 90°
-time.sleep(1)
-servo.duty_u16(8192)   # 180°
-time.sleep(1)
+while True:
+    # กวาด 0° → 90° → 180° → ลูป
+    servo.duty_u16(1638)   # 0°
+    time.sleep(1)
+    servo.duty_u16(4915)   # 90°
+    time.sleep(1)
+    servo.duty_u16(8192)   # 180°
+    time.sleep(1)
 `,
         m7: `# ภารกิจ 7: Smart Garden
 from machine import Pin, ADC
 import time
 
-soil = ADC(26)
-pump = Pin(15, Pin.OUT)
+soil = ADC(26)             # GROVE 6 — ADC0 (Soil Sensor)
+pump = Pin(16, Pin.OUT)    # GROVE 5 — Signal1 (Water Pump)
 
 while True:
     moisture = soil.read_u16()
-    if moisture < 25000:  # ดินแห้ง
+    if moisture < 25000:   # ดินแห้ง
         pump.on()
         print("รดน้ำ...")
         time.sleep(2)
@@ -3841,105 +3930,131 @@ while True:
 from machine import Pin
 import time
 
-# ในชีวิตจริงต้องใช้ dht library
-# จำลองการอ่านค่า DHT11
-dht = Pin(15)
+dht = Pin(4)               # GROVE 3 — Signal1 (DHT11)
 
 while True:
-    temp = dht.read_temp()   # อุณหภูมิ
-    hum = dht.read_humidity() # ความชื้น
+    temp = dht.read_temp()       # อุณหภูมิ (°C)
+    hum  = dht.read_humidity()   # ความชื้น (%)
     print("Temp:", temp, "C  Humidity:", hum, "%")
     time.sleep(2)
 `,
-        m9: `# ภารกิจ 9: Obstacle Avoidance Bot
+        m10: `# ภารกิจ 10: Motor Control
 from machine import Pin
 import time
 
-trig = Pin(15, Pin.OUT)
-echo = Pin(14, Pin.IN)
-servo = Pin(13, Pin.OUT)
-buzzer = Pin(12, Pin.OUT)
+in1 = Pin(8, Pin.OUT)   # MOTOR 1 — IN1 (GP8)
+in2 = Pin(9, Pin.OUT)   # MOTOR 1 — IN2 (GP9)
+
+while True:
+    # หมุนไปข้างหน้า (CW)
+    in1.on()
+    in2.off()
+    time.sleep(2)
+    # หยุด
+    in1.off()
+    in2.off()
+    time.sleep(0.5)
+    # หมุนถอยหลัง (CCW)
+    in1.off()
+    in2.on()
+    time.sleep(2)
+    # หยุด
+    in1.off()
+    in2.off()
+    time.sleep(0.5)
+`,
+        m9: `# ภารกิจ 9: Obstacle Avoidance Bot
+from machine import Pin, PWM
+import time
+
+trig   = Pin(4, Pin.OUT)   # GROVE 3 — Signal1 (HC-SR04 TRIG)
+echo   = Pin(5, Pin.IN)    # GROVE 3 — Signal2 (HC-SR04 ECHO)
+servo  = PWM(Pin(12))      # S1 Connector — Signal (GP12)
+buzzer = Pin(6, Pin.OUT)   # GROVE 4 — Signal1
+
+servo.freq(50)
 
 while True:
     distance = ultrasonic(trig, echo)
     print("Distance:", distance, "cm")
     if distance < 10:
         buzzer.on()
-        servo.on()  # หลบทาง
+        servo.duty_u16(4915)   # หมุน 90° หลบสิ่งกีดขวาง
     else:
         buzzer.off()
-        servo.off()
+        servo.duty_u16(1638)   # กลับ 0°
     time.sleep(0.3)
 `
     },
     c: {
         default: `// โค้ดเริ่มต้น (Arduino C)
 void setup() {
-    pinMode(15, OUTPUT);
+    pinMode(2, OUTPUT);    // GROVE 2 — Signal1
 }
 
 void loop() {
-    digitalWrite(15, HIGH);
+    digitalWrite(2, HIGH);
     delay(500);
-    digitalWrite(15, LOW);
+    digitalWrite(2, LOW);
     delay(500);
 }
 `,
         m1: `// ภารกิจ 1: กระพริบ LED
 void setup() {
-    pinMode(15, OUTPUT);
+    pinMode(2, OUTPUT);    // GROVE 2 — Signal1
 }
 
 void loop() {
-    digitalWrite(15, HIGH);
+    digitalWrite(2, HIGH);
     delay(1000);
-    digitalWrite(15, LOW);
+    digitalWrite(2, LOW);
     delay(1000);
 }
 `,
         m2: `// ภารกิจ 2: ไฟจราจร
 void setup() {
-    pinMode(15, OUTPUT); // red
-    pinMode(14, OUTPUT); // yellow
-    pinMode(13, OUTPUT); // green
+    pinMode(2, OUTPUT);    // GROVE 2 — red
+    pinMode(4, OUTPUT);    // GROVE 3 — yellow
+    pinMode(6, OUTPUT);    // GROVE 4 — green
 }
 
 void loop() {
-    digitalWrite(15, HIGH);
+    digitalWrite(2, HIGH);
     delay(2000);
-    digitalWrite(15, LOW);
-    digitalWrite(14, HIGH);
+    digitalWrite(2, LOW);
+    digitalWrite(4, HIGH);
     delay(1000);
-    digitalWrite(14, LOW);
-    digitalWrite(13, HIGH);
+    digitalWrite(4, LOW);
+    digitalWrite(6, HIGH);
     delay(2000);
-    digitalWrite(13, LOW);
+    digitalWrite(6, LOW);
 }
 `,
         m3: `// ภารกิจ 3: ปุ่ม → LED
 void setup() {
-    pinMode(15, OUTPUT);
-    pinMode(14, INPUT);
+    pinMode(2, OUTPUT);    // GROVE 2 — LED
+    pinMode(4, INPUT);     // GROVE 3 — Button
 }
 
 void loop() {
-    if (digitalRead(14) == HIGH) {
-        digitalWrite(15, HIGH);
+    if (digitalRead(4) == HIGH) {
+        digitalWrite(2, HIGH);  // กดปุ่ม → LED ติด
     } else {
-        digitalWrite(15, LOW);
+        digitalWrite(2, LOW);   // ปล่อยปุ่ม → LED ดับ
     }
+    delay(50);  // อ่านค่าทุก 50ms
 }
 `,
         m4: `// ภารกิจ 4: Buzzer Music
 void setup() {
-    pinMode(15, OUTPUT);
+    pinMode(6, OUTPUT);    // GROVE 4 — Signal1
 }
 
 void loop() {
     for (int i = 0; i < 5; i++) {
-        digitalWrite(15, HIGH);
+        digitalWrite(6, HIGH);
         delay(200);
-        digitalWrite(15, LOW);
+        digitalWrite(6, LOW);
         delay(100);
     }
     delay(2000);
@@ -3947,57 +4062,65 @@ void loop() {
 `,
         m5: `// ภารกิจ 5: Night Light
 void setup() {
-    pinMode(15, OUTPUT);
-    pinMode(26, INPUT); // ADC0
+    pinMode(2, OUTPUT);    // GROVE 2 — LED
+    pinMode(26, INPUT);    // GROVE 6 — ADC0 (LDR)
 }
 
 void loop() {
     int light = analogRead(26);
     if (light < 500) {
-        digitalWrite(15, HIGH);
+        digitalWrite(2, HIGH);
     } else {
-        digitalWrite(15, LOW);
+        digitalWrite(2, LOW);
     }
     delay(200);
 }
 `,
-        m6: `// ภารกิจ 6: Servo
+        m6: `// ภารกิจ 6: Servo (S1 Connector — GP12)
+#include <Servo.h>
+Servo myServo;
+
 void setup() {
-    pinMode(15, OUTPUT);
+    myServo.attach(12);    // S1 Signal — GP12 (5V จาก VBUS)
 }
 
 void loop() {
-    // จำลอง servo: HIGH = 90°
-    digitalWrite(15, HIGH);
+    myServo.write(0);      // 0°
     delay(1000);
-    digitalWrite(15, LOW);
+    myServo.write(90);     // 90°
+    delay(1000);
+    myServo.write(180);    // 180°
     delay(1000);
 }
 `,
         m7: `// ภารกิจ 7: Smart Garden
 void setup() {
-    pinMode(15, OUTPUT);
-    pinMode(26, INPUT);
+    pinMode(16, OUTPUT);   // GROVE 5 — Pump
+    pinMode(26, INPUT);    // GROVE 6 — ADC0 (Soil)
 }
 
 void loop() {
     int moisture = analogRead(26);
     if (moisture < 500) {
-        digitalWrite(15, HIGH);
+        digitalWrite(16, HIGH);
         delay(2000);
-        digitalWrite(15, LOW);
+        digitalWrite(16, LOW);
     }
     delay(1000);
 }
 `,
-        m8: `// ภารกิจ 8: Weather
+        m8: `// ภารกิจ 8: Weather Station
+#include <DHT.h>
+DHT dht(4, DHT11);         // GROVE 3 — Signal1
+
 void setup() {
     Serial.begin(9600);
+    dht.begin();
 }
 
 void loop() {
-    float t = readTemp();    // จำลอง
-    float h = readHumidity();
+    float t = dht.readTemperature();
+    float h = dht.readHumidity();
     Serial.print("Temp: ");
     Serial.print(t);
     Serial.print(" Humidity: ");
@@ -4005,22 +4128,50 @@ void loop() {
     delay(2000);
 }
 `,
-        m9: `// ภารกิจ 9: Obstacle Bot
+        m10: `// ภารกิจ 10: Motor Control
 void setup() {
-    pinMode(15, OUTPUT); // trig
-    pinMode(14, INPUT);  // echo
-    pinMode(13, OUTPUT); // servo
-    pinMode(12, OUTPUT); // buzzer
+    pinMode(8, OUTPUT);   // MOTOR 1 — IN1
+    pinMode(9, OUTPUT);   // MOTOR 1 — IN2
 }
 
 void loop() {
-    int distance = ultrasonic(15, 14);
-    if (distance < 10) {
-        digitalWrite(12, HIGH);
-        digitalWrite(13, HIGH);
+    // หมุนไปข้างหน้า (CW)
+    digitalWrite(8, HIGH);
+    digitalWrite(9, LOW);
+    delay(2000);
+    // หยุด
+    digitalWrite(8, LOW);
+    digitalWrite(9, LOW);
+    delay(500);
+    // หมุนถอยหลัง (CCW)
+    digitalWrite(8, LOW);
+    digitalWrite(9, HIGH);
+    delay(2000);
+    // หยุด
+    digitalWrite(8, LOW);
+    digitalWrite(9, LOW);
+    delay(500);
+}
+`,
+        m9: `// ภารกิจ 9: Obstacle Avoidance Bot
+#include <Servo.h>
+Servo myServo;
+
+void setup() {
+    pinMode(4, OUTPUT);    // GROVE 3 — TRIG
+    pinMode(5, INPUT);     // GROVE 3 — ECHO
+    myServo.attach(12);    // S1 Signal — GP12
+    pinMode(6, OUTPUT);    // GROVE 4 — Buzzer
+}
+
+void loop() {
+    int dist = ultrasonic(4, 5);
+    if (dist < 10) {
+        digitalWrite(6, HIGH);
+        myServo.write(90);
     } else {
-        digitalWrite(12, LOW);
-        digitalWrite(13, LOW);
+        digitalWrite(6, LOW);
+        myServo.write(0);
     }
     delay(300);
 }
@@ -4032,83 +4183,92 @@ const LAB_MISSIONS = [
     {
         id: 'm1', num: 1, icon: '💡', diff: 'easy',
         title: 'Hello LED',
-        short: 'กระพริบ LED 1 ดวงด้วยขา GP15',
-        desc: 'เป้าหมาย: ต่อ LED 1 ดวงเข้ากับ GP15 และให้ติด-ดับสลับกันด้วยโค้ด',
+        short: 'กระพริบ LED ผ่าน GROVE 2 (GP2)',
+        desc: 'เป้าหมาย: ต่อ LED + ตัวต้านทาน 220Ω เข้ากับ GP2 (GROVE 2) แล้วเขียนโค้ดให้ LED กระพริบสลับกัน',
         requiredParts: ['led_red', 'resistor'],
-        requiredWires: [{from:'GP15', to:'led:a'}, {from:'led:c', to:'GND'}],
-        goal: { led15Toggle: true }
+        requiredWires: [{from:'GP2', to:'led:a'}, {from:'led:c', to:'GND'}],
+        goal: { ledToggle: true }
     },
     {
         id: 'm2', num: 2, icon: '🚦', diff: 'easy',
         title: 'Traffic Light',
-        short: 'ไฟจราจร LED 3 สีเรียงตามลำดับ',
-        desc: 'เป้าหมาย: ต่อ LED แดง (GP15) เหลือง (GP14) เขียว (GP13) ทำงานเหมือนสัญญาณไฟจราจร',
+        short: 'ไฟจราจร 3 สี: GP2 / GP4 / GP6',
+        desc: 'เป้าหมาย: ต่อ LED แดง→GP2 (GROVE 2), เหลือง→GP4 (GROVE 3), เขียว→GP6 (GROVE 4) ทำงานเป็นลำดับเหมือนสัญญาณไฟจราจร',
         requiredParts: ['led_red', 'led_yellow', 'led_green'],
-        requiredWires: [{from:'GP15', to:'led_red:a'}, {from:'GP14', to:'led_yellow:a'}, {from:'GP13', to:'led_green:a'}],
-        goal: { pinsToggled: [15, 14, 13] }
+        requiredWires: [{from:'GP2', to:'led_red:a'}, {from:'GP4', to:'led_yellow:a'}, {from:'GP6', to:'led_green:a'}],
+        goal: { pinsToggled: [2, 4, 6] }
     },
     {
         id: 'm3', num: 3, icon: '🔘', diff: 'easy',
         title: 'Button Light',
-        short: 'กดปุ่ม → LED ติด ปล่อย → LED ดับ',
-        desc: 'เป้าหมาย: ต่อ Push Button ที่ GP14 และ LED ที่ GP15 — กดปุ่มแล้ว LED ต้องติด',
+        short: 'กดปุ่ม (GP4/GROVE 3) → LED ติด (GP2/GROVE 2)',
+        desc: 'เป้าหมาย: ต่อ Push Button ที่ GP4 (GROVE 3) และ LED ที่ GP2 (GROVE 2) — กดปุ่มแล้ว LED ต้องติด',
         requiredParts: ['button', 'led_red'],
-        requiredWires: [{from:'GP15', to:'led:a'}, {from:'GP14', to:'button:t1'}],
-        goal: { readPin: 14 }
+        requiredWires: [{from:'GP2', to:'led:a'}, {from:'GP4', to:'button:t1'}],
+        goal: { readPin: 4 }
     },
     {
         id: 'm4', num: 4, icon: '🎵', diff: 'medium',
         title: 'Buzzer Melody',
-        short: 'เล่นทำนองด้วย Buzzer',
-        desc: 'เป้าหมาย: ต่อ Buzzer เข้ากับ GP15 และให้ส่งเสียงเป็นจังหวะ',
+        short: 'เล่นทำนองด้วย Buzzer ที่ GP6 (GROVE 4)',
+        desc: 'เป้าหมาย: ต่อ Buzzer เข้ากับ GP6 ผ่าน GROVE 4 แล้วเขียนโค้ดให้ส่งเสียงเป็นจังหวะ',
         requiredParts: ['buzzer'],
-        requiredWires: [{from:'GP15', to:'buzzer:+'}],
-        goal: { pinToggleCount: { 15: 3 } }
+        requiredWires: [{from:'GP6', to:'buzzer:+'}],
+        goal: { pinToggleCount: { 6: 3 } }
     },
     {
         id: 'm5', num: 5, icon: '🌙', diff: 'medium',
         title: 'Smart Night Light',
-        short: 'LDR วัดแสง → LED เปิดเมื่อมืด',
-        desc: 'เป้าหมาย: อ่านค่าจาก LDR (ADC0) เมื่อค่าน้อย (มืด) ให้เปิด LED ที่ GP15',
+        short: 'LDR (ADC0/GROVE 6) วัดแสง → LED (GP2) เปิดเมื่อมืด',
+        desc: 'เป้าหมาย: อ่านค่าจาก LDR ที่ ADC0 (GROVE 6) เมื่อค่าน้อย (มืด) ให้เปิด LED ที่ GP2 (GROVE 2)',
         requiredParts: ['ldr', 'led_red'],
-        requiredWires: [{from:'ADC0', to:'ldr:t1'}, {from:'GP15', to:'led:a'}],
+        requiredWires: [{from:'ADC0', to:'ldr:t1'}, {from:'GP2', to:'led:a'}],
         goal: { useADC: 26 }
     },
     {
         id: 'm6', num: 6, icon: '🦾', diff: 'medium',
         title: 'Servo Control',
-        short: 'หมุน Servo ไปตามมุมที่ต้องการ',
-        desc: 'เป้าหมาย: ต่อ Servo เข้ากับ GP15 และให้หมุนตามที่กำหนด',
+        short: 'หมุน Servo SG90 ผ่าน S1 Connector (GP12, VBUS 5V)',
+        desc: 'เป้าหมาย: ต่อ Servo เข้า S1 Connector — Signal→GP12, VCC→VBUS (5V), GND→GND แล้วใช้ PWM หมุน 0°→90°→180°',
         requiredParts: ['servo'],
-        requiredWires: [{from:'GP15', to:'servo:sig'}],
-        goal: { pinUsed: 15 }
+        requiredWires: [{from:'GP12', to:'servo:sig'}],
+        goal: { pinUsed: 12 }
     },
     {
         id: 'm7', num: 7, icon: '🌱', diff: 'hard',
         title: 'Smart Garden',
-        short: 'Soil Sensor → ดินแห้ง → ปั๊มน้ำทำงาน',
-        desc: 'เป้าหมาย: อ่าน Soil Sensor (ADC0) ถ้าค่าน้อยกว่า threshold ให้ Pump น้ำที่ GP15 ทำงาน',
+        short: 'Soil Sensor (ADC0/GROVE 6) → ดินแห้ง → ปั๊มน้ำ (GP16/GROVE 5)',
+        desc: 'เป้าหมาย: อ่าน Soil Sensor ที่ ADC0 (GROVE 6) ถ้าค่าน้อยกว่า threshold ให้ Water Pump ที่ GP16 (GROVE 5) ทำงาน',
         requiredParts: ['soil', 'pump'],
-        requiredWires: [{from:'ADC0', to:'soil:sig'}, {from:'GP15', to:'pump:+'}],
-        goal: { useADC: 26, pinUsed: 15 }
+        requiredWires: [{from:'ADC0', to:'soil:sig'}, {from:'GP16', to:'pump:+'}],
+        goal: { useADC: 26, pinUsed: 16 }
     },
     {
         id: 'm8', num: 8, icon: '🌡️', diff: 'hard',
         title: 'Weather Station',
-        short: 'อ่าน DHT11 แสดงผลใน Console',
-        desc: 'เป้าหมาย: ต่อ DHT11 เข้ากับ GP15 และพิมพ์ค่าอุณหภูมิ/ความชื้นใน Console',
+        short: 'อ่าน DHT11 (GP4/GROVE 3) แสดงผลใน Console',
+        desc: 'เป้าหมาย: ต่อ DHT11 เข้ากับ GP4 (GROVE 3) แล้วพิมพ์ค่าอุณหภูมิ/ความชื้นใน Console',
         requiredParts: ['dht'],
-        requiredWires: [{from:'GP15', to:'dht:data'}],
+        requiredWires: [{from:'GP4', to:'dht:data'}],
         goal: { usePrint: true }
     },
     {
         id: 'm9', num: 9, icon: '🤖', diff: 'hard',
         title: 'Obstacle Avoidance',
-        short: 'Ultrasonic + Servo + Buzzer หลบสิ่งกีดขวาง',
-        desc: 'เป้าหมาย: ใช้ Ultrasonic วัดระยะ ถ้ามีสิ่งกีดขวางใกล้ ให้ Servo หมุนหลบ + Buzzer ส่งเสียงเตือน',
+        short: 'HC-SR04 (GROVE 3) + Servo S1 (GP12) + Buzzer (GROVE 4)',
+        desc: 'เป้าหมาย: HC-SR04 TRIG→GP4 / ECHO→GP5 (GROVE 3), Servo Signal→GP12 (S1, VBUS 5V), Buzzer→GP6 (GROVE 4) — วัดระยะ ถ้ามีสิ่งกีดขวาง Servo หมุนหลบ + Buzzer เตือน',
         requiredParts: ['ultra', 'servo', 'buzzer'],
-        requiredWires: [{from:'GP15', to:'ultra:trig'}, {from:'GP14', to:'ultra:echo'}, {from:'GP13', to:'servo:sig'}, {from:'GP12', to:'buzzer:+'}],
-        goal: { pinsToggled: [15, 13, 12] }
+        requiredWires: [{from:'GP4', to:'ultra:trig'}, {from:'GP5', to:'ultra:echo'}, {from:'GP12', to:'servo:sig'}, {from:'GP6', to:'buzzer:+'}],
+        goal: { pinsToggled: [4, 12, 6] }
+    },
+    {
+        id: 'm10', num: 10, icon: '⚙️', diff: 'hard',
+        title: 'Motor Control',
+        short: 'ควบคุม DC Motor ผ่าน MOTOR 1 (GP8/GP9)',
+        desc: 'เป้าหมาย: ต่อ DC Motor เข้ากับ MOTOR 1 Connector — IN1→GP8, IN2→GP9 แล้วควบคุมทิศทางการหมุน (CW/CCW) ผ่านโค้ด',
+        requiredParts: ['motor'],
+        requiredWires: [{from:'GP8', to:'motor:in1'}, {from:'GP9', to:'motor:in2'}],
+        goal: { pinsToggled: [8, 9] }
     }
 ];
 
@@ -4118,6 +4278,9 @@ let labState = {
     selectedPin: null,       // {compId, pin}
     pinStates: {},           // {15: 0, 14: 1, ...}
     adcValues: { 26: 32000, 27: 32000 }, // 16-bit ADC mocks
+    simInputs: { adc0: 50, distance: 30, temperature: 25, humidity: 65 },
+    servoAngles: {}, // pin→angle set by PWM duty_u16
+    sensorDisplay: {},           // live sensor readings for component display
     running: false,
     stopRequested: false,
     currentMission: null,
@@ -4127,8 +4290,13 @@ let labState = {
     simTime: 0,
     pinToggleCount: {},
     nextCompId: 1,
-    nextWireId: 1
+    nextWireId: 1,
+    zoom: 1.0,              // zoom level for SVG canvas
+    panX: 0,               // pan offset X in SVG units
+    panY: 0                // pan offset Y in SVG units
 };
+// Expose to scenarios.js (real-world scene engine reads servoAngles/pinStates)
+window.labState = labState;
 
 // ----- Lab Hub render -----
 function renderLabMissionsHub() {
@@ -4156,6 +4324,34 @@ function openCircuitLab(missionId = 'm1') {
     drawPicoBoard();
     drawBreadboard();
     setupCanvasEvents();
+    resetLabZoom();
+}
+
+// ----- Zoom controls -----
+function applyLabZoom() {
+    const svg = document.getElementById('lab-svg');
+    if (!svg) return;
+    const baseW = 800, baseH = 600;
+    const w = baseW / labState.zoom;
+    const h = baseH / labState.zoom;
+    // Center + pan offset (panX/Y in SVG units, subtract = move view to show that area)
+    const x = (baseW - w) / 2 - labState.panX;
+    const y = (baseH - h) / 2 - labState.panY;
+    svg.setAttribute('viewBox', `${x} ${y} ${w} ${h}`);
+    const el = document.getElementById('lab-zoom-level');
+    if (el) el.textContent = Math.round(labState.zoom * 100) + '%';
+}
+
+function setLabZoom(delta) {
+    labState.zoom = Math.round(Math.max(0.5, Math.min(3.0, labState.zoom + delta)) * 100) / 100;
+    applyLabZoom();
+}
+
+function resetLabZoom() {
+    labState.zoom = 1.0;
+    labState.panX = 0;
+    labState.panY = 0;
+    applyLabZoom();
 }
 
 function openLabMissions() {
@@ -4288,87 +4484,298 @@ function renderPlacedList() {
 }
 
 // ----- Draw Pico Board -----
-const PICO_OFFSET_X = 320;
-const PICO_OFFSET_Y = 70;
+const PICO_OFFSET_X = 210;   // Cytron board centred in 800-wide SVG
+const PICO_OFFSET_Y = 120;
 function drawPicoBoard() {
     const g = document.getElementById('lab-pico');
     if (!g) return;
     const px = PICO_OFFSET_X, py = PICO_OFFSET_Y;
-    let svg = `
-        <g transform="translate(${px}, ${py})">
-            <rect x="0" y="0" width="230" height="320" rx="14" fill="url(#picoBg)" stroke="#0a4b25" stroke-width="2"/>
-            <rect x="0" y="0" width="230" height="320" rx="14" fill="none" stroke="#1d8a4a" stroke-width="1" opacity="0.6"/>
-            <rect x="80" y="0" width="70" height="30" rx="3" fill="#aaa"/>
-            <rect x="90" y="6" width="50" height="18" rx="2" fill="#555"/>
-            <text x="115" y="20" text-anchor="middle" fill="#888" font-size="8" font-family="monospace">USB</text>
-            <rect x="80" y="160" width="70" height="50" rx="3" fill="#1a1a1a" stroke="#444"/>
-            <text x="115" y="180" text-anchor="middle" fill="#ddd" font-size="8" font-family="monospace">RP2040</text>
-            <text x="115" y="195" text-anchor="middle" fill="#888" font-size="7" font-family="monospace">Pico</text>
-            <circle cx="170" cy="50" r="3" fill="#1a1a1a"/>
-            <text x="170" y="65" text-anchor="middle" fill="#fff" font-size="6">LED</text>
-            <text x="115" y="245" text-anchor="middle" fill="#fff" font-size="11" font-family="monospace" font-weight="bold">Raspberry Pi</text>
-            <text x="115" y="260" text-anchor="middle" fill="#ffd97d" font-size="13" font-family="monospace" font-weight="bold">Pico</text>
-            <text x="115" y="278" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="7">RP2040</text>
-    `;
-    // Compute which Pico pins are highlighted by the current mission
+    const BW = 380, BH = 252;
+
+    // ── Mission halo ──
     const mission = labState.currentMission;
     const requiredPinNames = new Set();
     if (mission) {
         mission.requiredWires.forEach(w => {
-            // Pin names like "GP15", "GND", "ADC0" appear in mission.from/to
             if (/^(GP\d+|GND|VBUS|3V3|ADC\d)$/.test(w.from)) requiredPinNames.add(w.from);
-            if (/^(GP\d+|GND|VBUS|3V3|ADC\d)$/.test(w.to)) requiredPinNames.add(w.to);
+            if (/^(GP\d+|GND|VBUS|3V3|ADC\d)$/.test(w.to))   requiredPinNames.add(w.to);
         });
     }
+
+    let svg = `<g transform="translate(${px},${py})">`;
+
+    // ── Board shadow ──
+    svg += `<rect x="4" y="4" width="${BW}" height="${BH}" rx="10" fill="rgba(0,0,0,0.35)"/>`;
+
+    // ── Board body (purple PCB) ──
+    svg += `<rect x="0" y="0" width="${BW}" height="${BH}" rx="10"
+        fill="#4a1a78" stroke="#7b3db5" stroke-width="1.5"/>`;
+    // subtle PCB grid
+    svg += `<rect x="0" y="0" width="${BW}" height="${BH}" rx="10"
+        fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="4"/>`;
+
+    // ── Mounting holes ──
+    [[14,14],[BW-14,14],[14,BH-14],[BW-14,BH-14]].forEach(([cx,cy]) => {
+        svg += `<circle cx="${cx}" cy="${cy}" r="6" fill="#37105c" stroke="#6b3b9a" stroke-width="1"/>
+                <circle cx="${cx}" cy="${cy}" r="2.5" fill="#250845"/>`;
+    });
+
+    // ── LiPo connector (top-left) ──
+    svg += `<rect x="5" y="1" width="30" height="17" rx="2" fill="#d8d0b4" stroke="#aaa" stroke-width="0.7"/>
+            <text x="20" y="12" text-anchor="middle" fill="#555" font-size="5.5" font-family="monospace">LIPO</text>`;
+
+    // ── MOTOR 2 terminal block (top, left section) ──
+    svg += `<rect x="22" y="0" width="62" height="22" rx="1.5" fill="#111" stroke="#555" stroke-width="0.7"/>`;
+    [28,41,54,67].forEach(tx => {
+        svg += `<rect x="${tx}" y="2" width="11" height="13" rx="1" fill="#2a2a2a" stroke="#666" stroke-width="0.4"/>
+                <circle cx="${tx+5.5}" cy="8.5" r="2.5" fill="#444"/>`;
+    });
+    svg += `<rect x="22" y="22" width="62" height="18" fill="#0d0d0d"/>
+            <text x="53" y="33" text-anchor="middle" fill="#fff" font-size="5.5" font-family="monospace" font-weight="bold">MOTOR 2</text>
+            <text x="36" y="42" text-anchor="middle" fill="#ffd97d" font-size="5" font-family="monospace">M2B</text>
+            <text x="53" y="42" text-anchor="middle" fill="#ffd97d" font-size="5" font-family="monospace">M2A</text>
+            <text x="36" y="50" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="4.5" font-family="monospace">GP11</text>
+            <text x="53" y="50" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="4.5" font-family="monospace">GP10</text>`;
+
+    // ── MOTOR 1 terminal block (top) ──
+    svg += `<rect x="114" y="0" width="62" height="22" rx="1.5" fill="#111" stroke="#555" stroke-width="0.7"/>`;
+    [120,133,146,159].forEach(tx => {
+        svg += `<rect x="${tx}" y="2" width="11" height="13" rx="1" fill="#2a2a2a" stroke="#666" stroke-width="0.4"/>
+                <circle cx="${tx+5.5}" cy="8.5" r="2.5" fill="#444"/>`;
+    });
+    svg += `<rect x="114" y="22" width="62" height="18" fill="#0d0d0d"/>
+            <text x="145" y="33" text-anchor="middle" fill="#fff" font-size="5.5" font-family="monospace" font-weight="bold">MOTOR 1</text>
+            <text x="129" y="42" text-anchor="middle" fill="#ffd97d" font-size="5" font-family="monospace">M1B</text>
+            <text x="146" y="42" text-anchor="middle" fill="#ffd97d" font-size="5" font-family="monospace">M1A</text>
+            <text x="129" y="50" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="4.5" font-family="monospace">GP9</text>
+            <text x="146" y="50" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="4.5" font-family="monospace">GP8</text>`;
+
+    // ── VIN screw terminal (top-center) ──
+    svg += `<rect x="194" y="0" width="50" height="22" rx="1.5" fill="#1a5c1a" stroke="#2a8b2a" stroke-width="0.7"/>`;
+    [198,210,222,234].forEach(tx => {
+        svg += `<rect x="${tx}" y="2" width="10" height="13" rx="1" fill="#0d3a0d" stroke="#3a8f3a" stroke-width="0.4"/>
+                <circle cx="${tx+5}" cy="8.5" r="2.5" fill="#145014"/>`;
+    });
+    svg += `<text x="219" y="32" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="5" font-family="monospace">VIN</text>
+            <text x="203" y="40" text-anchor="middle" fill="#ff9999" font-size="6" font-family="monospace">+</text>
+            <text x="235" y="40" text-anchor="middle" fill="#aaa" font-size="6" font-family="monospace">−</text>`;
+
+    // ── Motor driver IC (center-top area) ──
+    svg += `<rect x="87" y="65" width="55" height="42" rx="3" fill="#111" stroke="#2a2a2a" stroke-width="0.7"/>`;
+    for (let i=0;i<7;i++) {
+        svg += `<rect x="84" y="${69+i*5}" width="5" height="3" rx="0.5" fill="#888"/>
+                <rect x="140" y="${69+i*5}" width="5" height="3" rx="0.5" fill="#888"/>`;
+    }
+    svg += `<text x="114" y="83" text-anchor="middle" fill="#888" font-size="5.5" font-family="monospace">MOTOR</text>
+            <text x="114" y="93" text-anchor="middle" fill="#888" font-size="5.5" font-family="monospace">DRIVER</text>
+            <text x="70" y="93" text-anchor="middle" fill="rgba(255,255,255,0.35)" font-size="4.5" font-family="monospace">M2B M2A</text>
+            <text x="158" y="93" text-anchor="middle" fill="rgba(255,255,255,0.35)" font-size="4.5" font-family="monospace">M1B M1A</text>`;
+
+    // ── RP2040 chip ──
+    svg += `<rect x="97" y="118" width="88" height="78" rx="4" fill="#111" stroke="#2a2a2a" stroke-width="1"/>
+            <rect x="102" y="123" width="78" height="68" rx="2" fill="#1a1a1a"/>`;
+    // Chip legs
+    for (let i=0;i<8;i++) {
+        svg += `<rect x="${94}" y="${126+i*9}" width="5" height="5" rx="0.5" fill="#777"/>
+                <rect x="${183}" y="${126+i*9}" width="5" height="5" rx="0.5" fill="#777"/>`;
+    }
+    svg += `<circle cx="102" cy="123" r="2.5" fill="#333"/>
+            <text x="141" y="152" text-anchor="middle" fill="#666" font-size="7" font-family="monospace">Cytron</text>
+            <text x="141" y="165" text-anchor="middle" fill="#bbb" font-size="8.5" font-family="monospace" font-weight="bold">RP2040</text>
+            <text x="141" y="177" text-anchor="middle" fill="#555" font-size="5.5" font-family="monospace">MAKER Pi</text>`;
+
+    // ── Digital IO Status LED bar ──
+    svg += `<rect x="200" y="70" width="158" height="52" rx="3" fill="#0a0a0a" stroke="#222" stroke-width="1"/>
+            <text x="279" y="82" text-anchor="middle" fill="#777" font-size="5.5" font-family="monospace">DIGITAL IO STATUS</text>`;
+    // 16 LEDs for GP0–GP15
+    for (let i = 0; i < 16; i++) {
+        const lx = 206 + i * 9.5;
+        const gpIdx = i;
+        const isOn = labState.pinStates && labState.pinStates[gpIdx];
+        svg += `<circle cx="${lx}" cy="95" r="3.8"
+            fill="${isOn ? '#55ccff' : '#0a2540'}"
+            stroke="${isOn ? '#88eeff' : '#163258'}"
+            stroke-width="0.6"/>`;
+        svg += `<text x="${lx}" y="110" text-anchor="middle"
+            fill="rgba(255,255,255,0.3)" font-size="3.8" font-family="monospace">${gpIdx}</text>`;
+    }
+
+    // ── DEBUG pads ──
+    svg += `<rect x="97" y="200" width="48" height="20" rx="2" fill="#111" stroke="#2a2a2a" stroke-width="0.7"/>
+            <text x="121" y="213" text-anchor="middle" fill="#777" font-size="5.5" font-family="monospace">DEBUG</text>`;
+    [104,115,126].forEach(cx => {
+        svg += `<circle cx="${cx}" cy="205" r="3" fill="#555" stroke="#888" stroke-width="0.5"/>`;
+    });
+
+    // ── RST button ──
+    svg += `<rect x="158" y="200" width="20" height="16" rx="2" fill="#1a1a1a" stroke="#333"/>
+            <rect x="161" y="203" width="14" height="10" rx="1.5" fill="#3a3a3a"/>
+            <text x="168" y="224" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="5" font-family="monospace">RST</text>`;
+
+    // ── BOOT button (near Grove 1) ──
+    svg += `<rect x="3" y="185" width="16" height="12" rx="2" fill="#1a1a1a" stroke="#333"/>
+            <rect x="5" y="187" width="12" height="8" rx="1.5" fill="#3a3a3a"/>
+            <text x="11" y="206" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="5" font-family="monospace">BOOT</text>`;
+
+    // ── Micro USB (left side, protruding) ──
+    svg += `<rect x="-9" y="82" width="15" height="21" rx="3" fill="#b0b0b0" stroke="#888" stroke-width="0.7"/>
+            <rect x="-7" y="85" width="11" height="15" rx="1" fill="#d0d0d0"/>
+            <text x="12" y="94" fill="rgba(255,255,255,0.4)" font-size="5" font-family="monospace">USB</text>`;
+
+    // ── ON/OFF switch (left) ──
+    svg += `<rect x="2" y="126" width="18" height="34" rx="2" fill="#1a1a1a" stroke="#333"/>
+            <rect x="4" y="129" width="14" height="14" rx="1.5" fill="#28a428"/>
+            <text x="11" y="139" text-anchor="middle" fill="#fff" font-size="5" font-family="monospace" font-weight="bold">ON</text>
+            <rect x="4" y="144" width="14" height="14" rx="1.5" fill="#333"/>
+            <text x="11" y="154" text-anchor="middle" fill="#888" font-size="5" font-family="monospace">OFF</text>`;
+
+    // ── PWR LED ──
+    svg += `<circle cx="12" cy="170" r="4.5" fill="#cc2222" opacity="0.85"/>
+            <circle cx="12" cy="170" r="2" fill="#ff5555" opacity="0.6"/>
+            <text x="12" y="179" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="4.5" font-family="monospace">PWR</text>`;
+
+    // ── Cytron branding ──
+    svg += `<text x="60" y="220" text-anchor="middle" fill="rgba(255,255,255,0.18)" font-size="26"
+            font-family="monospace" font-weight="bold" transform="rotate(-90 60 180)">Cytron</text>`;
+
+    // ── GROVE 1 connector (left side, 4-pin JST) ──
+    svg += `<rect x="0" y="34" width="18" height="76" rx="2" fill="#ddd8bc" stroke="#bbb" stroke-width="0.7"/>`;
+    [40,55,70,85].forEach(gy => {
+        svg += `<rect x="4" y="${gy}" width="10" height="9" rx="1" fill="#888"/>
+                <circle cx="9" cy="${gy+4.5}" r="2.5" fill="#555"/>`;
+    });
+    svg += `<text x="9" y="116" text-anchor="middle" fill="#555" font-size="4.5" font-family="monospace"
+            transform="rotate(-90 9 93)">GROVE 1</text>`;
+
+    // ── GROVE 7 connector (right side) — 4-pin Grove: GP20, GP21, 3V3, GND ──
+    svg += `<rect x="${BW-18}" y="28" width="18" height="76" rx="2" fill="#ddd8bc" stroke="#bbb" stroke-width="0.7"/>`;
+    [34,49,64,79].forEach(gy => {
+        svg += `<rect x="${BW-14}" y="${gy}" width="10" height="9" rx="1" fill="#888"/>
+                <circle cx="${BW-9}" cy="${gy+4.5}" r="2.5" fill="#555"/>`;
+    });
+    svg += `<text x="${BW-9}" y="108" text-anchor="middle" fill="#555" font-size="4.5" font-family="monospace"
+            transform="rotate(90 ${BW-9} 68)">GROVE 7</text>
+            <text x="${BW-24}" y="48"  text-anchor="end" fill="rgba(255,255,255,0.45)" font-size="5" font-family="monospace">GP20</text>
+            <text x="${BW-24}" y="63"  text-anchor="end" fill="rgba(255,255,255,0.45)" font-size="5" font-family="monospace">GP21</text>
+            <text x="${BW-24}" y="78"  text-anchor="end" fill="rgba(255,150,150,0.7)"  font-size="5" font-family="monospace">3V3</text>
+            <text x="${BW-24}" y="93"  text-anchor="end" fill="rgba(180,180,180,0.6)"  font-size="5" font-family="monospace">GND</text>`;
+
+    // ── SERVO connector (right side, 4 rows × 3-pin: –, +, S) ──
+    // Connector body spans BW-34 to BW; each row has 3 holes at centers BW-23, BW-13, BW-3
+    svg += `<rect x="${BW-34}" y="108" width="34" height="84" rx="2" fill="#ddd8bc" stroke="#bbb" stroke-width="0.7"/>
+            <text x="${BW-17}" y="155" text-anchor="middle" fill="#555" font-size="4.5" font-family="monospace"
+            transform="rotate(90 ${BW-17} 150)">SERVO</text>`;
+    ['S1','S2','S3','S4'].forEach((sl, si) => {
+        const sy = 114 + si * 20;
+        // 3 holes per row: GND(–), VCC(+), Signal(S)
+        [BW-27, BW-17, BW-7].forEach(hx => {
+            svg += `<rect x="${hx}" y="${sy}" width="8" height="8" rx="1" fill="#888"/>
+                    <circle cx="${hx+4}" cy="${sy+4}" r="2.5" fill="#555"/>`;
+        });
+        // Row label removed — shown by PICO_PINS label (S1/S2/S3/S4) to the left
+        // Pin-type labels (–, +, S) below each hole
+        ['–','+','S'].forEach((lbl, i) => {
+            const fill = lbl==='–' ? '#ff8a80' : lbl==='+' ? '#69f0ae' : 'rgba(255,255,220,0.9)';
+            svg += `<text x="${BW-23+(i*10)}" y="${sy+14}" text-anchor="middle"
+                fill="${fill}" font-size="4" font-family="monospace" font-weight="bold">${lbl}</text>`;
+        });
+    });
+
+    // ── GROVE 2-6 bottom connectors ──
+    const groveCfg = [
+        { x:5,   label:'GROVE 2', g1:'GP2',  g2:'GP3'  },
+        { x:80,  label:'GROVE 3', g1:'GP4',  g2:'GP5'  },
+        { x:155, label:'GROVE 4', g1:'GP6',  g2:'GP7'  },
+        { x:230, label:'GROVE 5', g1:'GP16', g2:'GP17' },
+        { x:305, label:'GROVE 6', g1:'ADC0', g2:'ADC1' },
+    ];
+    groveCfg.forEach(({x:gx, label, g1, g2}) => {
+        const gw = 70;
+        // Holes at gx+4, gx+20, gx+36, gx+52 → centers at gx+9, gx+25, gx+41, gx+57 (16px spacing)
+        svg += `<rect x="${gx}" y="${BH-20}" width="${gw}" height="20" rx="2" fill="#ddd8bc" stroke="#bbb" stroke-width="0.7"/>`;
+        [gx+4, gx+20, gx+36, gx+52].forEach(hx => {
+            svg += `<rect x="${hx}" y="${BH-16}" width="10" height="9" rx="1" fill="#888"/>
+                    <circle cx="${hx+5}" cy="${BH-11.5}" r="2.5" fill="#555"/>`;
+        });
+        svg += `<text x="${gx+gw/2}" y="${BH-2}" text-anchor="middle"
+            fill="#444" font-size="4.5" font-family="monospace">${label}</text>`;
+        // Pin labels below board — GND, 3V3, Signal1, Signal2
+        const pinLabels = ['GND', '3V3', g1, g2];
+        const hxCenters = [gx+9, gx+25, gx+41, gx+57];
+        const pinColors  = ['#ff8a80', '#69f0ae', 'rgba(255,255,220,0.9)', 'rgba(255,255,220,0.9)'];
+        pinLabels.forEach((lbl, i) => {
+            svg += `<text x="${hxCenters[i]}" y="${BH+12}" text-anchor="middle"
+                fill="${pinColors[i]}" font-size="5.5" font-family="monospace" font-weight="bold">${lbl}</text>`;
+        });
+    });
+
+    // ── Crystal oscillator ──
+    svg += `<rect x="168" y="118" width="24" height="12" rx="3" fill="#c0a820" stroke="#a08010" stroke-width="0.7"/>
+            <text x="180" y="127" text-anchor="middle" fill="#333" font-size="4.5" font-family="monospace">12MHz</text>`;
+
+    // ── Render clickable pins ──
     PICO_PINS.forEach((pin) => {
         const fullName = pin.name + (pin.alt ? '_' + pin.alt : '');
-        const labelX = pin.side === 'L' ? pin.x + 14 : pin.x - 14;
-        const anchor = pin.side === 'L' ? 'start' : 'end';
-        const pinColor = pin.kind === 'gnd' ? '#222' :
-                         pin.kind === 'vbus' || pin.kind === '3v3' ? '#e74c3c' :
-                         pin.kind === 'adc' ? '#9b59b6' : '#f4d03f';
-        const isSel = labState.selectedPin && labState.selectedPin.compId === 'pico' && labState.selectedPin.pin === fullName;
-        const isConn = labState.wires.some(w => (w.from.compId === 'pico' && w.from.pin === fullName) || (w.to.compId === 'pico' && w.to.pin === fullName));
-        // For required-halo purpose, treat duplicate pins (e.g. two GND) as a group:
-        // once ANY pin with this base name is wired, drop the halo on all of them.
+        const pinColor = pin.kind === 'gnd'  ? '#2c2c2c' :
+                         pin.kind === 'vbus' || pin.kind === '3v3' ? '#c0392b' :
+                         pin.kind === 'adc'  ? '#8e44ad' : '#f4d03f';
+        const isSel  = labState.selectedPin &&
+                       labState.selectedPin.compId === 'pico' &&
+                       labState.selectedPin.pin === fullName;
+        const isConn = labState.wires.some(w =>
+            (w.from.compId === 'pico' && w.from.pin === fullName) ||
+            (w.to.compId   === 'pico' && w.to.pin   === fullName));
         const baseConnected = labState.wires.some(w =>
             (w.from.compId === 'pico' && w.from.pin.replace(/_\d+$/, '') === pin.name) ||
-            (w.to.compId === 'pico' && w.to.pin.replace(/_\d+$/, '') === pin.name)
-        );
+            (w.to.compId   === 'pico' && w.to.pin.replace(/_\d+$/, '')   === pin.name));
         const isRequired = requiredPinNames.has(pin.name) && !baseConnected;
-        // Pulsing halo for required pins
-        const halo = isRequired ? `<circle class="pin-required-halo" cx="${pin.x}" cy="${pin.y}" r="11" fill="none" stroke="#ffd700" stroke-width="2"/>` : '';
-        svg += `<g class="svg-pin-group" onclick="onPinClick('pico', '${fullName}')">
+        const halo = isRequired
+            ? `<circle class="pin-required-halo" cx="${pin.x}" cy="${pin.y}" r="11" fill="none" stroke="#ffd700" stroke-width="2"/>`
+            : '';
+        // Label position per side
+        let lx, ly, anchor, fontSize;
+        if      (pin.side === 'L') { lx = pin.x + 16; ly = pin.y + 4;  anchor = 'start';  fontSize = 9; }
+        else if (pin.side === 'R') {
+            // Servo pins (r=5) sit inside narrow connector — push label well outside
+            lx = pin.r === 5 ? BW - 44 : pin.x - 16;
+            ly = pin.y + 4; anchor = 'end'; fontSize = pin.r === 5 ? 8 : 9;
+        }
+        else if (pin.side === 'T') { lx = pin.x;      ly = pin.y - 10; anchor = 'middle'; fontSize = 7; }
+        else                       { lx = pin.x;      ly = pin.y + 14; anchor = 'middle'; fontSize = 9; } // B
+
+        // Bottom-side pin names are shown by the Grove labels below — skip text here
+        // pin.label overrides the display text ('' = hidden, string = custom label)
+        const pinLabelText = pin.side === 'B' ? ''
+                           : pin.label !== undefined ? pin.label
+                           : pin.name;
+        svg += `<g class="svg-pin-group" onclick="onPinClick('pico','${fullName}')">
             ${halo}
-            <circle class="svg-pin ${isSel ? 'selected' : ''} ${isConn ? 'connected' : ''}" cx="${pin.x}" cy="${pin.y}" r="7" fill="${pinColor}" stroke="#1a1a1a" stroke-width="2"/>
-            <text x="${labelX}" y="${pin.y + 4}" text-anchor="${anchor}" fill="${isRequired ? '#ffd700' : '#fff'}" font-size="11" font-family="monospace" font-weight="bold" pointer-events="none">${pin.name}</text>
+            <circle class="svg-pin ${isSel ? 'selected' : ''} ${isConn ? 'connected' : ''} ${pin.r === 5 ? 'servo-pin' : ''}"
+                cx="${pin.x}" cy="${pin.y}" r="${pin.r || 7}"
+                fill="${pinColor}" stroke="#1a1a1a" stroke-width="2"/>
+            <text x="${lx}" y="${ly}" text-anchor="${anchor}"
+                fill="${isRequired ? '#ffd700' : '#fff'}"
+                font-size="${fontSize}" font-family="monospace" font-weight="bold"
+                pointer-events="none">${pinLabelText}</text>
         </g>`;
     });
+
     svg += `</g>`;
     g.innerHTML = svg;
 }
 
-// ----- Draw Breadboard -----
+// ----- Draw Breadboard (workspace hint only — board uses Grove connectors) -----
 function drawBreadboard() {
     const g = document.getElementById('lab-breadboard');
-    if (!g) return;
-    const bx = 30, by = 420, bw = 740, bh = 100;
-    let svg = `
-        <rect x="${bx}" y="${by}" width="${bw}" height="${bh}" rx="6" fill="url(#breadboardBg)" stroke="#a0a0a0"/>
-        <rect x="${bx}" y="${by}" width="${bw}" height="3" fill="#e74c3c" opacity="0.5"/>
-        <text x="${bx + 5}" y="${by + 14}" fill="#c0392b" font-size="9" font-family="monospace" font-weight="bold">+</text>
-        <rect x="${bx}" y="${by + bh - 3}" width="${bw}" height="3" fill="#2c3e50" opacity="0.5"/>
-        <text x="${bx + 5}" y="${by + bh - 6}" fill="#34495e" font-size="9" font-family="monospace" font-weight="bold">-</text>
-    `;
-    // Tiny holes
-    for (let row = 0; row < 4; row++) {
-        for (let col = 0; col < 30; col++) {
-            const hx = bx + 25 + col * 24;
-            const hy = by + 20 + row * 18;
-            svg += `<circle cx="${hx}" cy="${hy}" r="2" fill="#333" opacity="0.45"/>`;
-        }
-    }
-    g.innerHTML = svg;
+    if (!g) { return; }
+    // Subtle component workspace area below the board
+    g.innerHTML = `
+        <rect x="30" y="410" width="740" height="120" rx="8"
+            fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.06)" stroke-width="1" stroke-dasharray="6 4"/>
+        <text x="400" y="475" text-anchor="middle"
+            fill="rgba(255,255,255,0.12)" font-size="13" font-family="monospace">
+            🧩 พื้นที่วางชิ้นส่วน — ลากชิ้นส่วนมาวางที่นี่ได้
+        </text>`;
 }
 
 // ----- Add component to canvas -----
@@ -4377,15 +4784,15 @@ function addLabPart(type) {
     const def = PART_DEFS[type];
     if (!def) return;
     const id = labState.nextCompId++;
-    // Smart placement: cycle through safe slots that don't overlap the Pico board
-    // Pico occupies roughly x:320-550, y:70-390
+    // Smart placement: avoid Cytron board area (x:210-590, y:120-372)
     const slots = [
-        // Left column of Pico (top to bottom)
-        { x: 130, y: 100 }, { x: 130, y: 200 }, { x: 130, y: 300 },
-        // Right column of Pico
-        { x: 620, y: 100 }, { x: 620, y: 200 }, { x: 620, y: 300 },
-        // Below everything (above breadboard rails)
-        { x: 80, y: 540 }, { x: 200, y: 540 }, { x: 340, y: 540 }, { x: 480, y: 540 }, { x: 620, y: 540 }
+        // Left of board
+        { x: 80,  y: 160 }, { x: 80,  y: 260 }, { x: 80,  y: 360 },
+        // Right of board
+        { x: 660, y: 160 }, { x: 660, y: 260 }, { x: 660, y: 360 },
+        // Below board (workspace area)
+        { x: 80,  y: 450 }, { x: 200, y: 450 }, { x: 330, y: 450 },
+        { x: 460, y: 450 }, { x: 590, y: 450 }, { x: 700, y: 450 },
     ];
     const pos = slots[labState.components.length % slots.length];
     const comp = { id, type, x: pos.x, y: pos.y, state: { value: 0, angle: 0, active: false } };
@@ -4455,11 +4862,20 @@ function renderSvgComponent(comp, def) {
         pinDots.push({ name: 't1', x: -15, y: 10 });
         pinDots.push({ name: 't2', x: 65, y: 10 });
     } else if (def.kind === 'button') {
+        const btnActive = labState.running;  // interactive only during simulation
+        const btnBg   = !btnActive ? '#2a2a2a' : state.value ? '#333' : '#444';
+        const btnRim  = !btnActive ? '#555'    : state.value ? '#e74c3c' : '#222';
+        const btnFace = !btnActive ? '#5a5a5a' : state.value ? '#ff6b6b' : '#c0392b';
+        const btnInner= !btnActive ? '#444'    : state.value ? '#e74c3c' : '#a93226';
+        const btnLabel= !btnActive ? '🔒' : state.value ? 'PRESS' : 'BTN';
+        const lblColor= !btnActive ? '#777' : state.value ? '#ffd97d' : '#fff';
         body = `
-            <rect x="0" y="0" width="36" height="36" rx="4" fill="#444" stroke="#222"/>
-            <circle cx="18" cy="18" r="11" fill="${state.value ? '#e74c3c' : '#c0392b'}" stroke="#222"/>
-            <circle cx="18" cy="18" r="7" fill="#a93226"/>
-            <text x="18" y="-3" text-anchor="middle" fill="#fff" font-size="8" font-family="monospace">BTN</text>
+            <rect x="0" y="0" width="36" height="36" rx="4" fill="${btnBg}" stroke="${btnRim}" stroke-width="${state.value && btnActive ? 2 : 1}" opacity="${btnActive ? 1 : 0.6}"/>
+            ${state.value && btnActive ? '<circle cx="18" cy="18" r="20" fill="#e74c3c" opacity="0.18"/>' : ''}
+            <circle cx="18" cy="18" r="11" fill="${btnFace}" stroke="#222"/>
+            <circle cx="18" cy="18" r="7" fill="${btnInner}"/>
+            <text x="18" y="-3" text-anchor="middle" fill="${lblColor}" font-size="8" font-family="monospace">${btnLabel}</text>
+            ${!btnActive ? '<text x="18" y="43" text-anchor="middle" fill="#888" font-size="7" font-family="monospace">กด Run ก่อน</text>' : ''}
         `;
         pinDots.push({ name: 't1', x: 0, y: 36 });
         pinDots.push({ name: 't2', x: 36, y: 36 });
@@ -4467,11 +4883,15 @@ function renderSvgComponent(comp, def) {
         const active = state.active;
         body = `
             <g class="${active ? 'buzzer-active' : ''}">
-                <circle cx="18" cy="18" r="16" fill="#222" stroke="#000" stroke-width="2"/>
-                <circle cx="18" cy="18" r="12" fill="#333"/>
-                <circle cx="18" cy="18" r="3" fill="#666"/>
-                <text x="18" y="20" text-anchor="middle" fill="#999" font-size="6" font-family="monospace">BUZ</text>
-                ${active ? '<path d="M 38 12 Q 44 18, 38 24" stroke="#ffd97d" stroke-width="2" fill="none"/><path d="M 42 8 Q 50 18, 42 28" stroke="#ffd97d" stroke-width="2" fill="none" opacity="0.6"/>' : ''}
+                <circle cx="18" cy="18" r="16" fill="${active ? '#2d1a00' : '#222'}" stroke="${active ? '#f39c12' : '#000'}" stroke-width="2"/>
+                <circle cx="18" cy="18" r="12" fill="${active ? '#3d2200' : '#333'}"/>
+                <circle cx="18" cy="18" r="5" fill="${active ? '#f39c12' : '#666'}"/>
+                <text x="18" y="21" text-anchor="middle" fill="${active ? '#ffd97d' : '#999'}" font-size="6" font-weight="bold" font-family="monospace">BUZ</text>
+                ${active ? `
+                <path class="buz-wave buz-w1" d="M 36 11 Q 43 18, 36 25" stroke="#ffd97d" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                <path class="buz-wave buz-w2" d="M 41 7  Q 50 18, 41 29" stroke="#ffd97d" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.75"/>
+                <path class="buz-wave buz-w3" d="M 46 3  Q 57 18, 46 33" stroke="#ffd97d" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.45"/>
+                ` : ''}
             </g>
             <text x="18" y="-3" text-anchor="middle" fill="#fff" font-size="8" font-family="monospace">Buzzer</text>
         `;
@@ -4483,33 +4903,54 @@ function renderSvgComponent(comp, def) {
             <rect x="0" y="6" width="46" height="30" rx="3" fill="#1565c0" stroke="#0d47a1"/>
             <rect x="46" y="14" width="8" height="14" rx="2" fill="#1565c0" stroke="#0d47a1"/>
             <circle cx="50" cy="21" r="10" fill="#0d47a1" stroke="#000"/>
-            <g transform="rotate(${angle} 50 21)">
-                <rect x="50" y="19" width="22" height="4" rx="2" fill="#fff" stroke="#888"/>
-                <circle cx="72" cy="21" r="2" fill="#888"/>
+            <circle cx="50" cy="21" r="7" fill="#1976d2" stroke="#0d47a1"/>
+            <g class="servo-arm" transform="rotate(${angle} 50 21)">
+                <rect x="50" y="18" width="24" height="6" rx="3" fill="#ffffff" stroke="#aaa" stroke-width="1"/>
+                <circle cx="74" cy="21" r="3" fill="#ccc" stroke="#888"/>
+                <circle cx="50" cy="21" r="4" fill="#42a5f5"/>
             </g>
-            <text x="22" y="-3" text-anchor="middle" fill="#fff" font-size="8" font-family="monospace">Servo</text>
-            <text x="22" y="56" text-anchor="middle" fill="#ffd97d" font-size="8" font-family="monospace">${angle}°</text>
+            <text x="22" y="-3" text-anchor="middle" fill="#fff" font-size="8" font-family="monospace">Servo SG90</text>
+            <text class="servo-angle-txt" x="22" y="56" text-anchor="middle" fill="#ffd97d" font-size="9" font-weight="bold" font-family="monospace">${angle}°</text>
         `;
         pinDots.push({ name: 'sig', x: 5, y: 42 });
         pinDots.push({ name: 'v', x: 18, y: 42 });
         pinDots.push({ name: 'g', x: 32, y: 42 });
     } else if (def.kind === 'ldr') {
+        const ldrRaw = labState.adcValues[26] || 32000;
+        const ldrPct = Math.round(ldrRaw / 655.35);
+        const ldrBg = ldrPct > 65 ? '#f9e97a' : ldrPct < 30 ? '#1a1a2e' : '#555';
+        const ldrLabel = ldrPct > 65 ? 'BRIGHT' : ldrPct < 30 ? 'DARK' : 'MED';
+        const ldrColor = ldrPct > 65 ? '#333' : '#ffd97d';
         body = `
-            <circle cx="20" cy="20" r="16" fill="#444" stroke="#222"/>
+            <circle cx="20" cy="20" r="16" fill="${ldrBg}" stroke="#222"/>
             <path d="M 10 14 L 30 14 L 28 18 L 12 18 L 10 14" fill="#ffd97d"/>
             <path d="M 10 22 L 30 22 L 28 26 L 12 26 L 10 22" fill="#ffd97d"/>
             <text x="20" y="-3" text-anchor="middle" fill="#fff" font-size="8" font-family="monospace">LDR</text>
+            <rect x="2" y="37" width="36" height="11" rx="2" fill="rgba(0,0,0,0.65)"/>
+            <text x="20" y="45.5" text-anchor="middle" fill="${ldrColor}" font-size="8" font-weight="bold" font-family="monospace">${ldrLabel} ${ldrPct}%</text>
         `;
-        pinDots.push({ name: 't1', x: 8, y: 40 });
-        pinDots.push({ name: 't2', x: 32, y: 40 });
+        pinDots.push({ name: 't1', x: 8, y: 52 });
+        pinDots.push({ name: 't2', x: 32, y: 52 });
     } else if (def.kind === 'ultra') {
+        const uActive = (state.active || state.value);
         body = `
-            <rect x="0" y="6" width="80" height="32" rx="3" fill="#2c3e50" stroke="#000"/>
-            <circle cx="18" cy="22" r="10" fill="#1a252f" stroke="#000"/>
-            <circle cx="18" cy="22" r="6" fill="#0f1419"/>
-            <circle cx="62" cy="22" r="10" fill="#1a252f" stroke="#000"/>
-            <circle cx="62" cy="22" r="6" fill="#0f1419"/>
-            <text x="40" y="-3" text-anchor="middle" fill="#fff" font-size="8" font-family="monospace">HC-SR04</text>
+            <rect x="0" y="6" width="80" height="32" rx="3" fill="${uActive ? '#1a2a3a' : '#2c3e50'}" stroke="${uActive ? '#3498db' : '#000'}"/>
+            <circle cx="18" cy="22" r="10" fill="#1a252f" stroke="${uActive ? '#3498db' : '#000'}" stroke-width="${uActive ? 2 : 1}"/>
+            <circle cx="18" cy="22" r="6" fill="${uActive ? '#0d2137' : '#0f1419'}"/>
+            <circle cx="18" cy="22" r="3" fill="${uActive ? '#3498db' : '#1a2530'}"/>
+            <circle cx="62" cy="22" r="10" fill="#1a252f" stroke="${uActive ? '#2ecc71' : '#000'}" stroke-width="${uActive ? 2 : 1}"/>
+            <circle cx="62" cy="22" r="6" fill="${uActive ? '#0d2137' : '#0f1419'}"/>
+            <circle cx="62" cy="22" r="3" fill="${uActive ? '#2ecc71' : '#1a2530'}"/>
+            ${uActive ? `
+            <path class="ultra-pulse up1" d="M -4 18 Q -10 22 -4 26" stroke="#3498db" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <path class="ultra-pulse up2" d="M -9 14 Q -17 22 -9 30" stroke="#3498db" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.6"/>
+            <path class="ultra-pulse up3" d="M 84 18 Q 90 22 84 26" stroke="#2ecc71" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <path class="ultra-pulse up4" d="M 89 14 Q 97 22 89 30" stroke="#2ecc71" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.6"/>
+            ` : ''}
+            <text x="40" y="-3" text-anchor="middle" fill="${uActive ? '#7fd4f8' : '#fff'}" font-size="8" font-family="monospace">HC-SR04</text>
+            ${labState.sensorDisplay.ultra !== undefined ? `
+            <rect x="8" y="43" width="64" height="14" rx="3" fill="rgba(0,0,0,0.7)" stroke="#3498db" stroke-width="0.8"/>
+            <text x="40" y="53" text-anchor="middle" fill="#7fd4f8" font-size="9" font-weight="bold" font-family="monospace">${labState.sensorDisplay.ultra} cm</text>` : ''}
         `;
         pinDots.push({ name: 'v', x: 12, y: 42 });
         pinDots.push({ name: 'trig', x: 30, y: 42 });
@@ -4522,30 +4963,64 @@ function renderSvgComponent(comp, def) {
             <text x="20" y="20" text-anchor="middle" fill="#fff" font-size="9" font-family="monospace" font-weight="bold">DHT</text>
             <text x="20" y="34" text-anchor="middle" fill="#fff" font-size="9" font-family="monospace" font-weight="bold">11</text>
             <text x="20" y="-3" text-anchor="middle" fill="#fff" font-size="8" font-family="monospace">Temp/Hum</text>
+            ${labState.sensorDisplay.dht_temp !== undefined ? `
+            <text x="20" y="52" text-anchor="middle" fill="#ffd97d" font-size="8" font-weight="bold" font-family="monospace">${labState.sensorDisplay.dht_temp}°C</text>
+            <text x="20" y="62" text-anchor="middle" fill="#85c1e9" font-size="8" font-weight="bold" font-family="monospace">${labState.sensorDisplay.dht_hum || '--'}%</text>` : ''}
         `;
         pinDots.push({ name: 'v', x: 10, y: 60 });
         pinDots.push({ name: 'data', x: 20, y: 60 });
         pinDots.push({ name: 'g', x: 30, y: 60 });
     } else if (def.kind === 'soil') {
         body = `
-            <rect x="0" y="0" width="40" height="20" rx="3" fill="#27ae60" stroke="#0e6251"/>
-            <rect x="6" y="20" width="3" height="30" fill="#888"/>
-            <rect x="31" y="20" width="3" height="30" fill="#888"/>
-            <text x="20" y="14" text-anchor="middle" fill="#fff" font-size="8" font-family="monospace">SOIL</text>
+            <rect x="0" y="0" width="40" height="30" rx="3" fill="#27ae60" stroke="#0e6251"/>
+            <rect x="6" y="30" width="3" height="22" fill="#888"/>
+            <rect x="31" y="30" width="3" height="22" fill="#888"/>
+            <text x="20" y="10" text-anchor="middle" fill="#fff" font-size="7" font-family="monospace" font-weight="bold">SOIL</text>
             <text x="20" y="-3" text-anchor="middle" fill="#fff" font-size="8" font-family="monospace">Moisture</text>
+            ${labState.sensorDisplay.soil !== undefined ? `
+            <rect x="2" y="13" width="36" height="14" rx="2" fill="rgba(0,0,0,0.55)" stroke="#27ae60" stroke-width="0.8"/>
+            <text x="20" y="23" text-anchor="middle" fill="#58d68d" font-size="9" font-weight="bold" font-family="monospace">${labState.sensorDisplay.soil}%</text>` : ''}
         `;
         pinDots.push({ name: 'sig', x: 8, y: 0 });
         pinDots.push({ name: 'v', x: 20, y: 0 });
         pinDots.push({ name: 'g', x: 32, y: 0 });
     } else if (def.kind === 'pump') {
+        const pumpOn = state.active;
         body = `
-            <circle cx="22" cy="22" r="18" fill="#34495e" stroke="#000"/>
-            <circle cx="22" cy="22" r="12" fill="#2980b9"/>
-            <path d="M 22 14 L 28 22 L 22 30 L 16 22 Z" fill="#fff"/>
-            <text x="22" y="-3" text-anchor="middle" fill="#fff" font-size="8" font-family="monospace">Pump</text>
+            <circle cx="22" cy="22" r="18" fill="${pumpOn ? '#1a3d5c' : '#34495e'}" stroke="${pumpOn ? '#3498db' : '#000'}" stroke-width="${pumpOn ? 2 : 1}"/>
+            <circle cx="22" cy="22" r="12" fill="${pumpOn ? '#3498db' : '#2980b9'}"/>
+            <g class="${pumpOn ? 'pump-spin' : ''}">
+                <path d="M 22 14 L 28 22 L 22 30 L 16 22 Z" fill="${pumpOn ? '#e3f4ff' : '#fff'}"/>
+            </g>
+            ${pumpOn ? '<circle cx="22" cy="22" r="5" fill="#7fd4f8" opacity="0.8"/>' : ''}
+            ${pumpOn ? '<path d="M 32 5 Q 42 14 38 26" stroke="#3498db" stroke-width="2" fill="none" stroke-dasharray="3 2" opacity="0.7"/><path d="M 12 5 Q 2 14 6 26" stroke="#85c1e9" stroke-width="1.5" fill="none" stroke-dasharray="3 2" opacity="0.5"/>' : ''}
+            <text x="22" y="-3" text-anchor="middle" fill="${pumpOn ? '#7fd4f8' : '#fff'}" font-size="8" font-family="monospace">Pump${pumpOn ? ' ON' : ''}</text>
         `;
         pinDots.push({ name: '+', x: 12, y: 44 });
         pinDots.push({ name: '-', x: 32, y: 44 });
+    } else if (def.kind === 'motor') {
+        const fwd = state.in1 === 1 && state.in2 === 0;
+        const rev = state.in1 === 0 && state.in2 === 1;
+        const brk = state.in1 === 1 && state.in2 === 1;
+        const spin = fwd || rev;
+        const dir = fwd ? 'CW' : rev ? 'CCW' : brk ? 'BRK' : 'OFF';
+        const clr = fwd ? '#2ecc71' : rev ? '#e74c3c' : brk ? '#f39c12' : '#7f8c8d';
+        const cls = fwd ? 'motor-cw' : rev ? 'motor-ccw' : '';
+        body = `
+            <circle cx="22" cy="22" r="19" fill="#2c3e50" stroke="${spin ? clr : '#000'}" stroke-width="${spin ? 2 : 1}"/>
+            <circle cx="22" cy="22" r="13" fill="#34495e"/>
+            <g class="${cls}">
+                <circle cx="22" cy="22" r="9" fill="${spin ? clr : '#555'}" opacity="0.9"/>
+                <line x1="22" y1="13" x2="22" y2="31" stroke="${spin ? '#fff' : '#888'}" stroke-width="2.5" stroke-linecap="round"/>
+                <line x1="13" y1="22" x2="31" y2="22" stroke="${spin ? '#fff' : '#888'}" stroke-width="2.5" stroke-linecap="round"/>
+            </g>
+            <circle cx="22" cy="22" r="3.5" fill="#ecf0f1"/>
+            <text x="22" y="-3" text-anchor="middle" fill="#fff" font-size="8" font-family="monospace">DC Motor</text>
+            <rect x="1" y="41" width="42" height="11" rx="2" fill="rgba(0,0,0,0.6)"/>
+            <text x="22" y="49.5" text-anchor="middle" fill="${clr}" font-size="8" font-weight="bold" font-family="monospace">${dir}</text>
+        `;
+        pinDots.push({ name: 'in1', x: 10, y: 54 });
+        pinDots.push({ name: 'in2', x: 34, y: 54 });
     }
 
     const pinsSvg = pinDots.map(p => {
@@ -4572,6 +5047,11 @@ function renderSvgComponent(comp, def) {
 let draggingComp = null;
 let dragOffset = { x: 0, y: 0 };
 
+// ----- Canvas pan -----
+let isPanning = false;
+let panStart = { x: 0, y: 0 };   // screen coords at pan start
+let panOrigin = { x: 0, y: 0 };  // labState.panX/Y at pan start
+
 function onComponentDragStart(id, e) {
     if (labState.running) return;
     if (e.target.closest('.svg-pin') || e.target.closest('[onclick*="onPinClick"]')) return;
@@ -4584,12 +5064,65 @@ function onComponentDragStart(id, e) {
     e.preventDefault();
 }
 
+// Tracks which component was mousedown'd — used to fire interaction
+// even when SVG re-renders between mousedown and mouseup
+let _pendingInteractComp = null;
+
 function setupCanvasEvents() {
     const svg = document.getElementById('lab-svg');
     if (!svg || svg._eventsAttached) return;
     svg._eventsAttached = true;
 
+    // Capture-phase mousedown: record which component the user pressed.
+    // This fires BEFORE any re-render from simSleep ticks can replace the element.
+    svg.addEventListener('mousedown', (e) => {
+        const g = e.target.closest('[data-comp]');
+        if (g && labState.running) {
+            _pendingInteractComp = parseInt(g.dataset.comp);
+        } else {
+            _pendingInteractComp = null;
+        }
+    }, true); // ← capture phase
+
+    // Global mouseup: if we recorded a component press during simulation, fire interaction.
+    // Using document so it fires even if the original element was replaced by a re-render.
+    document.addEventListener('mouseup', (e) => {
+        if (_pendingInteractComp !== null && labState.running) {
+            const id = _pendingInteractComp;
+            _pendingInteractComp = null;
+            // Only fire if mouseup is over the same component (or anywhere — for button toggle, position doesn't matter)
+            onComponentClick(id, e);
+        }
+    });
+
+    // Pan: mousedown on empty SVG space
+    svg.addEventListener('mousedown', (e) => {
+        // Only pan if clicking directly on SVG background (not a component/pin)
+        const onComponent = e.target.closest('[data-comp]') || e.target.closest('.svg-pin');
+        if (!onComponent && !labState.selectedPin) {
+            isPanning = true;
+            panStart = { x: e.clientX, y: e.clientY };
+            panOrigin = { x: labState.panX, y: labState.panY };
+            svg.style.cursor = 'grabbing';
+            e.preventDefault();
+        }
+    });
+
     svg.addEventListener('mousemove', (e) => {
+        // Pan movement
+        if (isPanning) {
+            const ctm = svg.getScreenCTM();
+            const scaleX = ctm ? ctm.a : 1;
+            const scaleY = ctm ? ctm.d : 1;
+            // Convert screen delta → SVG units (divide by CTM scale)
+            const dx = (e.clientX - panStart.x) / scaleX;
+            const dy = (e.clientY - panStart.y) / scaleY;
+            labState.panX = panOrigin.x + dx;
+            labState.panY = panOrigin.y + dy;
+            applyLabZoom();
+            return;
+        }
+        // Component drag
         const pt = svgPointFromEvent(svg, e);
         if (draggingComp) {
             draggingComp.x = pt.x - dragOffset.x;
@@ -4606,12 +5139,27 @@ function setupCanvasEvents() {
             }
         }
     });
+
     svg.addEventListener('mouseup', () => {
+        if (isPanning) {
+            isPanning = false;
+            svg.style.cursor = '';
+        }
         draggingComp = null;
     });
     svg.addEventListener('mouseleave', () => {
+        if (isPanning) {
+            isPanning = false;
+            svg.style.cursor = '';
+        }
         draggingComp = null;
     });
+    // Scroll wheel zoom
+    svg.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const delta = e.deltaY < 0 ? 0.15 : -0.15;
+        setLabZoom(delta);
+    }, { passive: false });
 }
 
 function svgPointFromEvent(svg, e) {
@@ -4630,6 +5178,10 @@ function onComponentClick(id, e) {
     const def = PART_DEFS[c.type];
     if (!def) return;
     if (def.kind === 'button') {
+        if (!labState.running) {
+            showToast('⚠️ กด ▶️ Run ก่อนจึงจะกดปุ่มได้');
+            return;
+        }
         c.state.value = c.state.value ? 0 : 1;
         renderLabComponents();
         renderLabWires();
@@ -4694,8 +5246,15 @@ function formatPin(p) {
 }
 
 function determineWireColor(p1, p2) {
-    const isGND = (p) => p.compId === 'pico' && (p.pin === 'GND' || p.pin.startsWith('GND'));
-    const isPwr = (p) => p.compId === 'pico' && (p.pin === 'VBUS' || p.pin === '3V3');
+    // GND: matches 'GND', 'GND_1', 'GND_8' etc.
+    const isGND = (p) => p.compId === 'pico' && (p.pin === 'GND' || p.pin.startsWith('GND_'));
+    // Power: matches 'VBUS', '3V3', '3V3_1'…'3V3_6', 'VCC_1'…'VCC_4' (servo connector)
+    const isPwr = (p) => p.compId === 'pico' && (
+        p.pin === 'VBUS' ||
+        p.pin === '3V3'  ||
+        p.pin.startsWith('3V3_') ||
+        p.pin.startsWith('VCC_')
+    );
     if (isGND(p1) || isGND(p2)) return WIRE_COLORS.ground;
     if (isPwr(p1) || isPwr(p2)) return WIRE_COLORS.power;
     return WIRE_COLORS.signal;
@@ -4717,11 +5276,12 @@ function getPinPosition(pin) {
         button: { t1: { x: 0, y: 36 }, t2: { x: 36, y: 36 } },
         buzzer: { '+': { x: 12, y: 36 }, '-': { x: 24, y: 36 } },
         servo: { sig: { x: 5, y: 42 }, v: { x: 18, y: 42 }, g: { x: 32, y: 42 } },
-        ldr: { t1: { x: 8, y: 40 }, t2: { x: 32, y: 40 } },
+        ldr: { t1: { x: 8, y: 52 }, t2: { x: 32, y: 52 } },
         ultra: { v: { x: 12, y: 42 }, trig: { x: 30, y: 42 }, echo: { x: 48, y: 42 }, g: { x: 66, y: 42 } },
         dht: { v: { x: 10, y: 60 }, data: { x: 20, y: 60 }, g: { x: 30, y: 60 } },
         soil: { sig: { x: 8, y: 0 }, v: { x: 20, y: 0 }, g: { x: 32, y: 0 } },
-        pump: { '+': { x: 12, y: 44 }, '-': { x: 32, y: 44 } }
+        pump: { '+': { x: 12, y: 44 }, '-': { x: 32, y: 44 } },
+        motor: { in1: { x: 10, y: 54 }, in2: { x: 34, y: 54 } }
     };
     const offsets = pinMap[def.kind];
     if (!offsets || !offsets[pin.pin]) return null;
@@ -4770,6 +5330,9 @@ function removeLabWire(id) {
 
 function resetLab() {
     if (labState.running) labState.stopRequested = true;
+    stopBuzzerAudio();
+    labState.sensorDisplay = {};
+    labState.servoAngles = {};
     labState.components = [];
     labState.wires = [];
     labState.selectedPin = null;
@@ -4951,23 +5514,222 @@ function updatePinDisplay() {
 // ⚙️ CODE INTERPRETER (Python + C subset)
 // ===========================================
 
+// ── Code linter (Wokwi-style pre-Run validation) ──────────────────────────
+// Returns an array of {line, col, msg} errors. Empty array = clean.
+function lintPython(code) {
+    const errors = [];
+    const lines = code.split('\n');
+    let paren = 0, bracket = 0, brace = 0;
+    let inStr = null;
+    // Bracket balance + simple syntax
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        for (let j = 0; j < line.length; j++) {
+            const c = line[j];
+            if (inStr) {
+                if (c === '\\') { j++; continue; }
+                if (c === inStr) inStr = null;
+                continue;
+            }
+            if (c === '#') break;
+            if (c === '"' || c === "'") { inStr = c; continue; }
+            if (c === '(') paren++;
+            else if (c === ')') { paren--; if (paren < 0) { errors.push({line: i+1, msg: 'มี ) โดยไม่มี ( คู่กัน'}); paren = 0; } }
+            else if (c === '[') bracket++;
+            else if (c === ']') { bracket--; if (bracket < 0) { errors.push({line: i+1, msg: 'มี ] โดยไม่มี [ คู่กัน'}); bracket = 0; } }
+            else if (c === '{') brace++;
+            else if (c === '}') { brace--; if (brace < 0) { errors.push({line: i+1, msg: 'มี } โดยไม่มี { คู่กัน'}); brace = 0; } }
+        }
+        // Detect unterminated string at end of line (Python single-line strings)
+        if (inStr) { errors.push({line: i+1, msg: `string ไม่ปิด — ใส่ ${inStr} ปิดด้วย`}); inStr = null; }
+        // Colon check for control statements (strip inline comment before checking)
+        const t = line.trim();
+        if (t && !t.startsWith('#') && /^(if|elif|else|while|for|def|class)\b/.test(t)) {
+            // Strip inline comment outside strings
+            let codeOnly = '', s = null;
+            for (let k = 0; k < t.length; k++) {
+                if (s) { if (t[k] === s) s = null; codeOnly += t[k]; continue; }
+                if (t[k] === '"' || t[k] === "'") { s = t[k]; codeOnly += t[k]; continue; }
+                if (t[k] === '#') break;
+                codeOnly += t[k];
+            }
+            const tNoComment = codeOnly.trim();
+            if (tNoComment && !tNoComment.endsWith(':') && !tNoComment.endsWith('\\') && paren === 0 && bracket === 0) {
+                errors.push({line: i+1, msg: 'คำสั่ง control (if/while/for/...) ต้องลงท้ายด้วย ":"'});
+            }
+        }
+    }
+    if (paren > 0)   errors.push({msg: `( เปิดทิ้งไว้ ${paren} ตัว ไม่ปิดด้วย )`});
+    if (bracket > 0) errors.push({msg: `[ เปิดทิ้งไว้ ${bracket} ตัว ไม่ปิดด้วย ]`});
+    if (brace > 0)   errors.push({msg: `{ เปิดทิ้งไว้ ${brace} ตัว ไม่ปิดด้วย }`});
+    // Check there's something actually executable
+    const hasContent = lines.some(l => {
+        const t = l.trim();
+        return t && !t.startsWith('#');
+    });
+    if (!hasContent) errors.push({msg: 'โค้ดว่างเปล่า — ยังไม่มีคำสั่งให้รัน'});
+    return errors;
+}
+
+function lintC(code) {
+    const errors = [];
+    const lines = code.split('\n');
+    let paren = 0, brace = 0, bracket = 0;
+    let inStr = null;
+    let inBlockComment = false;
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        for (let j = 0; j < line.length; j++) {
+            if (inBlockComment) {
+                if (line[j] === '*' && line[j+1] === '/') { inBlockComment = false; j++; }
+                continue;
+            }
+            if (inStr) {
+                if (line[j] === '\\') { j++; continue; }
+                if (line[j] === inStr) inStr = null;
+                continue;
+            }
+            if (line[j] === '/' && line[j+1] === '/') break;
+            if (line[j] === '/' && line[j+1] === '*') { inBlockComment = true; j++; continue; }
+            const c = line[j];
+            if (c === '"' || c === "'") { inStr = c; continue; }
+            if (c === '(') paren++;
+            else if (c === ')') { paren--; if (paren < 0) { errors.push({line: i+1, msg: 'มี ) โดยไม่มี ( คู่กัน'}); paren = 0; } }
+            else if (c === '{') brace++;
+            else if (c === '}') { brace--; if (brace < 0) { errors.push({line: i+1, msg: 'มี } โดยไม่มี { คู่กัน'}); brace = 0; } }
+            else if (c === '[') bracket++;
+            else if (c === ']') { bracket--; if (bracket < 0) { errors.push({line: i+1, msg: 'มี ] โดยไม่มี [ คู่กัน'}); bracket = 0; } }
+        }
+        if (inStr) { errors.push({line: i+1, msg: `string ไม่ปิด — ใส่ ${inStr} ปิดด้วย`}); inStr = null; }
+    }
+    if (paren > 0) errors.push({msg: `( เปิดทิ้งไว้ ${paren} ตัว`});
+    if (brace > 0) errors.push({msg: `{ เปิดทิ้งไว้ ${brace} ตัว`});
+    if (bracket > 0) errors.push({msg: `[ เปิดทิ้งไว้ ${bracket} ตัว`});
+    if (!/void\s+setup\s*\(\s*\)/.test(code)) errors.push({msg: 'ไม่พบฟังก์ชัน void setup() { ... }'});
+    if (!/void\s+loop\s*\(\s*\)/.test(code))  errors.push({msg: 'ไม่พบฟังก์ชัน void loop() { ... }'});
+    return errors;
+}
+
+// ── Hardware validation: real board needs real wiring ─────────────────
+// Returns array of human-readable errors describing missing parts/wires.
+function validateWiring(mission) {
+    if (!mission) return [];
+    const errors = [];
+    const placedTypes = labState.components.map(c => c.type);
+    // Required parts
+    for (const reqPart of mission.requiredParts || []) {
+        if (!placedTypes.includes(reqPart)) {
+            const def = PART_DEFS[reqPart];
+            errors.push(`ขาดชิ้นส่วน: ${def ? def.icon + ' ' + def.name : reqPart}`);
+        }
+    }
+    // Required wires — match strictly on both endpoints (either direction)
+    function canonEndpoint(side) {
+        if (side.compId === 'pico') {
+            // Strip _N suffix for duplicated pins like GND_3
+            return side.pin.replace(/_\d+$/, '');
+        }
+        const c = labState.components.find(cc => cc.id === side.compId);
+        if (!c) return null;
+        const def = PART_DEFS[c.type];
+        const kindOrType = def ? def.kind : c.type;
+        return `${kindOrType}:${side.pin}`;
+    }
+    for (const rw of mission.requiredWires || []) {
+        // rw.from / rw.to could be 'ADC0', 'GP2', or 'led:a', 'soil:sig'
+        const expectedA = rw.from.replace(/_\d+$/, '');
+        const expectedB = rw.to.replace(/_\d+$/, '');
+        const found = labState.wires.some(w => {
+            const a = canonEndpoint(w.from);
+            const b = canonEndpoint(w.to);
+            if (!a || !b) return false;
+            return (a === expectedA && b === expectedB) || (a === expectedB && b === expectedA);
+        });
+        if (!found) {
+            errors.push(`ขาดสาย: ${rw.from} ↔ ${rw.to}`);
+        }
+    }
+    return errors;
+}
+
+// Check if a given Pico pin is wired to a component of a specific kind.
+// Used by sensor reads to honestly report 0 when nothing is wired (floating pin).
+function isPinWiredToKind(picoPin, kindOrKinds) {
+    const kinds = Array.isArray(kindOrKinds) ? kindOrKinds : [kindOrKinds];
+    const normPico = picoPin.replace(/_\d+$/, '');
+    for (const w of labState.wires) {
+        const picoSide = w.from.compId === 'pico' ? w.from : w.to.compId === 'pico' ? w.to : null;
+        if (!picoSide) continue;
+        if (picoSide.pin.replace(/_\d+$/, '') !== normPico) continue;
+        const otherSide = w.from.compId === 'pico' ? w.to : w.from;
+        const comp = labState.components.find(c => c.id === otherSide.compId);
+        if (!comp) continue;
+        const def = PART_DEFS[comp.type];
+        if (def && kinds.includes(def.kind)) return true;
+    }
+    return false;
+}
+
 async function runLabCode() {
     if (labState.running) return;
+    // ── Lint code first (Wokwi-style: block Run on errors) ──
+    const code0 = labState.code[labState.currentLang];
+    const linter = labState.currentLang === 'python' ? lintPython : lintC;
+    const lintErrors = linter(code0);
+    if (lintErrors.length) {
+        clearConsole();
+        consoleLog('❌ พบข้อผิดพลาดในโค้ด — แก้ไขก่อนกด Run อีกครั้ง:', 'error');
+        for (const e of lintErrors) {
+            const prefix = e.line ? `บรรทัด ${e.line}: ` : '';
+            consoleLog(`   • ${prefix}${e.msg}`, 'error');
+        }
+        consoleLog(' ', 'info');
+        consoleLog('💡 เคล็ดลับ: ตรวจสอบว่าวงเล็บ/ปีกกาคู่กันครบ และ if/while/for ลงท้ายด้วย ":" (Python) หรือมี { } (C)', 'info');
+        switchLabTab('console');
+        showToast('❌ โค้ดยังมีข้อผิดพลาด ' + lintErrors.length + ' จุด');
+        return;
+    }
+    // ── Hardware check (must come AFTER lint): real board behavior ──
+    // If sensors/actuators aren't physically connected, code can't run on the hardware.
+    const wireErrors = validateWiring(labState.currentMission);
+    if (wireErrors.length) {
+        clearConsole();
+        consoleLog('⚠️ โค้ดผ่าน lint ✓ แต่วงจรยังไม่พร้อมรัน:', 'warn');
+        consoleLog(' ', 'info');
+        for (const msg of wireErrors) {
+            consoleLog(`   • ${msg}`, 'error');
+        }
+        consoleLog(' ', 'info');
+        consoleLog('💡 บนบอร์ดจริง: ถ้าไม่ต่อเซ็นเซอร์/อุปกรณ์ MCU อ่านค่า/ขับสัญญาณไม่ได้', 'info');
+        consoleLog('💡 ดูแถบ "🧩 ต้องใช้" และ "🔌 ต่อสาย" ด้านบน — คลิกชิ้นส่วนทางซ้ายเพิ่ม แล้วคลิก pin 2 ตัวเพื่อต่อสาย', 'info');
+        switchLabTab('console');
+        showToast(`⚠️ ยังขาด ${wireErrors.length} จุด — ต่อวงจรให้ครบก่อนกด Run`);
+        return;
+    }
     labState.running = true;
     labState.stopRequested = false;
     labState.pinStates = {};
     labState.pinToggleCount = {};
+    labState.sensorDisplay = {};
+    labState.servoAngles = {};
     labState.simTime = 0;
+    stopBuzzerAudio();
     clearConsole();
-    consoleLog('▶️ เริ่มรันโค้ด ' + (labState.currentLang === 'python' ? '(Python)' : '(C)'), 'info');
+    consoleLog('▶️ เริ่มรันโค้ด ' + (labState.currentLang === 'python' ? '(Python)' : '(C)') + ' — Lint ผ่าน ✓', 'info');
     switchLabTab('console');
     document.getElementById('lab-run-btn').style.display = 'none';
     document.getElementById('lab-stop-btn').style.display = 'block';
+    showSimControls(true);
     document.getElementById('status-power').classList.add('on');
     document.getElementById('status-power-text').textContent = 'ON';
     // Show "RUNNING" badge in topbar
     const ms = document.getElementById('lab-mission-status');
     if (ms) ms.innerHTML = (ms.textContent || '') + ' <span class="lab-running-badge">⚡ RUNNING</span>';
+
+    // ── Real-world scenario: replace circuit canvas while running ──
+    if (window.scenarioApi && labState.currentMission) {
+        window.scenarioApi.start(labState.currentMission.id);
+    }
 
     const code = labState.code[labState.currentLang];
     try {
@@ -4981,6 +5743,7 @@ async function runLabCode() {
     }
 
     labState.running = false;
+    showSimControls(false);
     document.getElementById('lab-run-btn').style.display = 'block';
     document.getElementById('lab-stop-btn').style.display = 'none';
     document.getElementById('status-power').classList.remove('on');
@@ -4992,6 +5755,9 @@ async function runLabCode() {
     // Force re-render of wires so live-flow stops
     renderLabWires();
 
+    // ── Close scenario (restore circuit canvas) ──
+    if (window.scenarioApi) window.scenarioApi.stop();
+
     if (!labState.stopRequested) {
         consoleLog('✅ โปรแกรมจบการทำงาน', 'success');
         checkMissionCompletion();
@@ -5000,42 +5766,48 @@ async function runLabCode() {
 
 function stopLabCode() {
     labState.stopRequested = true;
+    stopBuzzerAudio();
+    // Reset all button states so they render as disabled after stop
+    labState.components.forEach(c => {
+        if (PART_DEFS[c.type] && PART_DEFS[c.type].kind === 'button') {
+            c.state.value = 0;
+        }
+    });
     consoleLog('⏹ หยุดการรัน', 'warn');
 }
 
 // Variables in user's program
 let userVars = {};
 const SIM_SPEED = 2; // simulated time runs 2x faster than wall clock (slow enough to see LED blink)
+let _sleepCount = 0;  // tracked across simSleep calls; used to detect runaway loops without yield
+let _serialBuffer = ''; // Arduino Serial.print buffer (flushed on println)
 
 async function runPythonCode(code) {
     userVars = {};
-    // Parse lines, build IR
+    _serialBuffer = '';
+    // Parse lines
     const lines = code.split('\n').map(l => l.replace(/\s+$/, ''));
-    // Find while True block (main loop)
+    // Find top-level `while True:` line (the canonical main loop)
     let mainStart = -1;
     let mainIndent = 0;
-    let setupLines = [];
-
     for (let i = 0; i < lines.length; i++) {
         const trimmed = lines[i].trim();
-        if (/^while\s+True\s*:/.test(trimmed)) {
-            mainStart = i + 1;
+        if (/^while\s+True\s*:\s*$/.test(trimmed)) {
             const m = lines[i].match(/^(\s*)/);
-            mainIndent = (m ? m[1].length : 0) + 4;
-            break;
+            const baseInd = m ? m[1].length : 0;
+            if (baseInd === 0) {  // only top-level while True: is treated as main loop
+                mainStart = i + 1;
+                mainIndent = baseInd + 4;
+                break;
+            }
         }
-        if (!trimmed || trimmed.startsWith('#') || trimmed.startsWith('from ') || trimmed.startsWith('import ')) {
-            if (trimmed && !trimmed.startsWith('#') && !trimmed.startsWith('from ') && !trimmed.startsWith('import ')) setupLines.push(lines[i]);
-            continue;
-        }
-        setupLines.push(lines[i]);
     }
 
-    // Execute setup
-    for (const line of setupLines) {
-        if (labState.stopRequested) return;
-        await execPythonLine(line);
-    }
+    // Setup section: lines BEFORE the main loop (use executePythonBlock so for/if/while work)
+    const setupEnd = mainStart >= 0 ? mainStart - 1 : lines.length;
+    const setupLines = lines.slice(0, setupEnd);
+    await executePythonBlock(setupLines);
+    if (labState.stopRequested) return;
 
     // Execute main loop
     if (mainStart >= 0) {
@@ -5048,8 +5820,14 @@ async function runPythonCode(code) {
             loopLines.push(lines[i].slice(mainIndent));
         }
         let loops = 0;
-        while (!labState.stopRequested && loops < 50) {
+        while (!labState.stopRequested) {
+            const before = _sleepCount;
             await executePythonBlock(loopLines);
+            // Anti-freeze: if the loop body had NO sleep/sleep_ms call, force a yield.
+            // Critical for missions like m5 whose starter has no time.sleep().
+            if (_sleepCount === before && !labState.stopRequested) {
+                await simSleep(50);
+            }
             loops++;
         }
     }
@@ -5061,47 +5839,89 @@ async function executePythonBlock(lines) {
         const line = lines[i];
         const trimmed = line.trim();
         if (!trimmed || trimmed.startsWith('#')) continue;
-        // if statement
+        // if / elif / else chain
         const ifMatch = trimmed.match(/^if\s+(.+):$/);
         if (ifMatch) {
-            const cond = evalPythonExpr(ifMatch[1]);
-            const blockIndent = (line.match(/^(\s*)/)[1].length) + 4;
-            const blockLines = [];
+            const origIndent = (line.match(/^(\s*)/)[1].length);
+            const blockIndent = origIndent + 4;
+            // chain: [{cond, lines}], elseBranch: lines | null
+            const chain = [{ cond: ifMatch[1], lines: [] }];
+            let elseBranch = null;
             let j = i + 1;
+            let current = chain[0].lines;
             while (j < lines.length) {
                 const li = lines[j];
-                if (li.trim() === '') { blockLines.push(li); j++; continue; }
+                if (li.trim() === '') { current.push(li); j++; continue; }
                 const ind = li.match(/^(\s*)/)[1].length;
-                if (ind < blockIndent) break;
-                blockLines.push(li.slice(blockIndent));
-                j++;
-            }
-            // Check for else
-            const elseLines = [];
-            if (j < lines.length && lines[j].trim().startsWith('else')) {
-                j++;
-                while (j < lines.length) {
-                    const li = lines[j];
-                    if (li.trim() === '') { elseLines.push(li); j++; continue; }
-                    const ind = li.match(/^(\s*)/)[1].length;
-                    if (ind < blockIndent) break;
-                    elseLines.push(li.slice(blockIndent));
+                if (ind >= blockIndent) {
+                    current.push(li.slice(blockIndent));
                     j++;
+                    continue;
+                }
+                if (ind === origIndent) {
+                    const lstr = li.trim();
+                    const elifM = lstr.match(/^elif\s+(.+):$/);
+                    if (elifM) {
+                        chain.push({ cond: elifM[1], lines: [] });
+                        current = chain[chain.length - 1].lines;
+                        j++;
+                        continue;
+                    }
+                    if (/^else\s*:?\s*$/.test(lstr)) {
+                        elseBranch = [];
+                        current = elseBranch;
+                        j++;
+                        continue;
+                    }
+                }
+                break;
+            }
+            let executed = false;
+            for (const br of chain) {
+                if (evalPythonExpr(br.cond)) {
+                    await executePythonBlock(br.lines);
+                    executed = true;
+                    break;
                 }
             }
-            if (cond) {
-                await executePythonBlock(blockLines);
-            } else {
-                await executePythonBlock(elseLines);
+            if (!executed && elseBranch) {
+                await executePythonBlock(elseBranch);
             }
             i = j - 1;
             continue;
         }
-        // for loop: for i in range(N):
-        const forMatch = trimmed.match(/^for\s+(\w+)\s+in\s+range\((\d+)\):$/);
+        // while condition: (in addition to the main `while True:` outer loop)
+        const whileMatch = trimmed.match(/^while\s+(.+):$/);
+        if (whileMatch && whileMatch[1].trim() !== 'True') {
+            const blockIndent = (line.match(/^(\s*)/)[1].length) + 4;
+            const bodyLines = [];
+            let j = i + 1;
+            while (j < lines.length) {
+                const li = lines[j];
+                if (li.trim() === '') { bodyLines.push(li); j++; continue; }
+                const ind = li.match(/^(\s*)/)[1].length;
+                if (ind < blockIndent) break;
+                bodyLines.push(li.slice(blockIndent));
+                j++;
+            }
+            let safety = 0;
+            while (evalPythonExpr(whileMatch[1])) {
+                if (labState.stopRequested) return;
+                await executePythonBlock(bodyLines);
+                if (++safety > 10000) { consoleLog('⚠️ while loop ออกจาก loop เพราะนานเกิน', 'warn'); break; }
+            }
+            i = j - 1;
+            continue;
+        }
+        // for loop: for i in range(...):  — supports range(N), range(a,b), range(a,b,s)
+        const forMatch = trimmed.match(/^for\s+(\w+)\s+in\s+range\((.+)\)\s*:\s*$/);
         if (forMatch) {
             const varName = forMatch[1];
-            const count = parseInt(forMatch[2]);
+            const args = forMatch[2].split(',').map(a => evalPythonExpr(a.trim()));
+            let rStart = 0, rStop, rStep = 1;
+            if (args.length === 1) rStop = args[0];
+            else if (args.length === 2) { rStart = args[0]; rStop = args[1]; }
+            else { rStart = args[0]; rStop = args[1]; rStep = args[2] || 1; }
             const blockIndent = (line.match(/^(\s*)/)[1].length) + 4;
             const blockLines = [];
             let j = i + 1;
@@ -5113,7 +5933,8 @@ async function executePythonBlock(lines) {
                 blockLines.push(li.slice(blockIndent));
                 j++;
             }
-            for (let k = 0; k < count; k++) {
+            const iter = (val) => rStep > 0 ? val < rStop : val > rStop;
+            for (let k = rStart; iter(k); k += rStep) {
                 if (labState.stopRequested) return;
                 userVars[varName] = k;
                 await executePythonBlock(blockLines);
@@ -5175,7 +5996,7 @@ async function execPythonLine(line) {
         if (v && v._type === 'Pin') setPinState(v.pin, parseInt(m[2]));
         return;
     }
-    // servo.duty_u16(x) or servo.freq(x)
+    // servo.duty_u16(x)
     m = t.match(/^(\w+)\.duty_u16\(\s*(\d+)\s*\)$/);
     if (m) {
         const v = userVars[m[1]];
@@ -5187,18 +6008,16 @@ async function execPythonLine(line) {
         return;
     }
     m = t.match(/^(\w+)\.freq\(\s*(\d+)\s*\)$/);
-    if (m) { return; }
-    // time.sleep(x) / time.sleep_ms(x)
+    if (m) {
+        const v = userVars[m[1]];
+        if (v && v._type === 'PWM') { v.freq = parseInt(m[2]); setBuzzerFreq(v.freq); }
+        return;
+    }
+    // time.sleep(x)
     m = t.match(/^time\.sleep\(\s*([\d.]+)\s*\)$/);
-    if (m) {
-        await simSleep(parseFloat(m[1]) * 1000);
-        return;
-    }
+    if (m) { await simSleep(parseFloat(m[1]) * 1000); return; }
     m = t.match(/^time\.sleep_ms\(\s*(\d+)\s*\)$/);
-    if (m) {
-        await simSleep(parseInt(m[1]));
-        return;
-    }
+    if (m) { await simSleep(parseInt(m[1])); return; }
     // print(...)
     m = t.match(/^print\((.*)\)$/);
     if (m) {
@@ -5206,22 +6025,60 @@ async function execPythonLine(line) {
         consoleLog('>>> ' + args.join(' '), 'pin');
         return;
     }
+    // General variable assignment: distance = ultrasonic(...) / x = expr
+    m = t.match(/^(\w+)\s*=\s*(.+)$/);
+    if (m && !m[1].match(/^(Pin|PWM|ADC|True|False|None)$/)) {
+        userVars[m[1]] = evalPythonExpr(m[2]);
+        return;
+    }
 }
 
 function evalPythonExpr(expr) {
     expr = expr.trim();
     if (!expr) return 0;
-    // string literal
+    // Strip outer parens
+    while (expr.startsWith('(') && expr.endsWith(')')) {
+        // Check the parens actually match (don't strip "(a) + (b)")
+        let depth = 0, ok = true;
+        for (let k = 0; k < expr.length; k++) {
+            if (expr[k] === '(') depth++;
+            else if (expr[k] === ')') { depth--; if (depth === 0 && k < expr.length - 1) { ok = false; break; } }
+        }
+        if (!ok) break;
+        expr = expr.slice(1, -1).trim();
+    }
     if (/^["'].*["']$/.test(expr)) return expr.slice(1, -1);
-    // number
     if (/^-?\d+\.?\d*$/.test(expr)) return parseFloat(expr);
-    // var.value() / .read_u16() / .read_temp() / .read_humidity()
-    let m = expr.match(/^(\w+)\.value\(\)$/);
+    if (expr === 'True') return true;
+    if (expr === 'False') return false;
+    if (expr === 'None') return null;
+    // Logical OR (lowest precedence)
+    let m;
+    m = splitTopLevel(expr, /\s+or\s+/);
+    if (m && m.length > 1) {
+        for (const part of m) { if (evalPythonExpr(part)) return true; }
+        return false;
+    }
+    // Logical AND
+    m = splitTopLevel(expr, /\s+and\s+/);
+    if (m && m.length > 1) {
+        let last = true;
+        for (const part of m) { last = evalPythonExpr(part); if (!last) return false; }
+        return last;
+    }
+    // Logical NOT
+    const notMatch = expr.match(/^not\s+(.+)$/);
+    if (notMatch) return !evalPythonExpr(notMatch[1]);
+    m = expr.match(/^(\w+)\.value\(\)$/);
     if (m) {
         const v = userVars[m[1]];
         if (v && v._type === 'Pin') {
             if (v.mode === 'IN') {
-                // Find connected component
+                // Scenario can override (e.g., m3 doorbell button on GP4)
+                if (window.scenarioController) {
+                    const s = window.scenarioController.getSensor('btn:GP' + v.pin);
+                    if (s !== null && s !== undefined) return s;
+                }
                 const c = findInputForPin(v.pin);
                 return c ? c.state.value : 0;
             }
@@ -5231,404 +6088,812 @@ function evalPythonExpr(expr) {
     m = expr.match(/^(\w+)\.read_u16\(\)$/);
     if (m) {
         const v = userVars[m[1]];
-        if (v && v._type === 'ADC') return labState.adcValues[v.pin] !== undefined ? labState.adcValues[v.pin] : 32000;
-    }
-    m = expr.match(/^(\w+)\.read_temp\(\)$/);
-    if (m) return Math.round(22 + Math.random() * 8);
-    m = expr.match(/^(\w+)\.read_humidity\(\)$/);
-    if (m) return Math.round(50 + Math.random() * 30);
-    m = expr.match(/^ultrasonic\(.+\)$/);
-    if (m) return Math.round(5 + Math.random() * 50);
-    // Comparisons
-    m = expr.match(/^(.+?)\s*(==|!=|<=|>=|<|>)\s*(.+)$/);
-    if (m) {
-        const a = evalPythonExpr(m[1]);
-        const b = evalPythonExpr(m[3]);
-        switch(m[2]) {
-            case '==': return a == b;
-            case '!=': return a != b;
-            case '<=': return a <= b;
-            case '>=': return a >= b;
-            case '<': return a < b;
-            case '>': return a > b;
+        if (v && v._type === 'ADC') {
+            // Honest hardware: if nothing wired to this ADC pin, the pin floats → returns ~0
+            const adcPinName = v.pin === 26 ? 'ADC0' : v.pin === 27 ? 'ADC1' : 'GP' + v.pin;
+            if (!isPinWiredToKind(adcPinName, ['ldr', 'soil'])) {
+                return 0;  // floating pin
+            }
+            // Real-world scenario takes priority (e.g., m5 sun position, m7 probe in soil)
+            let raw = null;
+            if (window.scenarioController) {
+                const adcName = 'adc' + (v.pin - 26);
+                const r = window.scenarioController.getSensor(adcName);
+                if (r !== null && r !== undefined) raw = r;
+            }
+            if (raw === null) {
+                const sliderVal = (labState.simInputs && labState.simInputs.adc0 !== undefined)
+                    ? Math.round((labState.simInputs.adc0 / 100) * 65535) : 32000;
+                labState.adcValues[26] = sliderVal;
+                raw = labState.adcValues[v.pin] !== undefined ? labState.adcValues[v.pin] : 32000;
+            } else {
+                labState.adcValues[v.pin] = raw;
+            }
+            labState.sensorDisplay.soil = Math.round(raw / 655.35);
+            labState.sensorDisplay.ldr  = Math.round(raw / 655.35);
+            return raw;
         }
     }
-    // bare variable
-    if (/^\w+$/.test(expr)) return userVars[expr] !== undefined ? userVars[expr] : 0;
+    m = expr.match(/^(\w+)\.read_temp\(\)$/);
+    if (m) {
+        // Honest hardware: DHT11 must be wired to some GP pin
+        const dhtVar = userVars[m[1]];
+        if (dhtVar && dhtVar.pin !== undefined && !isPinWiredToKind('GP' + dhtVar.pin, 'dht')) return 0;
+        let t = null;
+        if (window.scenarioController) t = window.scenarioController.getSensor('temperature');
+        if (t === null || t === undefined) t = (labState.simInputs && labState.simInputs.temperature) || 25;
+        labState.sensorDisplay.dht_temp = t;
+        return t;
+    }
+    m = expr.match(/^(\w+)\.read_humidity\(\)$/);
+    if (m) {
+        const dhtVar = userVars[m[1]];
+        if (dhtVar && dhtVar.pin !== undefined && !isPinWiredToKind('GP' + dhtVar.pin, 'dht')) return 0;
+        let h = null;
+        if (window.scenarioController) h = window.scenarioController.getSensor('humidity');
+        if (h === null || h === undefined) h = (labState.simInputs && labState.simInputs.humidity) || 65;
+        labState.sensorDisplay.dht_hum = h;
+        return h;
+    }
+    m = expr.match(/^ultrasonic\(.+\)$/);
+    if (m) {
+        // Honest: HC-SR04 must be wired (we check any GP pin has 'ultra' wired)
+        const hasUltra = labState.components.some(c => PART_DEFS[c.type] && PART_DEFS[c.type].kind === 'ultra' &&
+            labState.wires.some(w => w.from.compId === c.id || w.to.compId === c.id));
+        if (!hasUltra) return 0;
+        let d = null;
+        if (window.scenarioController) d = window.scenarioController.getSensor('distance');
+        if (d === null || d === undefined) d = (labState.simInputs && labState.simInputs.distance) || 30;
+        labState.sensorDisplay.ultra = d;
+        return d;
+    }
+    // Comparison (split at top-level operator)
+    const cmpParts = splitTopLevelComparison(expr);
+    if (cmpParts) {
+        const a = evalPythonExpr(cmpParts[0]), b = evalPythonExpr(cmpParts[2]);
+        switch (cmpParts[1]) {
+            case '==': return a == b; case '!=': return a != b;
+            case '<=': return a <= b; case '>=': return a >= b;
+            case '<':  return a <  b; case '>':  return a >  b;
+        }
+    }
+    // Arithmetic: + -  (split at top level, left associative)
+    let parts = splitTopLevelOps(expr, ['+', '-']);
+    if (parts && parts.length > 1) {
+        let acc = evalPythonExpr(parts[0].value);
+        for (let i = 1; i < parts.length; i++) {
+            const v = evalPythonExpr(parts[i].value);
+            acc = parts[i].op === '+' ? (acc + v) : (acc - v);
+        }
+        return acc;
+    }
+    // Arithmetic: * / % //
+    parts = splitTopLevelOps(expr, ['*', '/', '%']);
+    if (parts && parts.length > 1) {
+        let acc = evalPythonExpr(parts[0].value);
+        for (let i = 1; i < parts.length; i++) {
+            const v = evalPythonExpr(parts[i].value);
+            acc = parts[i].op === '*' ? acc * v : parts[i].op === '/' ? acc / v : acc % v;
+        }
+        return acc;
+    }
+    // int(x) / float(x) / abs(x) / min(a,b) / max(a,b) / round(x)
+    m = expr.match(/^int\((.+)\)$/);    if (m) return Math.trunc(evalPythonExpr(m[1]));
+    m = expr.match(/^float\((.+)\)$/);  if (m) return parseFloat(evalPythonExpr(m[1]));
+    m = expr.match(/^abs\((.+)\)$/);    if (m) return Math.abs(evalPythonExpr(m[1]));
+    m = expr.match(/^round\((.+)\)$/);  if (m) return Math.round(evalPythonExpr(m[1]));
+    m = expr.match(/^min\((.+),(.+)\)$/); if (m) return Math.min(evalPythonExpr(m[1]), evalPythonExpr(m[2]));
+    m = expr.match(/^max\((.+),(.+)\)$/); if (m) return Math.max(evalPythonExpr(m[1]), evalPythonExpr(m[2]));
+    // Identifier
+    if (/^[a-zA-Z_]\w*$/.test(expr)) return userVars[expr] !== undefined ? userVars[expr] : 0;
     return expr;
 }
 
+// Helpers for splitting at top-level (respecting parens & strings)
+function splitTopLevel(str, sepRegex) {
+    const out = [];
+    let depth = 0, inStr = null, last = 0;
+    for (let i = 0; i < str.length; i++) {
+        const c = str[i];
+        if (inStr) { if (c === inStr) inStr = null; continue; }
+        if (c === '"' || c === "'") { inStr = c; continue; }
+        if (c === '(') depth++;
+        else if (c === ')') depth--;
+        if (depth === 0) {
+            const rest = str.slice(i);
+            const m = rest.match(sepRegex);
+            if (m && m.index === 0) {
+                out.push(str.slice(last, i));
+                i += m[0].length - 1;
+                last = i + 1;
+            }
+        }
+    }
+    out.push(str.slice(last));
+    return out.length > 1 ? out : null;
+}
+function splitTopLevelComparison(str) {
+    let depth = 0, inStr = null;
+    const ops = ['==', '!=', '<=', '>=', '<', '>'];
+    for (let i = 0; i < str.length; i++) {
+        const c = str[i];
+        if (inStr) { if (c === inStr) inStr = null; continue; }
+        if (c === '"' || c === "'") { inStr = c; continue; }
+        if (c === '(') { depth++; continue; }
+        if (c === ')') { depth--; continue; }
+        if (depth !== 0) continue;
+        for (const op of ops) {
+            if (str.substr(i, op.length) === op) {
+                return [str.slice(0, i).trim(), op, str.slice(i + op.length).trim()];
+            }
+        }
+    }
+    return null;
+}
+function splitTopLevelOps(str, ops) {
+    const out = [];
+    let depth = 0, inStr = null, last = 0, lastOp = null;
+    for (let i = 0; i < str.length; i++) {
+        const c = str[i];
+        if (inStr) { if (c === inStr) inStr = null; continue; }
+        if (c === '"' || c === "'") { inStr = c; continue; }
+        if (c === '(') { depth++; continue; }
+        if (c === ')') { depth--; continue; }
+        if (depth !== 0) continue;
+        if (ops.includes(c)) {
+            // Skip unary minus (start of string OR previous char is an operator)
+            if (c === '-' && (i === 0 || /[\+\-\*\/%\(=<>!,]/.test(str[i-1].trim() || str[i-1]))) {
+                // Skip if at the very start or just after an operator (unary)
+                const prev = i > 0 ? str.slice(0, i).trim().slice(-1) : '';
+                if (prev === '' || /[\+\-\*\/%\(=<>!,]/.test(prev)) continue;
+            }
+            out.push({ op: lastOp, value: str.slice(last, i).trim() });
+            lastOp = c;
+            last = i + 1;
+        }
+    }
+    out.push({ op: lastOp, value: str.slice(last).trim() });
+    // Filter empty
+    if (out.length > 1 && out.every(p => p.value !== '')) return out;
+    return null;
+}
+
 // ----- C interpreter -----
+// Normalizes C source so the line-based block extractor can handle common
+// styles: `} else {`, `}\nelse`, `int x=0;float y=1.0;` on one line, etc.
+function preprocessCCode(code) {
+    let r = code;
+    // Strip line + block comments and preprocessor directives
+    r = r.replace(/\/\/[^\n]*/g, '');
+    r = r.replace(/\/\*[\s\S]*?\*\//g, '');
+    r = r.replace(/^[ \t]*#.*$/gm, '');
+    // Split `} else if (..) {` and `} else {` and `} else` onto separate lines
+    r = r.replace(/\}\s*else\s+if\s*\(/g, '}\nelse if (');
+    r = r.replace(/\}\s*else\s*\{/g, '}\nelse {');
+    r = r.replace(/\}\s*else(?=\s|$|;)/g, '}\nelse');
+    // One closing brace per line
+    r = r.replace(/([^\n])\}/g, '$1\n}');
+    return r;
+}
+
+// Extract body of a named C function (void funcName()) using brace counting.
+// Returns the body string (between the outermost { }) or null if not found.
+function _extractCFunctionBody(code, funcName) {
+    const pat = new RegExp('void\\s+' + funcName + '\\s*\\(\\s*\\)\\s*\\{');
+    const m = pat.exec(code);
+    if (!m) return null;
+    let depth = 1;
+    let i = m.index + m[0].length;
+    const start = i;
+    while (i < code.length && depth > 0) {
+        if (code[i] === '{') depth++;
+        else if (code[i] === '}') depth--;
+        i++;
+    }
+    return code.slice(start, i - 1); // body between { }
+}
+
 async function runCCode(code) {
     userVars = {};
-    // Extract setup() and loop() blocks
-    const setupMatch = code.match(/void\s+setup\s*\(\s*\)\s*\{([\s\S]*?)\n\}/);
-    const loopMatch  = code.match(/void\s+loop\s*\(\s*\)\s*\{([\s\S]*?)\n\}/);
-    const setupBody = setupMatch ? setupMatch[1] : '';
-    const loopBody  = loopMatch  ? loopMatch[1] : '';
-
-    // Run setup once
+    _serialBuffer = '';
+    const norm = preprocessCCode(code);
+    // Use brace-counting extraction (regex \n} fails after preprocessCCode splits } else {)
+    const setupBody = _extractCFunctionBody(norm, 'setup') || '';
+    const loopBody  = _extractCFunctionBody(norm, 'loop')  || '';
+    // Module scope: everything outside setup/loop (for global declarations like Servo myServo;)
+    const moduleScope = norm
+        .replace(/void\s+setup\s*\(\s*\)\s*\{[\s\S]*?\}/, '')
+        .replace(/void\s+loop\s*\(\s*\)\s*\{[\s\S]*?\}/, '');
+    await executeCBlock(moduleScope.split('\n'));
     await executeCBlock(setupBody.split('\n'));
-    // Run loop repeatedly
-    let loops = 0;
-    while (!labState.stopRequested && loops < 50) {
+    while (!labState.stopRequested) {
+        const before = _sleepCount;
         await executeCBlock(loopBody.split('\n'));
-        loops++;
+        // Anti-freeze: force a yield if no delay() ran this iteration
+        if (_sleepCount === before && !labState.stopRequested) {
+            await simSleep(50);
+        }
     }
 }
 
+// Extract a braced block starting at lineIdx (which may or may not contain `{`).
+// Returns { body: string[], endIdx: number (line AFTER closing `}`) }
+function _extractCBlock(lines, lineIdx) {
+    let depth = lines[lineIdx].includes('{') ? 1 : 0;
+    const body = [];
+    let j = lineIdx + 1;
+    while (j < lines.length) {
+        const li = lines[j];
+        const t = li.trim();
+        if (depth === 0) {
+            // Look for opening brace
+            if (t === '{') { depth = 1; j++; continue; }
+            // Single-statement block (no braces) — one line then stop
+            if (t) { body.push(li); j++; }
+            break;
+        }
+        let opens = 0, closes = 0;
+        for (const ch of t) {
+            if (ch === '{') opens++;
+            else if (ch === '}') closes++;
+        }
+        const newDepth = depth + opens - closes;
+        if (newDepth === 0) { j++; depth = 0; break; }
+        depth = newDepth;
+        body.push(li);
+        j++;
+    }
+    return { body, endIdx: j };
+}
+
 async function executeCBlock(lines) {
-    let i = 0;
-    while (i < lines.length) {
+    for (let i = 0; i < lines.length; i++) {
         if (labState.stopRequested) return;
-        const raw = lines[i];
-        const t = raw.trim();
-        if (!t || t.startsWith('//')) { i++; continue; }
-        // if (cond) { ... }
-        let m = t.match(/^if\s*\((.+)\)\s*\{?$/);
-        if (m) {
-            const cond = evalCExpr(m[1]);
-            // collect block
-            const blockLines = [];
-            let depth = t.includes('{') ? 1 : 0;
-            let j = i + (t.endsWith('{') ? 1 : 1);
-            if (depth === 0 && lines[j] && lines[j].trim() === '{') { depth = 1; j++; }
-            while (j < lines.length && depth > 0) {
-                const lj = lines[j].trim();
-                if (lj.includes('{')) depth += (lj.match(/\{/g) || []).length;
-                if (lj.includes('}')) depth -= (lj.match(/\}/g) || []).length;
-                if (depth > 0) blockLines.push(lines[j]);
-                j++;
-            }
-            // else
-            let elseLines = [];
-            if (j < lines.length && lines[j].trim().startsWith('else')) {
-                let edepth = 1;
-                let k = j + 1;
-                if (lines[j].includes('{') === false && lines[k] && lines[k].trim() === '{') { k++; }
-                while (k < lines.length && edepth > 0) {
-                    const lk = lines[k].trim();
-                    if (lk.includes('{')) edepth += (lk.match(/\{/g) || []).length;
-                    if (lk.includes('}')) edepth -= (lk.match(/\}/g) || []).length;
-                    if (edepth > 0) elseLines.push(lines[k]);
-                    k++;
+        const trimmed = lines[i].trim();
+        if (!trimmed || trimmed.startsWith('//') || trimmed.startsWith('#')) continue;
+        // for (init; cond; incr) { ... }
+        const forMatch = trimmed.match(/^for\s*\(([^;]+);([^;]+);(.+)\)\s*\{?$/);
+        if (forMatch) {
+            const initStmt = forMatch[1].trim();
+            const condStr = forMatch[2].trim();
+            const incrStmt = forMatch[3].trim();
+            await execCLine(initStmt.replace(/;$/, '') + ';');
+            const { body, endIdx } = _extractCBlock(lines, i);
+            let safety = 0;
+            const innerBefore = _sleepCount;
+            while (evalCExpr(condStr)) {
+                if (labState.stopRequested) return;
+                await executeCBlock(body);
+                await execCLine(incrStmt + ';');
+                if (++safety > 10000) {
+                    if (_sleepCount === innerBefore) { await simSleep(50); }
+                    consoleLog('⚠️ for loop ครบ 10000 รอบ — ตัดออก', 'warn');
+                    break;
                 }
-                j = k;
             }
-            if (cond) await executeCBlock(blockLines);
-            else await executeCBlock(elseLines);
-            i = j;
-            continue;
+            i = endIdx - 1; continue;
         }
-        // for loop: for (int x = 0; x < N; x++)
-        m = t.match(/^for\s*\(\s*(?:int\s+)?(\w+)\s*=\s*(\d+)\s*;\s*\w+\s*<\s*(\d+)\s*;\s*\w+\+\+\s*\)\s*\{?$/);
-        if (m) {
-            const [, vn, start, end] = m;
-            const blockLines = [];
-            let depth = t.endsWith('{') ? 1 : 0;
-            let j = i + 1;
-            if (depth === 0 && lines[j] && lines[j].trim() === '{') { depth = 1; j++; }
-            while (j < lines.length && depth > 0) {
-                const lj = lines[j].trim();
-                if (lj.includes('{')) depth += (lj.match(/\{/g) || []).length;
-                if (lj.includes('}')) depth -= (lj.match(/\}/g) || []).length;
-                if (depth > 0) blockLines.push(lines[j]);
-                j++;
+        // while (cond) { ... }
+        const whileMatch = trimmed.match(/^while\s*\((.+)\)\s*\{?$/);
+        if (whileMatch) {
+            const condStr = whileMatch[1].trim();
+            const { body, endIdx } = _extractCBlock(lines, i);
+            let safety = 0;
+            while (evalCExpr(condStr)) {
+                if (labState.stopRequested) return;
+                const before = _sleepCount;
+                await executeCBlock(body);
+                if (_sleepCount === before) { await simSleep(20); }
+                if (++safety > 10000) break;
             }
-            for (let k = parseInt(start); k < parseInt(end) && !labState.stopRequested; k++) {
-                userVars[vn] = k;
-                await executeCBlock(blockLines);
-            }
-            i = j;
-            continue;
+            i = endIdx - 1; continue;
         }
-        await execCLine(t);
-        i++;
+        // if (cond) { ... } [else if/else { ... }]
+        const ifMatch = trimmed.match(/^if\s*\((.+)\)\s*\{?$/);
+        if (ifMatch) {
+            const cond = evalCExpr(ifMatch[1]);
+            // Extract if-block
+            const ifExt = _extractCBlock(lines, i);
+            // Look ahead for else / else-if at i = ifExt.endIdx
+            let elseBody = [];
+            let cursor = ifExt.endIdx;
+            while (cursor < lines.length && lines[cursor].trim() === '') cursor++;
+            let took = false;
+            if (cursor < lines.length) {
+                const cli = lines[cursor].trim();
+                const elseIfM = cli.match(/^else\s+if\s*\((.+)\)\s*\{?$/);
+                if (elseIfM) {
+                    // Recurse into else if as a new if at this line
+                    if (cond) {
+                        await executeCBlock(ifExt.body);
+                    } else {
+                        // Build a synthetic block that re-runs from cursor as `if (newCond) ...`
+                        const synthLines = ['if (' + elseIfM[1] + ') ' + (cli.endsWith('{') ? '{' : '')];
+                        const tailExt = _extractCBlock(lines, cursor);
+                        synthLines.push(...tailExt.body, '}');
+                        // Also support chained else after the else-if
+                        cursor = tailExt.endIdx;
+                        while (cursor < lines.length && lines[cursor].trim() === '') cursor++;
+                        if (cursor < lines.length && /^else\b/.test(lines[cursor].trim())) {
+                            synthLines.push(lines[cursor]);
+                            const ext2 = _extractCBlock(lines, cursor);
+                            synthLines.push(...ext2.body, '}');
+                            cursor = ext2.endIdx;
+                        }
+                        await executeCBlock(synthLines);
+                    }
+                    took = true;
+                } else if (/^else\b/.test(cli)) {
+                    const ext = _extractCBlock(lines, cursor);
+                    elseBody = ext.body;
+                    cursor = ext.endIdx;
+                    if (cond) await executeCBlock(ifExt.body); else await executeCBlock(elseBody);
+                    took = true;
+                }
+            }
+            if (!took) {
+                if (cond) await executeCBlock(ifExt.body);
+                cursor = ifExt.endIdx;
+            }
+            i = cursor - 1; continue;
+        }
+        await execCLine(trimmed);
     }
 }
 
 async function execCLine(t) {
-    // strip inline comments
-    const cidx = findCommentStart(t, '//');
-    if (cidx !== -1) t = t.slice(0, cidx).trim();
-    if (!t || t === '{' || t === '}') return;
-    t = t.replace(/;\s*$/, '');
+    if (!t || t.startsWith('//') || t.startsWith('#') || t === '{' || t === '}') return;
     let m;
-    // pinMode(N, OUTPUT/INPUT)
-    m = t.match(/^pinMode\(\s*(\d+)\s*,\s*(OUTPUT|INPUT)\s*\)$/);
+    // Servo myServo;  →  declare variable
+    m = t.match(/^Servo\s+(\w+)\s*;?\s*$/);
+    if (m) { userVars[m[1]] = { _type: 'Servo', pin: null }; return; }
+    // myServo.attach(pin)
+    m = t.match(/^(\w+)\.attach\(\s*(\d+)\s*\)[\s;]*$/);
+    if (m) {
+        const v = userVars[m[1]] || (userVars[m[1]] = { _type: 'Servo' });
+        v.pin = parseInt(m[2]);
+        v._type = 'Servo';
+        if (!labState.servoAngles) labState.servoAngles = {};
+        return;
+    }
+    // myServo.write(angle)
+    m = t.match(/^(\w+)\.write\(\s*(.+?)\s*\)[\s;]*$/);
+    if (m) {
+        const v = userVars[m[1]];
+        if (v && v._type === 'Servo' && v.pin !== null) {
+            const ang = Math.max(0, Math.min(180, evalCExpr(m[2])));
+            updateServoVisual(v.pin, ang);
+        }
+        return;
+    }
+    m = t.match(/^pinMode\(\s*(\d+)\s*,\s*(\w+)\s*\)[\s;]*$/);
     if (m) {
         const pin = parseInt(m[1]);
-        labState.pinStates[pin] = 0;
-        if (!userVars._cpins) userVars._cpins = {};
-        userVars._cpins[pin] = { mode: m[2] };
-        updatePinDisplay();
+        const mode = m[2];
+        userVars['_pin'+pin] = { _type:'Pin', pin, mode: mode === 'INPUT' || mode === 'INPUT_PULLUP' ? 'IN' : 'OUT' };
         return;
     }
-    // digitalWrite(N, HIGH/LOW)
-    m = t.match(/^digitalWrite\(\s*(\d+)\s*,\s*(HIGH|LOW|1|0)\s*\)$/);
-    if (m) {
-        const pin = parseInt(m[1]);
-        const val = (m[2] === 'HIGH' || m[2] === '1') ? 1 : 0;
-        setPinState(pin, val);
-        return;
-    }
-    // delay(ms)
-    m = t.match(/^delay\(\s*(\d+)\s*\)$/);
-    if (m) { await simSleep(parseInt(m[1])); return; }
-    // Serial.print/println
-    m = t.match(/^Serial\.(print|println)\((.*)\)$/);
-    if (m) {
-        const val = evalCExpr(m[2]);
-        consoleLog('>>> ' + val + (m[1] === 'println' ? '' : ''), 'pin');
-        return;
-    }
-    m = t.match(/^Serial\.begin\(.+\)$/);
+    // DHT dht(pin, type);
+    m = t.match(/^DHT\s+(\w+)\(\s*(\d+)\s*,\s*\w+\s*\)[\s;]*$/);
+    if (m) { userVars[m[1]] = { _type: 'DHT', pin: parseInt(m[2]) }; return; }
+    // dht.begin()
+    m = t.match(/^(\w+)\.begin\(\)[\s;]*$/);
+    if (m) { /* no-op for simulator */ return; }
+    // Serial.begin(baud)
+    m = t.match(/^Serial\.begin\(\s*\d+\s*\)[\s;]*$/);
     if (m) return;
-    // int x = expr
-    m = t.match(/^(?:int|float|double)\s+(\w+)\s*=\s*(.+)$/);
+    m = t.match(/^(?:int|float|bool|byte|long|unsigned\s+int|unsigned\s+long)\s+(\w+)\s*=\s*(.+?);?$/);
+    if (m) { userVars[m[1]] = evalCExpr(m[2]); return; }
+    m = t.match(/^(?:int|float|bool|byte|long)\s+(\w+)\s*;?\s*$/);
+    if (m) { userVars[m[1]] = 0; return; }
+    // Increment / decrement: i++, i--, i += n
+    m = t.match(/^(\w+)\s*\+\+[\s;]*$/);
+    if (m) { userVars[m[1]] = (userVars[m[1]] || 0) + 1; return; }
+    m = t.match(/^(\w+)\s*--[\s;]*$/);
+    if (m) { userVars[m[1]] = (userVars[m[1]] || 0) - 1; return; }
+    m = t.match(/^(\w+)\s*([+\-*/])=\s*(.+?);?$/);
     if (m) {
-        userVars[m[1]] = evalCExpr(m[2]);
+        const cur = userVars[m[1]] || 0;
+        const v = evalCExpr(m[3]);
+        userVars[m[1]] = m[2] === '+' ? cur + v : m[2] === '-' ? cur - v : m[2] === '*' ? cur * v : cur / v;
         return;
     }
-    // x = expr
-    m = t.match(/^(\w+)\s*=\s*(.+)$/);
+    m = t.match(/^(\w+)\s*=\s*(.+?);?$/);
+    if (m && !['if','while','for'].includes(m[1])) { userVars[m[1]] = evalCExpr(m[2]); return; }
+    m = t.match(/^digitalWrite\(\s*(\d+)\s*,\s*(.+?)\s*\)[\s;]*/);
     if (m) {
-        userVars[m[1]] = evalCExpr(m[2]);
+        const v = evalCExpr(m[2]);
+        setPinState(parseInt(m[1]), (v === 'HIGH' || v === 1 || v === true) ? 1 : 0);
+        return;
+    }
+    // analogWrite(pin, val 0–255) — PWM duty
+    m = t.match(/^analogWrite\(\s*(\d+)\s*,\s*(.+?)\s*\)[\s;]*$/);
+    if (m) {
+        const pin = parseInt(m[1]);
+        const duty = evalCExpr(m[2]);
+        // Treat as approximate PWM: set pin HIGH if duty>0
+        setPinState(pin, duty > 0 ? 1 : 0);
+        // If a servo-like consumer, also feed updateServoVisual at a mapped angle
+        return;
+    }
+    m = t.match(/^delay\(\s*(.+?)\s*\)[\s;]*/);
+    if (m) { await simSleep(evalCExpr(m[1])); return; }
+    m = t.match(/^delayMicroseconds\(\s*(.+?)\s*\)[\s;]*/);
+    if (m) { await simSleep(Math.max(1, Math.round(evalCExpr(m[1]) / 1000))); return; }
+    m = t.match(/^Serial\.(print|println)\((.*)\)[\s;]*/);
+    if (m) {
+        const arg = m[2].trim();
+        const val = arg ? evalCExpr(arg) : '';
+        // Buffer like real Arduino Serial: print appends, println flushes with newline
+        _serialBuffer += String(val);
+        if (m[1] === 'println') {
+            consoleLog('>>> ' + _serialBuffer, 'pin');
+            _serialBuffer = '';
+        }
         return;
     }
 }
 
 function evalCExpr(expr) {
-    expr = expr.trim();
+    expr = (expr||'').trim().replace(/;$/,'');
     if (!expr) return 0;
-    if (/^["'].*["']$/.test(expr)) return expr.slice(1, -1);
-    if (/^-?\d+\.?\d*$/.test(expr)) return parseFloat(expr);
-    if (expr === 'HIGH') return 1;
-    if (expr === 'LOW') return 0;
-    // digitalRead(N)
-    let m = expr.match(/^digitalRead\(\s*(\d+)\s*\)$/);
-    if (m) {
-        const pin = parseInt(m[1]);
-        const c = findInputForPin(pin);
-        return c ? c.state.value : 0;
+    // Strip outer parens
+    while (expr.startsWith('(') && expr.endsWith(')')) {
+        let depth = 0, ok = true;
+        for (let k = 0; k < expr.length; k++) {
+            if (expr[k] === '(') depth++;
+            else if (expr[k] === ')') { depth--; if (depth === 0 && k < expr.length - 1) { ok = false; break; } }
+        }
+        if (!ok) break;
+        expr = expr.slice(1, -1).trim();
     }
+    if (/^["'].*["']$/.test(expr)) return expr.slice(1,-1);
+    if (expr==='HIGH'||expr==='true') return 1;
+    if (expr==='LOW'||expr==='false') return 0;
+    if (/^-?\d+\.?\d*$/.test(expr)) return parseFloat(expr);
+    // Logical || and &&
+    let parts;
+    parts = splitTopLevel(expr, /\s*\|\|\s*/);
+    if (parts && parts.length > 1) {
+        for (const p of parts) if (evalCExpr(p)) return 1;
+        return 0;
+    }
+    parts = splitTopLevel(expr, /\s*&&\s*/);
+    if (parts && parts.length > 1) {
+        for (const p of parts) if (!evalCExpr(p)) return 0;
+        return 1;
+    }
+    // Logical NOT
+    let m = expr.match(/^!\s*(.+)$/);
+    if (m) return evalCExpr(m[1]) ? 0 : 1;
     m = expr.match(/^analogRead\(\s*(\d+)\s*\)$/);
     if (m) {
         const pin = parseInt(m[1]);
-        const adcVal = labState.adcValues[pin] !== undefined ? labState.adcValues[pin] : 32000;
-        return Math.round(adcVal / 64); // 16-bit to 10-bit equivalent
+        // Honest: floating ADC = 0 if no sensor wired here
+        const pinName = pin === 26 ? 'ADC0' : pin === 27 ? 'ADC1' : 'GP' + pin;
+        if (!isPinWiredToKind(pinName, ['ldr', 'soil'])) return 0;
+        if (window.scenarioController) {
+            const r = window.scenarioController.getSensor('adc' + (pin - 26));
+            if (r !== null && r !== undefined) {
+                labState.adcValues[pin] = r;
+                return Math.round(r / 16); // 12-bit on Pico
+            }
+        }
+        if (labState.simInputs && labState.simInputs.adc0 !== undefined)
+            labState.adcValues[26] = Math.round((labState.simInputs.adc0 / 100) * 65535);
+        const raw = labState.adcValues[pin] !== undefined ? labState.adcValues[pin] : 32768;
+        return Math.round(raw / 16);
     }
-    m = expr.match(/^readTemp\(.*\)$/);
-    if (m) return Math.round(22 + Math.random() * 8);
-    m = expr.match(/^readHumidity\(.*\)$/);
-    if (m) return Math.round(50 + Math.random() * 30);
-    m = expr.match(/^ultrasonic\(.+\)$/);
-    if (m) return Math.round(5 + Math.random() * 50);
-    // Comparisons
-    m = expr.match(/^(.+?)\s*(==|!=|<=|>=|<|>)\s*(.+)$/);
+    m = expr.match(/^digitalRead\(\s*(\d+)\s*\)$/);
     if (m) {
-        const a = evalCExpr(m[1]);
-        const b = evalCExpr(m[3]);
-        switch(m[2]) {
-            case '==': return a == b;
-            case '!=': return a != b;
-            case '<=': return a <= b;
-            case '>=': return a >= b;
-            case '<': return a < b;
-            case '>': return a > b;
+        const pin = parseInt(m[1]);
+        // Honest: floating digital input = 0 unless a button is wired
+        if (!isPinWiredToKind('GP' + pin, ['button'])) return 0;
+        if (window.scenarioController) {
+            const v = window.scenarioController.getSensor('btn:GP' + pin);
+            if (v !== null && v !== undefined) return v;
+            const v2 = window.scenarioController.getSensor('digital:' + pin);
+            if (v2 !== null && v2 !== undefined) return v2;
+        }
+        const c = findInputForPin(pin);
+        return c ? c.state.value : 0;
+    }
+    m = expr.match(/^ultrasonic\(.+\)$/);
+    if (m) {
+        // Honest: HC-SR04 must be placed AND wired
+        const hasUltra = labState.components.some(c => PART_DEFS[c.type] && PART_DEFS[c.type].kind === 'ultra' &&
+            labState.wires.some(w => w.from.compId === c.id || w.to.compId === c.id));
+        if (!hasUltra) return 0;
+        if (window.scenarioController) {
+            const d = window.scenarioController.getSensor('distance');
+            if (d !== null && d !== undefined) { labState.sensorDisplay.ultra = d; return d; }
+        }
+        const d = (labState.simInputs && labState.simInputs.distance) || 30;
+        labState.sensorDisplay.ultra = d;
+        return d;
+    }
+    m = expr.match(/^(\w+)\.readTemperature\(\)$/);
+    if (m) {
+        // Honest: DHT11 must be placed AND wired
+        const hasDht = labState.components.some(c => PART_DEFS[c.type] && PART_DEFS[c.type].kind === 'dht' &&
+            labState.wires.some(w => w.from.compId === c.id || w.to.compId === c.id));
+        if (!hasDht) return 0;
+        let t = null;
+        if (window.scenarioController) t = window.scenarioController.getSensor('temperature');
+        if (t === null || t === undefined) t = (labState.simInputs && labState.simInputs.temperature) || 25;
+        labState.sensorDisplay.dht_temp = t;
+        return t;
+    }
+    m = expr.match(/^(\w+)\.readHumidity\(\)$/);
+    if (m) {
+        const hasDht = labState.components.some(c => PART_DEFS[c.type] && PART_DEFS[c.type].kind === 'dht' &&
+            labState.wires.some(w => w.from.compId === c.id || w.to.compId === c.id));
+        if (!hasDht) return 0;
+        let h = null;
+        if (window.scenarioController) h = window.scenarioController.getSensor('humidity');
+        if (h === null || h === undefined) h = (labState.simInputs && labState.simInputs.humidity) || 65;
+        labState.sensorDisplay.dht_hum = h;
+        return h;
+    }
+    // Comparison
+    const cmp = splitTopLevelComparison(expr);
+    if (cmp) {
+        const a = evalCExpr(cmp[0]), b = evalCExpr(cmp[2]);
+        switch (cmp[1]) {
+            case '==': return a == b ? 1 : 0; case '!=': return a != b ? 1 : 0;
+            case '<=': return a <= b ? 1 : 0; case '>=': return a >= b ? 1 : 0;
+            case '<':  return a <  b ? 1 : 0; case '>':  return a >  b ? 1 : 0;
         }
     }
-    if (/^\w+$/.test(expr)) return userVars[expr] !== undefined ? userVars[expr] : 0;
+    // Arithmetic + - and * / %
+    let opsP = splitTopLevelOps(expr, ['+', '-']);
+    if (opsP && opsP.length > 1) {
+        let acc = evalCExpr(opsP[0].value);
+        for (let i = 1; i < opsP.length; i++) {
+            const v = evalCExpr(opsP[i].value);
+            acc = opsP[i].op === '+' ? acc + v : acc - v;
+        }
+        return acc;
+    }
+    opsP = splitTopLevelOps(expr, ['*', '/', '%']);
+    if (opsP && opsP.length > 1) {
+        let acc = evalCExpr(opsP[0].value);
+        for (let i = 1; i < opsP.length; i++) {
+            const v = evalCExpr(opsP[i].value);
+            acc = opsP[i].op === '*' ? acc * v : opsP[i].op === '/' ? acc / v : acc % v;
+        }
+        return acc;
+    }
+    if (/^[a-zA-Z_]\w*$/.test(expr)) return userVars[expr]!==undefined?userVars[expr]:0;
     return expr;
 }
 
-// ----- Helpers -----
-async function simSleep(ms) {
-    const start = Date.now();
-    const realMs = Math.max(20, ms / SIM_SPEED);
-    while (Date.now() - start < realMs) {
-        if (labState.stopRequested) return;
-        await sleep(20);
-    }
-    labState.simTime += ms / 1000;
-    document.getElementById('status-time').textContent = labState.simTime.toFixed(1) + 's';
+// ----- Buzzer Audio (Web Audio API) -----
+let _audioCtx = null;
+let _buzzerOsc = null;
+let _buzzerGain = null;
+
+function _getAudioCtx() {
+    if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    return _audioCtx;
+}
+function startBuzzerAudio(freq) {
+    if (_buzzerOsc) return;
+    try {
+        const ctx = _getAudioCtx();
+        _buzzerGain = ctx.createGain();
+        _buzzerGain.gain.value = 0.12;
+        _buzzerGain.connect(ctx.destination);
+        _buzzerOsc = ctx.createOscillator();
+        _buzzerOsc.type = 'square';
+        _buzzerOsc.frequency.value = freq || 1000;
+        _buzzerOsc.connect(_buzzerGain);
+        _buzzerOsc.start();
+    } catch(e) {}
+}
+function stopBuzzerAudio() {
+    if (!_buzzerOsc) return;
+    try { _buzzerOsc.stop(); _buzzerOsc.disconnect(); } catch(e) {}
+    _buzzerOsc = null;
+    if (_buzzerGain) { try { _buzzerGain.disconnect(); } catch(e) {} _buzzerGain = null; }
+}
+function setBuzzerFreq(freq) {
+    if (_buzzerOsc) _buzzerOsc.frequency.value = freq;
 }
 
-function setPinState(pin, val) {
-    const prev = labState.pinStates[pin] || 0;
-    labState.pinStates[pin] = val;
-    if (prev !== val) {
-        labState.pinToggleCount[pin] = (labState.pinToggleCount[pin] || 0) + 1;
-        // Verbose state-change log so students see exactly what's happening at the GPIO level
-        consoleLog(`📍 GP${pin} → ${val ? 'HIGH ⚡' : 'LOW ○'}  (t=${labState.simTime.toFixed(1)}s)`, val ? 'pin' : 'info');
-    }
-    updatePinDisplay();
-    updateComponentsFromPin(pin, val);
-}
-
-function updateComponentsFromPin(pin, val) {
-    // Find components wired to this pin and update visuals
-    const wired = labState.wires.filter(w =>
-        (w.from.compId === 'pico' && w.from.pin === 'GP' + pin) ||
-        (w.to.compId === 'pico' && w.to.pin === 'GP' + pin)
-    );
-    for (const w of wired) {
-        const compId = w.from.compId === 'pico' ? w.to.compId : w.from.compId;
-        const pinName = w.from.compId === 'pico' ? w.to.pin : w.from.pin;
-        const c = labState.components.find(c => c.id === compId);
-        if (!c) continue;
+// ----- Component visual update -----
+function updateComponentsFromPin() {
+    for (const c of labState.components) {
         const def = PART_DEFS[c.type];
-        if (def.kind === 'led' && pinName === 'a') {
-            c.state.value = val;
-        } else if (def.kind === 'buzzer' && pinName === '+') {
-            c.state.active = val === 1;
-        } else if (def.kind === 'servo' && pinName === 'sig') {
-            c.state.angle = val === 1 ? 90 : 0;
-        } else if (def.kind === 'pump' && pinName === '+') {
-            c.state.active = val === 1;
+        if (!def) continue;
+        for (const pinName of def.pins) {
+            const wires = labState.wires.filter(w =>
+                (w.from.compId===c.id && w.from.pin===pinName) ||
+                (w.to.compId===c.id   && w.to.pin===pinName)
+            );
+            for (const wire of wires) {
+                const picoPin = wire.from.compId==='pico' ? wire.from.pin
+                              : wire.to.compId==='pico'   ? wire.to.pin : null;
+                if (!picoPin) continue;
+                const gpNum = parseInt(picoPin.replace('GP',''));
+                const val = labState.pinStates[gpNum] || 0;
+                if (def.kind==='led'    && pinName==='a')   { c.state.value = val; }
+                else if (def.kind==='buzzer' && pinName==='+') {
+                    const wasActive = c.state.active;
+                    c.state.active = val===1;
+                    if (c.state.active && !wasActive) startBuzzerAudio(c.state.freq || 1000);
+                    else if (!c.state.active && wasActive) stopBuzzerAudio();
+                }
+                else if (def.kind==='servo'  && pinName==='sig') {
+                    // PWM mode: angle set by duty_u16 — don't override
+                    if (!labState.servoAngles || labState.servoAngles[gpNum] === undefined) {
+                        animateServo(c.id, val===1?90:0, 550);
+                    }
+                }
+                else if (def.kind==='ultra'  && (pinName==='trig'||pinName==='echo')) { c.state.active = val===1; }
+                else if (def.kind==='pump'   && pinName==='+')  { c.state.active = val===1; }
+                else if (def.kind==='motor'  && pinName==='in1') { c.state.in1 = val; }
+                else if (def.kind==='motor'  && pinName==='in2') { c.state.in2 = val; }
+            }
         }
     }
-    renderLabComponents();
-    renderLabWires();
+}
+
+// ----- Smooth servo animation -----
+const _servoAnims = {};
+function animateServo(compId, targetAngle, duration) {
+    duration = duration || 600;
+    const c = labState.components.find(c => c.id === compId);
+    if (!c) return;
+    if (_servoAnims[compId]) { cancelAnimationFrame(_servoAnims[compId]); delete _servoAnims[compId]; }
+    const startAngle = c.state.angle || 0;
+    if (Math.abs(startAngle - targetAngle) < 0.5) return;
+    const startTime = performance.now();
+    function easeInOut(t) { return t<0.5 ? 2*t*t : -1+(4-2*t)*t; }
+    function step(now) {
+        if (labState.stopRequested) { delete _servoAnims[compId]; return; }
+        const rawT = Math.min(1, (now - startTime) / duration);
+        const cur = startAngle + (targetAngle - startAngle) * easeInOut(rawT);
+        c.state.angle = cur;
+        const el = document.querySelector(`[data-comp="${compId}"]`);
+        if (el) {
+            const arm = el.querySelector('.servo-arm');
+            const txt = el.querySelector('.servo-angle-txt');
+            if (arm) arm.setAttribute('transform', `rotate(${cur.toFixed(2)} 50 21)`);
+            if (txt) txt.textContent = Math.round(cur) + '°';
+        }
+        if (rawT < 1) { _servoAnims[compId] = requestAnimationFrame(step); }
+        else { c.state.angle = targetAngle; delete _servoAnims[compId]; renderLabComponents(); renderLabWires(); }
+    }
+    _servoAnims[compId] = requestAnimationFrame(step);
 }
 
 function updateServoVisual(pin, angle) {
+    if (!labState.servoAngles) labState.servoAngles = {};
+    labState.servoAngles[pin] = angle;
+    // Notify real-world scenario (e.g., window blinds m6, robot head m9)
+    if (window.scenarioApi && window.scenarioApi.isActive()) {
+        window.scenarioApi.onPwm(pin, angle);
+    }
     const wired = labState.wires.filter(w =>
-        (w.from.compId === 'pico' && w.from.pin === 'GP' + pin) ||
-        (w.to.compId === 'pico' && w.to.pin === 'GP' + pin)
+        (w.from.compId==='pico' && w.from.pin==='GP'+pin) ||
+        (w.to.compId==='pico'   && w.to.pin==='GP'+pin)
     );
     for (const w of wired) {
-        const compId = w.from.compId === 'pico' ? w.to.compId : w.from.compId;
-        const pinName = w.from.compId === 'pico' ? w.to.pin : w.from.pin;
+        const compId  = w.from.compId==='pico' ? w.to.compId  : w.from.compId;
+        const pinName = w.from.compId==='pico' ? w.to.pin     : w.from.pin;
         const c = labState.components.find(c => c.id === compId);
-        if (c && PART_DEFS[c.type].kind === 'servo' && pinName === 'sig') {
-            c.state.angle = angle;
-        }
+        if (c && PART_DEFS[c.type].kind==='servo' && pinName==='sig') animateServo(c.id, angle, 250);
     }
-    renderLabComponents();
-    renderLabWires();
 }
 
 function findInputForPin(pin) {
-    const wired = labState.wires.find(w =>
-        (w.from.compId === 'pico' && w.from.pin === 'GP' + pin) ||
-        (w.to.compId === 'pico' && w.to.pin === 'GP' + pin)
+    const w = labState.wires.find(w =>
+        (w.from.compId==='pico' && w.from.pin==='GP'+pin) ||
+        (w.to.compId==='pico'   && w.to.pin==='GP'+pin)
     );
-    if (!wired) return null;
-    const compId = wired.from.compId === 'pico' ? wired.to.compId : wired.from.compId;
+    if (!w) return null;
+    const compId = w.from.compId==='pico' ? w.to.compId : w.from.compId;
     return labState.components.find(c => c.id === compId);
 }
 
-// ----- Mission check -----
+// ─── Simulation input controls ───────────────────────────────────────────────
+function updateSimInput(key, val) {
+    if (!labState.simInputs) labState.simInputs = {};
+    labState.simInputs[key] = parseFloat(val);
+    const labels = {
+        adc0:        { id: 'sim-adc0-val',      fmt: v => v + '%'  },
+        distance:    { id: 'sim-distance-val',  fmt: v => v + ' cm' },
+        temperature: { id: 'sim-temp-val',      fmt: v => v + '°C' },
+        humidity:    { id: 'sim-hum-val',       fmt: v => v + '%'  },
+    };
+    const info = labels[key];
+    if (info) {
+        const el = document.getElementById(info.id);
+        if (el) el.textContent = info.fmt(Math.round(val));
+    }
+    if (key === 'adc0') {
+        labState.adcValues[26] = Math.round((parseFloat(val) / 100) * 65535);
+        renderLabComponents();
+    }
+}
+
+function showSimControls(visible) {
+    const panel = document.getElementById('lab-sim-controls');
+    if (panel) panel.style.display = visible ? 'flex' : 'none';
+    if (visible && labState.simInputs) {
+        const s1 = document.getElementById('sim-adc0-slider');
+        const s2 = document.getElementById('sim-distance-slider');
+        const s3 = document.getElementById('sim-temp-slider');
+        const s4 = document.getElementById('sim-hum-slider');
+        if (s1) s1.value = labState.simInputs.adc0;
+        if (s2) s2.value = labState.simInputs.distance;
+        if (s3) s3.value = labState.simInputs.temperature;
+        if (s4) s4.value = labState.simInputs.humidity;
+    }
+}
+
 function checkMissionCompletion() {
     const m = labState.currentMission;
     if (!m) return;
     const area = document.getElementById('mission-check-area');
-    const checks = [];
-
-    // 1. Required parts
     const placedTypes = labState.components.map(c => c.type);
-    const partsOk = m.requiredParts.every(p => {
-        // Allow alternative LED colors
-        if (p.startsWith('led_')) return placedTypes.some(t => t.startsWith('led_'));
-        return placedTypes.includes(p);
-    });
-    checks.push({ ok: partsOk, text: 'มีชิ้นส่วนครบ' });
-
-    // 2. Pin toggle requirements
-    if (m.goal.led15Toggle || m.goal.pinUsed === 15) {
-        const ok = (labState.pinToggleCount[15] || 0) >= 2;
-        checks.push({ ok, text: 'LED ที่ GP15 ติด-ดับสลับกัน' });
-    }
-    if (m.goal.pinsToggled) {
-        m.goal.pinsToggled.forEach(p => {
-            const ok = (labState.pinToggleCount[p] || 0) >= 1;
-            checks.push({ ok, text: `GP${p} เคยทำงาน` });
-        });
-    }
-    if (m.goal.pinToggleCount) {
-        for (const [p, count] of Object.entries(m.goal.pinToggleCount)) {
-            const ok = (labState.pinToggleCount[p] || 0) >= count;
-            checks.push({ ok, text: `GP${p} ทำงานอย่างน้อย ${count} ครั้ง` });
+    const partsOk = m.requiredParts.every(p => placedTypes.includes(p));
+    const allWired = m.requiredWires.every(rw =>
+        labState.wires.some(w => {
+            const pp = w.from.compId==='pico' ? w.from.pin : w.to.compId==='pico' ? w.to.pin : null;
+            return pp && (pp===rw.from||pp===rw.to);
+        })
+    );
+    const codeRan = labState.simTime > 0;
+    const checks = [
+        { label: 'วางชิ้นส่วนครบ', ok: partsOk },
+        { label: 'ต่อสายถูกต้อง',  ok: allWired },
+        { label: 'รันโค้ดแล้ว',    ok: codeRan  },
+    ];
+    const allOk = checks.every(c => c.ok);
+    if (area) {
+        area.innerHTML = `<div style="margin-top:16px;border-top:1px solid rgba(255,255,255,0.1);padding-top:12px;">
+            <h4 style="color:#ffd97d;margin-bottom:10px;">✅ ผลการตรวจ</h4>
+            ${checks.map(c=>`<div style="color:${c.ok?'#6fcf97':'#eb5757'};font-size:13px;margin:4px 0;">${c.ok?'✅':'❌'} ${c.label}</div>`).join('')}
+            ${allOk?'<div style="margin-top:10px;background:rgba(111,207,151,0.2);padding:8px 12px;border-radius:8px;color:#6fcf97;font-weight:bold;">🎉 ภารกิจสำเร็จ!</div>':''}
+        </div>`;
+        if (allOk) {
+            const done = JSON.parse(localStorage.getItem('lab_completed')||'[]');
+            if (!done.includes(m.id)) { done.push(m.id); localStorage.setItem('lab_completed', JSON.stringify(done)); }
         }
     }
-    if (m.goal.useADC) {
-        const userCode = labState.code[labState.currentLang];
-        const ok = userCode.includes('ADC') || userCode.includes('analogRead');
-        checks.push({ ok, text: 'ใช้ ADC อ่านค่าจาก sensor' });
-    }
-    if (m.goal.usePrint) {
-        const ok = labState.consoleOutput.some(l => l.text.startsWith('>>>'));
-        checks.push({ ok, text: 'มี print ค่าออกใน Console' });
-    }
-    if (m.goal.readPin !== undefined) {
-        const userCode = labState.code[labState.currentLang];
-        const ok = userCode.includes('.value()') || userCode.includes('digitalRead');
-        checks.push({ ok, text: `อ่านค่าจาก GP${m.goal.readPin}` });
-    }
-
-    const allPass = checks.every(c => c.ok);
-    if (allPass) {
-        const completed = JSON.parse(localStorage.getItem('lab_completed') || '[]');
-        if (!completed.includes(m.id)) completed.push(m.id);
-        localStorage.setItem('lab_completed', JSON.stringify(completed));
-        if (typeof confetti === 'function') {
-            confetti({ particleCount: 200, spread: 110, origin: { y: 0.5 } });
-        }
-        showToast('🎉 ผ่านภารกิจ ' + m.num + ' สำเร็จ!');
-    }
-
-    const html = `
-        <div class="mission-check-result ${allPass ? 'pass' : 'fail'}">
-            <h4 style="margin-bottom: 10px; font-size: 14px;">${allPass ? '🎉 ผ่านภารกิจ!' : '⚠️ ยังไม่ผ่าน'}</h4>
-            <ul style="list-style: none; padding: 0;">
-                ${checks.map(c => `<li style="padding: 3px 0;">${c.ok ? '✅' : '❌'} ${c.text}</li>`).join('')}
-            </ul>
-        </div>
-    `;
-    if (area) area.innerHTML = html;
 }
 
-// Init lab parts when opening
-(function patchOpenCircuitLab(){
-    const orig = window.openCircuitLab;
-    if (!orig) return;
-    window.openCircuitLab = function(missionId) {
-        orig(missionId);
-        setTimeout(() => {
-            renderLabParts();
-            renderPlacedList();
+// ----- Sim sleep (drives animation ticks) -----
+function simSleep(ms) {
+    return new Promise(resolve => {
+        if (labState.stopRequested) { resolve(); return; }
+        const steps = Math.ceil(ms / 50);
+        let step = 0;
+        function tick() {
+            if (labState.stopRequested || step >= steps) { resolve(); return; }
+            labState.simTime += 50; step++;
+            updateComponentsFromPin();
+            renderLabComponents();
+            renderLabWires();
+            drawPicoBoard();
             updatePinDisplay();
-            updateConsole();
-        }, 100);
-    };
-})();
-
-// ----- ✨ Hide splash even if init wasn't called yet (safety net) -----
-window.addEventListener('load', () => {
-    setTimeout(() => {
-        const splash = document.getElementById('splash-screen');
-        if (splash && !splash.classList.contains('hide')) {
-            splash.classList.add('hide');
-            setTimeout(() => splash && splash.remove(), 800);
+            setTimeout(tick, 16);
         }
-    }, 2000);
-});
+        tick();
+    });
+}
 
-// 🌟 ฟังก์ชันหัวใจหลัก: สั่ง Render รายงานลงหน้าแรกมือถือตามสิทธิ์
-async function renderMobileDashboardReport() {
-    const mobileArea = document.getElementById('mobile-dashboard-report-area');
-    if (!mobileArea || window.innerWidth > 992) return;
-
-    if (currentUser) {
-        if (currentUser.role === 'teacher') {
-            renderTeacherReportSelection('mobile-dashboard-report-area');
-        } else {
-            // ถ้านักเรียนล็อกอิน ให้โชว์ตารางคะแนนตัวเองทันที!
-            renderStudentIndividualReport(currentUser.id, currentUser.full_name, 'mobile-dashboard-report-area');
-        }
-    } else {
-        // ถ้าเป็น Guest ให้โชว์ช่องค้นหา
-        renderGuestSearchUI('mobile-dashboard-report-area');
+// ----- Set pin state (triggers immediate visual refresh) -----
+function setPinState(pin, value) {
+    labState.pinStates[pin] = value;
+    if (window.scenarioApi && window.scenarioApi.isActive()) {
+        window.scenarioApi.onPinChange(pin, value);
     }
+    updateComponentsFromPin();
+    renderLabComponents();
+    renderLabWires();
+    drawPicoBoard();
+    updatePinDisplay();
 }
