@@ -949,6 +949,12 @@
         <div class="lab-canvas-toolbar">
           <span class="lab-toolbar-info" id="lab-canvas-info">💡 คลิกชิ้นส่วนทางซ้ายเพื่อเพิ่ม • คลิก pin 2 ตัวเพื่อต่อสาย</span>
           <span class="lab-wire-status" id="lab-wire-status"></span>
+          <div class="lab-zoom-controls">
+            <button class="lab-zoom-btn" onclick="setLabZoom(0.25)" title="ซูมเข้า">＋</button>
+            <span class="lab-zoom-level" id="lab-zoom-level">100%</span>
+            <button class="lab-zoom-btn" onclick="setLabZoom(-0.25)" title="ซูมออก">－</button>
+            <button class="lab-zoom-btn lab-zoom-reset" onclick="resetLabZoom()" title="รีเซ็ต">⊙</button>
+          </div>
         </div>
         <div class="lab-mission-helper" id="lab-mission-helper" style="display:none;"></div>
         <div class="lab-canvas" id="lab-canvas">
@@ -984,6 +990,8 @@
             <path id="lab-wire-preview" stroke="#f0a500" stroke-width="3" fill="none" stroke-dasharray="6 3" style="display:none;"/>
           </svg>
         </div>
+        <!-- Real-world scenario canvas (replaces circuit while running) -->
+        <div class="lab-scenario-host" id="lab-scenario-host" style="display:none;"></div>
         <!-- Bottom status -->
         <div class="lab-status-bar">
           <div class="status-item">
@@ -996,6 +1004,34 @@
           </div>
           <div class="status-item">
             <span>Time: <b id="status-time">0.0s</b></span>
+          </div>
+        </div>
+        <!-- Sensor Simulation Controls (visible during run) -->
+        <div class="lab-sim-controls" id="lab-sim-controls" style="display:none;">
+          <div class="sim-ctrl-title">🎛️ ควบคุมสภาพแวดล้อมจำลอง</div>
+          <div class="sim-ctrl-row">
+            <label>🔆 แสง / ความชื้นดิน (ADC0)</label>
+            <input type="range" min="0" max="100" value="50" id="sim-adc0-slider"
+                   oninput="updateSimInput('adc0', this.value)">
+            <span class="sim-val" id="sim-adc0-val">50%</span>
+          </div>
+          <div class="sim-ctrl-row">
+            <label>📏 ระยะสิ่งกีดขวาง (HC-SR04)</label>
+            <input type="range" min="1" max="100" value="30" id="sim-distance-slider"
+                   oninput="updateSimInput('distance', this.value)">
+            <span class="sim-val" id="sim-distance-val">30 cm</span>
+          </div>
+          <div class="sim-ctrl-row">
+            <label>🌡️ อุณหภูมิ (DHT11)</label>
+            <input type="range" min="10" max="50" value="25" id="sim-temp-slider"
+                   oninput="updateSimInput('temperature', this.value)">
+            <span class="sim-val" id="sim-temp-val">25°C</span>
+          </div>
+          <div class="sim-ctrl-row">
+            <label>💧 ความชื้น (DHT11)</label>
+            <input type="range" min="0" max="100" value="65" id="sim-hum-slider"
+                   oninput="updateSimInput('humidity', this.value)">
+            <span class="sim-val" id="sim-hum-val">65%</span>
           </div>
         </div>
       </div>
@@ -1074,5 +1110,6 @@
 </button>
 
 <script src="script.js"></script>
+<script src="scenarios.js"></script>
 </body>
 </html>
