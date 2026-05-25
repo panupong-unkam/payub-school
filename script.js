@@ -7293,25 +7293,19 @@ function checkMissionCompletion() {
     const partsOk = (m.requiredParts || []).every(p => placedTypes.includes(p));
     const allWired = (typeof validateWiring === 'function') ? validateWiring(m).length === 0 : true;
     const codeRan = labState.simTime > 0;
+    
     const checks = [
         { label: 'วางชิ้นส่วนครบ', ok: partsOk },
         { label: 'ต่อสายถูกต้อง', ok: allWired },
         { label: 'รันโค้ดแล้ว', ok: codeRan }
     ];
     const allOk = checks.every(c => c.ok);
+    
     if (area) {
         area.innerHTML = `<div style="margin-top:16px;border-top:1px solid rgba(255,255,255,0.1);padding-top:12px;">
             <h4 style="color:#ffd97d;margin-bottom:10px;">✅ ผลการตรวจ</h4>
             ${checks.map(c => `<div style="color:${c.ok?'#6fcf97':'#eb5757'};font-size:13px;margin:4px 0;">${c.ok?'✅':'❌'} ${c.label}</div>`).join('')}
             ${allOk ? '<div style="margin-top:10px;background:rgba(111,207,151,0.2);padding:8px 12px;border-radius:8px;color:#6fcf97;font-weight:bold;">🎉 ภารกิจสำเร็จ!</div>' : ''}
-        </div>`;
-        if (allOk) {
-            const done = JSON.parse(localStorage.getItem('lab_completed') || '[]');
-            if (!done.includes(m.id)) { done.push(m.id); localStorage.setItem('lab_completed', JSON.stringify(done)); }
-        }
-    }
-}
-"margin-top:10px;background:rgba(111,207,151,0.2);padding:8px 12px;border-radius:8px;color:#6fcf97;font-weight:bold;">🎉 ภารกิจสำเร็จ!</div>' : ''}
         </div>`;
         if (allOk) {
             const done = JSON.parse(localStorage.getItem('lab_completed') || '[]');
