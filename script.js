@@ -139,7 +139,8 @@ async function loadData() {
     if (typeof window.studentFilterStatus === 'undefined') window.studentFilterStatus = 'all';
     const assignContainer = document.getElementById('assignments-list');
     const subjectsContainer = document.getElementById('subjects-list');
-    const assignHeader = document.querySelector('#page-assignments h2');
+    const assignHeader = document.getElementById('assign-title-text');
+    const assignFilterBar = document.getElementById('assign-filter-bar');
     
     if (currentSubjectFilter && assignContainer) assignContainer.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--primary);">⏳ กำลังโหลดข้อมูล...</div>';
 
@@ -364,40 +365,40 @@ async function loadData() {
 
     // 🌟 ส่วนหน้าใบงานอื่นๆ (ภาพรวม)
     else {
-        if (assignHeader) {
-            const subjectOptions = displaySubs.map(s => `
-                <option value="${s.id}" ${window.assignmentSubjectFilter == s.id ? 'selected' : ''}>
-                    ${s.name}
-                </option>
-            `).join('');
+        // Reset h2 to plain title (don't embed dropdowns inside h2 — invalid HTML)
+        if (assignHeader) assignHeader.textContent = '📝 ใบงานและกิจกรรม';
+
+        if (assignFilterBar) {
+            const selectStyle = `padding: 8px 16px; border-radius: 20px; border: 2px solid var(--primary); outline: none; font-family: 'Sarabun'; cursor: pointer; font-size: 14px; background: white; color: var(--primary-dark); font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.1);`;
+
+            const subjectOptions = displaySubs.map(s =>
+                `<option value="${s.id}" ${window.assignmentSubjectFilter == s.id ? 'selected' : ''}>${s.name}</option>`
+            ).join('');
 
             if (currentUser && currentUser.role !== 'teacher') {
-                assignHeader.innerHTML = `
-                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; width:100%;">
-                        <span style="font-size: 1.1rem; font-weight: bold; color: var(--primary-dark);">📝 ใบงานและกิจกรรม</span>
-                        <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                            <select onchange="window.assignmentSubjectFilter=this.value; loadData();" style="padding: 6px 12px; border-radius: 20px; border: 2px solid var(--primary); outline: none; font-family: 'Sarabun'; cursor: pointer; font-size: 14px; background: white; color: var(--primary-dark); font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-                                <option value="all" ${window.assignmentSubjectFilter === 'all' ? 'selected' : ''}>📚 ทุกวิชา</option>
-                                ${subjectOptions}
-                            </select>
-                            <select onchange="window.studentFilterStatus=this.value; loadData();" style="padding: 6px 12px; border-radius: 20px; border: 2px solid var(--primary); outline: none; font-family: 'Sarabun'; cursor: pointer; font-size: 14px; background: white; color: var(--primary-dark); font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-                                <option value="all" ${window.studentFilterStatus === 'all' ? 'selected' : ''}>📋 ทุกสถานะ</option>
-                                <option value="submitted" ${window.studentFilterStatus === 'submitted' ? 'selected' : ''}>✅ ส่งแล้ว</option>
-                                <option value="pending" ${window.studentFilterStatus === 'pending' ? 'selected' : ''}>⏳ ยังไม่ส่ง</option>
-                            </select>
-                        </div>
-                    </div>
+                assignFilterBar.style.display = 'flex';
+                assignFilterBar.innerHTML = `
+                    <select onchange="window.assignmentSubjectFilter=this.value; loadData();" style="${selectStyle}">
+                        <option value="all" ${!window.assignmentSubjectFilter || window.assignmentSubjectFilter === 'all' ? 'selected' : ''}>📚 ทุกวิชา</option>
+                        ${subjectOptions}
+                    </select>
+                    <select onchange="window.studentFilterStatus=this.value; loadData();" style="${selectStyle}">
+                        <option value="all" ${!window.studentFilterStatus || window.studentFilterStatus === 'all' ? 'selected' : ''}>📋 ทุกสถานะ</option>
+                        <option value="submitted" ${window.studentFilterStatus === 'submitted' ? 'selected' : ''}>✅ ส่งแล้ว</option>
+                        <option value="pending" ${window.studentFilterStatus === 'pending' ? 'selected' : ''}>⏳ ยังไม่ส่ง</option>
+                    </select>
                 `;
-            } else { 
-                assignHeader.innerHTML = `
-                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; width:100%;">
-                        <span style="font-size: 1.1rem; font-weight: bold; color: var(--primary-dark);">📝 ใบงานและกิจกรรม</span>
-                        <select onchange="window.assignmentSubjectFilter=this.value; loadData();" style="padding: 6px 12px; border-radius: 20px; border: 2px solid var(--primary); outline: none; font-family: 'Sarabun'; cursor: pointer; font-size: 14px; background: white; color: var(--primary-dark); font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-                            <option value="all" ${window.assignmentSubjectFilter === 'all' ? 'selected' : ''}>📚 ดูทุกวิชา</option>
-                            ${subjectOptions}
-                        </select>
-                    </div>
+            } else if (currentUser && currentUser.role === 'teacher') {
+                assignFilterBar.style.display = 'flex';
+                assignFilterBar.innerHTML = `
+                    <select onchange="window.assignmentSubjectFilter=this.value; loadData();" style="${selectStyle}">
+                        <option value="all" ${!window.assignmentSubjectFilter || window.assignmentSubjectFilter === 'all' ? 'selected' : ''}>📚 ดูทุกวิชา</option>
+                        ${subjectOptions}
+                    </select>
                 `;
+            } else {
+                assignFilterBar.style.display = 'none';
+                assignFilterBar.innerHTML = '';
             }
         }
 
@@ -627,6 +628,7 @@ function backToAssignments() { currentGradingStep = 'assignments'; loadSubmissio
 let currentGradingStudentsData = [];
 let gradingClassFilter = 'all';
 let gradingSortBy = 'number_asc'; // ตั้งค่าเริ่มต้นให้เรียงตามเลขที่
+let gradingStatusFilter = 'all';  // 'all' | 'graded' | 'pending'
 
 async function loadSubmissions() {
     const container = document.getElementById('submissions-list');
@@ -706,10 +708,15 @@ function renderGradingStudentsList() {
     // หากลุ่มห้องทั้งหมดที่มีคนส่งงานมา เพื่อทำ Dropdown อัตโนมัติ
     const classesAvailable = [...new Set(currentGradingStudentsData.map(s => s.profiles?.class_level).filter(Boolean))].sort();
 
-    // 1. คัดกรองห้อง (Filter)
+    // 1. คัดกรองห้อง + สถานะ (Filter)
     let filteredList = currentGradingStudentsData;
     if (gradingClassFilter !== 'all') {
         filteredList = filteredList.filter(s => s.profiles?.class_level === gradingClassFilter);
+    }
+    if (gradingStatusFilter === 'graded') {
+        filteredList = filteredList.filter(s => s.status === 'ตรวจแล้ว');
+    } else if (gradingStatusFilter === 'pending') {
+        filteredList = filteredList.filter(s => s.status !== 'ตรวจแล้ว');
     }
 
     // 2. จัดเรียงข้อมูล (Sort)
@@ -740,6 +747,14 @@ function renderGradingStudentsList() {
                     <select onchange="gradingClassFilter=this.value; renderGradingStudentsList()" style="padding: 8px 12px; border-radius: 8px; border: 2px solid var(--border); outline: none; font-family: 'Sarabun'; cursor:pointer; background: white;">
                         <option value="all" ${gradingClassFilter === 'all' ? 'selected' : ''}>ดูทุกห้อง</option>
                         ${classesAvailable.map(c => `<option value="${c}" ${gradingClassFilter === c ? 'selected' : ''}>เฉพาะ ${c}</option>`).join('')}
+                    </select>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <label style="font-weight: bold; font-size: 14px; color: var(--primary-dark);">📌 สถานะ:</label>
+                    <select onchange="gradingStatusFilter=this.value; renderGradingStudentsList()" style="padding: 8px 12px; border-radius: 8px; border: 2px solid var(--border); outline: none; font-family: 'Sarabun'; cursor:pointer; background: white;">
+                        <option value="all" ${gradingStatusFilter === 'all' ? 'selected' : ''}>📋 ทุกสถานะ</option>
+                        <option value="pending" ${gradingStatusFilter === 'pending' ? 'selected' : ''}>🔴 ยังไม่ตรวจ</option>
+                        <option value="graded" ${gradingStatusFilter === 'graded' ? 'selected' : ''}>✅ ตรวจแล้ว</option>
                     </select>
                 </div>
                 <div style="display: flex; align-items: center; gap: 8px;">
@@ -786,8 +801,9 @@ function renderGradingStudentsList() {
 function backToAssignments() {
     gradingAssignId = null;
     currentGradingStep = 'assignments';
-    gradingClassFilter = 'all'; // รีเซ็ตตัวกรอง
-    gradingSortBy = 'number_asc'; // รีเซ็ตตัวเรียงกลับเป็นเลขที่
+    gradingClassFilter = 'all';
+    gradingSortBy = 'number_asc';
+    gradingStatusFilter = 'all';
     loadSubmissions();
 }
 // 🌟 ฟังก์ชันสำหรับกดย้อนกลับไปหน้าเลือกวิชา
@@ -1402,6 +1418,12 @@ window.onload = () => {
     loadData();
     // 🌟 เริ่มระบบเสริมทั้งหมด (Splash, Particles, Stats, Quote, Notifications, Mascot, Keyboard)
     if (typeof initEnhancements === 'function') initEnhancements();
+    // 🔗 ตรวจสอบ URL parameter ?lab=mX เพื่อเปิด Circuit Lab อัตโนมัติ
+    const labParam = new URLSearchParams(window.location.search).get('lab');
+    if (labParam) {
+        // รอให้ DOM พร้อมก่อนค่อยเปิด Lab
+        setTimeout(() => openCircuitLab(labParam), 800);
+    }
 };
 
 // ==========================================
@@ -1605,10 +1627,41 @@ async function searchStudentReport(targetId = 'report-content-area') {
 async function renderStudentIndividualReport(studentId, fullName, targetId = 'report-content-area') {
     const output = document.getElementById(targetId);
     output.innerHTML = '⏳ กำลังคำนวณเกรดและดึงข้อมูล...';
-    
+
     try {
-        const { data: assigns, error: err1 } = await sb.from('assignments').select('*, subjects(name)').order('id', {ascending: true});
+        // ดึงโปรไฟล์นักเรียนเพื่อเอา class_level
+        let studentClass = '';
+        if (currentUser && currentUser.id === studentId) {
+            studentClass = currentUser.class_level || '';
+        } else {
+            const { data: profile } = await sb.from('profiles').select('class_level').eq('id', studentId).single();
+            studentClass = profile?.class_level || '';
+        }
+        const classPrefix = studentClass.split('/')[0]; // เช่น "ม.2" จาก "ม.2/1"
+
+        // ดึงวิชาทั้งหมดก่อน แล้วกรองเฉพาะวิชาของระดับชั้นนักเรียน
+        const { data: allSubjects } = await sb.from('subjects').select('id, name');
+        const mySubjectIds = new Set(
+            (allSubjects || [])
+                .filter(s => {
+                    if (!studentClass) return true; // ถ้าไม่รู้ชั้น แสดงทั้งหมด
+                    // ตัดวิชาชุมนุมออก (จะไม่แสดงในรายงานผลการเรียนปกติ)
+                    if (s.name.includes('ชุมนุม')) return false;
+                    return s.name.includes(classPrefix) || s.name.includes(studentClass);
+                })
+                .map(s => s.id)
+        );
+
+        const { data: allAssigns, error: err1 } = await sb.from('assignments').select('*, subjects(name)').order('id', {ascending: true});
         if (err1) throw err1;
+
+        // กรองใบงานเฉพาะวิชาของระดับชั้น และ target_classes ตรงกัน
+        const assigns = (allAssigns || []).filter(a => {
+            if (mySubjectIds.size > 0 && !mySubjectIds.has(a.subject_id)) return false;
+            const tc = a.target_classes;
+            if (!tc || tc === 'all') return true;
+            return tc === studentClass;
+        });
 
         const { data: subs, error: err2 } = await sb.from('submissions').select('*').eq('student_id', studentId);
         if (err2) throw err2;
@@ -3807,8 +3860,7 @@ const WIRE_COLORS = {
 
 const STARTER_CODE = {
     python: {
-        default: `# โค้ดเริ่มต้น (MicroPython)
-from machine import Pin
+        default: `from machine import Pin
 import time
 
 led = Pin(2, Pin.OUT)   # GROVE 2 — Signal1
@@ -3819,8 +3871,7 @@ while True:
     led.off()
     time.sleep(0.5)
 `,
-        m1: `# ภารกิจ 1: กระพริบ LED
-from machine import Pin
+        m1: `from machine import Pin
 import time
 
 led = Pin(2, Pin.OUT)   # GROVE 2 — Signal1
@@ -3831,8 +3882,7 @@ while True:
     led.off()
     time.sleep(1)
 `,
-        m2: `# ภารกิจ 2: ไฟจราจร (Red, Yellow, Green)
-from machine import Pin
+        m2: `from machine import Pin
 import time
 
 red    = Pin(2, Pin.OUT)   # GROVE 2 — Signal1
@@ -3850,8 +3900,7 @@ while True:
     time.sleep(2)
     green.off()
 `,
-        m3: `# ภารกิจ 3: กดปุ่ม → LED ติด
-from machine import Pin
+        m3: `from machine import Pin
 import time
 
 led = Pin(2, Pin.OUT)   # GROVE 2 — Signal1
@@ -3864,8 +3913,7 @@ while True:
         led.off()   # ปล่อยปุ่ม → LED ดับ
     time.sleep(0.05)  # อ่านค่าทุก 50ms
 `,
-        m4: `# ภารกิจ 4: Buzzer Music
-from machine import Pin
+        m4: `from machine import Pin
 import time
 
 buzzer = Pin(6, Pin.OUT)   # GROVE 4 — Signal1
@@ -3879,8 +3927,7 @@ while True:
         time.sleep(0.1)
     time.sleep(2)   # หยุดก่อนรอบถัดไป
 `,
-        m5: `# ภารกิจ 5: Smart Night Light
-from machine import Pin, ADC
+        m5: `from machine import Pin, ADC
 import time
 
 ldr = ADC(26)              # GROVE 6 — ADC0
@@ -3894,8 +3941,7 @@ while True:
         led.off()   # สว่าง → ปิดไฟ
     time.sleep(0.1)  # อ่านค่าทุก 100ms
 `,
-        m6: `# ภารกิจ 6: Servo Control
-from machine import Pin, PWM
+        m6: `from machine import Pin, PWM
 import time
 
 servo = PWM(Pin(12))       # S1 Connector — Signal (GP12)
@@ -3910,8 +3956,7 @@ while True:
     servo.duty_u16(8192)   # 180°
     time.sleep(1)
 `,
-        m7: `# ภารกิจ 7: Smart Garden
-from machine import Pin, ADC
+        m7: `from machine import Pin, ADC
 import time
 
 soil = ADC(26)             # GROVE 6 — ADC0 (Soil Sensor)
@@ -3926,8 +3971,7 @@ while True:
         pump.off()
     time.sleep(1)
 `,
-        m8: `# ภารกิจ 8: Weather Station
-from machine import Pin
+        m8: `from machine import Pin
 import time
 
 dht = Pin(4)               # GROVE 3 — Signal1 (DHT11)
@@ -3938,8 +3982,7 @@ while True:
     print("Temp:", temp, "C  Humidity:", hum, "%")
     time.sleep(2)
 `,
-        m10: `# ภารกิจ 10: Motor Control
-from machine import Pin
+        m10: `from machine import Pin
 import time
 
 in1 = Pin(8, Pin.OUT)   # MOTOR 1 — IN1 (GP8)
@@ -3963,8 +4006,7 @@ while True:
     in2.off()
     time.sleep(0.5)
 `,
-        m9: `# ภารกิจ 9: Obstacle Avoidance Bot
-from machine import Pin, PWM
+        m9: `from machine import Pin, PWM
 import time
 
 trig   = Pin(4, Pin.OUT)   # GROVE 3 — Signal1 (HC-SR04 TRIG)
@@ -3987,8 +4029,7 @@ while True:
 `
     },
     c: {
-        default: `// โค้ดเริ่มต้น (Arduino C)
-void setup() {
+        default: `void setup() {
     pinMode(2, OUTPUT);    // GROVE 2 — Signal1
 }
 
@@ -3999,8 +4040,7 @@ void loop() {
     delay(500);
 }
 `,
-        m1: `// ภารกิจ 1: กระพริบ LED
-void setup() {
+        m1: `void setup() {
     pinMode(2, OUTPUT);    // GROVE 2 — Signal1
 }
 
@@ -4011,8 +4051,7 @@ void loop() {
     delay(1000);
 }
 `,
-        m2: `// ภารกิจ 2: ไฟจราจร
-void setup() {
+        m2: `void setup() {
     pinMode(2, OUTPUT);    // GROVE 2 — red
     pinMode(4, OUTPUT);    // GROVE 3 — yellow
     pinMode(6, OUTPUT);    // GROVE 4 — green
@@ -4030,8 +4069,7 @@ void loop() {
     digitalWrite(6, LOW);
 }
 `,
-        m3: `// ภารกิจ 3: ปุ่ม → LED
-void setup() {
+        m3: `void setup() {
     pinMode(2, OUTPUT);    // GROVE 2 — LED
     pinMode(4, INPUT);     // GROVE 3 — Button
 }
@@ -4045,8 +4083,7 @@ void loop() {
     delay(50);  // อ่านค่าทุก 50ms
 }
 `,
-        m4: `// ภารกิจ 4: Buzzer Music
-void setup() {
+        m4: `void setup() {
     pinMode(6, OUTPUT);    // GROVE 4 — Signal1
 }
 
@@ -4060,8 +4097,7 @@ void loop() {
     delay(2000);
 }
 `,
-        m5: `// ภารกิจ 5: Night Light
-void setup() {
+        m5: `void setup() {
     pinMode(2, OUTPUT);    // GROVE 2 — LED
     pinMode(26, INPUT);    // GROVE 6 — ADC0 (LDR)
 }
@@ -4076,8 +4112,7 @@ void loop() {
     delay(200);
 }
 `,
-        m6: `// ภารกิจ 6: Servo (S1 Connector — GP12)
-#include <Servo.h>
+        m6: `#include <Servo.h>
 Servo myServo;
 
 void setup() {
@@ -4093,8 +4128,7 @@ void loop() {
     delay(1000);
 }
 `,
-        m7: `// ภารกิจ 7: Smart Garden
-void setup() {
+        m7: `void setup() {
     pinMode(16, OUTPUT);   // GROVE 5 — Pump
     pinMode(26, INPUT);    // GROVE 6 — ADC0 (Soil)
 }
@@ -4109,8 +4143,7 @@ void loop() {
     delay(1000);
 }
 `,
-        m8: `// ภารกิจ 8: Weather Station
-#include <DHT.h>
+        m8: `#include <DHT.h>
 DHT dht(4, DHT11);         // GROVE 3 — Signal1
 
 void setup() {
@@ -4128,8 +4161,7 @@ void loop() {
     delay(2000);
 }
 `,
-        m10: `// ภารกิจ 10: Motor Control
-void setup() {
+        m10: `void setup() {
     pinMode(8, OUTPUT);   // MOTOR 1 — IN1
     pinMode(9, OUTPUT);   // MOTOR 1 — IN2
 }
@@ -4153,8 +4185,7 @@ void loop() {
     delay(500);
 }
 `,
-        m9: `// ภารกิจ 9: Obstacle Avoidance Bot
-#include <Servo.h>
+        m9: `#include <Servo.h>
 Servo myServo;
 
 void setup() {
@@ -4293,7 +4324,8 @@ let labState = {
     nextWireId: 1,
     zoom: 1.0,              // zoom level for SVG canvas
     panX: 0,               // pan offset X in SVG units
-    panY: 0                // pan offset Y in SVG units
+    panY: 0,               // pan offset Y in SVG units
+    ghost: { active: false, target: '', typed: '' }  // ghost typing mode
 };
 // Expose to scenarios.js (real-world scene engine reads servoAngles/pinStates)
 window.labState = labState;
@@ -4325,6 +4357,46 @@ function openCircuitLab(missionId = 'm1') {
     drawBreadboard();
     setupCanvasEvents();
     resetLabZoom();
+    // Update URL so the lab is shareable / bookmarkable
+    history.replaceState({ lab: missionId }, '', '?lab=' + missionId);
+}
+
+function closeLabModal() {
+    stopLabCode();
+    closeModal('modal-circuit-lab');
+    // Restore clean URL (remove ?lab=... parameter)
+    history.replaceState({}, '', window.location.pathname);
+}
+
+function copyLabLink() {
+    const url = window.location.href;
+    navigator.clipboard.writeText(url).then(() => {
+        showToast('✅ คัดลอกลิงก์แล้ว! ส่งให้เพื่อนได้เลย 🎉');
+    }).catch(() => {
+        // Fallback for browsers that block clipboard
+        prompt('คัดลอกลิงก์นี้:', url);
+    });
+}
+
+function showToast(message) {
+    let toast = document.getElementById('lab-toast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'lab-toast';
+        toast.style.cssText = `
+            position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%);
+            background: #323232; color: #fff; padding: 12px 24px; border-radius: 24px;
+            font-size: 15px; font-weight: 600; z-index: 99999;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.35);
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+        `;
+        document.body.appendChild(toast);
+    }
+    toast.textContent = message;
+    toast.style.opacity = '1';
+    clearTimeout(toast._hideTimer);
+    toast._hideTimer = setTimeout(() => { toast.style.opacity = '0'; }, 2800);
 }
 
 // ----- Zoom controls -----
@@ -4380,9 +4452,15 @@ function selectLabMission(id) {
     document.getElementById('lab-mission-name').textContent = `ภารกิจ ${mission.num}: ${mission.title}`;
     document.getElementById('lab-mission-status').textContent = mission.diff === 'easy' ? '😊 ง่าย' : mission.diff === 'medium' ? '😎 ปานกลาง' : '🔥 ยาก';
 
-    // Load starter code
-    labState.code.python = STARTER_CODE.python[id] || STARTER_CODE.python.default;
-    labState.code.c = STARTER_CODE.c[id] || STARTER_CODE.c.default;
+    // Load starter code (strip title-comment first line)
+    labState.code.python = stripTitleComment(STARTER_CODE.python[id] || STARTER_CODE.python.default);
+    labState.code.c      = stripTitleComment(STARTER_CODE.c[id]      || STARTER_CODE.c.default);
+
+    // Always activate ghost typing mode — students type code themselves every time
+    const _lang = labState.currentLang;
+    labState.ghost = { active: true, target: labState.code[_lang], typed: '' };
+    labState.code[_lang] = '';
+    updateGhostButton();
     updateCodeEditorView();
     renderMissionDetail();
     renderMissionHelperBanner();
@@ -5359,6 +5437,14 @@ function resetLab() {
 function switchLabLanguage(lang) {
     labState.currentLang = lang;
     document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.getAttribute('data-lang') === lang));
+    // Reset ghost mode for new language if a mission is loaded
+    if (labState.currentMission) {
+        const mId = labState.currentMission.id;
+        const target = stripTitleComment(STARTER_CODE[lang][mId] || STARTER_CODE[lang].default);
+        labState.code[lang] = '';
+        labState.ghost = { active: true, target, typed: '' };
+        updateGhostButton();
+    }
     updateCodeEditorView();
 }
 
@@ -5373,17 +5459,140 @@ function switchLabTab(tab) {
 function updateCodeEditorView() {
     const editor = document.getElementById('code-editor');
     const highlight = document.getElementById('code-highlight');
-    const code = labState.code[labState.currentLang];
-    editor.value = code;
-    editor.placeholder = labState.currentLang === 'python' ? '# เขียนโค้ด Python (MicroPython)...' : '// เขียนโค้ด C (Arduino style)...';
-    highlight.innerHTML = highlightCode(code, labState.currentLang);
+    const lang = labState.currentLang;
+    if (labState.ghost.active) {
+        editor.value = labState.ghost.typed;
+        editor.placeholder = '';   // ghost text ใน pre แสดงแทนอยู่แล้ว ไม่ต้อง placeholder
+        highlight.innerHTML = ghostRenderHtml(labState.ghost.typed, labState.ghost.target, lang);
+        updateGhostProgressBar();
+    } else {
+        const code = labState.code[lang];
+        editor.value = code;
+        editor.placeholder = lang === 'python' ? '# เขียนโค้ด Python (MicroPython)...' : '// เขียนโค้ด C (Arduino style)...';
+        highlight.innerHTML = highlightCode(code, lang);
+    }
 }
 
 function onCodeInput() {
     const editor = document.getElementById('code-editor');
     const highlight = document.getElementById('code-highlight');
-    labState.code[labState.currentLang] = editor.value;
-    highlight.innerHTML = highlightCode(editor.value, labState.currentLang);
+    const lang = labState.currentLang;
+
+    if (labState.ghost.active) {
+        const newText = editor.value;
+        const target = labState.ghost.target;
+        if (target.startsWith(newText) || newText === '') {
+            // Valid prefix — accept
+            labState.ghost.typed = newText;
+            labState.code[lang] = newText;
+            highlight.innerHTML = ghostRenderHtml(newText, target, lang);
+            updateGhostProgressBar();
+            if (newText.length === target.length) {
+                // Completed!
+                setTimeout(() => {
+                    showToast('🎉 เยี่ยมมาก! พิมพ์โค้ดครบทั้งหมดแล้ว');
+                    labState.ghost.active = false;
+                    labState.code[lang] = target;
+                    updateGhostButton();
+                    updateCodeEditorView();
+                }, 100);
+            }
+        } else {
+            // Wrong character — reject and flash
+            editor.value = labState.ghost.typed;
+            editor.classList.remove('ghost-error');
+            void editor.offsetWidth; // force reflow for animation restart
+            editor.classList.add('ghost-error');
+            setTimeout(() => editor.classList.remove('ghost-error'), 300);
+        }
+        return;
+    }
+
+    labState.code[lang] = editor.value;
+    highlight.innerHTML = highlightCode(editor.value, lang);
+}
+
+function onCodeKeyDown(e) {
+    // In ghost mode, block paste (Ctrl+V) and cut (Ctrl+X) to keep typing honest
+    if (labState.ghost.active && (e.ctrlKey || e.metaKey) && (e.key === 'v' || e.key === 'x')) {
+        e.preventDefault();
+        showToast('✋ โหมดพิมพ์เอง: ต้องพิมพ์ด้วยตัวเอง ไม่สามารถวางได้');
+    }
+}
+
+function ghostRenderHtml(typed, target, lang) {
+    const typedHtml = highlightCode(typed, lang).replace(/ $/, '');
+    const remaining = target.slice(typed.length);
+    if (!remaining) return typedHtml;
+    return typedHtml + '<span class="tok-ghost">' + escapeHtml(remaining) + '</span>';
+}
+
+function updateGhostProgressBar() {
+    const bar = document.getElementById('ghost-progress-bar');
+    if (!bar) return;
+    if (!labState.ghost.active || !labState.ghost.target) {
+        bar.style.display = 'none'; return;
+    }
+    const pct = labState.ghost.target.length
+        ? Math.round((labState.ghost.typed.length / labState.ghost.target.length) * 100)
+        : 0;
+    bar.style.display = 'block';
+    bar.style.width = pct + '%';
+}
+
+// Strip the first line of a code template if it's a title comment (# ... or // ...)
+function stripTitleComment(code) {
+    if (!code) return code;
+    const lines = code.split('\n');
+    if (lines[0] && (lines[0].trimStart().startsWith('#') || lines[0].trimStart().startsWith('//'))) {
+        const rest = lines.slice(1).join('\n');
+        return rest.startsWith('\n') ? rest.slice(1) : rest;
+    }
+    return code;
+}
+
+function toggleGhostMode() {
+    const lang = labState.currentLang;
+    if (labState.ghost.active) {
+        // Turn off — restore full starter code
+        labState.ghost.active = false;
+        labState.ghost.typed = '';
+        labState.ghost.target = '';
+        // Restore original starter code (student may not have finished)
+        const mId = labState.currentMission?.id;
+        labState.code[lang] = STARTER_CODE[lang][mId] || STARTER_CODE[lang].default;
+    } else {
+        // Turn on — use current starter code as target, start empty
+        const mId = labState.currentMission?.id;
+        const target = STARTER_CODE[lang][mId] || STARTER_CODE[lang].default;
+        labState.ghost.active = true;
+        labState.ghost.target = target;
+        labState.ghost.typed = '';
+        labState.code[lang] = '';
+        showToast('✍️ โหมดพิมพ์เอง: พิมพ์โค้ดทีละตัวตาม ghost text สีจาง');
+        switchLabTab('code');
+    }
+    updateGhostButton();
+    updateCodeEditorView();
+    const editor = document.getElementById('code-editor');
+    if (editor) editor.focus();
+}
+
+function updateGhostButton() {
+    const btn = document.getElementById('ghost-mode-btn');
+    const bar = document.getElementById('ghost-progress-bar');
+    if (!btn) return;
+    if (labState.ghost.active) {
+        btn.classList.add('active');
+        btn.textContent = '✍️ กำลังพิมพ์...';
+        if (bar) { bar.style.display = 'block'; bar.style.width = '0%'; }
+    } else {
+        btn.classList.remove('active');
+        btn.textContent = '✍️ พิมพ์เอง';
+        if (bar) bar.style.display = 'none';
+    }
+    const editor = document.getElementById('code-editor');
+    if (editor) editor.classList.toggle('ghost-active', labState.ghost.active);
 }
 
 function syncCodeScroll() {
@@ -5623,10 +5832,9 @@ function validateWiring(mission) {
             errors.push(`ขาดชิ้นส่วน: ${def ? def.icon + ' ' + def.name : reqPart}`);
         }
     }
-    // Required wires — match strictly on both endpoints (either direction)
+    // Required wires — check electrical connectivity (supports resistors in series)
     function canonEndpoint(side) {
         if (side.compId === 'pico') {
-            // Strip _N suffix for duplicated pins like GND_3
             return side.pin.replace(/_\d+$/, '');
         }
         const c = labState.components.find(cc => cc.id === side.compId);
@@ -5635,17 +5843,45 @@ function validateWiring(mission) {
         const kindOrType = def ? def.kind : c.type;
         return `${kindOrType}:${side.pin}`;
     }
+
+    // Build connectivity graph with internal component edges
+    // Nodes: canonical endpoint strings. Resistors bridge t1↔t2 internally.
+    const adj = {};
+    function addEdge(a, b) {
+        if (!a || !b) return;
+        (adj[a] = adj[a] || new Set()).add(b);
+        (adj[b] = adj[b] || new Set()).add(a);
+    }
+    for (const w of labState.wires) {
+        addEdge(canonEndpoint(w.from), canonEndpoint(w.to));
+    }
+    // Internal edges: resistors are purely conductive (t1 ↔ t2)
+    for (const c of labState.components) {
+        const def = PART_DEFS[c.type];
+        if (def && def.kind === 'resistor') {
+            addEdge('resistor:t1', 'resistor:t2');
+        }
+    }
+
+    function isConnected(nodeA, nodeB) {
+        if (nodeA === nodeB) return true;
+        const visited = new Set();
+        const queue = [nodeA];
+        visited.add(nodeA);
+        while (queue.length) {
+            const curr = queue.shift();
+            if (curr === nodeB) return true;
+            for (const nb of (adj[curr] || [])) {
+                if (!visited.has(nb)) { visited.add(nb); queue.push(nb); }
+            }
+        }
+        return false;
+    }
+
     for (const rw of mission.requiredWires || []) {
-        // rw.from / rw.to could be 'ADC0', 'GP2', or 'led:a', 'soil:sig'
         const expectedA = rw.from.replace(/_\d+$/, '');
         const expectedB = rw.to.replace(/_\d+$/, '');
-        const found = labState.wires.some(w => {
-            const a = canonEndpoint(w.from);
-            const b = canonEndpoint(w.to);
-            if (!a || !b) return false;
-            return (a === expectedA && b === expectedB) || (a === expectedB && b === expectedA);
-        });
-        if (!found) {
+        if (!isConnected(expectedA, expectedB)) {
             errors.push(`ขาดสาย: ${rw.from} ↔ ${rw.to}`);
         }
     }
@@ -6763,106 +6999,9 @@ function animateServo(compId, targetAngle, duration) {
             if (txt) txt.textContent = Math.round(cur) + '°';
         }
         if (rawT < 1) { _servoAnims[compId] = requestAnimationFrame(step); }
-        else { c.state.angle = targetAngle; delete _servoAnims[compId]; renderLabComponents(); renderLabWires(); }
+        else { c.state.angle = targetAngle; delete _servoAnims[compId]; renderLabComponents(); }
     }
     _servoAnims[compId] = requestAnimationFrame(step);
-}
-
-function updateServoVisual(pin, angle) {
-    if (!labState.servoAngles) labState.servoAngles = {};
-    labState.servoAngles[pin] = angle;
-    // Notify real-world scenario (e.g., window blinds m6, robot head m9)
-    if (window.scenarioApi && window.scenarioApi.isActive()) {
-        window.scenarioApi.onPwm(pin, angle);
-    }
-    const wired = labState.wires.filter(w =>
-        (w.from.compId==='pico' && w.from.pin==='GP'+pin) ||
-        (w.to.compId==='pico'   && w.to.pin==='GP'+pin)
-    );
-    for (const w of wired) {
-        const compId  = w.from.compId==='pico' ? w.to.compId  : w.from.compId;
-        const pinName = w.from.compId==='pico' ? w.to.pin     : w.from.pin;
-        const c = labState.components.find(c => c.id === compId);
-        if (c && PART_DEFS[c.type].kind==='servo' && pinName==='sig') animateServo(c.id, angle, 250);
-    }
-}
-
-function findInputForPin(pin) {
-    const w = labState.wires.find(w =>
-        (w.from.compId==='pico' && w.from.pin==='GP'+pin) ||
-        (w.to.compId==='pico'   && w.to.pin==='GP'+pin)
-    );
-    if (!w) return null;
-    const compId = w.from.compId==='pico' ? w.to.compId : w.from.compId;
-    return labState.components.find(c => c.id === compId);
-}
-
-// ─── Simulation input controls ───────────────────────────────────────────────
-function updateSimInput(key, val) {
-    if (!labState.simInputs) labState.simInputs = {};
-    labState.simInputs[key] = parseFloat(val);
-    const labels = {
-        adc0:        { id: 'sim-adc0-val',      fmt: v => v + '%'  },
-        distance:    { id: 'sim-distance-val',  fmt: v => v + ' cm' },
-        temperature: { id: 'sim-temp-val',      fmt: v => v + '°C' },
-        humidity:    { id: 'sim-hum-val',       fmt: v => v + '%'  },
-    };
-    const info = labels[key];
-    if (info) {
-        const el = document.getElementById(info.id);
-        if (el) el.textContent = info.fmt(Math.round(val));
-    }
-    if (key === 'adc0') {
-        labState.adcValues[26] = Math.round((parseFloat(val) / 100) * 65535);
-        renderLabComponents();
-    }
-}
-
-function showSimControls(visible) {
-    const panel = document.getElementById('lab-sim-controls');
-    if (panel) panel.style.display = visible ? 'flex' : 'none';
-    if (visible && labState.simInputs) {
-        const s1 = document.getElementById('sim-adc0-slider');
-        const s2 = document.getElementById('sim-distance-slider');
-        const s3 = document.getElementById('sim-temp-slider');
-        const s4 = document.getElementById('sim-hum-slider');
-        if (s1) s1.value = labState.simInputs.adc0;
-        if (s2) s2.value = labState.simInputs.distance;
-        if (s3) s3.value = labState.simInputs.temperature;
-        if (s4) s4.value = labState.simInputs.humidity;
-    }
-}
-
-function checkMissionCompletion() {
-    const m = labState.currentMission;
-    if (!m) return;
-    const area = document.getElementById('mission-check-area');
-    const placedTypes = labState.components.map(c => c.type);
-    const partsOk = m.requiredParts.every(p => placedTypes.includes(p));
-    const allWired = m.requiredWires.every(rw =>
-        labState.wires.some(w => {
-            const pp = w.from.compId==='pico' ? w.from.pin : w.to.compId==='pico' ? w.to.pin : null;
-            return pp && (pp===rw.from||pp===rw.to);
-        })
-    );
-    const codeRan = labState.simTime > 0;
-    const checks = [
-        { label: 'วางชิ้นส่วนครบ', ok: partsOk },
-        { label: 'ต่อสายถูกต้อง',  ok: allWired },
-        { label: 'รันโค้ดแล้ว',    ok: codeRan  },
-    ];
-    const allOk = checks.every(c => c.ok);
-    if (area) {
-        area.innerHTML = `<div style="margin-top:16px;border-top:1px solid rgba(255,255,255,0.1);padding-top:12px;">
-            <h4 style="color:#ffd97d;margin-bottom:10px;">✅ ผลการตรวจ</h4>
-            ${checks.map(c=>`<div style="color:${c.ok?'#6fcf97':'#eb5757'};font-size:13px;margin:4px 0;">${c.ok?'✅':'❌'} ${c.label}</div>`).join('')}
-            ${allOk?'<div style="margin-top:10px;background:rgba(111,207,151,0.2);padding:8px 12px;border-radius:8px;color:#6fcf97;font-weight:bold;">🎉 ภารกิจสำเร็จ!</div>':''}
-        </div>`;
-        if (allOk) {
-            const done = JSON.parse(localStorage.getItem('lab_completed')||'[]');
-            if (!done.includes(m.id)) { done.push(m.id); localStorage.setItem('lab_completed', JSON.stringify(done)); }
-        }
-    }
 }
 
 // ----- Sim sleep (drives animation ticks) -----
@@ -6884,8 +7023,6 @@ function simSleep(ms) {
         tick();
     });
 }
-
-// ----- Set pin state (triggers immediate visual refresh) -----
 function setPinState(pin, value) {
     labState.pinStates[pin] = value;
     if (window.scenarioApi && window.scenarioApi.isActive()) {
