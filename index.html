@@ -579,7 +579,7 @@
       </select>
     </div>
     <div class="form-group" style="margin-bottom: 25px;">
-      <input type="text" id="lesson-url" placeholder="วางลิงก์ (URL) ที่นี่..." style="width: 100%; padding: 14px; border: 2px solid var(--border); border-radius: 12px; font-family: 'Sarabun'; outline: none;">
+      <input type="text" id="lesson-url" placeholder="วางลิงก์ (URL) ที่นี่..." oninput="autoDetectLessonType(this.value, 'lesson-type')" style="width: 100%; padding: 14px; border: 2px solid var(--border); border-radius: 12px; font-family: 'Sarabun'; outline: none;">
     </div>
     <div style="display: flex; gap: 12px;">
       <button class="btn" style="flex: 1; background: var(--surface2); border: 2px solid var(--border);" onclick="closeModal('modal-lesson')">❌ ยกเลิก</button>
@@ -610,7 +610,7 @@
     </div>
     <div class="form-group" style="margin-bottom: 25px;">
       <label style="font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; display:block;">ลิงก์ (URL)</label>
-      <input type="text" id="edit-lesson-url" placeholder="วางลิงก์ใหม่..." style="width: 100%; padding: 14px; border: 2px solid var(--border); border-radius: 12px; font-family: 'Sarabun'; outline: none; transition: 0.3s;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'">
+      <input type="text" id="edit-lesson-url" placeholder="วางลิงก์ใหม่..." oninput="autoDetectLessonType(this.value, 'edit-lesson-type')" style="width: 100%; padding: 14px; border: 2px solid var(--border); border-radius: 12px; font-family: 'Sarabun'; outline: none; transition: 0.3s;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'">
     </div>
     <div style="display: flex; gap: 12px;">
       <button class="btn" style="flex: 1; background: var(--surface2); border: 2px solid var(--border);" onclick="closeModal('modal-edit-lesson')">❌ ยกเลิก</button>
@@ -1112,6 +1112,31 @@
 <button class="theme-toggle-fab" id="mobile-home-fab" onclick="navigate('dashboard', document.querySelectorAll('.nav-item')[0])" title="กลับหน้าแรก">
   🏠
 </button>
+
+<!-- ====== 📺 LESSON VIEWER MODAL (Phase 3) ====== -->
+<div class="modal-overlay" id="modal-lesson-viewer" style="z-index: 6000;">
+  <div class="lvm-shell">
+    <div class="lvm-topbar">
+      <div class="lvm-title-wrap">
+        <span style="font-size: 22px;">📺</span>
+        <span class="lvm-title" id="lvm-title">เนื้อหาบทเรียน</span>
+      </div>
+      <div class="lvm-actions">
+        <button class="btn btn-sm" id="lvm-open-tab" style="background: rgba(255,255,255,0.18); color:#fff; border:1px solid rgba(255,255,255,0.3);">🔗 เปิดแท็บใหม่</button>
+        <button class="btn btn-sm" onclick="closeLessonViewer()" style="background:#ffebee; color:#c62828; border:none;">✕</button>
+      </div>
+    </div>
+    <div class="lvm-body">
+      <iframe id="lvm-frame" src="about:blank" allowfullscreen allow="autoplay; fullscreen; encrypted-media; picture-in-picture"></iframe>
+      <div id="lvm-fallback" class="lvm-fallback" style="display:none;">
+        <div style="font-size: 70px;">🚫</div>
+        <h3 style="margin:14px 0 6px;">เนื้อหานี้ไม่อนุญาตให้ฝังในเว็บอื่น</h3>
+        <p style="color: var(--text-muted); max-width: 480px; margin: 0 0 22px;">บางบริการ (เช่น Canva published-site, Dropbox) ตั้งค่าความปลอดภัยห้ามฝัง — กรุณาเปิดในแท็บใหม่</p>
+        <button class="btn btn-primary" onclick="document.getElementById('lvm-open-tab').click()">🔗 เปิดในแท็บใหม่</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script src="script.js"></script>
 <script src="scenarios.js"></script>
