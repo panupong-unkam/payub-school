@@ -122,17 +122,67 @@ function goBackToSubjects() {
 // ==========================================
 // 2. ระบบโหลดข้อมูล (เนื้อหา/ใบงาน)
 // ==========================================
+// Returns embeddable URL or null if the source refuses iframe embedding.
 function getEmbedUrl(url, type) {
-    if (!url) return '';
-    if (type === 'youtube') {
+    if (!url) return null;
+    const u = url.trim();
+    // YouTube: regular video, shorts, embed already
+    if (type === 'youtube' || /youtube\.com|youtu\.be/.test(u)) {
         let videoId = '';
-        if (url.includes('v=')) videoId = url.split('v=')[1].split('&')[0];
-        else if (url.includes('be/')) videoId = url.split('be/')[1].split('?')[0];
-        return `https://www.youtube.com/embed/${videoId}`;
+        if (u.includes('/embed/')) return u;
+        if (u.includes('v=')) videoId = u.split('v=')[1].split('&')[0];
+        else if (u.includes('youtu.be/')) videoId = u.split('youtu.be/')[1].split('?')[0];
+        else if (u.includes('/shorts/')) videoId = u.split('/shorts/')[1].split('?')[0];
+        return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
     }
-    if (type === 'canva' && url.includes('view?')) return url.replace('view?', 'view?embed&');
-    if (type === 'slide' && url.includes('pub?')) return url.replace('pub?', 'embed?');
-    return url;
+    // Canva sites (my.canva.site) refuse to embed — return null
+    if (/\.my\.canva\.site/.test(u)) return null;
+    // Canva design (canva.com/design/.../view) — supports ?embed
+    if (type === 'canva' || /canva\.com\/design/.test(u)) {
+        if (u.includes('embed')) return u;
+        if (u.includes('view?')) return u.replace('view?', 'view?embed&');
+        if (u.includes('/view')) return u.replace(/\/view\??/, '/view?embed');
+        return u + (u.includes('?') ? '&embed' : '?embed');
+    }
+    // Google Slides
+    if (type === 'slide' || /docs\.google\.com\/presentation/.test(u)) {
+        if (u.includes('pub?')) return u.replace('pub?', 'embed?');
+        if (u.includes('/edit')) return u.replace(/\/edit.*$/, '/embed?start=false&loop=false&delayms=3000');
+        return u;
+    }
+    // Google Drive (files: PDFs, videos)
+    if (/drive\.google\.com/.test(u)) {
+        if (u.includes('/view')) return u.replace('/view', '/preview');
+        return u;
+    }
+    // Google Docs / Sheets
+    if (/docs\.google\.com\/(document|spreadsheets)/.test(u)) {
+        if (u.includes('/edit')) return u.replace(/\/edit.*$/, '/preview');
+        return u;
+    }
+    return u;
+}
+
+// Returns true if the URL can be embedded in an iframe (best-effort detection).
+function canEmbed(url, type) {
+    const embed = getEmbedUrl(url, type);
+    if (!embed) return false;
+    // Sites known to block framing
+    if (/\.my\.canva\.site/.test(url)) return false;
+    if (/dropbox\.com/.test(url)) return false;
+    if (/facebook\.com\/(?!plugins)/.test(url)) return false;
+    return true;
+}
+
+// Determine content type from URL — used by Add Lesson auto-detect
+function detectContentType(url) {
+    if (!url) return 'youtube';
+    const u = url.toLowerCase();
+    if (/youtube\.com|youtu\.be/.test(u)) return 'youtube';
+    if (/canva\.com|canva\.site/.test(u)) return 'canva';
+    if (/docs\.google\.com\/presentation|slides\.google/.test(u)) return 'slide';
+    if (/drive\.google\.com|docs\.google\.com/.test(u)) return 'drive';
+    return 'other';
 }
 
 async function loadData() {
@@ -277,53 +327,58 @@ async function loadData() {
                 </div>
             `;
 
-            const lessonsGridHtml = displayLessons.length ? `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; margin-bottom: 50px;">` + displayLessons.map((l, index) => {
-                let embedHtml = '';
-                const embedUrl = getEmbedUrl(l.url, l.content_type);
-                const lessonIcon = l.content_type === 'youtube' ? '▶️' : l.content_type === 'canva' ? '🎨' : l.content_type === 'slide' ? '📊' : '🔗';
-                const lessonTypeName = l.content_type === 'youtube' ? 'YouTube Video' : l.content_type === 'canva' ? 'Canva' : l.content_type === 'slide' ? 'Google Slides' : 'เนื้อหา';
-                const thumbId = 'thumb_' + l.id;
-                const frameId = 'frame_' + l.id;
-                if (embedUrl) {
-                    embedHtml = `
-                    <div id="${thumbId}" style="width:100%; aspect-ratio:16/9; border-radius:12px; margin-bottom:15px; background:linear-gradient(135deg,#e8f5e9,#c8e6c9); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; cursor:pointer; border:2px dashed #81c784; transition:0.2s;"
-                        onclick="document.getElementById('${thumbId}').style.display='none'; document.getElementById('${frameId}').style.display='block';"
-                        onmouseover="this.style.background='linear-gradient(135deg,#c8e6c9,#a5d6a7)'"
-                        onmouseout="this.style.background='linear-gradient(135deg,#e8f5e9,#c8e6c9)'">
-                        <div style="font-size:40px;">${lessonIcon}</div>
-                        <div style="font-size:14px; color:#2e7d32; font-weight:bold;">${lessonTypeName}</div>
-                        <div style="font-size:12px; color:#4caf50; background:rgba(255,255,255,0.7); padding:5px 12px; border-radius:20px;">▶ คลิกเพื่อโหลด</div>
-                    </div>
-                    <iframe id="${frameId}" src="${embedUrl}" style="width:100%; aspect-ratio:16/9; border:none; border-radius:12px; margin-bottom:15px; background:#f5f7f5; display:none;"
-                        allowfullscreen
-                        onload="this.style.display='block';"
-                        onerror="this.style.display='none'; document.getElementById('${thumbId}').style.display='flex'; document.getElementById('${thumbId}').innerHTML='<div style=\\'font-size:36px;\\'>⚠️</div><div style=\\'font-size:13px;color:#c62828;font-weight:bold;\\'>โหลดไม่ได้ (ถูกบล็อก)</div><div style=\\'font-size:12px;color:#666;text-align:center;padding:0 15px;\\'>กรุณาเปิดในหน้าต่างใหม่</div>';">
-                    </iframe>`;
-                }
-                
-                // ✅ เพิ่มปุ่มแก้ไข + ลบ เฉพาะครู
-                const teacherLessonBtns = currentUser?.role === 'teacher' ? `
-                    <div style="display:flex; gap:8px; margin-top:15px; border-top: 1px dashed var(--border); padding-top: 15px;">
-                        <button class="btn btn-sm" style="flex:1; background:#e3f2fd; color:#1565c0; border:1px solid #90caf9;" 
-                            onclick="openEditLesson(${l.id}, '${l.title.replace(/'/g,"\\'")}', '${l.content_type}', '${l.url.replace(/'/g,"\\'")}')">
-                            ✏️ แก้ไข
-                        </button>
-                        <button class="btn btn-sm" style="flex:1; background:#ffebee; color:#c62828; border:1px solid #ffcdd2;" 
-                            onclick="deleteLesson(${l.id})">
-                            🗑️ ลบเนื้อหา
-                        </button>
+            // ── Lesson card v2 (gradient header per type, action buttons, modal viewer) ──
+            const TYPE_META = {
+                youtube: { icon: '▶️',  name: 'YouTube',       grad: 'linear-gradient(135deg,#ff5252 0%,#b71c1c 100%)',   accent: '#c62828' },
+                canva:   { icon: '🎨',  name: 'Canva',         grad: 'linear-gradient(135deg,#7c4dff 0%,#3949ab 100%)',   accent: '#5e35b1' },
+                slide:   { icon: '📊',  name: 'Google Slides', grad: 'linear-gradient(135deg,#ffb300 0%,#e65100 100%)',   accent: '#ef6c00' },
+                drive:   { icon: '📄',  name: 'Google Drive',  grad: 'linear-gradient(135deg,#42a5f5 0%,#1565c0 100%)',   accent: '#1565c0' },
+                other:   { icon: '🔗',  name: 'เนื้อหา',         grad: 'linear-gradient(135deg,#66bb6a 0%,#1b5e20 100%)',   accent: '#2e7d32' }
+            };
+            const lessonsGridHtml = displayLessons.length ? `<div class="lesson-grid">` + displayLessons.map((l, index) => {
+                const tKey = TYPE_META[l.content_type] ? l.content_type : 'other';
+                const meta = TYPE_META[tKey];
+                const embeddable = canEmbed(l.url, l.content_type);
+                const safeTitle = (l.title || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                const safeUrl   = (l.url   || '').replace(/'/g, "\\'");
+                // Action buttons differ depending on embeddability
+                const viewBtn = embeddable
+                    ? `<button class="lc-btn lc-btn-primary" onclick="openLessonViewer(${l.id}, &quot;${safeTitle}&quot;, '${l.content_type}', '${safeUrl}')">👁️ เปิดดูเนื้อหา</button>`
+                    : `<button class="lc-btn lc-btn-primary" onclick="window.open('${safeUrl}','_blank','noopener')">🔗 เปิดในแท็บใหม่</button>`;
+                const altBtn = embeddable
+                    ? `<button class="lc-btn lc-btn-outline" onclick="window.open('${safeUrl}','_blank','noopener')" title="เปิดในแท็บใหม่">↗</button>`
+                    : `<button class="lc-btn lc-btn-outline" onclick="navigator.clipboard?.writeText('${safeUrl}').then(()=>showToast('📋 คัดลอกลิงก์แล้ว'))" title="คัดลอกลิงก์">📋</button>`;
+                const teacherBtns = currentUser?.role === 'teacher' ? `
+                    <div class="lc-edit-overlay">
+                        <button class="lc-edit-btn" title="แก้ไข" onclick="event.stopPropagation(); openEditLesson(${l.id}, '${safeTitle}', '${l.content_type}', '${safeUrl}')">✏️</button>
+                        <button class="lc-edit-btn lc-edit-btn-danger" title="ลบ" onclick="event.stopPropagation(); deleteLesson(${l.id})">🗑️</button>
                     </div>` : '';
-
+                const blockedBadge = !embeddable
+                    ? `<div class="lc-blocked-badge" title="แหล่งนี้ไม่อนุญาตให้ฝังในเว็บอื่น">⚠ ฝังไม่ได้</div>`
+                    : '';
                 return `
-                <div class="card" style="padding:20px; display:flex; flex-direction:column; animation-delay: ${index * 0.1}s; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid var(--border);">
-                    <div style="font-weight:bold; font-size:16px; margin-bottom:15px; color:var(--primary-dark); line-height:1.4;">${l.title}</div>
-                    ${embedHtml}
-                    <div style="margin-top:auto; text-align:center;">
-                        <a href="${l.url}" target="_blank" style="color:var(--text-muted); font-size:13px; text-decoration:underline; font-weight:bold;">🔗 เปิดในหน้าต่างใหม่</a>
+                <article class="lesson-card-v2" style="--lc-grad:${meta.grad}; --lc-accent:${meta.accent}; animation-delay:${index * 0.06}s;">
+                    <div class="lc-header">
+                        ${teacherBtns}
+                        ${blockedBadge}
+                        <div class="lc-type-badge">${meta.icon} ${meta.name}</div>
+                        <div class="lc-hero-icon">${meta.icon}</div>
                     </div>
-                    ${teacherLessonBtns}
+                    <div class="lc-body">
+                        <h3 class="lc-title" title="${safeTitle}">${l.title}</h3>
+                        <div class="lc-meta">${meta.name}</div>
+                        <div class="lc-actions">
+                            ${viewBtn}
+                            ${altBtn}
+                        </div>
+                    </div>
+                </article>`;
+            }).join('') + `</div>` : `
+                <div class="lesson-empty">
+                    <div class="lesson-empty-icon">📚</div>
+                    <h3>ยังไม่มีเนื้อหาบทเรียน</h3>
+                    <p>${currentUser?.role === 'teacher' ? 'คลิกปุ่ม "เพิ่มเนื้อหา" ด้านบนเพื่อสร้างบทแรก' : 'ครูยังไม่ได้เพิ่มเนื้อหาในวิชานี้ครับ'}</p>
                 </div>`;
-            }).join('') + `</div>` : '<div class="card" style="text-align:center; padding: 40px; color:gray; margin-bottom: 50px; border: 2px dashed var(--border);">ยังไม่มีเนื้อหาบทเรียนครับ</div>';
 
             // 3. ส่วนใบงานและกิจกรรม (พร้อมระบบล็อกผู้เยี่ยมชม!)
             const addAssignBtn = currentUser?.role === 'teacher' ? `<button class="btn btn-primary" style="padding: 8px 20px; border-radius: 20px;" onclick="openAddAssignment()">+ เพิ่มใบงาน</button>` : '';
@@ -1137,6 +1192,59 @@ function checkAuth(page, el) {
 function showToast(msg) { const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; document.getElementById('toast-container').appendChild(t); setTimeout(() => t.remove(), 3000); }
 function openAuth() { document.getElementById('modal-auth').classList.add('show'); }
 function closeAuth() { document.getElementById('modal-auth').classList.remove('show'); }
+
+// ── Lesson viewer modal (Phase 3) ──────────────────────────────────────
+function openLessonViewer(id, title, type, url) {
+    const modal = document.getElementById('modal-lesson-viewer');
+    if (!modal) return;
+    const embed = getEmbedUrl(url, type);
+    const titleEl = document.getElementById('lvm-title');
+    const frame   = document.getElementById('lvm-frame');
+    const fallback = document.getElementById('lvm-fallback');
+    const openBtn = document.getElementById('lvm-open-tab');
+    if (titleEl) titleEl.textContent = (title || '').replace(/&quot;/g, '"');
+    if (openBtn) openBtn.onclick = () => window.open(url, '_blank', 'noopener');
+    // Set up fallback detection: if iframe fails to load, show fallback message
+    if (frame && fallback) {
+        fallback.style.display = 'none';
+        frame.style.display = 'block';
+        frame.src = 'about:blank';
+        if (embed) {
+            // Detect frame-load failure via short timeout (iframes blocked by X-Frame-Options never fire onload)
+            let loaded = false;
+            frame.onload = () => { loaded = true; };
+            frame.src = embed;
+            setTimeout(() => {
+                if (!loaded) {
+                    frame.style.display = 'none';
+                    fallback.style.display = 'flex';
+                }
+            }, 4000);
+        } else {
+            frame.style.display = 'none';
+            fallback.style.display = 'flex';
+        }
+    }
+    modal.classList.add('show');
+}
+function closeLessonViewer() {
+    const modal = document.getElementById('modal-lesson-viewer');
+    if (!modal) return;
+    modal.classList.remove('show');
+    const frame = document.getElementById('lvm-frame');
+    if (frame) frame.src = 'about:blank';   // free resources / stop video
+}
+
+// Auto-detect lesson type from URL — called from Add/Edit Lesson form (Phase 5)
+function autoDetectLessonType(url, selectId) {
+    const t = detectContentType(url);
+    const select = document.getElementById(selectId);
+    if (!select) return;
+    // Only auto-set if a matching option exists
+    for (const opt of select.options) {
+        if (opt.value === t) { select.value = t; break; }
+    }
+}
 
 // ⭐ ฟังก์ชันสลับหน้าสมัคร/ล็อกอิน ที่หายไป
 function toggleAuth(isReg) { 
@@ -4214,28 +4322,42 @@ const LAB_MISSIONS = [
     {
         id: 'm1', num: 1, icon: '💡', diff: 'easy',
         title: 'Hello LED',
-        short: 'กระพริบ LED ผ่าน GROVE 2 (GP2)',
-        desc: 'เป้าหมาย: ต่อ LED + ตัวต้านทาน 220Ω เข้ากับ GP2 (GROVE 2) แล้วเขียนโค้ดให้ LED กระพริบสลับกัน',
+        short: 'กระพริบ LED + Resistor 220Ω แบบอนุกรม (GP2)',
+        desc: 'เป้าหมาย: ต่อ LED แบบ series กับ Resistor 220Ω — GP2 → LED → Resistor → GND (Resistor ลดกระแสไม่ให้ LED ไหม้). ตามจริงทางวิศวกรรม: I = (V - V_LED) / R',
         requiredParts: ['led_red', 'resistor'],
-        requiredWires: [{from:'GP2', to:'led:a'}, {from:'led:c', to:'GND'}],
+        requiredPaths: [
+            { from: 'GP2',   to: 'led:a' },                        // GP2 → LED anode (direct)
+            { from: 'led:c', to: 'GND', via: 'resistor' }          // LED cathode → GND through resistor
+        ],
         goal: { ledToggle: true }
     },
     {
         id: 'm2', num: 2, icon: '🚦', diff: 'easy',
         title: 'Traffic Light',
-        short: 'ไฟจราจร 3 สี: GP2 / GP4 / GP6',
-        desc: 'เป้าหมาย: ต่อ LED แดง→GP2 (GROVE 2), เหลือง→GP4 (GROVE 3), เขียว→GP6 (GROVE 4) ทำงานเป็นลำดับเหมือนสัญญาณไฟจราจร',
-        requiredParts: ['led_red', 'led_yellow', 'led_green'],
-        requiredWires: [{from:'GP2', to:'led_red:a'}, {from:'GP4', to:'led_yellow:a'}, {from:'GP6', to:'led_green:a'}],
+        short: '3 LED + Resistor ต่อ GP2/GP4/GP6',
+        desc: 'เป้าหมาย: ไฟจราจร 3 สี (แดง GP2, เหลือง GP4, เขียว GP6) — LED แต่ละดวงต้องผ่าน Resistor 220Ω ก่อนถึง GND',
+        requiredParts: ['led_red', 'led_yellow', 'led_green', 'resistor', 'resistor', 'resistor'],
+        requiredPaths: [
+            { from: 'GP2', to: 'led_red:a' },
+            { from: 'GP4', to: 'led_yellow:a' },
+            { from: 'GP6', to: 'led_green:a' },
+            { from: 'led_red:c',    to: 'GND', via: 'resistor' },
+            { from: 'led_yellow:c', to: 'GND', via: 'resistor' },
+            { from: 'led_green:c',  to: 'GND', via: 'resistor' }
+        ],
         goal: { pinsToggled: [2, 4, 6] }
     },
     {
         id: 'm3', num: 3, icon: '🔘', diff: 'easy',
         title: 'Button Light',
-        short: 'กดปุ่ม (GP4/GROVE 3) → LED ติด (GP2/GROVE 2)',
-        desc: 'เป้าหมาย: ต่อ Push Button ที่ GP4 (GROVE 3) และ LED ที่ GP2 (GROVE 2) — กดปุ่มแล้ว LED ต้องติด',
-        requiredParts: ['button', 'led_red'],
-        requiredWires: [{from:'GP2', to:'led:a'}, {from:'GP4', to:'button:t1'}],
+        short: 'ปุ่ม GP4 → LED + Resistor GP2',
+        desc: 'เป้าหมาย: ปุ่มกด ↔ GP4, LED+Resistor ↔ GP2 — กดปุ่มแล้ว LED ติด (Resistor 220Ω จำกัดกระแส LED)',
+        requiredParts: ['button', 'led_red', 'resistor'],
+        requiredPaths: [
+            { from: 'GP2',   to: 'led:a' },
+            { from: 'led:c', to: 'GND', via: 'resistor' },
+            { from: 'GP4',   to: 'button:t1' }
+        ],
         goal: { readPin: 4 }
     },
     {
@@ -4250,10 +4372,14 @@ const LAB_MISSIONS = [
     {
         id: 'm5', num: 5, icon: '🌙', diff: 'medium',
         title: 'Smart Night Light',
-        short: 'LDR (ADC0/GROVE 6) วัดแสง → LED (GP2) เปิดเมื่อมืด',
-        desc: 'เป้าหมาย: อ่านค่าจาก LDR ที่ ADC0 (GROVE 6) เมื่อค่าน้อย (มืด) ให้เปิด LED ที่ GP2 (GROVE 2)',
-        requiredParts: ['ldr', 'led_red'],
-        requiredWires: [{from:'ADC0', to:'ldr:t1'}, {from:'GP2', to:'led:a'}],
+        short: 'LDR ADC0 → LED+Resistor GP2 — มืดเปิดไฟ',
+        desc: 'เป้าหมาย: อ่าน LDR ที่ ADC0 (GROVE 6); ถ้าค่าน้อย (มืด) → เปิด LED ที่ GP2 — LED ต้องมี Resistor 220Ω แบบ series',
+        requiredParts: ['ldr', 'led_red', 'resistor'],
+        requiredPaths: [
+            { from: 'ADC0',  to: 'ldr:t1' },
+            { from: 'GP2',   to: 'led:a' },
+            { from: 'led:c', to: 'GND', via: 'resistor' }
+        ],
         goal: { useADC: 26 }
     },
     {
@@ -5820,69 +5946,111 @@ function lintC(code) {
 }
 
 // ── Hardware validation: real board needs real wiring ─────────────────
-// Returns array of human-readable errors describing missing parts/wires.
-function validateWiring(mission) {
-    if (!mission) return [];
-    const errors = [];
-    const placedTypes = labState.components.map(c => c.type);
-    // Required parts
-    for (const reqPart of mission.requiredParts || []) {
-        if (!placedTypes.includes(reqPart)) {
-            const def = PART_DEFS[reqPart];
-            errors.push(`ขาดชิ้นส่วน: ${def ? def.icon + ' ' + def.name : reqPart}`);
-        }
+// Path-based connectivity. If viaKind is specified, the path MUST traverse
+// at least one component of that kind (entering one pin and exiting another).
+function isPathConnected(fromEp, toEp, viaKind) {
+    const wireAdj = new Map();
+    function addEdge(a, b, map) {
+        if (a === b) return;
+        if (!map.has(a)) map.set(a, new Set());
+        if (!map.has(b)) map.set(b, new Set());
+        map.get(a).add(b);
+        map.get(b).add(a);
     }
-    // Required wires — check electrical connectivity (supports resistors in series)
-    function canonEndpoint(side) {
-        if (side.compId === 'pico') {
-            return side.pin.replace(/_\d+$/, '');
-        }
-        const c = labState.components.find(cc => cc.id === side.compId);
-        if (!c) return null;
-        const def = PART_DEFS[c.type];
-        const kindOrType = def ? def.kind : c.type;
-        return `${kindOrType}:${side.pin}`;
-    }
-
-    // Build connectivity graph with internal component edges
-    // Nodes: canonical endpoint strings. Resistors bridge t1↔t2 internally.
-    const adj = {};
-    function addEdge(a, b) {
-        if (!a || !b) return;
-        (adj[a] = adj[a] || new Set()).add(b);
-        (adj[b] = adj[b] || new Set()).add(a);
+    function epId(side) {
+        if (side.compId === 'pico') return 'pico:' + side.pin.replace(/_\d+$/, '');
+        return 'c' + side.compId + ':' + side.pin;
     }
     for (const w of labState.wires) {
-        addEdge(canonEndpoint(w.from), canonEndpoint(w.to));
+        addEdge(epId(w.from), epId(w.to), wireAdj);
     }
-    // Internal edges: resistors are purely conductive (t1 ↔ t2)
-    for (const c of labState.components) {
-        const def = PART_DEFS[c.type];
-        if (def && def.kind === 'resistor') {
-            addEdge('resistor:t1', 'resistor:t2');
+    function resolveEndpoint(ep) {
+        if (/^(GP\d+|GND|VBUS|3V3|ADC\d|VCC)$/.test(ep)) return ['pico:' + ep];
+        const [kindOrType, pinName] = ep.split(':');
+        const matches = [];
+        for (const c of labState.components) {
+            const def = PART_DEFS[c.type];
+            if (!def) continue;
+            if ((def.kind === kindOrType || c.type === kindOrType) && def.pins.includes(pinName)) {
+                matches.push('c' + c.id + ':' + pinName);
+            }
         }
+        return matches;
     }
-
-    function isConnected(nodeA, nodeB) {
-        if (nodeA === nodeB) return true;
+    function bfsReaches(starts, targets, graph) {
         const visited = new Set();
-        const queue = [nodeA];
-        visited.add(nodeA);
+        const queue = [];
+        for (const s of starts) {
+            if (targets.has(s)) return true;
+            if (!visited.has(s)) { visited.add(s); queue.push(s); }
+        }
         while (queue.length) {
-            const curr = queue.shift();
-            if (curr === nodeB) return true;
-            for (const nb of (adj[curr] || [])) {
-                if (!visited.has(nb)) { visited.add(nb); queue.push(nb); }
+            const n = queue.shift();
+            for (const next of graph.get(n) || []) {
+                if (targets.has(next)) return true;
+                if (!visited.has(next)) { visited.add(next); queue.push(next); }
             }
         }
         return false;
     }
+    const froms = resolveEndpoint(fromEp);
+    const tos = new Set(resolveEndpoint(toEp));
+    if (!viaKind) {
+        return bfsReaches(froms, tos, wireAdj);
+    }
+    // viaKind required: path MUST traverse one component of that kind
+    const viaKinds = Array.isArray(viaKind) ? viaKind : [viaKind];
+    for (const c of labState.components) {
+        const def = PART_DEFS[c.type];
+        if (!def || !viaKinds.includes(def.kind)) continue;
+        const pins = def.pins;
+        for (let i = 0; i < pins.length; i++) {
+            for (let j = 0; j < pins.length; j++) {
+                if (i === j) continue;
+                const inPin  = new Set(['c' + c.id + ':' + pins[i]]);
+                const outPin = ['c' + c.id + ':' + pins[j]];
+                if (bfsReaches(froms, inPin, wireAdj) &&
+                    bfsReaches(outPin, tos, wireAdj)) {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
 
+function validateWiring(mission) {
+    if (!mission) return [];
+    const errors = [];
+    const placedTypes = labState.components.map(c => c.type);
+
+    // Part counts: duplicate entries in requiredParts mean need multiple
+    const partCounts = {};
+    for (const p of (mission.requiredParts || [])) {
+        partCounts[p] = (partCounts[p] || 0) + 1;
+    }
+    for (const [type, needed] of Object.entries(partCounts)) {
+        const have = placedTypes.filter(t => t === type).length;
+        if (have < needed) {
+            const def = PART_DEFS[type];
+            const name = def ? def.icon + ' ' + def.name : type;
+            const countSuffix = needed > 1 ? ` (ต้องการ ${needed} ตัว, มี ${have})` : '';
+            errors.push(`ขาดชิ้นส่วน: ${name}${countSuffix}`);
+        }
+    }
+
+    // Legacy direct wires (no via component allowed)
     for (const rw of mission.requiredWires || []) {
-        const expectedA = rw.from.replace(/_\d+$/, '');
-        const expectedB = rw.to.replace(/_\d+$/, '');
-        if (!isConnected(expectedA, expectedB)) {
+        if (!isPathConnected(rw.from, rw.to, null)) {
             errors.push(`ขาดสาย: ${rw.from} ↔ ${rw.to}`);
+        }
+    }
+
+    // Path-based: may go through specified component kind (e.g., resistor in series)
+    for (const rp of mission.requiredPaths || []) {
+        if (!isPathConnected(rp.from, rp.to, rp.via)) {
+            const viaInfo = rp.via ? ` (ผ่าน ${rp.via})` : '';
+            errors.push(`ขาดเส้นทาง: ${rp.from} → ${rp.to}${viaInfo}`);
         }
     }
     return errors;
@@ -5968,6 +6136,7 @@ async function runLabCode() {
     }
 
     const code = labState.code[labState.currentLang];
+    let runError = null;
     try {
         if (labState.currentLang === 'python') {
             await runPythonCode(code);
@@ -5975,28 +6144,33 @@ async function runLabCode() {
             await runCCode(code);
         }
     } catch (err) {
-        consoleLog('❌ Error: ' + err.message, 'error');
+        runError = err;
+        consoleLog('❌ Error: ' + (err && err.message ? err.message : err), 'error');
+    } finally {
+        // GUARANTEED UI reset — runs even if interpreter throws
+        labState.running = false;
+        labState.stopRequested = false;
+        stopBuzzerAudio();
+        try { showSimControls(false); } catch(e) {}
+        const runBtn = document.getElementById('lab-run-btn');
+        const stopBtn = document.getElementById('lab-stop-btn');
+        if (runBtn)  runBtn.style.display  = 'block';
+        if (stopBtn) stopBtn.style.display = 'none';
+        const power = document.getElementById('status-power');
+        if (power) power.classList.remove('on');
+        const powerTxt = document.getElementById('status-power-text');
+        if (powerTxt) powerTxt.textContent = 'OFF';
+        // Restore mission status text (remove RUNNING badge)
+        const ms2 = document.getElementById('lab-mission-status');
+        const m = labState.currentMission;
+        if (ms2 && m) ms2.textContent = m.diff === 'easy' ? '😊 ง่าย' : m.diff === 'medium' ? '😎 ปานกลาง' : '🔥 ยาก';
+        try { renderLabWires(); } catch(e) {}
+        if (window.scenarioApi) { try { window.scenarioApi.stop(); } catch(e) {} }
     }
 
-    labState.running = false;
-    showSimControls(false);
-    document.getElementById('lab-run-btn').style.display = 'block';
-    document.getElementById('lab-stop-btn').style.display = 'none';
-    document.getElementById('status-power').classList.remove('on');
-    document.getElementById('status-power-text').textContent = 'OFF';
-    // Remove RUNNING badge and restore mission status text
-    const ms2 = document.getElementById('lab-mission-status');
-    const m = labState.currentMission;
-    if (ms2 && m) ms2.textContent = m.diff === 'easy' ? '😊 ง่าย' : m.diff === 'medium' ? '😎 ปานกลาง' : '🔥 ยาก';
-    // Force re-render of wires so live-flow stops
-    renderLabWires();
-
-    // ── Close scenario (restore circuit canvas) ──
-    if (window.scenarioApi) window.scenarioApi.stop();
-
-    if (!labState.stopRequested) {
+    if (!runError) {
         consoleLog('✅ โปรแกรมจบการทำงาน', 'success');
-        checkMissionCompletion();
+        try { checkMissionCompletion(); } catch(e) {}
     }
 }
 
@@ -6009,7 +6183,20 @@ function stopLabCode() {
             c.state.value = 0;
         }
     });
-    consoleLog('⏹ หยุดการรัน', 'warn');
+    consoleLog('⏹ หยุดการรัน — กำลังคืนสถานะ Ready...', 'warn');
+    // Belt-and-suspenders: also reset UI immediately so user gets feedback even
+    // before the interpreter's main loop unwinds. The runLabCode `finally` will
+    // run shortly after and re-apply the same state (idempotent).
+    setTimeout(() => {
+        const runBtn = document.getElementById('lab-run-btn');
+        const stopBtn = document.getElementById('lab-stop-btn');
+        if (runBtn)  runBtn.style.display  = 'block';
+        if (stopBtn) stopBtn.style.display = 'none';
+        const power = document.getElementById('status-power');
+        if (power) power.classList.remove('on');
+        const powerTxt = document.getElementById('status-power-text');
+        if (powerTxt) powerTxt.textContent = 'OFF';
+    }, 250);
 }
 
 // Variables in user's program
@@ -7033,4 +7220,102 @@ function setPinState(pin, value) {
     renderLabWires();
     drawPicoBoard();
     updatePinDisplay();
+}
+
+function updateServoVisual(pin, angle) {
+    if (!labState.servoAngles) labState.servoAngles = {};
+    labState.servoAngles[pin] = angle;
+    if (window.scenarioApi && window.scenarioApi.isActive()) {
+        window.scenarioApi.onPwm(pin, angle);
+    }
+    const wired = labState.wires.filter(w =>
+        (w.from.compId==='pico' && w.from.pin==='GP'+pin) ||
+        (w.to.compId==='pico'   && w.to.pin==='GP'+pin)
+    );
+    for (const w of wired) {
+        const compId  = w.from.compId==='pico' ? w.to.compId  : w.from.compId;
+        const pinName = w.from.compId==='pico' ? w.to.pin     : w.from.pin;
+        const c = labState.components.find(c => c.id === compId);
+        if (c && PART_DEFS[c.type].kind==='servo' && pinName==='sig') animateServo(c.id, angle, 250);
+    }
+}
+
+function findInputForPin(pin) {
+    const w = labState.wires.find(w =>
+        (w.from.compId==='pico' && w.from.pin==='GP'+pin) ||
+        (w.to.compId==='pico'   && w.to.pin==='GP'+pin)
+    );
+    if (!w) return null;
+    const compId = w.from.compId==='pico' ? w.to.compId : w.from.compId;
+    return labState.components.find(c => c.id === compId);
+}
+
+function updateSimInput(key, val) {
+    if (!labState.simInputs) labState.simInputs = {};
+    labState.simInputs[key] = parseFloat(val);
+    const labels = {
+        adc0: { id: 'sim-adc0-val', fmt: v => v + '%' },
+        distance: { id: 'sim-distance-val', fmt: v => v + ' cm' },
+        temperature: { id: 'sim-temp-val', fmt: v => v + '°C' },
+        humidity: { id: 'sim-hum-val', fmt: v => v + '%' }
+    };
+    const info = labels[key];
+    if (info) {
+        const el = document.getElementById(info.id);
+        if (el) el.textContent = info.fmt(Math.round(val));
+    }
+    if (key === 'adc0') {
+        labState.adcValues[26] = Math.round((parseFloat(val) / 100) * 65535);
+        renderLabComponents();
+    }
+}
+
+function showSimControls(visible) {
+    const panel = document.getElementById('lab-sim-controls');
+    if (panel) panel.style.display = visible ? 'flex' : 'none';
+    if (visible && labState.simInputs) {
+        const s1 = document.getElementById('sim-adc0-slider');
+        const s2 = document.getElementById('sim-distance-slider');
+        const s3 = document.getElementById('sim-temp-slider');
+        const s4 = document.getElementById('sim-hum-slider');
+        if (s1) s1.value = labState.simInputs.adc0;
+        if (s2) s2.value = labState.simInputs.distance;
+        if (s3) s3.value = labState.simInputs.temperature;
+        if (s4) s4.value = labState.simInputs.humidity;
+    }
+}
+
+function checkMissionCompletion() {
+    const m = labState.currentMission;
+    if (!m) return;
+    const area = document.getElementById('mission-check-area');
+    const placedTypes = labState.components.map(c => c.type);
+    const partsOk = (m.requiredParts || []).every(p => placedTypes.includes(p));
+    const allWired = (typeof validateWiring === 'function') ? validateWiring(m).length === 0 : true;
+    const codeRan = labState.simTime > 0;
+    const checks = [
+        { label: 'วางชิ้นส่วนครบ', ok: partsOk },
+        { label: 'ต่อสายถูกต้อง', ok: allWired },
+        { label: 'รันโค้ดแล้ว', ok: codeRan }
+    ];
+    const allOk = checks.every(c => c.ok);
+    if (area) {
+        area.innerHTML = `<div style="margin-top:16px;border-top:1px solid rgba(255,255,255,0.1);padding-top:12px;">
+            <h4 style="color:#ffd97d;margin-bottom:10px;">✅ ผลการตรวจ</h4>
+            ${checks.map(c => `<div style="color:${c.ok?'#6fcf97':'#eb5757'};font-size:13px;margin:4px 0;">${c.ok?'✅':'❌'} ${c.label}</div>`).join('')}
+            ${allOk ? '<div style="margin-top:10px;background:rgba(111,207,151,0.2);padding:8px 12px;border-radius:8px;color:#6fcf97;font-weight:bold;">🎉 ภารกิจสำเร็จ!</div>' : ''}
+        </div>`;
+        if (allOk) {
+            const done = JSON.parse(localStorage.getItem('lab_completed') || '[]');
+            if (!done.includes(m.id)) { done.push(m.id); localStorage.setItem('lab_completed', JSON.stringify(done)); }
+        }
+    }
+}
+"margin-top:10px;background:rgba(111,207,151,0.2);padding:8px 12px;border-radius:8px;color:#6fcf97;font-weight:bold;">🎉 ภารกิจสำเร็จ!</div>' : ''}
+        </div>`;
+        if (allOk) {
+            const done = JSON.parse(localStorage.getItem('lab_completed') || '[]');
+            if (!done.includes(m.id)) { done.push(m.id); localStorage.setItem('lab_completed', JSON.stringify(done)); }
+        }
+    }
 }
