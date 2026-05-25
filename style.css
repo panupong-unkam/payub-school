@@ -3126,6 +3126,49 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .tok-op  { color: #d4d4d4; }
 .tok-pin { color: #c586c0; }
 
+/* Ghost typing mode */
+.tok-ghost {
+    color: rgba(200, 200, 200, 0.28);
+    font-style: normal;
+}
+.code-editor.ghost-active {
+    caret-color: #ffd97d;
+}
+.code-editor.ghost-error {
+    animation: ghostErrorFlash 0.25s ease;
+}
+@keyframes ghostErrorFlash {
+    0%   { background: rgba(255, 80, 80, 0.25); }
+    100% { background: transparent; }
+}
+.ghost-mode-btn {
+    font-size: 12px;
+    padding: 3px 10px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.85);
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-left: 4px;
+}
+.ghost-mode-btn.active {
+    background: #ffd97d;
+    color: #1a1a1a;
+    border-color: #ffd97d;
+    font-weight: 700;
+}
+.ghost-progress-bar {
+    height: 3px;
+    background: linear-gradient(90deg, #ffd97d, #4caf50);
+    transition: width 0.15s ease;
+    border-radius: 0 2px 2px 0;
+    position: absolute;
+    bottom: 0; left: 0;
+    z-index: 3;
+    pointer-events: none;
+}
+
 /* Console */
 .lab-console {
     flex: 1;
