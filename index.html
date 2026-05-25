@@ -277,6 +277,7 @@
       <h2 id="assign-title-text">📝 ใบงานและกิจกรรม</h2>
       <button class="btn btn-primary" id="add-assign-btn" style="display:none;" onclick="openAddAssignment()">+ เพิ่มใบงาน</button>
     </div>
+    <div id="assign-filter-bar" style="display:none; gap:8px; flex-wrap:wrap; margin-bottom:18px;"></div>
     <div id="assignments-list">กำลังโหลดใบงาน...</div>
   </div>
 
@@ -926,7 +927,8 @@
         <button class="btn btn-sm" style="background: #fff; color: #2e7d32; border: none; font-weight: 700;" onclick="runLabCode()" id="lab-run-btn">▶️ Run</button>
         <button class="btn btn-sm" style="background: #c62828; color: white; border: none; display: none;" onclick="stopLabCode()" id="lab-stop-btn">⏹ Stop</button>
         <button class="btn btn-sm" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3);" onclick="resetLab()">🔄 ล้าง</button>
-        <button class="btn btn-sm" style="background: #ffebee; color: #c62828; border: none;" onclick="closeModal('modal-circuit-lab')">✕</button>
+        <button class="btn btn-sm" style="background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3);" onclick="copyLabLink()" title="คัดลอกลิงก์แชร์">🔗 แชร์</button>
+        <button class="btn btn-sm" style="background: #ffebee; color: #c62828; border: none;" onclick="closeLabModal()">✕</button>
       </div>
     </div>
 
@@ -1038,16 +1040,18 @@
 
       <!-- RIGHT: Code Editor + Console -->
       <div class="lab-code-panel">
-        <div class="lab-code-tabs">
+        <div class="lab-code-tabs" style="display:flex; align-items:center;">
           <div class="lab-tab active" id="tab-code" onclick="switchLabTab('code')">📝 โค้ด</div>
           <div class="lab-tab" id="tab-console" onclick="switchLabTab('console')">📺 Console</div>
           <div class="lab-tab" id="tab-mission" onclick="switchLabTab('mission')">🎯 ภารกิจ</div>
+          <button class="ghost-mode-btn" id="ghost-mode-btn" onclick="toggleGhostMode()" title="โหมดพิมพ์โค้ดตามแบบทีละตัวอักษร">✍️ พิมพ์เอง</button>
         </div>
         <!-- Code editor -->
         <div class="lab-code-content" id="lab-content-code">
           <div class="lab-code-editor-wrap">
             <pre class="code-highlight" id="code-highlight" aria-hidden="true"></pre>
-            <textarea class="code-editor" id="code-editor" spellcheck="false" oninput="onCodeInput()" onscroll="syncCodeScroll()" placeholder="# เขียนโค้ด Python ที่นี่..."></textarea>
+            <textarea class="code-editor" id="code-editor" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" oninput="onCodeInput()" onkeydown="onCodeKeyDown(event)" onscroll="syncCodeScroll()" placeholder="# เขียนโค้ด Python ที่นี่..."></textarea>
+            <div class="ghost-progress-bar" id="ghost-progress-bar" style="width:0;display:none;"></div>
           </div>
         </div>
         <!-- Console -->
