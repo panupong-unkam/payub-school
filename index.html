@@ -657,11 +657,16 @@
     
     <div class="form-group" style="margin-bottom: 15px;">
       <label style="font-size: 14px; font-weight: bold; display: block; margin-bottom: 5px; color: var(--text-muted);">📁 แนบไฟล์ผลงานใหม่ (ถ้าต้องการแก้ไข):</label>
-      <input type="file" id="submit-file" style="width: 100%; padding: 10px; border: 2px dashed var(--primary); border-radius: 12px; cursor: pointer; background: #f0fdf4;">
+      <input type="file" id="submit-file" onchange="onSubmitFilePicked(event)" style="width: 100%; padding: 10px; border: 2px dashed var(--primary); border-radius: 12px; cursor: pointer; background: #f0fdf4;">
+      <div id="submit-paste-preview" style="display:none; margin-top: 10px;"></div>
     </div>
 
     <div class="form-group" style="margin-bottom: 15px;">
-      <textarea id="submit-content" placeholder="พิมพ์ข้อความ หรือแนบลิงก์เพิ่มเติม (ถ้ามี)..." style="width: 100%; height: 80px; padding: 14px 16px; border: 2px solid var(--border); border-radius: 12px; font-family: 'Sarabun'; outline: none; transition: 0.3s; resize: none;"></textarea>
+      <textarea id="submit-content" placeholder="พิมพ์ข้อความ หรือแนบลิงก์เพิ่มเติม (ถ้ามี)... 💡 หรือกด Ctrl+V วางรูปจาก clipboard ได้เลย" style="width: 100%; height: 80px; padding: 14px 16px; border: 2px solid var(--border); border-radius: 12px; font-family: 'Sarabun'; outline: none; transition: 0.3s; resize: none;"></textarea>
+      <div style="font-size: 11px; color: var(--text-muted); margin-top: 5px; display: flex; align-items: center; gap: 5px;">
+        <span>💡</span>
+        <span>กด <kbd style="background:#fff;border:1px solid #ccc;border-radius:4px;padding:1px 5px;font-family:monospace;">Ctrl</kbd>+<kbd style="background:#fff;border:1px solid #ccc;border-radius:4px;padding:1px 5px;font-family:monospace;">V</kbd> เพื่อวางรูปจาก clipboard — จะอัปโหลดอัตโนมัติ</span>
+      </div>
     </div>
 
     <div class="form-group" style="margin-bottom: 25px;">
@@ -1140,5 +1145,16 @@
 
 <script src="script.js"></script>
 <script src="scenarios.js"></script>
+<script>
+// ── Ultimate splash failsafe: hide splash after 4 seconds no matter what ──
+// Even if script.js fails to load, this inline script will still run.
+setTimeout(function() {
+    var splash = document.getElementById('splash-screen');
+    if (splash) {
+        splash.classList.add('hide');
+        setTimeout(function() { if (splash.parentNode) splash.parentNode.removeChild(splash); }, 600);
+    }
+}, 4000);
+</script>
 </body>
 </html>
