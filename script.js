@@ -1519,19 +1519,40 @@ async function deleteDriveFolder(id, name) {
     } catch (err) { showToast('❌ ระบบขัดข้อง'); }
 }
 
-window.onload = () => {
-    const saved = localStorage.getItem('payub_user');
-    if (saved) currentUser = JSON.parse(saved);
-    updateUI();
-    loadData();
-    // 🌟 เริ่มระบบเสริมทั้งหมด (Splash, Particles, Stats, Quote, Notifications, Mascot, Keyboard)
-    if (typeof initEnhancements === 'function') initEnhancements();
-    // 🔗 ตรวจสอบ URL parameter ?lab=mX เพื่อเปิด Circuit Lab อัตโนมัติ
-    const labParam = new URLSearchParams(window.location.search).get('lab');
-    if (labParam) {
-        // รอให้ DOM พร้อมก่อนค่อยเปิด Lab
-        setTimeout(() => openCircuitLab(labParam), 800);
+// ── FAILSAFE: always hide splash after 3 seconds, even if something else throws ──
+// This guarantees the user never sees a hanging splash screen.
+setTimeout(() => {
+    const splash = document.getElementById('splash-screen');
+    if (splash && !splash.classList.contains('hide')) {
+        splash.classList.add('hide');
+        setTimeout(() => splash && splash.remove && splash.remove(), 800);
     }
+}, 3000);
+
+window.onload = () => {
+    // Wrap each step in try/catch so one error doesn't break the whole boot sequence
+    try {
+        const saved = localStorage.getItem('payub_user');
+        if (saved) {
+            try { currentUser = JSON.parse(saved); }
+            catch (e) { console.warn('Corrupted user state, clearing:', e); localStorage.removeItem('payub_user'); }
+        }
+    } catch (e) { console.error('Boot step 1 (load user):', e); }
+    try { updateUI(); } catch (e) { console.error('Boot step 2 (updateUI):', e); }
+    try { loadData(); } catch (e) { console.error('Boot step 3 (loadData):', e); }
+    try {
+        if (typeof initEnhancements === 'function') initEnhancements();
+    } catch (e) { console.error('Boot step 4 (initEnhancements):', e); }
+    // Belt-and-suspenders splash hide (in case initEnhancements failed mid-way)
+    setTimeout(() => {
+        const splash = document.getElementById('splash-screen');
+        if (splash) { splash.classList.add('hide'); setTimeout(() => splash.remove && splash.remove(), 600); }
+    }, 1500);
+    // 🔗 URL parameter ?lab=mX to open Circuit Lab directly
+    try {
+        const labParam = new URLSearchParams(window.location.search).get('lab');
+        if (labParam) setTimeout(() => { try { openCircuitLab(labParam); } catch(e){} }, 800);
+    } catch (e) {}
 };
 
 // ==========================================
@@ -4598,22 +4619,25 @@ function renderMissionHelperBanner() {
     if (!banner) return;
     const m = labState.currentMission;
     if (!m) { banner.innerHTML = ''; banner.style.display = 'none'; return; }
-    const wireLabels = m.requiredWires.map(w => {
-        // Resolve readable labels with the actual component icon
-        const formatEndpoint = (ep) => {
-            if (/^(GP\d+|GND|VBUS|3V3|ADC\d)$/.test(ep)) {
-                return `<span class="helper-pin">${ep}</span>`;
-            }
-            const [partKey, pinName] = ep.split(':');
-            const part = PART_DEFS[partKey] ||
-                         Object.values(PART_DEFS).find(p => p.kind === partKey) ||
-                         null;
-            const icon = part ? part.icon : '🧩';
-            return `<span class="helper-part">${icon} ${partKey}<small>:${pinName}</small></span>`;
-        };
-        return `<div class="helper-wire">${formatEndpoint(w.from)} <span class="helper-arrow">━</span> ${formatEndpoint(w.to)}</div>`;
+    const formatEndpoint = (ep) => {
+        if (/^(GP\d+|GND|VBUS|3V3|ADC\d)$/.test(ep)) {
+            return `<span class="helper-pin">${ep}</span>`;
+        }
+        const [partKey, pinName] = ep.split(':');
+        const part = PART_DEFS[partKey] ||
+                     Object.values(PART_DEFS).find(p => p.kind === partKey) ||
+                     null;
+        const icon = part ? part.icon : '🧩';
+        return `<span class="helper-part">${icon} ${partKey}<small>:${pinName}</small></span>`;
+    };
+    const wireLabels = (m.requiredWires || []).map(w =>
+        `<div class="helper-wire">${formatEndpoint(w.from)} <span class="helper-arrow">━</span> ${formatEndpoint(w.to)}</div>`
+    ).join('');
+    const pathLabels = (m.requiredPaths || []).map(p => {
+        const viaTxt = p.via ? `<small style="opacity:0.7;">ผ่าน ${p.via}</small>` : '';
+        return `<div class="helper-wire">${formatEndpoint(p.from)} <span class="helper-arrow">━</span> ${formatEndpoint(p.to)} ${viaTxt}</div>`;
     }).join('');
-    const partLabels = m.requiredParts.map(p => {
+    const partLabels = (m.requiredParts || []).map(p => {
         const def = PART_DEFS[p];
         return def ? `<span class="helper-need-part">${def.icon} ${def.name}</span>` : '';
     }).join('');
@@ -4624,7 +4648,7 @@ function renderMissionHelperBanner() {
         </div>
         <div class="helper-row helper-row-wires">
             <span class="helper-label">🔌 ต่อสาย:</span>
-            <div class="helper-wires-list">${wireLabels}</div>
+            <div class="helper-wires-list">${wireLabels}${pathLabels}</div>
         </div>
     `;
 }
@@ -4632,8 +4656,9 @@ function renderMissionHelperBanner() {
 function renderMissionDetail() {
     const m = labState.currentMission;
     if (!m) return;
-    const wiresHtml = m.requiredWires.map(w => `<li>${w.from} → ${w.to}</li>`).join('');
-    const partsHtml = m.requiredParts.map(p => `<li>${PART_DEFS[p]?.icon || ''} ${PART_DEFS[p]?.name || p}</li>`).join('');
+    const wiresHtml = (m.requiredWires || []).map(w => `<li>${w.from} → ${w.to}</li>`).join('');
+    const pathsHtml = (m.requiredPaths || []).map(p => `<li>${p.from} → ${p.to}${p.via ? ` <em style="opacity:0.7;">(ผ่าน ${p.via})</em>` : ''}</li>`).join('');
+    const partsHtml = (m.requiredParts || []).map(p => `<li>${PART_DEFS[p]?.icon || ''} ${PART_DEFS[p]?.name || p}</li>`).join('');
     document.getElementById('lab-mission-detail').innerHTML = `
         <h3 style="color:#ffd97d; margin-bottom: 12px;">${m.icon} ${m.title}</h3>
         <p style="color: #d4d4d4; margin-bottom: 16px; line-height: 1.6;">${m.desc}</p>
@@ -4643,7 +4668,7 @@ function renderMissionDetail() {
         </div>
         <div class="mission-section">
             <h4>🔌 การต่อสายที่ต้องการ</h4>
-            <ul>${wiresHtml}</ul>
+            <ul>${wiresHtml}${pathsHtml}</ul>
         </div>
         <div class="mission-section">
             <h4>💻 เคล็ดลับ</h4>
@@ -4700,9 +4725,14 @@ function drawPicoBoard() {
     const mission = labState.currentMission;
     const requiredPinNames = new Set();
     if (mission) {
-        mission.requiredWires.forEach(w => {
-            if (/^(GP\d+|GND|VBUS|3V3|ADC\d)$/.test(w.from)) requiredPinNames.add(w.from);
-            if (/^(GP\d+|GND|VBUS|3V3|ADC\d)$/.test(w.to))   requiredPinNames.add(w.to);
+        const pinRe = /^(GP\d+|GND|VBUS|3V3|ADC\d)$/;
+        (mission.requiredWires || []).forEach(w => {
+            if (pinRe.test(w.from)) requiredPinNames.add(w.from);
+            if (pinRe.test(w.to))   requiredPinNames.add(w.to);
+        });
+        (mission.requiredPaths || []).forEach(p => {
+            if (pinRe.test(p.from)) requiredPinNames.add(p.from);
+            if (pinRe.test(p.to))   requiredPinNames.add(p.to);
         });
     }
 
@@ -7293,14 +7323,12 @@ function checkMissionCompletion() {
     const partsOk = (m.requiredParts || []).every(p => placedTypes.includes(p));
     const allWired = (typeof validateWiring === 'function') ? validateWiring(m).length === 0 : true;
     const codeRan = labState.simTime > 0;
-    
     const checks = [
         { label: 'วางชิ้นส่วนครบ', ok: partsOk },
         { label: 'ต่อสายถูกต้อง', ok: allWired },
         { label: 'รันโค้ดแล้ว', ok: codeRan }
     ];
     const allOk = checks.every(c => c.ok);
-    
     if (area) {
         area.innerHTML = `<div style="margin-top:16px;border-top:1px solid rgba(255,255,255,0.1);padding-top:12px;">
             <h4 style="color:#ffd97d;margin-bottom:10px;">✅ ผลการตรวจ</h4>
@@ -7313,3 +7341,128 @@ function checkMissionCompletion() {
         }
     }
 }
+
+// ============================================================
+// 📋 Ctrl+V Paste Image → Submission Upload
+// Lets students paste a clipboard screenshot directly into the
+// submission modal. The pasted image is converted to a File and
+// assigned to #submit-file, so uploadAndSubmit() handles it
+// using the existing GAS upload + Drive flow (naming pattern
+// student_no_fullName_filename is preserved unchanged).
+// ============================================================
+function _pasteImageHandler(e) {
+    // Only act when the submission modal is open
+    const modal = document.getElementById('modal-submit-work');
+    if (!modal || !modal.classList.contains('show')) return;
+    const cd = e.clipboardData || (e.originalEvent && e.originalEvent.clipboardData);
+    if (!cd || !cd.items) return;
+    for (const item of cd.items) {
+        if (item && item.type && item.type.indexOf('image') === 0) {
+            const blob = item.getAsFile();
+            if (blob) {
+                e.preventDefault();
+                _attachPastedImage(blob);
+                return;
+            }
+        }
+    }
+}
+function _attachPastedImage(blob) {
+    // Build a sensible filename: paste_YYYYMMDD_HHmmss.ext
+    const now = new Date();
+    const p2 = n => String(n).padStart(2, '0');
+    const stamp = `${now.getFullYear()}${p2(now.getMonth()+1)}${p2(now.getDate())}_${p2(now.getHours())}${p2(now.getMinutes())}${p2(now.getSeconds())}`;
+    let ext = (blob.type.split('/')[1] || 'png').toLowerCase();
+    if (ext === 'jpeg') ext = 'jpg';
+    const filename = `paste_${stamp}.${ext}`;
+    let file;
+    try {
+        file = new File([blob], filename, { type: blob.type });
+    } catch (_) {
+        // Older browsers: fall back to assigning the blob as-is on the input via DataTransfer
+        file = blob;
+        file.name = filename;
+    }
+    // Assign to the hidden file input so uploadAndSubmit() picks it up automatically
+    const fileInput = document.getElementById('submit-file');
+    if (fileInput && typeof DataTransfer !== 'undefined') {
+        try {
+            const dt = new DataTransfer();
+            dt.items.add(file);
+            fileInput.files = dt.files;
+        } catch (err) {
+            // Some browsers (esp. Safari) restrict assigning to .files — keep going,
+            // the preview + global pasted-file fallback covers this case.
+            console.warn('DataTransfer assign failed:', err);
+        }
+    }
+    // Stash on a global so uploadAndSubmit can pick it up if .files assignment failed
+    window._pastedSubmissionFile = file;
+    _showPastePreview(file);
+    if (typeof showToast === 'function') showToast('📋 รูปจาก clipboard ถูกแนบแล้ว!');
+}
+function _showPastePreview(file) {
+    const preview = document.getElementById('submit-paste-preview');
+    if (!preview) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const sizeKB = Math.round(file.size / 1024);
+        preview.innerHTML = `
+            <div style="display:flex; gap:12px; align-items:center; padding:10px; background:#e8f5e9; border:2px solid #66bb6a; border-radius:12px;">
+                <img src="${e.target.result}" alt="preview" style="width:90px; height:90px; object-fit:cover; border-radius:8px; border:1px solid #ccc; background:#fff;">
+                <div style="flex:1; min-width:0;">
+                    <div style="font-size:11px; color:#2e7d32; font-weight:bold;">📋 รูปจาก Clipboard</div>
+                    <div style="font-size:13px; font-weight:bold; color:#1b5e20; margin-top:2px; word-break:break-all;">${file.name}</div>
+                    <div style="font-size:11px; color:#558b2f; margin-top:2px;">${sizeKB} KB • ${file.type || 'image'}</div>
+                </div>
+                <button type="button" onclick="clearPastePreview()" style="background:#ffebee; color:#c62828; border:none; border-radius:8px; padding:8px 12px; cursor:pointer; font-weight:bold; font-size:13px;" title="ลบรูปที่วางไว้">✕</button>
+            </div>`;
+        preview.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+}
+function clearPastePreview() {
+    const preview = document.getElementById('submit-paste-preview');
+    if (preview) { preview.style.display = 'none'; preview.innerHTML = ''; }
+    const fileInput = document.getElementById('submit-file');
+    if (fileInput) { try { fileInput.value = ''; } catch(_){} }
+    window._pastedSubmissionFile = null;
+}
+// Called from <input onchange="..."> when the user picks a file manually —
+// any prior pasted-image preview is no longer relevant.
+function onSubmitFilePicked(event) {
+    const preview = document.getElementById('submit-paste-preview');
+    if (preview) { preview.style.display = 'none'; preview.innerHTML = ''; }
+    window._pastedSubmissionFile = null;
+}
+// Attach the global paste listener once
+if (!window._pasteHandlerAttached) {
+    document.addEventListener('paste', _pasteImageHandler);
+    window._pasteHandlerAttached = true;
+}
+
+// Auto-clear paste preview when the submission modal opens fresh
+// (purely additive — doesn't modify openSubmitModal which sets submit-file.value='')
+(function _watchSubmitModal() {
+    const start = () => {
+        const modal = document.getElementById('modal-submit-work');
+        if (!modal || typeof MutationObserver === 'undefined') return;
+        let wasShown = modal.classList.contains('show');
+        new MutationObserver(() => {
+            const isShown = modal.classList.contains('show');
+            if (isShown && !wasShown) {
+                // Modal just opened — clear stale paste preview if file input is empty
+                const fi = document.getElementById('submit-file');
+                if (!fi || !fi.files || !fi.files.length) {
+                    clearPastePreview();
+                }
+            }
+            wasShown = isShown;
+        }).observe(modal, { attributes: true, attributeFilter: ['class'] });
+    };
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', start);
+    } else {
+        start();
+    }
+})();
