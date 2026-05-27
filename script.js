@@ -4159,7 +4159,7 @@ while True:
     },
     c: {
         default: `void setup() {
-    pinMode(2, OUTPUT);    // GROVE 2 — Signal1
+    pinMode(2, OUTPUT);    // GROVE 2  Signal1
 }
 
 void loop() {
@@ -4170,7 +4170,7 @@ void loop() {
 }
 `,
         m1: `void setup() {
-    pinMode(2, OUTPUT);    // GROVE 2 — Signal1
+    pinMode(2, OUTPUT);    // GROVE 2  Signal1
 }
 
 void loop() {
@@ -4181,9 +4181,9 @@ void loop() {
 }
 `,
         m2: `void setup() {
-    pinMode(2, OUTPUT);    // GROVE 2 — red
-    pinMode(4, OUTPUT);    // GROVE 3 — yellow
-    pinMode(6, OUTPUT);    // GROVE 4 — green
+    pinMode(2, OUTPUT);    // GROVE 2  red
+    pinMode(4, OUTPUT);    // GROVE 3  yellow
+    pinMode(6, OUTPUT);    // GROVE 4  green
 }
 
 void loop() {
@@ -4199,21 +4199,21 @@ void loop() {
 }
 `,
         m3: `void setup() {
-    pinMode(2, OUTPUT);    // GROVE 2 — LED
-    pinMode(4, INPUT);     // GROVE 3 — Button
+    pinMode(2, OUTPUT);    // GROVE 2  LED
+    pinMode(4, INPUT);     // GROVE 3  Button
 }
 
 void loop() {
     if (digitalRead(4) == HIGH) {
-        digitalWrite(2, HIGH);  // กดปุ่ม → LED ติด
+        digitalWrite(2, HIGH);  // กดปุ่ม  LED ติด
     } else {
-        digitalWrite(2, LOW);   // ปล่อยปุ่ม → LED ดับ
+        digitalWrite(2, LOW);   // ปล่อยปุ่ม  LED ดับ
     }
     delay(50);  // อ่านค่าทุก 50ms
 }
 `,
         m4: `void setup() {
-    pinMode(6, OUTPUT);    // GROVE 4 — Signal1
+    pinMode(6, OUTPUT);    // GROVE 4 Signal1
 }
 
 void loop() {
@@ -4227,8 +4227,8 @@ void loop() {
 }
 `,
         m5: `void setup() {
-    pinMode(2, OUTPUT);    // GROVE 2 — LED
-    pinMode(26, INPUT);    // GROVE 6 — ADC0 (LDR)
+    pinMode(2, OUTPUT);    // GROVE 2  LED
+    pinMode(26, INPUT);    // GROVE 6  ADC0 (LDR)
 }
 
 void loop() {
@@ -4245,7 +4245,7 @@ void loop() {
 Servo myServo;
 
 void setup() {
-    myServo.attach(12);    // S1 Signal — GP12 (5V จาก VBUS)
+    myServo.attach(12);    // S1 Signal  GP12 (5V จาก VBUS)
 }
 
 void loop() {
@@ -4258,8 +4258,8 @@ void loop() {
 }
 `,
         m7: `void setup() {
-    pinMode(16, OUTPUT);   // GROVE 5 — Pump
-    pinMode(26, INPUT);    // GROVE 6 — ADC0 (Soil)
+    pinMode(16, OUTPUT);   // GROVE 5  Pump
+    pinMode(26, INPUT);    // GROVE 6  ADC0 (Soil)
 }
 
 void loop() {
@@ -4291,8 +4291,8 @@ void loop() {
 }
 `,
         m10: `void setup() {
-    pinMode(8, OUTPUT);   // MOTOR 1 — IN1
-    pinMode(9, OUTPUT);   // MOTOR 1 — IN2
+    pinMode(8, OUTPUT);   // MOTOR 1  IN1
+    pinMode(9, OUTPUT);   // MOTOR 1  IN2
 }
 
 void loop() {
@@ -4318,10 +4318,10 @@ void loop() {
 Servo myServo;
 
 void setup() {
-    pinMode(4, OUTPUT);    // GROVE 3 — TRIG
-    pinMode(5, INPUT);     // GROVE 3 — ECHO
-    myServo.attach(12);    // S1 Signal — GP12
-    pinMode(6, OUTPUT);    // GROVE 4 — Buzzer
+    pinMode(4, OUTPUT);    // GROVE 3  TRIG
+    pinMode(5, INPUT);     // GROVE 3  ECHO
+    myServo.attach(12);    // S1 Signal  GP12
+    pinMode(6, OUTPUT);    // GROVE 4  Buzzer
 }
 
 void loop() {
