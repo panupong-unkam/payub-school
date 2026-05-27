@@ -4014,9 +4014,9 @@ while True:
         m2: `from machine import Pin
 import time
 
-red    = Pin(2, Pin.OUT)   # GROVE 2 — Signal1
-yellow = Pin(4, Pin.OUT)   # GROVE 3 — Signal1
-green  = Pin(6, Pin.OUT)   # GROVE 4 — Signal1
+red    = Pin(2, Pin.OUT)   # GROVE 2  Signal1
+yellow = Pin(4, Pin.OUT)   # GROVE 3  Signal1
+green  = Pin(6, Pin.OUT)   # GROVE 4  Signal1
 
 while True:
     red.on()
@@ -4032,8 +4032,8 @@ while True:
         m3: `from machine import Pin
 import time
 
-led = Pin(2, Pin.OUT)   # GROVE 2 — Signal1
-btn = Pin(4, Pin.IN)    # GROVE 3 — Signal1
+led = Pin(2, Pin.OUT)   # GROVE 2  Signal1
+btn = Pin(4, Pin.IN)    # GROVE 3  Signal1
 
 while True:
     if btn.value() == 1:
@@ -4045,7 +4045,7 @@ while True:
         m4: `from machine import Pin
 import time
 
-buzzer = Pin(6, Pin.OUT)   # GROVE 4 — Signal1
+buzzer = Pin(6, Pin.OUT)   # GROVE 4  Signal1
 
 while True:
     # เล่นเสียงสั้น ๆ 5 ครั้ง
@@ -4059,8 +4059,8 @@ while True:
         m5: `from machine import Pin, ADC
 import time
 
-ldr = ADC(26)              # GROVE 6 — ADC0
-led = Pin(2, Pin.OUT)      # GROVE 2 — Signal1
+ldr = ADC(26)              # GROVE 6  ADC0
+led = Pin(2, Pin.OUT)      # GROVE 2  Signal1
 
 while True:
     light = ldr.read_u16()
@@ -4073,7 +4073,7 @@ while True:
         m6: `from machine import Pin, PWM
 import time
 
-servo = PWM(Pin(12))       # S1 Connector — Signal (GP12)
+servo = PWM(Pin(12))       # S1 Connector  Signal (GP12)
 servo.freq(50)             # ความถี่ 50 Hz สำหรับ Servo
 
 while True:
@@ -4088,8 +4088,8 @@ while True:
         m7: `from machine import Pin, ADC
 import time
 
-soil = ADC(26)             # GROVE 6 — ADC0 (Soil Sensor)
-pump = Pin(16, Pin.OUT)    # GROVE 5 — Signal1 (Water Pump)
+soil = ADC(26)             # GROVE 6  ADC0 (Soil Sensor)
+pump = Pin(16, Pin.OUT)    # GROVE 5  Signal1 (Water Pump)
 
 while True:
     moisture = soil.read_u16()
@@ -4103,7 +4103,7 @@ while True:
         m8: `from machine import Pin
 import time
 
-dht = Pin(4)               # GROVE 3 — Signal1 (DHT11)
+dht = Pin(4)               # GROVE 3  Signal1 (DHT11)
 
 while True:
     temp = dht.read_temp()       # อุณหภูมิ (°C)
@@ -4114,8 +4114,8 @@ while True:
         m10: `from machine import Pin
 import time
 
-in1 = Pin(8, Pin.OUT)   # MOTOR 1 — IN1 (GP8)
-in2 = Pin(9, Pin.OUT)   # MOTOR 1 — IN2 (GP9)
+in1 = Pin(8, Pin.OUT)   # MOTOR 1  IN1 (GP8)
+in2 = Pin(9, Pin.OUT)   # MOTOR 1  IN2 (GP9)
 
 while True:
     # หมุนไปข้างหน้า (CW)
@@ -4138,10 +4138,10 @@ while True:
         m9: `from machine import Pin, PWM
 import time
 
-trig   = Pin(4, Pin.OUT)   # GROVE 3 — Signal1 (HC-SR04 TRIG)
-echo   = Pin(5, Pin.IN)    # GROVE 3 — Signal2 (HC-SR04 ECHO)
-servo  = PWM(Pin(12))      # S1 Connector — Signal (GP12)
-buzzer = Pin(6, Pin.OUT)   # GROVE 4 — Signal1
+trig   = Pin(4, Pin.OUT)   # GROVE 3 Signal1 (HC-SR04 TRIG)
+echo   = Pin(5, Pin.IN)    # GROVE 3 Signal2 (HC-SR04 ECHO)
+servo  = PWM(Pin(12))      # S1 Connector Signal (GP12)
+buzzer = Pin(6, Pin.OUT)   # GROVE 4  Signal1
 
 servo.freq(50)
 
@@ -4273,7 +4273,7 @@ void loop() {
 }
 `,
         m8: `#include <DHT.h>
-DHT dht(4, DHT11);         // GROVE 3 — Signal1
+DHT dht(4, DHT11);         // GROVE 3  Signal1
 
 void setup() {
     Serial.begin(9600);
@@ -4407,7 +4407,7 @@ const LAB_MISSIONS = [
         id: 'm6', num: 6, icon: '🦾', diff: 'medium',
         title: 'Servo Control',
         short: 'หมุน Servo SG90 ผ่าน S1 Connector (GP12, VBUS 5V)',
-        desc: 'เป้าหมาย: ต่อ Servo เข้า S1 Connector — Signal→GP12, VCC→VBUS (5V), GND→GND แล้วใช้ PWM หมุน 0°→90°→180°',
+        desc: 'เป้าหมาย: ต่อ Servo เข้า S1 Connector  Signal→GP12, VCC→VBUS (5V), GND→GND แล้วใช้ PWM หมุน 0°→90°→180°',
         requiredParts: ['servo'],
         requiredWires: [{from:'GP12', to:'servo:sig'}],
         goal: { pinUsed: 12 }
