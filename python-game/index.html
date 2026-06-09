@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎮 Python 3D Adventure — เรียน Python ผ่านเกม 3 มิติ</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Noto+Serif+Thai:wght@400;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="game-style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="shared/supabase-client.js"></script>
+<script src="shared/levels-data.js"></script>
+</head>
+<body>
+
+<!-- 🌌 BACKGROUND CANVAS (Stars / Particles) -->
+<canvas id="bg-canvas"></canvas>
+
+<!-- 🧭 TOP BAR -->
+<header class="game-topbar">
+  <a href="../index.html" class="back-btn">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+    กลับสู่หน้าหลัก
+  </a>
+  <div class="topbar-title">
+    <span class="topbar-emoji">🐍</span>
+    <div>
+      <div class="topbar-name">Python 3D Adventure</div>
+      <div class="topbar-sub">เรียน Python ผ่านการผจญภัยในโลก 3 มิติ</div>
+    </div>
+  </div>
+  <div class="player-stats">
+    <div class="stat-pill"><span>⭐</span> <b id="xp-count">0</b> XP</div>
+    <div class="stat-pill"><span>🏆</span> <b id="lv-cleared">0</b>/12</div>
+    <div class="stat-pill"><span>🔥</span> <b id="streak">0</b> วัน</div>
+  </div>
+</header>
+
+<!-- 🎯 HERO -->
+<section class="game-hero">
+  <div class="hero-bg-orbs">
+    <span class="orb orb-1"></span>
+    <span class="orb orb-2"></span>
+    <span class="orb orb-3"></span>
+  </div>
+  <div class="hero-content">
+    <div class="hero-badge">✨ ใหม่ล่าสุด · เปิดให้เล่นแล้ว</div>
+    <h1>เขียน <span class="hero-py">Python</span> เพื่อพาตัวละครฝ่าด่าน 3 มิติ</h1>
+    <p class="hero-desc">
+      ต่อยอดจาก Python Lab — ใช้ความรู้ที่เรียนมา <b>ควบคุมหุ่นยนต์</b> ในโลก 3 มิติจริงๆ
+      เริ่มจากคำสั่งง่ายๆ อย่าง <code>move_forward()</code> ไปจนถึง AI, การวางแผนเส้นทาง และ OOP
+    </p>
+    <div class="hero-cta">
+      <a href="level.html?level=1" class="btn-hero btn-hero-primary">
+        ▶️ เริ่มด่านแรก
+      </a>
+      <a href="multiplayer/lobby.html" class="btn-hero btn-hero-ghost">
+        ⚔️ เล่นออนไลน์ 2 คน
+      </a>
+      <a href="avatar/index.html" class="btn-hero btn-hero-ghost">
+        👕 แต่งตัวละคร
+      </a>
+    </div>
+  </div>
+  <div class="hero-preview">
+    <div class="hero-screen">
+      <div class="hero-screen-top">
+        <span class="dot dot-r"></span>
+        <span class="dot dot-y"></span>
+        <span class="dot dot-g"></span>
+        <span class="screen-title">main.py — Level 1</span>
+      </div>
+      <pre class="hero-code"><span class="c-com"># เก็บเหรียญทอง 3 อัน</span>
+<span class="c-key">for</span> i <span class="c-key">in</span> <span class="c-fn">range</span>(<span class="c-num">3</span>):
+    robot.<span class="c-fn">move_forward</span>()
+    robot.<span class="c-fn">turn_right</span>()
+    robot.<span class="c-fn">pick_coin</span>()</pre>
+      <div class="hero-screen-foot">
+        <span class="run-led"></span> Ready · Pyodide 0.25
+      </div>
+    </div>
+    <div class="hero-screen-bot">
+      <span>🤖</span>
+      <span class="speech">ภารกิจสำเร็จ! ได้ +30 XP</span>
+    </div>
+  </div>
+</section>
+
+<!-- 📊 WHY SECTION -->
+<section class="why-grid">
+  <div class="why-card">
+    <div class="why-icon">🎯</div>
+    <h3>เรียนจากการทำ</h3>
+    <p>ไม่ใช่อ่านทฤษฎีแล้วลืม — ต้องเขียน Python ให้ตัวละครเคลื่อนที่จริง ถ้าโค้ดผิดก็เห็นทันที</p>
+  </div>
+  <div class="why-card">
+    <div class="why-icon">🧱</div>
+    <h3>ไล่ระดับช้าๆ</h3>
+    <p>เริ่มจาก 4 คำสั่งพื้นฐาน → loop → if → function → list → OOP → AI ตามหลักสูตร 24 บท</p>
+  </div>
+  <div class="why-card">
+    <div class="why-icon">🌐</div>
+    <h3>รันบนเบราว์เซอร์</h3>
+    <p>ไม่ต้องลง Python — ใช้ Three.js + Pyodide ทุกอย่างทำงานบนเครื่องนักเรียนเลย</p>
+  </div>
+  <div class="why-card">
+    <div class="why-icon">🏅</div>
+    <h3>XP & เหรียญรางวัล</h3>
+    <p>เก็บคะแนน · ปลดล็อกสกินตัวละคร · จัดอันดับในห้องเรียน · แชร์ผลงานให้เพื่อน</p>
+  </div>
+</section>
+
+<!-- 🗺️ WORLDS / LEVEL MAP -->
+<section id="worlds" class="worlds-section">
+  <div class="worlds-head">
+    <h2>🗺️ แผนที่การผจญภัย</h2>
+    <p>12 ด่าน · 3 โลก · เรียง concept ตามหลักสูตร Python Lab</p>
+  </div>
+
+  <!-- WORLD 1: BASICS -->
+  <div class="world-block world-1">
+    <div class="world-banner">
+      <div class="world-emoji">🌱</div>
+      <div class="world-info">
+        <div class="world-eyebrow">โลกที่ 1 · พื้นฐาน</div>
+        <h3>ป่าแห่งคำสั่งแรก</h3>
+        <p>คำสั่งพื้นฐาน · ลูป · เงื่อนไข — ต่อยอดจากบทเรียนที่ 1-8</p>
+      </div>
+      <div class="world-progress">
+        <div class="world-progress-bar"><span style="width:0%"></span></div>
+        <div class="world-progress-text">0/4 ด่าน</div>
+      </div>
+    </div>
+
+    <div class="levels-grid">
+      <a href="level.html?level=1" class="level-card unlocked">
+        <div class="level-num">01</div>
+        <div class="level-thumb thumb-forest">
+          <div class="level-3d-mini">🤖</div>
+          <div class="level-tag">ทดลองได้</div>
+        </div>
+        <div class="level-body">
+          <h4>เดินป่าครั้งแรก</h4>
+          <p>เรียกใช้ฟังก์ชัน · เคลื่อนที่ไปข้างหน้า · เลี้ยว</p>
+          <div class="level-meta">
+            <span class="meta-chip">📚 บทที่ 1-2</span>
+            <span class="meta-chip">⭐ +30 XP</span>
+          </div>
+          <div class="level-cta">▶️ เริ่มเล่น</div>
+        </div>
+      </a>
+
+      <div class="level-card locked">
+        <div class="level-num">02</div>
+        <div class="level-thumb thumb-cave">
+          <div class="level-3d-mini">🪙</div>
+          <div class="level-lock">🔒</div>
+        </div>
+        <div class="level-body">
+          <h4>เก็บเหรียญในถ้ำ</h4>
+          <p>for loop · นับซ้ำ · เก็บไอเทมหลายชิ้น</p>
+          <div class="level-meta">
+            <span class="meta-chip">📚 บทที่ 6</span>
+            <span class="meta-chip">⭐ +50 XP</span>
+          </div>
+          <div class="level-cta">🔒 ผ่านด่าน 1 ก่อน</div>
+        </div>
+      </div>
+
+      <div class="level-card locked">
+        <div class="level-num">03</div>
+        <div class="level-thumb thumb-river">
+          <div class="level-3d-mini">🌉</div>
+          <div class="level-lock">🔒</div>
+        </div>
+        <div class="level-body">
+          <h4>สะพานเงื่อนไข</h4>
+          <p>if/elif/else · ตัดสินใจตามสภาพแวดล้อม</p>
+          <div class="level-meta">
+            <span class="meta-chip">📚 บทที่ 5</span>
+            <span class="meta-chip">⭐ +70 XP</span>
+          </div>
+          <div class="level-cta">🔒 ล็อก</div>
+        </div>
+      </div>
+
+      <div class="level-card locked">
+        <div class="level-num">04</div>
+        <div class="level-thumb thumb-boss">
+          <div class="level-3d-mini">🐉</div>
+          <div class="level-lock">🔒</div>
+        </div>
+        <div class="level-body">
+          <h4>BOSS: ราชาเขาวงกต</h4>
+          <p>รวมทุกคำสั่ง · while loop · หาทางออกจาก maze</p>
+          <div class="level-meta">
+            <span class="meta-chip">📚 บทที่ 7</span>
+            <span class="meta-chip">⭐ +120 XP</span>
+            <span class="meta-chip chip-boss">👑 BOSS</span>
+          </div>
+          <div class="level-cta">🔒 ล็อก</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WORLD 2: DATA -->
+  <div class="world-block world-2">
+    <div class="world-banner">
+      <div class="world-emoji">🚀</div>
+      <div class="world-info">
+        <div class="world-eyebrow">โลกที่ 2 · ข้อมูล</div>
+        <h3>เมืองแห่งข้อมูล</h3>
+        <p>List · Dictionary · ฟังก์ชัน · File I/O — ต่อยอดจากบทที่ 9-16</p>
+      </div>
+      <div class="world-progress">
+        <div class="world-progress-bar"><span style="width:0%"></span></div>
+        <div class="world-progress-text">0/4 ด่าน</div>
+      </div>
+    </div>
+
+    <div class="levels-grid">
+      <div class="level-card locked">
+        <div class="level-num">05</div>
+        <div class="level-thumb thumb-city">
+          <div class="level-3d-mini">📦</div>
+          <div class="level-lock">🔒</div>
+        </div>
+        <div class="level-body">
+          <h4>คลังสินค้า List</h4>
+          <p>เก็บไอเทมในรายการ · ใช้ index · เพิ่ม/ลบของ</p>
+          <div class="level-meta"><span class="meta-chip">📚 บทที่ 9</span><span class="meta-chip">⭐ +90 XP</span></div>
+          <div class="level-cta">🔒 ล็อก</div>
+        </div>
+      </div>
+      <div class="level-card locked">
+        <div class="level-num">06</div>
+        <div class="level-thumb thumb-market">
+          <div class="level-3d-mini">🗝️</div>
+          <div class="level-lock">🔒</div>
+        </div>
+        <div class="level-body">
+          <h4>ตลาด Dictionary</h4>
+          <p>key:value · ค้นหาด้วยชื่อ · จัดการสต็อก</p>
+          <div class="level-meta"><span class="meta-chip">📚 บทที่ 11</span><span class="meta-chip">⭐ +100 XP</span></div>
+          <div class="level-cta">🔒 ล็อก</div>
+        </div>
+      </div>
+      <div class="level-card locked">
+        <div class="level-num">07</div>
+        <div class="level-thumb thumb-temple">
+          <div class="level-3d-mini">⚙️</div>
+          <div class="level-lock">🔒</div>
+        </div>
+        <div class="level-body">
+          <h4>วิหารฟังก์ชัน</h4>
+          <p>def · return · parameters · สร้างคำสั่งของตัวเอง</p>
+          <div class="level-meta"><span class="meta-chip">📚 บทที่ 13</span><span class="meta-chip">⭐ +110 XP</span></div>
+          <div class="level-cta">🔒 ล็อก</div>
+        </div>
+      </div>
+      <div class="level-card locked">
+        <div class="level-num">08</div>
+        <div class="level-thumb thumb-boss">
+          <div class="level-3d-mini">💎</div>
+          <div class="level-lock">🔒</div>
+        </div>
+        <div class="level-body">
+          <h4>BOSS: ผู้พิทักษ์อัญมณี</h4>
+          <p>รวม List + Dict + Function · จัดเรียงและประมวลผลข้อมูล</p>
+          <div class="level-meta"><span class="meta-chip">📚 บทที่ 14</span><span class="meta-chip">⭐ +180 XP</span><span class="meta-chip chip-boss">👑 BOSS</span></div>
+          <div class="level-cta">🔒 ล็อก</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WORLD 3: ADVANCED -->
+  <div class="world-block world-3">
+    <div class="world-banner">
+      <div class="world-emoji">⭐</div>
+      <div class="world-info">
+        <div class="world-eyebrow">โลกที่ 3 · ขั้นสูง</div>
+        <h3>มิติแห่ง OOP &amp; AI</h3>
+        <p>Class · Inheritance · A* Pathfinding · สร้าง AI ตัวเอง — บทที่ 17-24</p>
+      </div>
+      <div class="world-progress">
+        <div class="world-progress-bar"><span style="width:0%"></span></div>
+        <div class="world-progress-text">0/4 ด่าน</div>
+      </div>
+    </div>
+
+    <div class="levels-grid">
+      <div class="level-card locked">
+        <div class="level-num">09</div>
+        <div class="level-thumb thumb-galaxy">
+          <div class="level-3d-mini">🧬</div>
+          <div class="level-lock">🔒</div>
+        </div>
+        <div class="level-body">
+          <h4>โรงงานคลาส</h4>
+          <p>สร้าง Class Robot ของตัวเอง · ใส่ method · ใช้ self</p>
+          <div class="level-meta"><span class="meta-chip">📚 บทที่ 17</span><span class="meta-chip">⭐ +150 XP</span></div>
+          <div class="level-cta">🔒 ล็อก</div>
+        </div>
+      </div>
+      <div class="level-card locked">
+        <div class="level-num">10</div>
+        <div class="level-thumb thumb-galaxy">
+          <div class="level-3d-mini">🧠</div>
+          <div class="level-lock">🔒</div>
+        </div>
+        <div class="level-body">
+          <h4>มรดกของหุ่นยนต์</h4>
+          <p>Inheritance · สร้างหุ่นยนต์รุ่นใหม่จากของเก่า</p>
+          <div class="level-meta"><span class="meta-chip">📚 บทที่ 18</span><span class="meta-chip">⭐ +170 XP</span></div>
+          <div class="level-cta">🔒 ล็อก</div>
+        </div>
+      </div>
+      <div class="level-card locked">
+        <div class="level-num">11</div>
+        <div class="level-thumb thumb-galaxy">
+          <div class="level-3d-mini">🛰️</div>
+          <div class="level-lock">🔒</div>
+        </div>
+        <div class="level-body">
+          <h4>AI หาเส้นทาง</h4>
+          <p>เขียน BFS / A* · ให้หุ่นยนต์หาเส้นทางสั้นสุดเอง</p>
+          <div class="level-meta"><span class="meta-chip">📚 บทที่ 22</span><span class="meta-chip">⭐ +220 XP</span></div>
+          <div class="level-cta">🔒 ล็อก</div>
+        </div>
+      </div>
+      <div class="level-card locked">
+        <div class="level-num">12</div>
+        <div class="level-thumb thumb-final">
+          <div class="level-3d-mini">👑</div>
+          <div class="level-lock">🔒</div>
+        </div>
+        <div class="level-body">
+          <h4>FINAL: เกมของฉัน</h4>
+          <p>โปรเจกต์จบ — ออกแบบด่านและ AI ของตัวเอง แชร์ให้เพื่อนเล่น</p>
+          <div class="level-meta"><span class="meta-chip">📚 บทที่ 24</span><span class="meta-chip">⭐ +500 XP</span><span class="meta-chip chip-boss">🌟 FINAL</span></div>
+          <div class="level-cta">🔒 ล็อก</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 🏆 LEADERBOARD PREVIEW -->
+<section class="leaderboard-section">
+  <h2>🏆 อันดับนักผจญภัย (เครื่องนี้)</h2>
+  <div class="lb-list">
+    <div class="lb-row lb-empty">
+      <span class="lb-empty-emoji">🌿</span>
+      ยังไม่มีคะแนน — เป็นคนแรกในห้องที่ผ่านด่าน 1!
+    </div>
+  </div>
+</section>
+
+<footer class="game-footer">
+  <p>Powered by <b>Three.js</b> + <b>Pyodide</b> · พัฒนาโดยครูภาณุพงศ์ อุ่นคำ</p>
+</footer>
+
+<script>
+// Background canvas — particles
+(function(){
+  const c = document.getElementById('bg-canvas');
+  const ctx = c.getContext('2d');
+  let W, H, particles;
+  function resize(){
+    W = c.width = innerWidth;
+    H = c.height = innerHeight;
+  }
+  function init(){
+    particles = Array.from({length: 60}, () => ({
+      x: Math.random()*W,
+      y: Math.random()*H,
+      r: Math.random()*2.5 + 0.5,
+      vx: (Math.random()-0.5)*0.3,
+      vy: (Math.random()-0.5)*0.3,
+      hue: Math.random() < 0.5 ? 145 : 40
+    }));
+  }
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    for(const p of particles){
+      p.x += p.vx; p.y += p.vy;
+      if(p.x<0||p.x>W) p.vx*=-1;
+      if(p.y<0||p.y>H) p.vy*=-1;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+      ctx.fillStyle = `hsla(${p.hue}, 70%, 60%, 0.35)`;
+      ctx.fill();
+    }
+    requestAnimationFrame(draw);
+  }
+  resize(); init(); draw();
+  addEventListener('resize', () => { resize(); init(); });
+})();
+
+// Load progress from localStorage
+(function(){
+  const xp = parseInt(localStorage.getItem('py3d_xp') || '0');
+  const cleared = parseInt(localStorage.getItem('py3d_cleared') || '0');
+  const streak = parseInt(localStorage.getItem('py3d_streak') || '0');
+  document.getElementById('xp-count').textContent = xp;
+  document.getElementById('lv-cleared').textContent = cleared;
+  document.getElementById('streak').textContent = streak;
+})();
+
+// 🔗 SSO bridge: รับ session จากเว็บหลัก (URL hash) + ส่งต่อให้ลิงก์ภายใน
+(async function(){
+  if (!window.PY3D) return;
+  await PY3D.loadUser();
+  if (PY3D.user) console.log('[Py3D] Logged in as:', PY3D.displayName());
+
+  // 🗺️ Auto-rewrite level cards: link + lock state จาก progress
+  rewriteLevelCards();
+  PY3D._rewriteInternalLinks();
+})();
+
+function rewriteLevelCards() {
+  const cards = document.querySelectorAll('.level-card');
+  cards.forEach((card, idx) => {
+    const levelNum = idx + 1;
+    const unlocked = PY3D.isLevelUnlocked(levelNum);
+    const progress = PY3D.getLevelProgress()[levelNum];
+    const cleared = progress && progress.cleared;
+
+    // ลบ class เก่า
+    card.classList.remove('locked', 'unlocked', 'cleared');
+    if (cleared)        card.classList.add('cleared', 'unlocked');
+    else if (unlocked)  card.classList.add('unlocked');
+    else                card.classList.add('locked');
+
+    // อัปเดต thumbnail
+    const lockEl = card.querySelector('.level-lock');
+    let tagEl    = card.querySelector('.level-tag');
+    if (cleared || unlocked) {
+      // ซ่อน 🔒 ถ้ามี
+      if (lockEl) lockEl.style.display = 'none';
+      // สร้างหรืออัปเดต tag
+      if (!tagEl) {
+        tagEl = document.createElement('div');
+        tagEl.className = 'level-tag';
+        card.querySelector('.level-thumb').appendChild(tagEl);
+      }
+      if (cleared) {
+        tagEl.textContent = '✅ ผ่านแล้ว';
+        tagEl.style.background = 'linear-gradient(90deg,#6fdf94,#a5d6a7)';
+        tagEl.style.color = '#0d3d28';
+      } else {
+        tagEl.textContent = '▶️ เล่นได้!';
+        tagEl.style.background = 'linear-gradient(90deg,#f0a500,#ffc233)';
+        tagEl.style.color = '#0d3d28';
+      }
+    }
+
+    // อัปเดต CTA + href
+    const cta = card.querySelector('.level-cta');
+    if (unlocked) {
+      cta.innerHTML = cleared ? '🔁 เล่นซ้ำ' : '▶️ เริ่มเล่น';
+      // wrap ทั้งการ์ดเป็นลิงก์ (replaceElement กับ <a>)
+      if (card.tagName !== 'A') {
+        const a = document.createElement('a');
+        a.href = `level.html?level=${levelNum}`;
+        a.style.cssText = 'text-decoration:none; color:inherit; display:block;';
+        // ต้องการรักษา class เดิม
+        a.className = card.className;
+        a.innerHTML = card.innerHTML;
+        card.replaceWith(a);
+      } else {
+        card.href = `level.html?level=${levelNum}`;
+      }
+    } else {
+      const prevLv = levelNum - 1;
+      cta.innerHTML = `🔒 ผ่านด่าน ${prevLv} ก่อน`;
+    }
+  });
+}
+</script>
+</body>
+</html>
