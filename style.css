@@ -1,4 +1,237 @@
 /* =====================================================
+   ⚡ FEATURED LABS — Cards บนหน้า Dashboard
+   ===================================================== */
+.featured-labs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+    gap: 24px;
+}
+
+.featured-lab-card {
+    position: relative;
+    border-radius: 24px;
+    padding: 32px 28px;
+    text-decoration: none;
+    color: white;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.4s;
+    display: block;
+    min-height: 320px;
+    isolation: isolate;
+}
+
+.featured-lab-card:hover {
+    transform: translateY(-8px) scale(1.01);
+}
+
+/* Python Lab card */
+.featured-lab-card.lab-python {
+    background:
+        linear-gradient(135deg, #306998 0%, #4B8BBE 100%);
+    box-shadow: 0 12px 30px rgba(48, 105, 152, 0.35);
+}
+.featured-lab-card.lab-python:hover {
+    box-shadow: 0 20px 50px rgba(48, 105, 152, 0.5);
+}
+.featured-lab-card.lab-python::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+        radial-gradient(circle at 90% 10%, rgba(255, 212, 59, 0.35), transparent 60%),
+        radial-gradient(circle at 10% 90%, rgba(255, 255, 255, 0.15), transparent 50%);
+    z-index: 0;
+}
+
+/* Circuit Lab card */
+.featured-lab-card.lab-circuit {
+    background:
+        linear-gradient(135deg, #1a5f3f 0%, #2d8a5e 50%, #f0a500 130%);
+    box-shadow: 0 12px 30px rgba(26, 95, 63, 0.35);
+}
+.featured-lab-card.lab-circuit:hover {
+    box-shadow: 0 20px 50px rgba(26, 95, 63, 0.5);
+}
+.featured-lab-card.lab-circuit::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+        radial-gradient(circle at 90% 10%, rgba(240, 165, 0, 0.3), transparent 60%),
+        radial-gradient(circle at 10% 90%, rgba(255, 255, 255, 0.15), transparent 50%);
+    z-index: 0;
+}
+
+/* Decorative emojis floating in background */
+.lab-card-bg-deco {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+}
+.lab-card-bg-deco .deco-emoji {
+    position: absolute;
+    font-size: 100px;
+    opacity: 0.08;
+    user-select: none;
+    transition: opacity 0.4s, transform 0.6s;
+}
+.lab-card-bg-deco .deco-emoji:nth-child(1) { top: -10px; right: -10px; transform: rotate(-15deg); }
+.lab-card-bg-deco .deco-emoji.deco-2 { bottom: -20px; left: -20px; font-size: 70px; transform: rotate(20deg); }
+.lab-card-bg-deco .deco-emoji.deco-3 { top: 50%; right: 40%; font-size: 50px; opacity: 0.05; transform: rotate(45deg); }
+.featured-lab-card:hover .lab-card-bg-deco .deco-emoji {
+    opacity: 0.15;
+    transform: rotate(0deg) scale(1.1);
+}
+
+/* Badge (มุมขวาบน) */
+.lab-card-badge {
+    position: absolute;
+    top: 16px; right: 16px;
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    color: white;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    z-index: 2;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Big icon */
+.lab-card-icon {
+    position: relative;
+    z-index: 1;
+    font-size: 72px;
+    line-height: 1;
+    margin-bottom: 16px;
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.2));
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.featured-lab-card:hover .lab-card-icon {
+    transform: scale(1.15) rotate(-8deg);
+}
+
+/* Content */
+.lab-card-content {
+    position: relative;
+    z-index: 1;
+}
+.lab-card-eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: rgba(255, 255, 255, 0.85);
+    margin-bottom: 4px;
+}
+.lab-card-title {
+    font-family: 'Noto Serif Thai', serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 12px;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+.lab-card-desc {
+    color: rgba(255, 255, 255, 0.92);
+    font-size: 14px;
+    line-height: 1.7;
+    margin-bottom: 22px;
+}
+.lab-card-desc b {
+    color: #FFD43B;
+    background: rgba(0, 0, 0, 0.15);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-weight: 700;
+}
+.featured-lab-card.lab-circuit .lab-card-desc b {
+    color: #FFEB3B;
+}
+
+/* Stats row */
+.lab-card-stats {
+    display: flex;
+    gap: 18px;
+    margin-bottom: 20px;
+    padding: 14px 18px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+.lab-stat-item {
+    flex: 1;
+    text-align: center;
+}
+.lab-stat-num {
+    font-size: 26px;
+    font-weight: 800;
+    color: white;
+    line-height: 1;
+    margin-bottom: 4px;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+.lab-stat-label {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.85);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+/* CTA button */
+.lab-card-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 12px 22px;
+    border-radius: 30px;
+    font-weight: 700;
+    font-size: 15px;
+    border: 1.5px solid rgba(255, 255, 255, 0.4);
+    transition: all 0.3s;
+}
+.featured-lab-card:hover .lab-card-cta {
+    background: white;
+    color: var(--primary-dark);
+    border-color: white;
+    padding: 12px 28px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+.featured-lab-card.lab-python:hover .lab-card-cta {
+    color: #306998;
+}
+.featured-lab-card.lab-circuit:hover .lab-card-cta {
+    color: #1a5f3f;
+}
+.lab-card-cta svg {
+    transition: transform 0.3s;
+}
+.featured-lab-card:hover .lab-card-cta svg {
+    transform: translateX(4px);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .featured-labs-grid { gap: 16px; }
+    .featured-lab-card {
+        padding: 24px 20px;
+        min-height: auto;
+    }
+    .lab-card-icon { font-size: 56px; }
+    .lab-card-title { font-size: 26px; }
+    .lab-card-stats { padding: 12px; gap: 10px; }
+    .lab-stat-num { font-size: 22px; }
+    .lab-card-bg-deco .deco-emoji { font-size: 60px; }
+}
+
+/* =====================================================
    🎨 CSS RESET & DESIGN SYSTEM
    ===================================================== */
 :root {
@@ -1489,10 +1722,116 @@ body.dark-mode .bottom-nav { background: rgba(28, 38, 32, 0.92); }
 }
 .fab-menu.open .fab-main { transform: rotate(135deg); }
 
+/* ========================================================
+   🤖 AI Tutor button — สีม่วงโดดเด่น (อยู่ใน fab-menu)
+   ======================================================== */
+.fab-menu .fab-item-ai {
+    background: linear-gradient(135deg, #9c27b0, #673ab7) !important;
+    color: white !important;
+    border: none !important;
+    box-shadow: 0 4px 15px rgba(123, 31, 162, 0.4) !important;
+    font-size: 22px !important;
+}
+.fab-menu .fab-item-ai:hover {
+    background: linear-gradient(135deg, #ab47bc, #7e57c2) !important;
+    transform: scale(1.15) !important;
+    box-shadow: 0 6px 22px rgba(123, 31, 162, 0.55) !important;
+}
+
+/* ========================================================
+   🔄 OVERRIDE: notif-fab และ mascot เมื่ออยู่ใน fab-menu
+   (ครูเจมส์ขอให้รวมเป็นกลุ่มเดียวด้านล่าง)
+   ======================================================== */
+.fab-menu .fab-item-notif,
+.fab-menu .fab-item-mascot {
+    position: relative !important;
+    top: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    right: auto !important;
+    width: 46px !important;
+    height: 46px !important;
+    border-radius: 50% !important;
+    background: var(--surface) !important;
+    border: 1px solid var(--border) !important;
+    color: var(--text) !important;
+    font-size: 20px !important;
+    cursor: pointer;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow);
+    transition: all 0.3s var(--ease-bounce);
+    animation: none !important;
+    z-index: auto !important;
+}
+.fab-menu .fab-item-notif:hover,
+.fab-menu .fab-item-mascot:hover {
+    transform: scale(1.15) !important;
+    background: var(--gradient-primary) !important;
+    color: white !important;
+    box-shadow: var(--shadow-lg);
+}
+.fab-menu .fab-item-notif .notif-badge {
+    position: absolute;
+    top: -4px; right: -4px;
+    background: var(--danger);
+    color: white;
+    border-radius: 50%;
+    min-width: 18px; height: 18px;
+    font-size: 10px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--surface);
+}
+
+/* mascot bubble ที่อยู่ใน fab-menu ให้แสดงด้านซ้าย */
+.fab-menu .mascot-bubble {
+    position: absolute !important;
+    right: 60px !important;
+    left: auto !important;
+    bottom: 50% !important;
+    top: auto !important;
+    transform: translateY(50%) translateX(10px) !important;
+    background: var(--surface) !important;
+    padding: 10px 14px !important;
+    border-radius: 12px !important;
+    border-bottom-right-radius: 4px !important;
+    border-bottom-left-radius: 12px !important;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+    font-size: 13px !important;
+    color: var(--text) !important;
+    min-width: 180px !important;
+    max-width: 240px !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transition: all 0.3s var(--ease-bounce) !important;
+    border: 1px solid var(--border) !important;
+}
+.fab-menu .mascot-bubble.show {
+    opacity: 1 !important;
+    transform: translateY(50%) translateX(0) !important;
+    pointer-events: auto !important;
+}
+
+/* notif-panel ปรับให้แสดงด้านขวาล่าง (ใกล้ FAB) */
+.notif-panel {
+    bottom: 180px !important;
+    right: 30px !important;
+    top: auto !important;
+}
+
 @media (max-width: 992px) {
     .fab-menu { bottom: 170px; right: 20px; }
     .theme-toggle-fab { display: none; }
     #mobile-home-fab { display: none !important; }
+    .notif-panel {
+        bottom: 250px !important;
+        right: 16px !important;
+        max-width: calc(100vw - 32px);
+    }
 }
 
 /* =====================================================
