@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>บทเรียน Python | โรงเรียนครูเจมส์</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Noto+Serif+Thai:wght@400;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
+<link rel="stylesheet" href="python-style.css">
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="py-topbar">
+  <div class="py-topbar-left">
+    <a href="index.html" class="py-btn-back">⬅️ ห้องเรียน</a>
+    <div class="py-breadcrumb" id="breadcrumb">Python Lab > Level - > บทที่ -</div>
+  </div>
+  <div style="display:flex; gap:10px;">
+    <a href="playground.html" class="py-btn-back">⚡ Playground</a>
+    <button class="py-btn-theme" onclick="pyToggleTheme()">🌓</button>
+  </div>
+</div>
+
+<!-- LESSON LAYOUT -->
+<div class="py-lesson-layout">
+
+  <!-- LEFT: CONTENT -->
+  <div class="py-lesson-content" id="lesson-content">
+    <div class="py-empty">
+      <div class="py-empty-icon">⏳</div>
+      <p>กำลังโหลดบทเรียน...</p>
+    </div>
+  </div>
+
+  <!-- RIGHT: CODE EDITOR + CONSOLE -->
+  <div class="py-editor-panel">
+
+    <div class="py-editor-tabs">
+      <button class="py-editor-tab active">💻 main.py</button>
+    </div>
+
+    <div class="py-editor-box">
+      <div class="py-editor-toolbar">
+        <div class="py-editor-toolbar-left">
+          <span class="py-dot py-dot-r"></span>
+          <span class="py-dot py-dot-y"></span>
+          <span class="py-dot py-dot-g"></span>
+          <span class="py-editor-filename">main.py</span>
+        </div>
+        <div class="py-editor-toolbar-right">
+          <button class="py-tool-btn" id="btn-copy">📋 Copy</button>
+          <button class="py-tool-btn" id="btn-reset">↺ Reset</button>
+        </div>
+      </div>
+      <textarea id="py-code-editor" spellcheck="false" autocomplete="off"></textarea>
+    </div>
+
+    <div class="py-run-bar">
+      <button class="py-btn-run" id="btn-run">▶ Run (Ctrl+Enter)</button>
+      <button class="py-btn-clear" id="btn-clear">🗑️ Clear</button>
+      <div class="py-pyodide-status" id="py-status">
+        <span class="py-status-dot"></span>⏳ กำลังโหลด...
+      </div>
+    </div>
+
+    <div class="py-console">
+      <div class="py-console-header">
+        <div class="py-console-title">
+          <span style="color:#27C93F;">●</span> Console Output
+        </div>
+        <button class="py-tool-btn" style="background:rgba(255,255,255,0.1);" onclick="pyClear()">Clear</button>
+      </div>
+      <div class="py-console-output" id="py-console">
+        <div class="py-out-line py-out-info">// Console พร้อมรับโค้ด — กด ▶ Run เพื่อเริ่ม</div>
+      </div>
+    </div>
+
+    <!-- LESSON NAV -->
+    <div class="py-lesson-nav" id="lesson-nav"></div>
+
+  </div>
+
+</div>
+
+<script src="lessons-data.js"></script>
+<script src="python-engine.js"></script>
+<script>
+let currentLesson = null;
+
+function getLessonId() {
+  const params = new URLSearchParams(location.search);
+  return parseInt(params.get('id') || '1');
+}
+
+function renderLesson() {
+  const id = getLessonId();
+  currentLesson = PYTHON_LESSONS.find(l => l.id === id);
+
+  if (!currentLesson) {
+    document.getElementById('lesson-content').innerHTML = `
+      <div class="py-empty">
+        <div class="py-empty-icon">❌</div>
+        <h2>ไม่พบบทเรียน</h2>
+        <p>ลองกลับไปเลือกบทใหม่</p>
+        <a href="index.html" class="py-btn-back" style="margin-top:20px; display:inline-block;">⬅️ กลับห้องเรียน</a>
+      </div>
+    `;
+    return;
+  }
+
+  window.PY_LESSON_ID = id;
+
+  // Update title and breadcrumb
+  document.title = `บทที่ ${id}: ${currentLesson.title} | Python Lab`;
+  document.getElementById('breadcrumb').textContent =
+    `Python Lab > Level ${currentLesson.level} > บทที่ ${id}`;
+
+  // Helper escape สำหรับใส่ใน HTML attribute
+  const esc = (s) => String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+
+  // Build content
+  const objs = currentLesson.objectives.map(o => `<li>${esc(o)}</li>`).join('');
+  const quizHtml = currentLesson.quiz.map((q, i) => {
+    const opts = q.options.map((opt, oi) =>
+      `<button class="py-quiz-option"
+        data-quiz-id="${i}"
+        data-answer="${oi}"
+        data-correct="${q.correct}"
+        data-explain="${esc(q.explain || '')}">${oi + 1}) ${esc(opt)}</button>`
+    ).join('');
+    return `
+      <div class="py-quiz-box" id="quiz-${i}">
+        <div class="py-quiz-question">❓ คำถามที่ ${i + 1}: ${esc(q.q)}</div>
+        <div class="py-quiz-options">${opts}</div>
+        <div class="py-quiz-feedback"></div>
+      </div>
+    `;
+  }).join('');
+
+  document.getElementById('lesson-content').innerHTML = `
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
+      <div style="background:linear-gradient(135deg,#306998,#FFD43B); color:white; padding:6px 14px; border-radius:20px; font-size:13px; font-weight:600;">
+        Level ${currentLesson.level} · บทที่ ${currentLesson.id}
+      </div>
+      <div style="font-size:13px; color:var(--py-text-muted);">⏱️ ${currentLesson.minutes} นาที · 🎯 ${currentLesson.difficulty}</div>
+    </div>
+    <h1>${currentLesson.icon} ${currentLesson.title}</h1>
+    <p style="color:var(--py-text-muted); font-size:16px; margin-bottom:20px;">${currentLesson.desc}</p>
+
+    <div class="py-callout py-callout-info">
+      <strong>🎯 เป้าหมายของบทนี้</strong>
+      <ul style="margin-top:6px; margin-left:20px;">${objs}</ul>
+    </div>
+
+    <div class="py-callout py-callout-tip">
+      <strong>📊 คะแนนของบทนี้ (เต็ม 10 คะแนน)</strong>
+      <ul style="margin-top:6px; margin-left:20px;">
+        <li><b>🧠 Quiz 5 คะแนน</b> — ทำ Quiz 5 ข้อด้านล่าง (1 ข้อ = 1 คะแนน)</li>
+        <li><b>💻 งาน 5 คะแนน</b> — เขียน/แก้โค้ดตามโจทย์ + รันให้ทำงานได้</li>
+        <li><b>📸 แคปหน้าจอ Console</b> — ส่งเป็นหลักฐานในระบบส่งงาน (ไม่มีคะแนน)</li>
+      </ul>
+    </div>
+
+    ${currentLesson.content}
+
+    <h2>🧠 ทดสอบความเข้าใจ (Quiz 5 ข้อ = 5 คะแนน)</h2>
+    <div id="quiz-score-display" style="background:#EFF6FF; border:2px solid #3B82F6; border-radius:12px; padding:12px 16px; margin-bottom:16px; font-weight:600; color:#1E40AF; text-align:center;">
+      📊 คะแนน Quiz ปัจจุบัน: <span id="quiz-current-score">0</span>/5
+    </div>
+    ${quizHtml}
+
+    <div style="text-align:center; margin-top:30px; padding:20px; background:linear-gradient(135deg,#FFF3CD,#FFE69C); border-radius:12px; border:2px dashed #F59E0B;">
+      <div style="font-size:36px; margin-bottom:8px;">📸</div>
+      <strong style="font-size:16px; color:#92400E;">ทำเสร็จแล้วอย่าลืม!</strong>
+      <p style="color:#92400E; font-size:14px; margin-top:6px;">
+        1. ทำ Quiz ครบ 5 ข้อ<br>
+        2. รันโค้ดให้ทำงานได้<br>
+        3. แคปหน้าจอ Console Output ส่งในระบบ "📤 ระบบส่งงาน" ของเว็บหลัก
+      </p>
+    </div>
+  `;
+
+  // Render nav buttons
+  const prevId = id > 1 ? id - 1 : null;
+  const nextId = id < 24 ? id + 1 : null;
+  const prev = prevId ? PYTHON_LESSONS.find(l => l.id === prevId) : null;
+  const next = nextId ? PYTHON_LESSONS.find(l => l.id === nextId) : null;
+
+  document.getElementById('lesson-nav').innerHTML = `
+    ${prev ? `
+      <a href="lesson.html?id=${prev.id}" class="py-nav-btn">
+        <span>⬅️</span>
+        <span>
+          <div class="py-nav-direction">บทก่อนหน้า</div>
+          <div class="py-nav-title">${prev.icon} บทที่ ${prev.id}</div>
+        </span>
+      </a>
+    ` : `<div class="py-nav-btn disabled"><span>⬅️</span><span><div class="py-nav-direction">บทแรกแล้ว</div></span></div>`}
+    ${next ? `
+      <a href="lesson.html?id=${next.id}" class="py-nav-btn next">
+        <span>
+          <div class="py-nav-direction">บทถัดไป</div>
+          <div class="py-nav-title">${next.icon} บทที่ ${next.id}</div>
+        </span>
+        <span>➡️</span>
+      </a>
+    ` : `<div class="py-nav-btn next disabled"><span><div class="py-nav-direction">บทสุดท้ายแล้ว 🎉</div></span><span>➡️</span></div>`}
+  `;
+
+  // Init Editor
+  pyInitEditor({
+    editorId: 'py-code-editor',
+    outputId: 'py-console',
+    runBtnId: 'btn-run',
+    statusId: 'py-status',
+    clearBtnId: 'btn-clear',
+    resetBtnId: 'btn-reset',
+    copyBtnId: 'btn-copy',
+    initialCode: currentLesson.starterCode
+  });
+
+  // Quiz click handler (event delegation — ปลอดภัยกว่า inline onclick)
+  document.getElementById('lesson-content').addEventListener('click', (e) => {
+    const btn = e.target.closest('.py-quiz-option');
+    if (!btn || btn.disabled) return;
+    const quizId = parseInt(btn.dataset.quizId);
+    const answer = parseInt(btn.dataset.answer);
+    const correct = parseInt(btn.dataset.correct);
+    const explain = btn.dataset.explain || '';
+    pyCheckQuiz(quizId, answer, correct, explain);
+    updateQuizScoreDisplay();
+  });
+
+  // ฟังก์ชันแสดงคะแนน Quiz สด
+  updateQuizScoreDisplay();
+
+  // Track visit
+  pyTrackProgress('visit');
+}
+
+function updateQuizScoreDisplay() {
+  const display = document.getElementById('quiz-current-score');
+  if (!display) return;
+  const answers = pyLoadQuizAnswers(currentLesson?.id);
+  const correctCount = Object.values(answers).filter(v => v === true).length;
+  display.textContent = correctCount;
+  // เปลี่ยนสีตามคะแนน
+  const box = document.getElementById('quiz-score-display');
+  if (box) {
+    if (correctCount === 5) {
+      box.style.background = '#D1FAE5';
+      box.style.borderColor = '#10B981';
+      box.style.color = '#065F46';
+      box.innerHTML = `🏆 สุดยอด! ตอบครบ <b>${correctCount}/5</b> คะแนน Quiz เต็ม! ✨`;
+    } else if (correctCount >= 3) {
+      box.style.background = '#FEF3C7';
+      box.style.borderColor = '#F59E0B';
+      box.style.color = '#92400E';
+      box.innerHTML = `📊 คะแนน Quiz ปัจจุบัน: <b>${correctCount}/5</b> — เก่งมาก!`;
+    } else {
+      box.innerHTML = `📊 คะแนน Quiz ปัจจุบัน: <b>${correctCount}/5</b>`;
+    }
+  }
+}
+
+window.addEventListener('DOMContentLoaded', renderLesson);
+</script>
+
+</body>
+</html>
