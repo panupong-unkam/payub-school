@@ -34,13 +34,7 @@
   </div>
 </div>
 
-<!-- 🔔 NOTIFICATION BELL -->
-<button class="notif-fab" id="notif-fab" onclick="toggleNotifications(event)" title="แจ้งเตือน">
-  🔔
-  <span class="notif-badge" id="notif-badge" style="display:none;">0</span>
-</button>
-
-<!-- 🔔 NOTIFICATION PANEL -->
+<!-- 🔔 NOTIFICATION PANEL (อยู่ที่เดิม แต่ปุ่มย้ายเข้าใน FAB แล้ว) -->
 <div class="notif-panel" id="notif-panel">
   <div class="notif-header">
     <span>🔔 การแจ้งเตือน</span>
@@ -54,17 +48,21 @@
   </div>
 </div>
 
-<!-- 🎭 MASCOT -->
-<div class="mascot" id="mascot" onclick="mascotInteract()" title="คลิกเพื่อทักทาย">
-  🦉
-  <div class="mascot-bubble" id="mascot-bubble">
-    <div id="mascot-bubble-text">สวัสดีครับ! ยินดีต้อนรับสู่ห้องเรียน 📚</div>
-  </div>
-</div>
-
-<!-- 🎈 FAB QUICK MENU -->
+<!-- 🎈 FAB QUICK MENU (รวมกระดิ่ง + นกฮูก + เมนูลัดทั้งหมด) -->
 <div class="fab-menu" id="fab-menu">
   <div class="fab-menu-items">
+    <button class="fab-item fab-item-notif" id="notif-fab" onclick="event.stopPropagation(); toggleNotifications(event)" title="แจ้งเตือน">
+      🔔
+      <span class="notif-badge" id="notif-badge" style="display:none;">0</span>
+      <span class="fab-item-tooltip">แจ้งเตือน</span>
+    </button>
+    <button class="fab-item fab-item-mascot" id="mascot" onclick="event.stopPropagation(); mascotInteract()" title="ทักทายนกฮูก">
+      🦉
+      <div class="mascot-bubble" id="mascot-bubble">
+        <div id="mascot-bubble-text">สวัสดีครับ! ยินดีต้อนรับสู่ห้องเรียน 📚</div>
+      </div>
+      <span class="fab-item-tooltip">ทักทายนกฮูก</span>
+    </button>
     <button class="fab-item" onclick="openSearch()" title="ค้นหา">
       🔍
       <span class="fab-item-tooltip">ค้นหา (Ctrl+K)</span>
@@ -112,6 +110,10 @@
       <div class="bottom-nav-icon">🎪</div>
       <div class="bottom-nav-label">ชุมนุม</div>
     </div>
+    <div class="bottom-nav-item" data-page="python" onclick="navigateBottom('python', 8)">
+      <div class="bottom-nav-icon">🐍</div>
+      <div class="bottom-nav-label">Python</div>
+    </div>
   </div>
 </nav>
 
@@ -151,6 +153,7 @@
     <div class="nav-item" onclick="navigate('clubs', this)">🎪 ยื่นคำขอเข้าชุมนุม</div>
     <div class="nav-item" onclick="navigate('games', this)">🎮 เกมหุ่นยนต์</div>
     <div class="nav-item" onclick="navigate('lab', this)">🔌 Circuit Lab</div>
+    <div class="nav-item" onclick="navigate('python', this)">🐍 Python Lab</div>
     </div>
   <div style="padding: 20px;" id="auth-btn-area"></div>
 </nav>
@@ -241,6 +244,126 @@
 
 
 
+
+    <!-- 🎨 FEATURED LABS — โชว์ Lab สำคัญทั้ง 2 -->
+    <div style="margin-top: 40px; margin-bottom: 30px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:10px;">
+        <h3 style="font-family:'Noto Serif Thai',serif; color:var(--primary-dark); font-size:24px; display:flex; align-items:center; gap:10px;">
+          <span style="font-size:30px; animation:bounce 2s infinite;">⚡</span>
+          ห้องปฏิบัติการพิเศษ
+        </h3>
+        <div style="font-size:13px; color:var(--text-muted); background:var(--bg-secondary); padding:6px 14px; border-radius:20px;">
+          ✨ เรียน-ลอง-รันได้จริงในเบราว์เซอร์
+        </div>
+      </div>
+
+      <div class="featured-labs-grid">
+
+        <!-- 🐍 PYTHON LAB CARD -->
+        <a href="python/index.html" target="_blank" class="featured-lab-card lab-python">
+          <div class="lab-card-bg-deco">
+            <span class="deco-emoji">🐍</span>
+            <span class="deco-emoji deco-2">⌨️</span>
+            <span class="deco-emoji deco-3">💻</span>
+          </div>
+          <div class="lab-card-badge">⭐ ใหม่</div>
+          <div class="lab-card-icon">🐍</div>
+          <div class="lab-card-content">
+            <div class="lab-card-eyebrow">PYTHON PROGRAMMING</div>
+            <h3 class="lab-card-title">Python Lab</h3>
+            <p class="lab-card-desc">
+              เรียนภาษา Python ตั้งแต่พื้นฐานจนถึงระดับสูง <b>24 บทเรียน</b> เขียนโค้ดและรันได้จริงในเบราว์เซอร์ทันที
+            </p>
+            <div class="lab-card-stats">
+              <div class="lab-stat-item">
+                <div class="lab-stat-num">24</div>
+                <div class="lab-stat-label">บทเรียน</div>
+              </div>
+              <div class="lab-stat-item">
+                <div class="lab-stat-num">120</div>
+                <div class="lab-stat-label">Quiz</div>
+              </div>
+              <div class="lab-stat-item">
+                <div class="lab-stat-num">20</div>
+                <div class="lab-stat-label">สัปดาห์</div>
+              </div>
+            </div>
+            <div class="lab-card-cta">
+              <span>เริ่มเรียน Python</span>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </div>
+          </div>
+        </a>
+
+        <!-- 🎮 PYTHON 3D ADVENTURE CARD (Multiplayer + Avatar) -->
+        <a href="python-game/index.html" target="_blank"
+           onclick="this.href = py3dLinkWithSession('python-game/index.html')"
+           class="featured-lab-card lab-python"
+           style="background: linear-gradient(135deg, #6a4c93 0%, #b967ff 100%);
+                  box-shadow: 0 12px 30px rgba(123, 31, 162, 0.35);">
+          <div class="lab-card-bg-deco">
+            <span class="deco-emoji">🎮</span>
+            <span class="deco-emoji deco-2">🤖</span>
+            <span class="deco-emoji deco-3">⚔️</span>
+          </div>
+          <div class="lab-card-badge" style="background:rgba(255,255,255,0.25);">🆕 ใหม่</div>
+          <div class="lab-card-icon">🎮</div>
+          <div class="lab-card-content">
+            <div class="lab-card-eyebrow">3D ADVENTURE · MULTIPLAYER</div>
+            <h3 class="lab-card-title">Python 3D Adventure</h3>
+            <p class="lab-card-desc">
+              เขียน Python ควบคุมหุ่นยนต์ 3D · <b>เล่นออนไลน์ 2 คน</b> · แต่งตัวละครแบบ Roblox
+            </p>
+            <div class="lab-card-stats">
+              <div class="lab-stat-item"><div class="lab-stat-num">12</div><div class="lab-stat-label">ด่าน</div></div>
+              <div class="lab-stat-item"><div class="lab-stat-num">2P</div><div class="lab-stat-label">ออนไลน์</div></div>
+              <div class="lab-stat-item"><div class="lab-stat-num">8</div><div class="lab-stat-label">หมวด avatar</div></div>
+            </div>
+            <div class="lab-card-cta">
+              <span>เริ่มผจญภัย</span>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </div>
+          </div>
+        </a>
+
+        <!-- 🔌 CIRCUIT LAB CARD -->
+        <a href="#" onclick="event.preventDefault(); navigate('lab', document.querySelectorAll('.nav-item')[7]); return false;" class="featured-lab-card lab-circuit">
+          <div class="lab-card-bg-deco">
+            <span class="deco-emoji">🔌</span>
+            <span class="deco-emoji deco-2">⚡</span>
+            <span class="deco-emoji deco-3">🤖</span>
+          </div>
+          <div class="lab-card-badge" style="background:rgba(255,255,255,0.25);">🔥 ยอดนิยม</div>
+          <div class="lab-card-icon">🔌</div>
+          <div class="lab-card-content">
+            <div class="lab-card-eyebrow">ROBOTICS & IOT</div>
+            <h3 class="lab-card-title">Circuit Lab</h3>
+            <p class="lab-card-desc">
+              ฝึกต่อวงจรไฟฟ้าและเขียนโค้ดควบคุมบอร์ด <b>RP2040 Pico</b> ผ่าน <b>9 ภารกิจ IoT</b> เหมือนของจริง
+            </p>
+            <div class="lab-card-stats">
+              <div class="lab-stat-item">
+                <div class="lab-stat-num">9</div>
+                <div class="lab-stat-label">ภารกิจ</div>
+              </div>
+              <div class="lab-stat-item">
+                <div class="lab-stat-num">2</div>
+                <div class="lab-stat-label">ภาษา</div>
+              </div>
+              <div class="lab-stat-item">
+                <div class="lab-stat-num">10+</div>
+                <div class="lab-stat-label">เซ็นเซอร์</div>
+              </div>
+            </div>
+            <div class="lab-card-cta">
+              <span>เปิด Circuit Lab</span>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </div>
+          </div>
+        </a>
+
+      </div>
+    </div>
 
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-top: 20px;">
       <div class="floating-card">
@@ -393,6 +516,78 @@
   <div id="report-content-area">
     </div>
 </div>
+
+  <!-- 🐍 PYTHON LAB HUB -->
+  <div class="page" id="page-python">
+    <div class="header-flex">
+      <h2>🐍 Python Lab — ห้องเรียนภาษาไพธอน</h2>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="btn btn-outline" onclick="window.open('python/playground.html','_blank')">⚡ Playground</button>
+        <button class="btn btn-primary" onclick="window.open('python/index.html','_blank')">▶️ เปิดห้องเรียน</button>
+      </div>
+    </div>
+    <p style="color: var(--text-muted); margin-bottom: 25px; font-size: 15px; line-height: 1.6;">
+      เรียนภาษา <b>Python</b> ตั้งแต่พื้นฐานจนถึงระดับสูง ผ่าน <b>24 บทเรียน</b> สำหรับนักเรียน ม.ต้น
+      เขียนโค้ดและรันได้จริงในเบราว์เซอร์ทันที (ไม่ต้องติดตั้งโปรแกรม) ด้วยเทคโนโลยี Pyodide
+    </p>
+
+    <div class="lab-intro-grid">
+      <div class="floating-card" style="animation: none;">
+        <div style="font-size: 36px; margin-bottom: 10px;">📚</div>
+        <h4 style="color: var(--primary-dark); margin-bottom: 8px;">24 บทเรียน 3 ระดับ</h4>
+        <p style="color: var(--text-muted); font-size: 14px; line-height: 1.6;">เริ่มจาก Hello World → เงื่อนไข → ลูป → ฟังก์ชัน → OOP → โปรเจกต์จริง ครบทุกพื้นฐาน Python</p>
+      </div>
+      <div class="floating-card" style="animation: none;">
+        <div style="font-size: 36px; margin-bottom: 10px;">💻</div>
+        <h4 style="color: var(--primary-dark); margin-bottom: 8px;">เขียนโค้ด-รันจริง</h4>
+        <p style="color: var(--text-muted); font-size: 14px; line-height: 1.6;">มี Code Editor + Console รัน Python 3 จริงในเบราว์เซอร์ รองรับ input(), print(), ลูป, ฟังก์ชัน ครบทุกอย่าง</p>
+      </div>
+      <div class="floating-card" style="animation: none;">
+        <div style="font-size: 36px; margin-bottom: 10px;">🏆</div>
+        <h4 style="color: var(--primary-dark); margin-bottom: 8px;">XP & Badge</h4>
+        <p style="color: var(--text-muted); font-size: 14px; line-height: 1.6;">ทำใบงาน-Quiz ในแต่ละบทเพื่อสะสม XP รับเหรียญรางวัล และดูความก้าวหน้าได้ตลอดเวลา</p>
+      </div>
+    </div>
+
+    <div style="margin-top: 35px;">
+      <h3 style="font-family: 'Noto Serif Thai', serif; color: var(--primary-dark); margin-bottom: 15px;">📋 หลักสูตร 24 บท</h3>
+      <div id="python-levels-overview" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px,1fr)); gap:20px;">
+        <div class="floating-card" style="animation:none; background:linear-gradient(135deg,#E3F2FD,#BBDEFB); border-left:5px solid #1976D2;">
+          <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+            <div style="font-size:32px;">🌱</div>
+            <div>
+              <div style="font-weight:700; color:#0D47A1; font-size:18px;">Level 1: เริ่มต้น</div>
+              <div style="font-size:13px; color:#1565C0;">บทที่ 1-8 · พื้นฐานเบื้องต้น</div>
+            </div>
+          </div>
+          <p style="color:#1565C0; font-size:14px; line-height:1.6; margin-bottom:12px;">รู้จัก Python · ตัวแปร · input/print · ตัวดำเนินการ · เงื่อนไข · ลูป · ฟังก์ชัน · โปรเจกต์เครื่องคิดเลข</p>
+          <button class="btn btn-primary" style="width:100%; background:#1976D2;" onclick="window.open('python/index.html#level1','_blank')">🚀 เริ่มเรียน Level 1</button>
+        </div>
+        <div class="floating-card" style="animation:none; background:linear-gradient(135deg,#FFF3E0,#FFE0B2); border-left:5px solid #F57C00;">
+          <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+            <div style="font-size:32px;">🚀</div>
+            <div>
+              <div style="font-weight:700; color:#E65100; font-size:18px;">Level 2: กลาง</div>
+              <div style="font-size:13px; color:#EF6C00;">บทที่ 9-16 · ข้อมูลและการจัดการ</div>
+            </div>
+          </div>
+          <p style="color:#EF6C00; font-size:14px; line-height:1.6; margin-bottom:12px;">List · Tuple · Dictionary · String · ฟังก์ชันขั้นสูง · Error · File I/O · โปรเจกต์สมุดที่อยู่</p>
+          <button class="btn btn-primary" style="width:100%; background:#F57C00;" onclick="window.open('python/index.html#level2','_blank')">📖 เริ่มเรียน Level 2</button>
+        </div>
+        <div class="floating-card" style="animation:none; background:linear-gradient(135deg,#F3E5F5,#E1BEE7); border-left:5px solid #7B1FA2;">
+          <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+            <div style="font-size:32px;">⭐</div>
+            <div>
+              <div style="font-weight:700; color:#4A148C; font-size:18px;">Level 3: สูง</div>
+              <div style="font-size:13px; color:#6A1B9A;">บทที่ 17-24 · OOP และโปรเจกต์ใหญ่</div>
+            </div>
+          </div>
+          <p style="color:#6A1B9A; font-size:14px; line-height:1.6; margin-bottom:12px;">OOP · Class · Inheritance · Generator · Decorator · Regex · NumPy/Pandas · Final Project</p>
+          <button class="btn btn-primary" style="width:100%; background:#7B1FA2;" onclick="window.open('python/index.html#level3','_blank')">🎯 เริ่มเรียน Level 3</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </main>
 
 <div class="modal-overlay" id="modal-auth">
@@ -1145,6 +1340,21 @@
 
 <script src="script.js"></script>
 <script src="scenarios.js"></script>
+<script src="lab-extensions.js"></script>
+<script>
+// ── 🔗 SSO Bridge สำหรับลิงก์ไป Python 3D Adventure (cross-folder file://) ──
+// ห่อ URL ด้วย #session=<base64 user JSON> เพื่อให้หน้านั้นอ่าน session ได้
+window.py3dLinkWithSession = function(href) {
+  try {
+    var u = window.currentUser || JSON.parse(localStorage.getItem('payub_user') || 'null');
+    if (!u || !u.id) return href;  // ถ้ายังไม่ login ก็ส่ง URL ตรงๆ (หน้าปลายทางจะโผล่ modal login)
+    var json = JSON.stringify(u);
+    var b64 = btoa(unescape(encodeURIComponent(json)));
+    var sep = href.indexOf('#') >= 0 ? '&' : '#';
+    return href + sep + 'session=' + encodeURIComponent(b64);
+  } catch(e) { return href; }
+};
+</script>
 <script>
 // ── Ultimate splash failsafe: hide splash after 4 seconds no matter what ──
 // Even if script.js fails to load, this inline script will still run.
