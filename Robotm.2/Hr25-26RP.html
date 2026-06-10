@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>หุ่นยนต์ ม.2 | Hr 25-26: Servo Motor SG90</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Noto+Serif+Thai:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --bg-dark: #0f172a; --surface-dark: #1e293b; --cyber-blue: #0ea5e9;
+            --neon-green: #10b981; --neon-orange: #f59e0b; --neon-pink: #ec4899;
+            --neon-purple: #a855f7; --neon-cyan: #06b6d4; --gold: #fbbf24;
+            --text-main: #f8fafc; --text-muted: #94a3b8; --border-line: #334155;
+        }
+        body { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 100%); color: var(--text-main); font-family: 'Sarabun', sans-serif; padding: 20px; margin: 0; overflow-x: hidden; }
+        body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px); background-size: 30px 30px; z-index: -1; }
+        .lesson-container { width: 100%; max-width: 1200px; background: var(--surface-dark); border-radius: 24px; box-shadow: 0 0 40px rgba(0,0,0,0.5), 0 0 30px rgba(6,182,212,0.3); overflow: hidden; border: 1px solid var(--border-line); display: flex; flex-direction: column; min-height: 80vh; }
+        .lesson-header { background: linear-gradient(90deg, rgba(6,182,212,0.15), rgba(15,23,42,0.95)); padding: 20px 30px; border-bottom: 1px solid var(--neon-cyan); display: flex; justify-content: space-between; align-items: center; }
+        .progress-track { height: 6px; background: var(--border-line); width: 100%; display: none; }
+        #progress-bar { height: 100%; background: linear-gradient(90deg, var(--neon-cyan), var(--cyber-blue)); width: 0%; box-shadow: 0 0 15px var(--neon-cyan); transition: width 0.6s ease; }
+        .lesson-body { padding: 40px; position: relative; flex-grow: 1; display: flex; flex-direction: column; }
+        .step { display: none; animation: glitchFadeIn 0.5s ease-out forwards; flex-grow: 1; }
+        .step.active { display: block; }
+        @keyframes glitchFadeIn { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 1; transform: translateY(0); } }
+        h3 { color: var(--neon-cyan); font-family: 'Noto Serif Thai', serif; font-size: 30px; margin-top: 0; text-shadow: 0 0 15px rgba(6,182,212,0.4); border-bottom: 1px dashed var(--border-line); padding-bottom: 15px; }
+        h4 { color: white; font-family: 'Noto Serif Thai', serif; font-size: 20px; margin: 20px 0 10px; }
+        p, li { line-height: 1.85; font-size: 17px; color: #cbd5e1; }
+        .btn { padding: 14px 28px; border: none; border-radius: 10px; font-family: 'Sarabun'; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.3s; display: inline-flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-primary { background: linear-gradient(135deg, var(--neon-cyan), #0891b2); color: white; box-shadow: 0 4px 20px rgba(6,182,212,0.5); }
+        .btn-primary:hover { transform: translateY(-3px); }
+        .btn-outline { background: transparent; color: var(--text-muted); border: 1px solid var(--border-line); }
+        .btn-outline:hover { color: white; border-color: white; }
+        .footer-nav { padding: 25px 40px; background: rgba(15,23,42,0.95); border-top: 1px solid var(--border-line); display: none; justify-content: space-between; align-items: center; margin-top: auto; }
+        .grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-top: 20px; }
+        .grid-3col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-top: 20px; }
+        .info-card { background: rgba(0,0,0,0.3); border: 1px solid var(--border-line); border-radius: 16px; padding: 22px; transition: 0.3s; }
+        .quiz-option { background: rgba(255,255,255,0.05); border: 2px solid var(--border-line); padding: 16px 22px; border-radius: 12px; margin-bottom: 12px; cursor: pointer; transition: 0.2s; font-size: 16px; color: var(--text-main); text-align: left; width: 100%; }
+        .quiz-option:hover { background: rgba(6,182,212,0.1); border-color: var(--neon-cyan); }
+        .quiz-option.correct { background: rgba(16,185,129,0.2); border-color: var(--neon-green); color: var(--neon-green); font-weight: bold; }
+        .quiz-option.wrong { background: rgba(239,68,68,0.2); border-color: #ef4444; color: #ef4444; }
+        .code-box { background: #0a0e1a; padding: 18px; border-radius: 10px; color: #e2e8f0; font-size: 14px; font-family: 'JetBrains Mono', monospace; white-space: pre; overflow-x: auto; line-height: 1.7; border-left: 4px solid var(--neon-cyan); margin: 10px 0; }
+        .code-box .kw { color: #c792ea; } .code-box .str { color: #a3e635; } .code-box .num { color: #f59e0b; } .code-box .com { color: #64748b; font-style: italic; } .code-box .fn { color: #06b6d4; }
+
+        /* Servo demo */
+        .servo-demo { background: #0a0a0a; padding: 30px; border-radius: 18px; border: 2px solid #444; margin: 20px 0; }
+        .servo-visual { display: flex; justify-content: center; margin: 20px 0; }
+        .servo-body {
+            position: relative; width: 280px; height: 280px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .servo-base {
+            position: absolute; width: 200px; height: 200px;
+            background: radial-gradient(circle, #4338ca 0%, #1e1b4b 100%);
+            border-radius: 50%; border: 4px solid #312e81;
+            box-shadow: 0 0 40px rgba(67,56,202,0.5);
+        }
+        .servo-arc {
+            position: absolute; width: 200px; height: 200px;
+            border-radius: 50%; border: 3px dashed rgba(255,255,255,0.2);
+        }
+        .servo-arm {
+            position: absolute; width: 8px; height: 110px;
+            background: linear-gradient(180deg, #fbbf24, #f59e0b);
+            border-radius: 4px; transform-origin: 50% 95%;
+            transform: translateY(-15px) rotate(0deg);
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 0 15px rgba(251,191,36,0.6);
+        }
+        .servo-arm::after {
+            content: ''; position: absolute; top: -6px; left: -6px;
+            width: 20px; height: 20px; border-radius: 50%;
+            background: #ef4444;
+            box-shadow: 0 0 10px #ef4444;
+        }
+        .servo-center {
+            position: absolute; width: 25px; height: 25px;
+            background: #cbd5e1; border-radius: 50%;
+            box-shadow: inset 0 0 8px rgba(0,0,0,0.5);
+            z-index: 10;
+        }
+        .angle-label {
+            position: absolute; color: white; font-family: monospace; font-size: 13px;
+            background: rgba(0,0,0,0.7); padding: 4px 8px; border-radius: 6px;
+        }
+        .lbl-0 { right: -15px; top: 50%; transform: translateY(-50%); color: #10b981; }
+        .lbl-90 { top: -15px; left: 50%; transform: translateX(-50%); color: var(--neon-orange); }
+        .lbl-180 { left: -25px; top: 50%; transform: translateY(-50%); color: #ef4444; }
+        .lbl-45 { top: 35px; right: 25px; font-size: 11px; color: #94a3b8; }
+        .lbl-135 { top: 35px; left: 25px; font-size: 11px; color: #94a3b8; }
+
+        .servo-controls { text-align: center; margin-top: 25px; }
+        .servo-controls input[type="range"] { width: 80%; max-width: 400px; }
+        .angle-display { font-family: monospace; font-size: 36px; color: var(--neon-cyan); font-weight: bold; margin: 10px 0; text-shadow: 0 0 15px rgba(6,182,212,0.5); }
+        .preset-btns { display: flex; gap: 10px; justify-content: center; margin-top: 15px; flex-wrap: wrap; }
+        .preset-btn { background: rgba(6,182,212,0.15); color: var(--neon-cyan); border: 1px solid var(--neon-cyan); padding: 8px 18px; border-radius: 20px; cursor: pointer; font-family: monospace; font-size: 14px; transition: 0.2s; }
+        .preset-btn:hover { background: var(--neon-cyan); color: white; }
+
+        /* Wiring diagram */
+        .wiring { background: #0a0a0a; padding: 25px; border-radius: 16px; margin: 20px 0; border: 2px solid #444; }
+
+        .tag { display: inline-block; padding: 5px 14px; border-radius: 14px; font-size: 12px; font-weight: bold; margin-right: 8px; }
+        .tag-rp { background: rgba(245,158,11,0.2); color: var(--neon-orange); border: 1px solid var(--neon-orange); }
+        .tag-time { background: rgba(6,182,212,0.2); color: var(--neon-cyan); border: 1px solid var(--neon-cyan); }
+
+        .callout { border-radius: 14px; padding: 18px 22px; margin: 18px 0; display: flex; gap: 15px; align-items: flex-start; }
+        .callout-icon { font-size: 28px; flex-shrink: 0; }
+        .callout-info { background: rgba(14,165,233,0.1); border-left: 4px solid var(--cyber-blue); }
+        .callout-warn { background: rgba(245,158,11,0.1); border-left: 4px solid var(--neon-orange); }
+        .callout-tip { background: rgba(16,185,129,0.1); border-left: 4px solid var(--neon-green); }
+        .callout-bonus { background: rgba(236,72,153,0.1); border-left: 4px solid var(--neon-pink); }
+        .callout-danger { background: rgba(239,68,68,0.1); border-left: 4px solid #ef4444; }
+        .callout b { color: white; }
+
+        .step-dots { display: flex; gap: 8px; justify-content: center; }
+        .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--border-line); transition: 0.3s; }
+        .dot.active { background: var(--neon-cyan); box-shadow: 0 0 10px var(--neon-cyan); }
+
+        .bigprint { font-size: 19px; line-height: 1.9; }
+        @media (max-width: 900px) { .lesson-body { padding: 22px; } .grid-2col, .grid-3col { grid-template-columns: 1fr !important; } h3 { font-size: 24px; } }
+    </style>
+</head>
+<body>
+
+<div class="lesson-container">
+    <div class="lesson-header">
+        <h2 style="margin: 0; font-size: 20px; letter-spacing: 1px;">🎚️ ROBOTICS M.2 | Hr 25-26</h2>
+        <div id="header-guest-info" style="display: none; align-items: center; gap: 12px;">
+            <span style="background: rgba(6,182,212,0.15); color: var(--neon-cyan); padding: 6px 18px; border-radius: 20px; font-size: 14px; font-weight: bold; border: 1px solid var(--neon-cyan);" id="display-header-name">Student</span>
+            <button class="btn btn-outline" style="padding: 6px 15px; font-size: 12px;" onclick="location.reload()">EXIT</button>
+        </div>
+    </div>
+
+    <div class="progress-track" id="progress-container"><div id="progress-bar"></div></div>
+
+    <div class="lesson-body">
+
+        <!-- STEP 0 -->
+        <div class="step active" id="step-0">
+            <div style="text-align: center; padding: 50px 20px;">
+                <div style="font-size: 90px; margin-bottom: 20px; filter: drop-shadow(0 0 20px var(--neon-cyan));">🎚️</div>
+                <h2 style="color: white; font-size: 32px; margin-bottom: 10px;">หุ่นยนต์ ม.2 | ชั่วโมงที่ 25-26</h2>
+                <p style="color: var(--neon-cyan); font-size: 22px; margin-bottom: 5px; font-weight: bold;">Servo Motor SG90 — ควบคุมมุม</p>
+                <p style="color: var(--text-muted); font-size: 16px; margin-bottom: 30px;">มอเตอร์ตัวแรก! ขยับ "แขนกล" ของหุ่นยนต์</p>
+                <p style="color: var(--text-muted); font-size: 16px; margin-bottom: 20px;">📝 ลงชื่อเข้าเรียน</p>
+                <input type="text" id="guest-name-input" placeholder="ชื่อ-นามสกุล เลขที่ ห้อง" style="width:100%; max-width:520px; padding:16px 22px; background:rgba(0,0,0,0.4); border:2px solid var(--neon-cyan); border-radius:12px; color:white; font-size:18px; text-align:center; outline:none;" onkeypress="if(event.key === 'Enter') startLesson()">
+                <div style="margin-top: 35px;">
+                    <button class="btn btn-primary" style="padding: 18px 60px; font-size: 19px;" onclick="startLesson()">🚀 เริ่มเรียน</button>
+                </div>
+                <div style="margin-top: 30px;"><span class="tag tag-rp">RP2040</span><span class="tag tag-time">2 ชั่วโมง</span></div>
+            </div>
+        </div>
+
+        <!-- STEP 1 -->
+        <div class="step" id="step-1">
+            <h3>🎯 ด่านที่ 1: Servo Motor คืออะไร?</h3>
+            <p class="bigprint">สวัสดี <b class="student-name-inject" style="color: var(--neon-green);"></b>! วันนี้เราเรียน <b>"มอเตอร์ตัวแรก"</b> ที่ใช้ในหุ่นยนต์ — Servo Motor SG90</p>
+
+            <div class="grid-2col">
+                <div class="info-card" style="border-color: var(--neon-cyan);">
+                    <h4 style="color: var(--neon-cyan); margin-top: 0;">⚙️ Servo คืออะไร?</h4>
+                    <p>มอเตอร์ที่หมุนไป "<b>มุมที่กำหนด</b>" แล้วหยุด ไม่ใช่หมุนตลอด</p>
+                    <ul>
+                        <li>หมุนได้ <b>0° - 180°</b></li>
+                        <li>แม่นยำ ±1°</li>
+                        <li>มีกลไกป้องกันการเลื่อน</li>
+                        <li>ราคาถูก (~80 บาท)</li>
+                    </ul>
+                </div>
+                <div class="info-card" style="border-color: var(--neon-orange);">
+                    <h4 style="color: var(--neon-orange); margin-top: 0;">🤖 ใช้ทำอะไรได้?</h4>
+                    <ul>
+                        <li>แขนกลของหุ่นยนต์</li>
+                        <li>กรงเล็บจับของ (Gripper)</li>
+                        <li>เลี้ยวล้อหน้าของรถ</li>
+                        <li>ก้านเข็มของนาฬิกา</li>
+                        <li>เปิด-ปิดประตูบ้านอัจฉริยะ</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h4>🔌 สายของ Servo SG90 — 3 เส้น</h4>
+            <div class="grid-3col">
+                <div class="info-card" style="border-color: #ef4444;">
+                    <div style="font-size: 35px; text-align: center;">🔴</div>
+                    <h4 style="color: #ef4444; text-align: center; margin: 5px 0;">VCC (แดง)</h4>
+                    <p style="font-size: 13px;">ไฟเลี้ยง +5V</p>
+                </div>
+                <div class="info-card" style="border-color: #6b7280;">
+                    <div style="font-size: 35px; text-align: center;">⚫</div>
+                    <h4 style="color: #6b7280; text-align: center; margin: 5px 0;">GND (ดำ/น้ำตาล)</h4>
+                    <p style="font-size: 13px;">กราวด์ (0V)</p>
+                </div>
+                <div class="info-card" style="border-color: var(--neon-orange);">
+                    <div style="font-size: 35px; text-align: center;">🟠</div>
+                    <h4 style="color: var(--neon-orange); text-align: center; margin: 5px 0;">Signal (ส้ม/เหลือง)</h4>
+                    <p style="font-size: 13px;">สัญญาณ PWM จาก RP2040</p>
+                </div>
+            </div>
+
+            <div class="callout callout-tip">
+                <span class="callout-icon">✅</span>
+                <div><b>Maker Pi ดีตรงไหน:</b> มี Servo Ports เสียบตรง 4 ตัว → <b>ไม่ต้องเชื่อมสายเอง</b> เสียบแล้วใช้ได้เลย</div>
+            </div>
+        </div>
+
+        <!-- STEP 2: Interactive Servo Demo -->
+        <div class="step" id="step-2">
+            <h3>🎮 ด่านที่ 2: ทดลองหมุน Servo จำลอง</h3>
+            <p>ลากแถบเพื่อเปลี่ยนมุม — ดูแขน Servo หมุนตามทันที!</p>
+
+            <div class="servo-demo">
+                <div class="servo-visual">
+                    <div class="servo-body">
+                        <div class="servo-arc"></div>
+                        <div class="servo-base"></div>
+                        <div class="angle-label lbl-0">0°</div>
+                        <div class="angle-label lbl-45">45°</div>
+                        <div class="angle-label lbl-90">90°</div>
+                        <div class="angle-label lbl-135">135°</div>
+                        <div class="angle-label lbl-180">180°</div>
+                        <div class="servo-arm" id="servo-arm"></div>
+                        <div class="servo-center"></div>
+                    </div>
+                </div>
+
+                <div class="servo-controls">
+                    <div class="angle-display" id="angle-display">90°</div>
+                    <input type="range" min="0" max="180" value="90" id="angle-slider" oninput="updateServo(this.value)">
+                    <div style="display: flex; justify-content: space-between; max-width: 420px; margin: 5px auto; font-family: monospace; color: var(--text-muted); font-size: 12px;">
+                        <span>0°</span><span>90°</span><span>180°</span>
+                    </div>
+                    <div class="preset-btns">
+                        <button class="preset-btn" onclick="setServo(0)">0°</button>
+                        <button class="preset-btn" onclick="setServo(45)">45°</button>
+                        <button class="preset-btn" onclick="setServo(90)">90° (กึ่งกลาง)</button>
+                        <button class="preset-btn" onclick="setServo(135)">135°</button>
+                        <button class="preset-btn" onclick="setServo(180)">180°</button>
+                        <button class="preset-btn" onclick="sweepServo()" style="background: var(--neon-orange); color: white;">▶ Sweep!</button>
+                    </div>
+                </div>
+            </div>
+
+            <h4>📚 โค้ดที่ใช้ตอนนี้</h4>
+            <div class="code-box" id="livecode"><span class="kw">import</span> board
+<span class="kw">from</span> adafruit_motor <span class="kw">import</span> servo
+<span class="kw">import</span> pwmio
+
+<span class="com"># Servo Port 1 ของ Maker Pi อยู่ที่ขา GP12</span>
+pwm = pwmio.<span class="fn">PWMOut</span>(board.GP12, frequency=<span class="num">50</span>)
+my_servo = servo.<span class="fn">Servo</span>(pwm)
+
+my_servo.angle = <span class="num">90</span>   <span class="com"># หมุนไปที่ 90 องศา</span></div>
+        </div>
+
+        <!-- STEP 3: Servo ports on board -->
+        <div class="step" id="step-3">
+            <h3>🔌 ด่านที่ 3: Servo Ports บน Maker Pi</h3>
+            <p>Maker Pi RP2040 มี Servo Port <b>4 ตัว</b> ที่เสียบตรงได้เลย</p>
+
+            <div class="wiring">
+                <h4 style="color: white; margin-top: 0; text-align: center;">📍 ตำแหน่งและขาของ Servo</h4>
+                <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+                    <thead>
+                        <tr style="background: rgba(6,182,212,0.15);">
+                            <th style="padding: 12px; text-align: left; color: var(--neon-cyan);">Servo Port</th>
+                            <th style="padding: 12px; text-align: left; color: var(--neon-cyan);">ขา GPIO</th>
+                            <th style="padding: 12px; text-align: left; color: var(--neon-cyan);">การใช้งาน</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td style="padding: 12px; border-bottom: 1px solid #333; font-weight: bold;">SERVO 1</td><td style="padding: 12px; border-bottom: 1px solid #333; font-family: monospace; color: var(--neon-orange);">GP12</td><td style="padding: 12px; border-bottom: 1px solid #333;">นิยมใช้กับ Servo ตัวหลัก</td></tr>
+                        <tr><td style="padding: 12px; border-bottom: 1px solid #333; font-weight: bold;">SERVO 2</td><td style="padding: 12px; border-bottom: 1px solid #333; font-family: monospace; color: var(--neon-orange);">GP13</td><td style="padding: 12px; border-bottom: 1px solid #333;">Servo ตัวรอง</td></tr>
+                        <tr><td style="padding: 12px; border-bottom: 1px solid #333; font-weight: bold;">SERVO 3</td><td style="padding: 12px; border-bottom: 1px solid #333; font-family: monospace; color: var(--neon-orange);">GP14</td><td style="padding: 12px; border-bottom: 1px solid #333;">Servo ตัวที่ 3</td></tr>
+                        <tr><td style="padding: 12px; font-weight: bold;">SERVO 4</td><td style="padding: 12px; font-family: monospace; color: var(--neon-orange);">GP15</td><td style="padding: 12px;">Servo ตัวที่ 4</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4>🧩 วิธีเสียบ Servo</h4>
+            <ol style="line-height: 2;">
+                <li>หา <b>Servo Port</b> ที่บอร์ด (มีลายพิมพ์ "SERVO 1" - "SERVO 4")</li>
+                <li>ดูสีของสาย Servo: <b style="color:#ef4444;">แดง=VCC</b>, <b style="color:#6b7280;">น้ำตาล=GND</b>, <b style="color:var(--neon-orange);">ส้ม=Signal</b></li>
+                <li>เสียบให้ตรงสี (แดงตรงกับ +, น้ำตาลตรงกับ −)</li>
+                <li>เปิดสวิตช์ <b>Servo Power</b> (อยู่ข้างขั้วถ่าน)</li>
+            </ol>
+
+            <div class="callout callout-warn">
+                <span class="callout-icon">⚠️</span>
+                <div><b>เสียบผิดสีจะเสียทันที!</b> Servo SG90 ทนแรงดันได้แค่ +5V ถ้าต่อ + กับ − สลับกัน — มอเตอร์อาจไหม้</div>
+            </div>
+        </div>
+
+        <!-- STEP 4: Advanced code -->
+        <div class="step" id="step-4">
+            <h3>🐍 ด่านที่ 4: โค้ดขั้นสูง — Sweep + ปุ่มควบคุม</h3>
+            <p>มาเขียนโค้ดที่ทำให้ Servo <b>ขยับซ้ำๆ</b> (Sweep) และให้ <b>ปุ่มควบคุม</b> Servo</p>
+
+            <h4>📚 โค้ด 1: Sweep 0° → 180° → 0°</h4>
+            <div class="code-box"><span class="kw">import</span> board, pwmio, time
+<span class="kw">from</span> adafruit_motor <span class="kw">import</span> servo
+
+pwm = pwmio.<span class="fn">PWMOut</span>(board.GP12, frequency=<span class="num">50</span>)
+my_servo = servo.<span class="fn">Servo</span>(pwm)
+
+<span class="kw">while</span> <span class="num">True</span>:
+    <span class="com"># หมุนซ้าย-ไป-ขวา</span>
+    <span class="kw">for</span> a <span class="kw">in</span> <span class="fn">range</span>(<span class="num">0</span>, <span class="num">181</span>, <span class="num">5</span>):
+        my_servo.angle = a
+        time.<span class="fn">sleep</span>(<span class="num">0.02</span>)
+    <span class="com"># กลับขวา-ไป-ซ้าย</span>
+    <span class="kw">for</span> a <span class="kw">in</span> <span class="fn">range</span>(<span class="num">180</span>, <span class="num">-1</span>, <span class="num">-5</span>):
+        my_servo.angle = a
+        time.<span class="fn">sleep</span>(<span class="num">0.02</span>)</div>
+
+            <h4>📚 โค้ด 2: ใช้ปุ่ม A/B เพิ่ม-ลดมุม</h4>
+            <div class="code-box"><span class="kw">import</span> board, pwmio, digitalio, time
+<span class="kw">from</span> adafruit_motor <span class="kw">import</span> servo
+
+pwm = pwmio.<span class="fn">PWMOut</span>(board.GP12, frequency=<span class="num">50</span>)
+my_servo = servo.<span class="fn">Servo</span>(pwm)
+angle = <span class="num">90</span>
+my_servo.angle = angle
+
+btn_a = digitalio.<span class="fn">DigitalInOut</span>(board.GP20)
+btn_a.pull = digitalio.Pull.UP
+btn_b = digitalio.<span class="fn">DigitalInOut</span>(board.GP21)
+btn_b.pull = digitalio.Pull.UP
+
+<span class="kw">while</span> <span class="num">True</span>:
+    <span class="kw">if not</span> btn_a.value <span class="kw">and</span> angle &lt; <span class="num">180</span>:
+        angle += <span class="num">5</span>
+        my_servo.angle = angle
+        <span class="fn">print</span>(<span class="str">"มุม:"</span>, angle)
+    <span class="kw">if not</span> btn_b.value <span class="kw">and</span> angle &gt; <span class="num">0</span>:
+        angle -= <span class="num">5</span>
+        my_servo.angle = angle
+        <span class="fn">print</span>(<span class="str">"มุม:"</span>, angle)
+    time.<span class="fn">sleep</span>(<span class="num">0.1</span>)</div>
+
+            <div class="callout callout-info">
+                <span class="callout-icon">🧠</span>
+                <div><b>ทำไม frequency=50?</b> Servo SG90 ต้องรับสัญญาณ PWM ความถี่ <b>50 Hz</b> เป็นมาตรฐาน (ทุก 20ms ส่งพัลส์ 1 ครั้ง) — ห้ามเปลี่ยน!</div>
+            </div>
+        </div>
+
+        <!-- STEP 5: Worksheet -->
+        <div class="step" id="step-5">
+            <h3>📝 ด่านที่ 5: ใบงานที่ 10 — "ที่กั้นไม้ไผ่"</h3>
+
+            <div style="background: rgba(6,182,212,0.08); border: 2px solid var(--neon-cyan); padding: 30px; border-radius: 20px;">
+                <h4 style="color: white; margin-top: 0; font-size: 22px;">🎯 ภารกิจ: ที่กั้นไม้ไผ่อัตโนมัติ (10 คะแนน)</h4>
+                <p>สมมติว่าคุณกำลังสร้าง <b>ที่กั้นทางเข้าลานจอดรถ</b> โดยใช้ Servo เป็นแกนยกที่กั้นขึ้น-ลง</p>
+
+                <div class="grid-2col">
+                    <div class="info-card">
+                        <h4 style="margin-top: 0; color: var(--neon-cyan);">📋 ข้อกำหนด</h4>
+                        <ul>
+                            <li>เริ่มต้น: ที่กั้น <b>ปิด</b> (Servo = 0°)</li>
+                            <li>กด <b>ปุ่ม A</b> → ที่กั้นเปิด (90°) + LED 2 ดวง <b>สีเขียว</b> + บัซเซอร์ดัง 1 ครั้ง</li>
+                            <li>กด <b>ปุ่ม B</b> → ที่กั้นปิด (0°) + LED 2 ดวง <b>สีแดง</b> + บัซเซอร์ดัง 1 ครั้ง</li>
+                            <li>เริ่มต้นทุกครั้ง LED = แดง</li>
+                        </ul>
+                    </div>
+                    <div class="info-card">
+                        <h4 style="margin-top: 0; color: var(--neon-orange);">🏗️ Hardware ที่ใช้</h4>
+                        <ul>
+                            <li>Maker Pi RP2040 × 1</li>
+                            <li>Servo SG90 ที่ Servo 1 (GP12)</li>
+                            <li>NeoPixel ในตัว (GP18)</li>
+                            <li>บัซเซอร์ในตัว (GP22)</li>
+                            <li>ปุ่ม A (GP20), B (GP21)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h4 style="color: white;">🐍 โครงโค้ดให้เริ่ม</h4>
+                <div class="code-box"><span class="kw">import</span> board, pwmio, digitalio, neopixel, time
+<span class="kw">from</span> adafruit_motor <span class="kw">import</span> servo
+
+<span class="com"># --- Setup ---</span>
+pwm = pwmio.<span class="fn">PWMOut</span>(board.GP12, frequency=<span class="num">50</span>)
+gate = servo.<span class="fn">Servo</span>(pwm)
+pixels = neopixel.<span class="fn">NeoPixel</span>(board.GP18, <span class="num">2</span>)
+buzzer = pwmio.<span class="fn">PWMOut</span>(board.GP22, frequency=<span class="num">880</span>, duty_cycle=<span class="num">0</span>)
+btn_a = digitalio.<span class="fn">DigitalInOut</span>(board.GP20); btn_a.pull = digitalio.Pull.UP
+btn_b = digitalio.<span class="fn">DigitalInOut</span>(board.GP21); btn_b.pull = digitalio.Pull.UP
+
+<span class="com"># --- เริ่มต้น: ที่กั้นปิด + LED แดง ---</span>
+gate.angle = <span class="num">0</span>
+pixels[<span class="num">0</span>] = (<span class="num">255</span>, <span class="num">0</span>, <span class="num">0</span>)
+pixels[<span class="num">1</span>] = (<span class="num">255</span>, <span class="num">0</span>, <span class="num">0</span>)
+
+<span class="kw">def</span> <span class="fn">beep</span>():
+    buzzer.duty_cycle = <span class="num">32768</span>
+    time.<span class="fn">sleep</span>(<span class="num">0.15</span>)
+    buzzer.duty_cycle = <span class="num">0</span>
+
+<span class="kw">while</span> <span class="num">True</span>:
+    <span class="kw">if not</span> btn_a.value:
+        <span class="com"># TODO: เปิดที่กั้น 90° + LED เขียว + beep</span>
+        <span class="kw">pass</span>
+    <span class="kw">if not</span> btn_b.value:
+        <span class="com"># TODO: ปิดที่กั้น 0° + LED แดง + beep</span>
+        <span class="kw">pass</span>
+    time.<span class="fn">sleep</span>(<span class="num">0.1</span>)</div>
+
+                <div style="background: rgba(0,0,0,0.5); padding: 22px; border-radius: 12px; margin-top: 20px;">
+                    <b style="color: var(--neon-cyan);">📸 แคปหน้าจอ 5 รูปส่งครู:</b>
+                    <ol style="margin-top: 12px; line-height: 2;">
+                        <li>โค้ดเต็มที่เขียนเสร็จ <b>(แคปทั้งหน้า)</b></li>
+                        <li>เริ่มต้น: Servo 0° + LED แดง <b>(แคปบอร์ด)</b></li>
+                        <li>กดปุ่ม A: Servo 90° + LED เขียว <b>(แคปบอร์ด)</b></li>
+                        <li>กดปุ่ม B: Servo 0° + LED แดง <b>(แคปบอร์ด)</b></li>
+                        <li>ถ้าทำกับบอร์ดจริง: ภาพ Servo จริงเปิด-ปิด <b>(ถ่ายภาพ)</b></li>
+                    </ol>
+                </div>
+
+                <div class="callout callout-info">
+                    <span class="callout-icon">📤</span>
+                    <div><b>วิธีส่ง:</b> รวมรูปทั้ง 5 เป็น zip "Hr25-26_ชื่อ_เลขที่.zip" → เว็บโรงครูเจมส์ → ระบบส่งงาน → ใบงาน "ที่กั้นไม้ไผ่ Servo"</div>
+                </div>
+
+                <div class="callout callout-bonus">
+                    <span class="callout-icon">🌟</span>
+                    <div><b>โบนัส +3 คะแนน:</b> ทำให้ Servo <b>หมุนช้าๆ</b> ตั้งแต่ 0° → 90° (ทีละ 5°) แทนการกระโดดทันที + ค่อยๆ ติด LED ทีละดวง</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 6: Quiz -->
+        <div class="step" id="step-6">
+            <h3>🎮 ด่านที่ 6: แบบทดสอบท้ายชั่วโมง (5 ข้อ)</h3>
+            <p>สุ่ม + สลับ <b style="color: var(--neon-orange);">กันลอก!</b></p>
+
+            <div id="game-area" style="background: rgba(0,0,0,0.2); border: 2px solid var(--neon-cyan); border-radius: 20px; padding: 30px; text-align: center; max-width: 750px; margin: 0 auto;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 20px; font-weight: bold; color: var(--neon-cyan);">
+                    <span id="question-counter">คำถาม: 1 / 5</span>
+                    <span id="score-counter">คะแนน: 0</span>
+                </div>
+                <h4 id="question-text" style="font-size: 22px; color: white; margin-bottom: 30px; line-height: 1.5;">กำลังโหลด...</h4>
+                <div id="options-grid" style="display: flex; flex-direction: column; gap: 12px;"></div>
+            </div>
+
+            <div id="game-result" style="display: none; text-align: center; padding: 40px; background: rgba(0,0,0,0.2); border-radius: 20px; border: 2px solid var(--neon-green);">
+                <div style="font-size: 70px;">🏆</div>
+                <h3 style="border: none; text-shadow: none; font-size: 32px; color: var(--neon-green);">จบชั่วโมงที่ 25-26!</h3>
+                <p style="font-size: 20px; color: white;">นักเรียน: <span class="student-name-inject" style="color:var(--neon-cyan);"></span></p>
+                <p style="font-size: 20px; color: white;">คะแนน: <b id="final-score" style="color: var(--neon-orange); font-size: 36px;"></b> / 5</p>
+                <p style="color: var(--cyber-blue); margin-top: 10px;">สัปดาห์หน้า: DC Motor — ขับล้อหุ่นยนต์!</p>
+                <button class="btn btn-primary" style="padding: 16px 40px; font-size: 18px; margin-top: 20px;" onclick="finishMission()">📥 ยืนยันส่งคะแนน</button>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="footer-nav" id="footer-controls">
+        <button class="btn btn-outline" id="prevBtn" onclick="moveStep(-1)">⬅️ ถอยกลับ</button>
+        <div class="step-dots" id="step-dots"></div>
+        <button class="btn btn-primary" id="nextBtn" onclick="moveStep(1)">เดินหน้า ➔</button>
+    </div>
+</div>
+
+<script>
+    let currentStep = 0; const totalSteps = 6; let studentName = "";
+
+    function startLesson() {
+        const input = document.getElementById('guest-name-input').value.trim();
+        if (!input) { alert('⚠️ กรุณาลงชื่อก่อนเริ่มเรียนครับ'); return; }
+        studentName = input;
+        try { localStorage.setItem('robotm2_student', studentName); } catch(e){}
+        document.querySelectorAll('.student-name-inject').forEach(el => el.innerText = studentName);
+        document.getElementById('display-header-name').innerText = "👨‍💻 " + studentName;
+        document.getElementById('header-guest-info').style.display = 'flex';
+        document.getElementById('footer-controls').style.display = 'flex';
+        document.getElementById('progress-container').style.display = 'block';
+        buildDots();
+        currentStep = 1; updateUI();
+    }
+    function buildDots() {
+        const dots = document.getElementById('step-dots'); dots.innerHTML = "";
+        for (let i = 1; i <= totalSteps; i++) { const d = document.createElement('div'); d.className = 'dot'; dots.appendChild(d); }
+    }
+    function updateUI() {
+        document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+        document.getElementById('step-' + currentStep).classList.add('active');
+        document.getElementById('progress-bar').style.width = (currentStep / totalSteps) * 100 + '%';
+        document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i < currentStep));
+        document.getElementById('prevBtn').style.visibility = currentStep === 1 ? 'hidden' : 'visible';
+        if (currentStep === totalSteps) { document.getElementById('nextBtn').style.display = 'none'; if (!gameStarted) initGame(); }
+        else { document.getElementById('nextBtn').style.display = 'inline-flex'; }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    function moveStep(n) { currentStep += n; updateUI(); }
+
+    function finishMission() {
+        confetti({ particleCount: 250, spread: 110, origin: { y: 0.5 }, colors: ['#06b6d4', '#10b981', '#fbbf24'] });
+        setTimeout(() => {
+            alert(`🎉 ${studentName} ทำคะแนนได้ ${score}/5\nอย่าลืมส่งใบงาน "ที่กั้นไม้ไผ่ Servo" นะครับ!`);
+            window.location.href = "index.html";
+        }, 2200);
+    }
+
+    // Servo demo
+    function updateServo(angle) {
+        const a = parseInt(angle);
+        // Map 0°→180° to physical: 0°=ขวา(90 in css), 90°=บน(0 in css), 180°=ซ้าย(-90 in css)
+        const cssAngle = 90 - a;
+        document.getElementById('servo-arm').style.transform = `translateY(-15px) rotate(${cssAngle}deg)`;
+        document.getElementById('angle-display').innerText = a + '°';
+        document.getElementById('angle-slider').value = a;
+        updateLiveCode(a);
+    }
+    function setServo(angle) { updateServo(angle); }
+    function updateLiveCode(a) {
+        document.getElementById('livecode').innerHTML = `<span class="kw">import</span> board\n<span class="kw">from</span> adafruit_motor <span class="kw">import</span> servo\n<span class="kw">import</span> pwmio\n\n<span class="com"># Servo Port 1 ของ Maker Pi อยู่ที่ขา GP12</span>\npwm = pwmio.<span class="fn">PWMOut</span>(board.GP12, frequency=<span class="num">50</span>)\nmy_servo = servo.<span class="fn">Servo</span>(pwm)\n\nmy_servo.angle = <span class="num">${a}</span>   <span class="com"># หมุนไปที่ ${a} องศา</span>`;
+    }
+    let sweeping = false;
+    function sweepServo() {
+        if (sweeping) return;
+        sweeping = true;
+        let a = 0; let dir = 5;
+        const iv = setInterval(() => {
+            updateServo(a);
+            a += dir;
+            if (a >= 180) { dir = -5; }
+            if (a <= 0 && dir < 0) { clearInterval(iv); sweeping = false; updateServo(90); }
+        }, 80);
+    }
+
+    const quizBank = [
+        { q: "Servo SG90 หมุนได้ในช่วงมุมเท่าใด?", ans: "0° ถึง 180°", choices: ["0° ถึง 90°", "0° ถึง 180°", "0° ถึง 360°", "-180° ถึง 180°"] },
+        { q: "Servo ต่างจาก DC Motor อย่างไร?", ans: "Servo หมุนไป 'มุมที่กำหนด' แล้วหยุด DC Motor หมุนต่อเนื่อง", choices: ["Servo เร็วกว่ามาก", "Servo หมุนไป 'มุมที่กำหนด' แล้วหยุด DC Motor หมุนต่อเนื่อง", "Servo ใช้ไฟ AC", "ไม่มีอะไรต่าง"] },
+        { q: "สาย Servo มีกี่เส้น?", ans: "3 เส้น (VCC, GND, Signal)", choices: ["2 เส้น (+, -)", "3 เส้น (VCC, GND, Signal)", "4 เส้น", "5 เส้น"] },
+        { q: "สายสีแดงของ Servo คือสายอะไร?", ans: "VCC (+5V)", choices: ["GND (0V)", "Signal", "VCC (+5V)", "Data"] },
+        { q: "Servo 1 บน Maker Pi RP2040 ต่อกับขา GPIO ใด?", ans: "GP12", choices: ["GP12", "GP18", "GP22", "GP25"] },
+        { q: "ความถี่ของสัญญาณ PWM ที่ Servo SG90 ต้องการคือเท่าใด?", ans: "50 Hz", choices: ["10 Hz", "50 Hz", "1000 Hz", "1 MHz"] },
+        { q: "บล็อกใช้ไลบรารีใดในการควบคุม Servo?", ans: "adafruit_motor.servo", choices: ["pwmio", "neopixel", "adafruit_motor.servo", "digitalio"] },
+        { q: "คำสั่ง my_servo.angle = 90 หมายความว่าอย่างไร?", ans: "หมุน Servo ไปที่ 90 องศา (ตรงกลาง)", choices: ["หมุน Servo ตลอดเวลา", "หมุน Servo 90 รอบ", "หมุน Servo ไปที่ 90 องศา (ตรงกลาง)", "หยุด Servo"] },
+        { q: "อะไรจะเกิดขึ้นถ้าเสียบสาย VCC กับ GND สลับกัน?", ans: "Servo อาจไหม้/พัง", choices: ["Servo หมุนทิศกลับ", "Servo อาจไหม้/พัง", "Servo จะทำงานปกติ", "Servo เร็วขึ้น 2 เท่า"] },
+        { q: "ในโค้ด Sweep ที่ใช้ for a in range(0, 181, 5) ค่า a จะวนเลขใดบ้าง?", ans: "0, 5, 10, 15, ..., 180", choices: ["0, 1, 2, 3, ...", "0, 5, 10, 15, ..., 180", "0, 5, 10, 15, ..., 181", "เลขสุ่ม"] },
+        { q: "ทำไม Maker Pi RP2040 ถึงสะดวกในการใช้ Servo?", ans: "มี Servo Ports 4 ตัว เสียบตรงได้เลย ไม่ต้องเชื่อมสาย", choices: ["มี Servo มาให้ในกล่อง", "มี Servo Ports 4 ตัว เสียบตรงได้เลย ไม่ต้องเชื่อมสาย", "บอร์ดเล็กกว่า", "ราคาถูกกว่า"] },
+        { q: "เริ่มต้นที่ดีสำหรับมุม Servo คือมุมใด?", ans: "90° (กึ่งกลาง)", choices: ["0° (สุดซ้าย)", "180° (สุดขวา)", "90° (กึ่งกลาง)", "ไม่สำคัญ"] }
+    ];
+
+    let currentQIndex = 0; let score = 0; let gameStarted = false; let selectedQuestions = [];
+    function shuffle(array) { let curId = array.length; while (0 !== curId) { let randId = Math.floor(Math.random() * curId); curId -= 1; let tmp = array[curId]; array[curId] = array[randId]; array[randId] = tmp; } return array; }
+    function initGame() { gameStarted = true; score = 0; currentQIndex = 0; selectedQuestions = shuffle([...quizBank]).slice(0, 5); loadQuestion(); }
+    function loadQuestion() {
+        const qData = selectedQuestions[currentQIndex];
+        document.getElementById('question-counter').innerText = `คำถาม: ${currentQIndex + 1} / 5`;
+        document.getElementById('score-counter').innerText = `คะแนน: ${score}`;
+        document.getElementById('question-text').innerText = qData.q;
+        const optionsGrid = document.getElementById('options-grid'); optionsGrid.innerHTML = "";
+        shuffle([...qData.choices]).forEach(choice => {
+            const btn = document.createElement('button'); btn.className = 'quiz-option'; btn.innerText = choice;
+            btn.onclick = () => checkAnswer(btn, choice, qData.ans); optionsGrid.appendChild(btn);
+        });
+    }
+    function checkAnswer(selectedBtn, selectedText, correctText) {
+        document.querySelectorAll('.quiz-option').forEach(b => b.style.pointerEvents = 'none');
+        if (selectedText === correctText) { selectedBtn.classList.add('correct'); score++; document.getElementById('score-counter').innerText = `คะแนน: ${score}`; confetti({ particleCount: 50, spread: 60, origin: { y: 0.8 }, colors: ['#06b6d4'] }); }
+        else { selectedBtn.classList.add('wrong'); document.querySelectorAll('.quiz-option').forEach(b => { if(b.innerText === correctText) b.classList.add('correct'); }); }
+        setTimeout(() => { currentQIndex++; if (currentQIndex < 5) loadQuestion(); else showResult(); }, 2200);
+    }
+    function showResult() {
+        document.getElementById('game-area').style.display = 'none';
+        document.getElementById('game-result').style.display = 'block';
+        document.getElementById('final-score').innerText = score;
+        document.getElementById('footer-controls').style.display = 'none';
+    }
+</script>
+
+</body>
+</html>

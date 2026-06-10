@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แผนการจัดการเรียนรู้ที่ 9 — Radio + มินิโปรเจกต์ปิดหน่วย micro:bit</title>
+    <link rel="stylesheet" href="lesson-plan.css">
+</head>
+<body>
+<div class="nav-bar no-print"><a href="index.html">⬅ กลับ</a><div style="color:white;">แผนที่ 9 / 20 — Hr 17-18</div><button class="print-btn" onclick="window.print()">🖨️ พิมพ์</button></div>
+<div class="paper">
+
+    <h1 class="plan-title">แผนการจัดการเรียนรู้ที่ 9</h1>
+    <div class="plan-meta-row"><span>หน่วยที่ 2 เรื่อง micro:bit (ล้วน ไม่มีอุปกรณ์เสริม)</span><span>จำนวน 12 ชั่วโมง</span></div>
+    <div class="plan-meta-row"><span>เรื่อง Radio + มินิโปรเจกต์ปิดหน่วย micro:bit</span><span>จำนวน 2 ชั่วโมง (ชั่วโมงที่ 17-18)</span></div>
+    <div class="plan-meta-row"><span>วิชา หุ่นยนต์</span><span>กลุ่มสาระการเรียนรู้ วิทยาศาสตร์และเทคโนโลยี</span></div>
+    <div class="plan-meta-row"><span>ชั้นมัธยมศึกษาปีที่ 2</span><span>ภาคเรียนที่ 1 ปีการศึกษา 2569</span></div>
+    <div class="plan-meta-row"><span>ผู้สอน นายภาณุพงศ์ อุ่นคำ</span><span>โรงเรียนบ้านป่ายุบ (บุ้นกีประชานุเคราะห์)</span></div>
+    <hr class="divider">
+
+    <div class="section">
+        <div class="section-title">1. มาตรฐานการเรียนรู้/ตัวชี้วัด</div>
+        <p class="indent"><b>มาตรฐาน ว 4.2</b> เข้าใจและใช้แนวคิดเชิงคำนวณในการแก้ปัญหา</p>
+        <p class="indent bold">ตัวชี้วัดระหว่างทาง</p>
+        <p class="indent2"><b>ว 4.2 ม.2/2</b> ออกแบบและเขียนโปรแกรมที่ใช้ตรรกะและฟังก์ชันในการแก้ปัญหา</p>
+        <p class="indent2"><b>ว 4.2 ม.2/3</b> อภิปรายองค์ประกอบและหลักการทำงานของระบบคอมพิวเตอร์ และเทคโนโลยีการสื่อสาร</p>
+        <p class="indent2"><b>ว 4.2 ม.2/4</b> ใช้เทคโนโลยีสารสนเทศอย่างปลอดภัย มีความรับผิดชอบ</p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">2. จุดประสงค์การเรียนรู้</div>
+        <ol>
+            <li>อธิบายหลักการสื่อสารไร้สายผ่านคลื่นวิทยุ 2.4 GHz ได้ <span class="kpa">K</span></li>
+            <li>ใช้บล็อก <code>radio set group</code>, <code>radio send</code>, <code>on radio received</code> ได้ <span class="kpa">P</span></li>
+            <li>ออกแบบและเขียนโปรเจกต์รวมความรู้หน่วย 2 (เป่ายิ้งฉุบ/Magic 8-Ball/Step Counter/Chat) <span class="kpa">P</span></li>
+            <li>ทำงานเป็นทีม 2 คน (1 บอร์ดต่อคน) สื่อสารระหว่างกันได้ <span class="kpa">P, A</span></li>
+            <li>เห็นความสำคัญของการตั้งกลุ่ม Radio เพื่อความเป็นส่วนตัวและความปลอดภัย <span class="kpa">A</span></li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">3. คุณลักษณะอันพึงประสงค์</div>
+        <p class="indent">☐ 1. รักชาติฯ ☐ 2. ซื่อสัตย์ ☑ 3. มีวินัย ☑ 4. ใฝ่เรียนรู้ ☐ 5. พอเพียง ☑ 6. มุ่งมั่น ☐ 7. รักไทย ☑ 8. จิตสาธารณะ</p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">4. สมรรถนะสำคัญของผู้เรียน</div>
+        <ol>
+            <li>ความสามารถในการคิด</li>
+            <li>ความสามารถในการแก้ปัญหา</li>
+            <li>ความสามารถในการสื่อสาร (ทำงานเป็นทีม)</li>
+            <li>ความสามารถในการใช้เทคโนโลยี</li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">5. สาระสำคัญ</div>
+        <p class="indent">Radio ใน micro:bit ใช้คลื่นความถี่ <b>2.4 GHz</b> (เดียวกับ WiFi, Bluetooth, ไมโครเวฟ) ส่ง-รับข้อมูลระหว่างบอร์ดในระยะ ~70 เมตร โดยตั้ง <code>radio set group</code> 0-255 — บอร์ดที่อยู่กลุ่มเดียวกันจะคุยกันได้ ส่งได้ทั้งตัวเลข ข้อความ และคู่ key-value โดยใช้ <code>radio send</code> + <code>on radio received</code> เป็นเทคโนโลยีพื้นฐานของ Internet of Things (IoT) ที่ใช้ในระบบสมาร์ทโฮม วิทยุสื่อสาร และ Walkie-Talkie</p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">6. ความรู้เดิมที่นักเรียนต้องมี</div>
+        <ol>
+            <li>ความรู้ทั้งหมดจากแผนที่ 4-8 (จอ LED, ปุ่ม, ตัวแปร, Accelerometer, แสง/อุณหภูมิ, เข็มทิศ)</li>
+            <li>การทำงานเป็นทีม</li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">7. การจัดกิจกรรมการเรียนรู้</div>
+
+        <div class="hour-banner">▶ ชั่วโมงที่ 17 (60 นาที) : Radio พื้นฐาน</div>
+
+        <p class="step-banner">ขั้นที่ 1: การวิเคราะห์และกำหนดรายละเอียดของปัญหา (15 นาที)</p>
+        <ol>
+            <li>ครูเปิดเว็บไซต์ <code>Robotm.2/Hr17-18MB.html</code></li>
+            <li>ครูตั้งคำถาม</li>
+            <p class="teacher-q">ก่อนมือถือมีอินเทอร์เน็ต เจ้าหน้าที่ตำรวจ/ทหารใช้อะไรในการสื่อสารระยะไกล? ทำงานอย่างไร?</p>
+            <p class="student-a">วิทยุสื่อสาร (Walkie-Talkie) ครับ/ค่ะ ใช้คลื่นวิทยุส่ง-รับเสียง — ต่างจากมือถือที่ใช้สัญญาณเซลล์ผ่านเสาส่ง</p>
+        </ol>
+
+        <p class="step-banner">ขั้นที่ 2: การวางแผนการแก้ปัญหา (20 นาที)</p>
+        <ol start="3">
+            <li>ครูแนะนำบล็อก Radio 3 ตัวหลัก:
+                <ul>
+                    <li><code>radio set group N</code> — ตั้งกลุ่ม</li>
+                    <li><code>radio send number/string</code> — ส่ง</li>
+                    <li><code>on radio received</code> — รับ</li>
+                </ul>
+            </li>
+            <li>ครูให้นักเรียนจับคู่ 2 คน (1 บอร์ด/คน) และตกลงเลขกลุ่ม (เช่น คู่ที่ 1 = กลุ่ม 1, คู่ที่ 2 = กลุ่ม 2)</li>
+        </ol>
+
+        <p class="step-banner">ขั้นที่ 3: การดำเนินการแก้ปัญหา (25 นาที)</p>
+        <ol start="5">
+            <li>นักเรียนเขียน Chat พื้นฐาน (กด A ส่ง "HI", กด B ส่ง "BYE", รับแล้วแสดงบนจอ)</li>
+            <li>นักเรียนทดสอบโดยให้ทั้ง 2 บอร์ดมีโค้ดเดียวกัน</li>
+        </ol>
+
+        <div class="hour-banner">▶ ชั่วโมงที่ 18 (60 นาที) : มินิโปรเจกต์ปิดหน่วย micro:bit</div>
+
+        <p class="step-banner">ขั้นที่ 3 (ต่อ): การดำเนินการแก้ปัญหา (40 นาที)</p>
+        <ol start="7">
+            <li>นักเรียนเลือกโปรเจกต์ 1 ใน 4:
+                <ul>
+                    <li>A: เป่ายิ้งฉุบไร้สาย (Radio + Accelerometer + LED)</li>
+                    <li>B: Magic 8-Ball (Accelerometer + LED)</li>
+                    <li>C: Step Counter (Accelerometer + ตัวแปร + ปุ่ม)</li>
+                    <li>D: Radio Chat 3 ทาง (Radio + ปุ่ม + LED)</li>
+                </ul>
+            </li>
+            <li>นักเรียนทำงานเป็นทีมและเขียนโปรแกรม</li>
+        </ol>
+
+        <p class="step-banner">ขั้นที่ 4: การตรวจสอบและประเมินผล (20 นาที)</p>
+        <ol start="9">
+            <li>นักเรียนทำใบงานที่ 9.1 (Final micro:bit Project)</li>
+            <li>นักเรียนทำแบบทดสอบสรุปหน่วย 5 ข้อ</li>
+            <li>นักเรียนแต่ละคู่/ทีมนำเสนอโปรเจกต์ + ครูประเมินตาม Rubric 10 คะแนน</li>
+            <p class="teacher-q">ถ้าเราตั้งกลุ่ม Radio = 0 ทั้งห้อง จะเกิดอะไร? เหตุใดต้องตั้งกลุ่มเฉพาะคู่?</p>
+            <p class="student-a">ทุกบอร์ดจะคุยกันมั่ว ข้อความปะปนกัน ตั้งกลุ่มเฉพาะคู่เพื่อให้ปลอดภัยและเป็นส่วนตัว เหมือนตั้งช่องวิทยุ</p>
+            <li>ครูสรุปบทเรียนและประกาศว่าสัปดาห์หน้าสอบกลางภาค</li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">8. ชิ้นงาน / ภาระงาน</div>
+        <ol>
+            <li>ใบงานที่ 9.1 "Final micro:bit Project" + วิดีโอ ≥45 วินาที</li>
+            <li>แบบทดสอบสรุปหน่วย 2 micro:bit (5 ข้อ)</li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">9. การวัดและประเมินผล</div>
+        <table class="eval">
+            <thead><tr><th>รายการ</th><th>วิธีวัด</th><th>เครื่องมือ</th><th>เกณฑ์</th></tr></thead>
+            <tbody>
+                <tr><td><b>1. ความรู้ (K)</b><br>Radio + ความรู้สรุปหน่วย</td><td>ตรวจใบงาน + ทดสอบ</td><td>1. ใบงาน 9.1<br>2. แบบทดสอบ 5 ข้อ</td><td>ร้อยละ 60</td></tr>
+                <tr><td><b>2. ทักษะกระบวนการ (P)</b></td><td>ตรวจชิ้นงานตาม Rubric</td><td>3. Rubric (10 คะแนน)</td><td>≥7 คะแนน</td></tr>
+                <tr><td><b>3. พฤติกรรม + การทำงานทีม</b></td><td>สังเกตในชั้น</td><td>4. แบบสังเกตพฤติกรรม</td><td>ระดับ "พอใช้"</td></tr>
+                <tr><td><b>4. คุณลักษณะ</b></td><td>สังเกต</td><td>5. แบบประเมินคุณลักษณะ</td><td>ระดับ "ผ่าน"</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <div class="section-title">10. สื่อและแหล่งการเรียนรู้</div>
+        <p class="indent"><b>สื่อ:</b> 1. <code>Robotm.2/Hr17-18MB.html</code> &nbsp; 2. บอร์ด micro:bit (2 บอร์ด/คู่) &nbsp; 3. ใบงานที่ 9.1</p>
+        <p class="indent"><b>แหล่งการเรียนรู้:</b> 1. ห้องคอมพิวเตอร์ &nbsp; 2. อินเทอร์เน็ต</p>
+    </div>
+
+    <div class="page-break"></div>
+
+    <div class="appendix-banner">ภาคผนวก: เครื่องมือวัดและประเมินผล</div>
+
+    <div class="tool-title">เครื่องมือที่ 1: ใบงานที่ 9.1 และ Rubric ปิดหน่วย</div>
+
+    <div class="worksheet-header">
+        <h3>ใบงานที่ 9.1 "Final micro:bit Project"</h3>
+        <p>ชื่อ-สกุล <span class="dots">..................................................................</span> ชั้น ม.2/<span class="dots">....</span> เลขที่ <span class="dots">....</span></p>
+        <p>คู่หู (ถ้ามี) <span class="dots">..................................................................</span></p>
+    </div>
+
+    <p><b>โปรเจกต์ที่เลือก:</b> ☐ A: เป่ายิ้งฉุบไร้สาย &nbsp;&nbsp; ☐ B: Magic 8-Ball &nbsp;&nbsp; ☐ C: Step Counter &nbsp;&nbsp; ☐ D: Radio Chat 3 ทาง</p>
+
+    <p class="bold">ตอนที่ 1: วางแผน</p>
+    <p class="indent">1. ใช้เซ็นเซอร์/ฟีเจอร์อะไรบ้าง (อย่างน้อย 2)? <span class="dots">................................................</span></p>
+    <p class="indent">2. ใช้ตัวแปรกี่ตัว? <span class="dots">......</span> ชื่ออะไร? <span class="dots">.............................................</span></p>
+    <p class="indent">3. ถ้าใช้ Radio ตั้งกลุ่มเลข: <span class="dots">......</span></p>
+    <p class="indent">4. เงื่อนไข if/else ใช้กี่ที่? <span class="dots">......</span></p>
+
+    <p class="bold">ตอนที่ 2: Pseudo code (โครงสร้างหลัก)</p>
+    <div style="border: 1px solid #000; min-height: 5cm; padding: 8pt; margin: 6pt 0;">
+        <p style="color: #888; font-style: italic;">(พื้นที่สำหรับเขียน Pseudo)</p>
+    </div>
+
+    <p class="bold">ตอนที่ 3: ผลทดสอบ</p>
+    <p class="indent">1. ทำงานบนบอร์ดจริง? <span class="dots">..........</span></p>
+    <p class="indent">2. ปัญหาที่เจอ + แก้ยังไง: <span class="dots">................................................................</span></p>
+    <p class="indent dots">.................................................................................................................</p>
+
+    <p class="bold">ตอนที่ 4: ประเมินตนเอง</p>
+    <p class="indent">1. ทักษะใหม่ที่ได้: <span class="dots">.............................................................................</span></p>
+    <p class="indent">2. ที่ภูมิใจที่สุด: <span class="dots">..................................................................................</span></p>
+    <p class="indent">3. ถ้ามีเวลาเพิ่มจะทำอะไร: <span class="dots">..................................................................</span></p>
+
+    <p class="bold" style="margin-top: 12pt;">Rubric ปิดหน่วย micro:bit (10 คะแนน)</p>
+    <table>
+        <thead><tr><th>หัวข้อ</th><th>เกณฑ์</th><th>คะแนน</th></tr></thead>
+        <tbody>
+            <tr><td><b>1. ใช้เซ็นเซอร์/ฟีเจอร์ ≥2 ตัว</b></td><td>รวมเซ็นเซอร์/ฟีเจอร์ที่เรียนมาได้</td><td class="text-center">2</td></tr>
+            <tr><td><b>2. มีเงื่อนไข if-else</b></td><td>ใช้ตรรกะถูกต้องและสมเหตุสมผล</td><td class="text-center">2</td></tr>
+            <tr><td><b>3. ใช้ตัวแปร</b></td><td>สร้างและเปลี่ยนค่าตัวแปรได้</td><td class="text-center">1</td></tr>
+            <tr><td><b>4. ทำงานบนบอร์ดจริง</b></td><td>โปรแกรมทำงานครบตามที่ออกแบบ</td><td class="text-center">3</td></tr>
+            <tr><td><b>5. ความสมบูรณ์ + ความคิดสร้างสรรค์</b></td><td>มีไอเดียพิเศษ มีรายละเอียดเพิ่ม</td><td class="text-center">2</td></tr>
+        </tbody>
+    </table>
+
+    <div class="page-break"></div>
+
+    <div class="tool-title">เครื่องมือที่ 2: แบบประเมินสมรรถนะการแก้ปัญหา</div>
+    <table>
+        <thead><tr><th style="width: 22%;">พฤติกรรม</th><th>ระดับ 3</th><th>ระดับ 2</th><th>ระดับ 1</th></tr></thead>
+        <tbody>
+            <tr><td><b>วิเคราะห์</b></td><td>เลือกโปรเจกต์ที่ใช้ความรู้หลายส่วน</td><td>เลือกพื้นฐาน</td><td>วิเคราะห์ไม่ออก</td></tr>
+            <tr><td><b>วางแผน</b></td><td>Pseudo + การแบ่งหน้าที่ในทีม</td><td>วางแผนเดี่ยว</td><td>เริ่มเลย</td></tr>
+            <tr><td><b>ดำเนินการ</b></td><td>โปรแกรมทำงานบนบอร์ดจริง</td><td>ทำใน Sim</td><td>ไม่ทำงาน</td></tr>
+            <tr><td><b>ตรวจสอบ + นำเสนอ</b></td><td>นำเสนอเข้าใจง่าย ตอบคำถามได้</td><td>นำเสนอได้แต่ขาดรายละเอียด</td><td>ไม่นำเสนอ</td></tr>
+        </tbody>
+    </table>
+
+    <div class="tool-title">เครื่องมือที่ 3: แบบประเมินพฤติกรรมการทำงาน + ทีม</div>
+    <table>
+        <thead><tr><th>ลำดับ</th><th>ชื่อ-สกุล</th><th>ตั้งใจ (3)</th><th>รับผิดชอบ (3)</th><th>ทำงานทีม (3)</th><th>รวม (9)</th></tr></thead>
+        <tbody>
+            <tr><td>1</td><td class="dots">...........................................................</td><td></td><td></td><td></td><td></td></tr>
+            <tr><td>2</td><td class="dots">...........................................................</td><td></td><td></td><td></td><td></td></tr>
+            <tr><td>...</td><td class="dots">...........................................................</td><td></td><td></td><td></td><td></td></tr>
+        </tbody>
+    </table>
+
+    <div class="tool-title">เครื่องมือที่ 4: แบบประเมินคุณลักษณะอันพึงประสงค์</div>
+    <table>
+        <thead><tr><th>คุณลักษณะ</th><th>ดีเยี่ยม (3)</th><th>ดี (2)</th><th>ผ่าน (1)</th></tr></thead>
+        <tbody>
+            <tr><td><b>มีวินัย</b></td><td>นัดเวลาทำงานทีมตามแผน</td><td>ปฏิบัติบางส่วน</td><td>ไม่ปฏิบัติ</td></tr>
+            <tr><td><b>ใฝ่เรียนรู้</b></td><td>เลือกโปรเจกต์ D ที่ยากที่สุด</td><td>เลือกโปรเจกต์ระดับกลาง</td><td>เลือกพื้นฐาน</td></tr>
+            <tr><td><b>มุ่งมั่นทำงาน</b></td><td>นำเสนอสำเร็จ + แก้บั๊กในทีม</td><td>ขอความช่วยเหลือ</td><td>หยุดทำ</td></tr>
+            <tr><td><b>จิตสาธารณะ</b></td><td>ช่วยเหลือเพื่อนในทีม</td><td>ทำส่วนตัว</td><td>ปฏิเสธความช่วยเหลือ</td></tr>
+        </tbody>
+    </table>
+
+    <div class="tool-title">บันทึกหลังการสอน</div>
+    <p><b>ผลที่เกิดกับผู้เรียน:</b></p><p class="dots">..........................................................................................................................</p>
+    <p><b>ปัญหา/อุปสรรค:</b></p><p class="dots">..........................................................................................................................</p>
+
+    <table class="signature" style="margin-top: 30pt;"><tr>
+        <td class="left" style="width: 50%;">ลงชื่อ <span class="dots">..............................................</span> ผู้สอน<br>(นายภาณุพงศ์ อุ่นคำ)<br>วันที่ <span class="dots">......./......./.........</span></td>
+        <td class="right">ลงชื่อ <span class="dots">..............................................</span><br>(<span class="dots">...........................................</span>)<br>ผู้อำนวยการโรงเรียนบ้านป่ายุบฯ</td>
+    </tr></table>
+</div>
+</body>
+</html>

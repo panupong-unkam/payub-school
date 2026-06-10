@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แผนการจัดการเรียนรู้ที่ 7 — เซ็นเซอร์แสง + อุณหภูมิ</title>
+    <link rel="stylesheet" href="lesson-plan.css">
+</head>
+<body>
+<div class="nav-bar no-print"><a href="index.html">⬅ กลับ</a><div style="color:white;">แผนที่ 7 / 20 — Hr 13-14</div><button class="print-btn" onclick="window.print()">🖨️ พิมพ์</button></div>
+<div class="paper">
+
+    <h1 class="plan-title">แผนการจัดการเรียนรู้ที่ 7</h1>
+    <div class="plan-meta-row"><span>หน่วยที่ 2 เรื่อง micro:bit (ล้วน ไม่มีอุปกรณ์เสริม)</span><span>จำนวน 12 ชั่วโมง</span></div>
+    <div class="plan-meta-row"><span>เรื่อง เซ็นเซอร์แสง (Light) + เซ็นเซอร์อุณหภูมิ (Temperature)</span><span>จำนวน 2 ชั่วโมง (ชั่วโมงที่ 13-14)</span></div>
+    <div class="plan-meta-row"><span>วิชา หุ่นยนต์</span><span>กลุ่มสาระการเรียนรู้ วิทยาศาสตร์และเทคโนโลยี</span></div>
+    <div class="plan-meta-row"><span>ชั้นมัธยมศึกษาปีที่ 2</span><span>ภาคเรียนที่ 1 ปีการศึกษา 2569</span></div>
+    <div class="plan-meta-row"><span>ผู้สอน นายภาณุพงศ์ อุ่นคำ</span><span>โรงเรียนบ้านป่ายุบ (บุ้นกีประชานุเคราะห์)</span></div>
+    <hr class="divider">
+
+    <div class="section">
+        <div class="section-title">1. มาตรฐานการเรียนรู้/ตัวชี้วัด</div>
+        <p class="indent"><b>มาตรฐาน ว 4.2</b> เข้าใจและใช้แนวคิดเชิงคำนวณในการแก้ปัญหา</p>
+        <p class="indent bold">ตัวชี้วัดระหว่างทาง</p>
+        <p class="indent2"><b>ว 4.2 ม.2/2</b> ออกแบบและเขียนโปรแกรมที่ใช้ตรรกะและฟังก์ชันในการแก้ปัญหา</p>
+        <p class="indent2"><b>ว 4.2 ม.2/3</b> อภิปรายองค์ประกอบและหลักการทำงานของระบบคอมพิวเตอร์และเทคโนโลยีการสื่อสาร</p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">2. จุดประสงค์การเรียนรู้</div>
+        <ol>
+            <li>อธิบายหลักการของเซ็นเซอร์แสง (LDR ในจอ LED) และเซ็นเซอร์อุณหภูมิ (ในชิป CPU) ได้ <span class="kpa">K</span></li>
+            <li>ใช้บล็อก <code>light level</code> และ <code>temperature</code> อ่านค่าได้ <span class="kpa">P</span></li>
+            <li>เขียนโปรแกรม Night Light หรือ Smart Home Mini ที่ใช้เงื่อนไข if/else กับเซ็นเซอร์ <span class="kpa">P</span></li>
+            <li>วิเคราะห์ข้อจำกัดของเซ็นเซอร์ (อุณหภูมิ CPU คลาดเคลื่อน 2-3°C) <span class="kpa">K</span></li>
+            <li>เห็นคุณค่าของเทคโนโลยีเซ็นเซอร์ในระบบ Smart Home <span class="kpa">A</span></li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">3. คุณลักษณะอันพึงประสงค์</div>
+        <p class="indent">☐ 1. รักชาติฯ ☐ 2. ซื่อสัตย์ ☑ 3. มีวินัย ☑ 4. ใฝ่เรียนรู้ ☑ 5. พอเพียง ☑ 6. มุ่งมั่น ☐ 7. รักไทย ☐ 8. จิตสาธารณะ</p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">4. สมรรถนะสำคัญของผู้เรียน</div>
+        <ol>
+            <li>ความสามารถในการคิด</li>
+            <li>ความสามารถในการแก้ปัญหา</li>
+            <li>ความสามารถในการใช้เทคโนโลยี</li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">5. สาระสำคัญ</div>
+        <p class="indent">micro:bit มีเซ็นเซอร์ "ไม่มีตัว" แต่ใช้ได้! เซ็นเซอร์แสงใช้จอ LED 5×5 รับแสง คืนค่า 0-255 (0=มืดสนิท, 255=สว่างจ้า) เซ็นเซอร์อุณหภูมิวัดที่ CPU เป็น °C (คลาดเคลื่อน ~2-3°C จากอุณหภูมิห้องจริง) เมื่อรวมกับเงื่อนไข if/else จะสร้างระบบ Smart Home ได้ เช่น Night Light เปิดไฟอัตโนมัติเมื่อแสงน้อย, เตือนเมื่ออุณหภูมิเกิน 30°C เป็นต้น</p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">6. ความรู้เดิมที่นักเรียนต้องมี</div>
+        <ol>
+            <li>การใช้ MakeCode + เงื่อนไข if/else จากแผนที่ 4-6</li>
+            <li>การคิดเป็นช่วงค่า (Range: 0-255 หรือ 20-30°C)</li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">7. การจัดกิจกรรมการเรียนรู้</div>
+
+        <div class="hour-banner">▶ ชั่วโมงที่ 13 (60 นาที) : เซ็นเซอร์แสงและเซ็นเซอร์อุณหภูมิ</div>
+
+        <p class="step-banner">ขั้นที่ 1: การวิเคราะห์และกำหนดรายละเอียดของปัญหา (15 นาที)</p>
+        <ol>
+            <li>ครูเปิดเว็บไซต์ <code>Robotm.2/Hr13-14MB.html</code></li>
+            <li>ครูตั้งคำถาม</li>
+            <p class="teacher-q">ไฟถนนเปิด-ปิดอัตโนมัติได้อย่างไร? ทำไมไม่ติดตลอดเวลา?</p>
+            <p class="student-a">เพราะมีเซ็นเซอร์แสง — มืดก็เปิด สว่างก็ปิด ประหยัดไฟ</p>
+        </ol>
+
+        <p class="step-banner">ขั้นที่ 2: การวางแผนการแก้ปัญหา (20 นาที)</p>
+        <ol start="3">
+            <li>ครูอธิบายว่าจอ LED ใช้รับแสงได้ด้วย (เป็น LDR ขนาดเล็ก) — เซ็นเซอร์แสงไม่ต้องมีตัวเพิ่ม</li>
+            <li>ครูแนะนำบล็อก <code>light level</code> (0-255) และ <code>temperature</code> (°C)</li>
+            <li>ครูสาธิตการเขียน Night Light: <code>if light level &lt; 50 → show icon Heart</code></li>
+        </ol>
+
+        <p class="step-banner">ขั้นที่ 3: การดำเนินการแก้ปัญหา (25 นาที)</p>
+        <ol start="6">
+            <li>นักเรียนเขียนโปรแกรม Night Light พื้นฐาน</li>
+            <li>นักเรียนทดสอบโดยเอามือบังจอและเปิด-ปิดแสงในห้อง</li>
+        </ol>
+
+        <div class="hour-banner">▶ ชั่วโมงที่ 14 (60 นาที) : ใบงาน — Smart Home Mini</div>
+
+        <p class="step-banner">ขั้นที่ 3 (ต่อ): การดำเนินการแก้ปัญหา (40 นาที)</p>
+        <ol start="8">
+            <li>นักเรียนเลือกโปรเจกต์ 1 ใน 3: A: Night Light, B: เตือนอุณหภูมิ 3 ระดับ, C: Smart Home</li>
+            <li>นักเรียนเขียนโปรแกรมและทดสอบบนบอร์ดจริง</li>
+        </ol>
+
+        <p class="step-banner">ขั้นที่ 4: การตรวจสอบและประเมินผล (20 นาที)</p>
+        <ol start="10">
+            <li>นักเรียนทำใบงานที่ 7.1</li>
+            <li>นักเรียนทำแบบทดสอบท้ายชั่วโมง 5 ข้อ</li>
+            <p class="teacher-q">เซ็นเซอร์อุณหภูมิของ micro:bit คลาดเคลื่อนเพราะอะไร? และเราจะแก้ไขปัญหานี้ในงานจริงได้อย่างไร?</p>
+            <p class="student-a">คลาดเคลื่อนเพราะวัดที่ CPU ที่ร้อนกว่าอากาศ ในงานจริงต้องใช้เซ็นเซอร์อุณหภูมิแยก เช่น DHT22</p>
+            <li>ครูสรุปบทเรียน</li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">8. ชิ้นงาน / ภาระงาน</div>
+        <ol>
+            <li>ใบงานที่ 7.1 "เซ็นเซอร์แสง+อุณหภูมิ" + วิดีโอบอร์ดทำงาน</li>
+            <li>แบบทดสอบท้ายชั่วโมง 5 ข้อ</li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">9. การวัดและประเมินผล</div>
+        <table class="eval">
+            <thead><tr><th>รายการ</th><th>วิธีวัด</th><th>เครื่องมือ</th><th>เกณฑ์</th></tr></thead>
+            <tbody>
+                <tr><td><b>1. ความรู้ (K)</b></td><td>ตรวจใบงาน + ทดสอบ</td><td>1. ใบงาน 7.1<br>2. แบบทดสอบ 5 ข้อ</td><td>ร้อยละ 60</td></tr>
+                <tr><td><b>2. ทักษะกระบวนการ (P)</b></td><td>ตรวจชิ้นงาน</td><td>3. แบบประเมินทักษะ</td><td>ระดับ "ดี"</td></tr>
+                <tr><td><b>3. พฤติกรรม</b></td><td>สังเกต</td><td>4. แบบสังเกตพฤติกรรม</td><td>ระดับ "พอใช้"</td></tr>
+                <tr><td><b>4. คุณลักษณะ</b></td><td>สังเกต</td><td>5. แบบประเมินคุณลักษณะ</td><td>ระดับ "ผ่าน"</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <div class="section-title">10. สื่อและแหล่งการเรียนรู้</div>
+        <p class="indent"><b>สื่อ:</b> 1. <code>Robotm.2/Hr13-14MB.html</code> &nbsp; 2. บอร์ด micro:bit &nbsp; 3. ใบงานที่ 7.1</p>
+        <p class="indent"><b>แหล่งการเรียนรู้:</b> 1. ห้องคอมพิวเตอร์ &nbsp; 2. อินเทอร์เน็ต</p>
+    </div>
+
+    <div class="page-break"></div>
+
+    <div class="appendix-banner">ภาคผนวก: เครื่องมือวัดและประเมินผล</div>
+
+    <div class="tool-title">เครื่องมือที่ 1: ใบงานที่ 7.1 และแบบประเมิน</div>
+
+    <div class="worksheet-header">
+        <h3>ใบงานที่ 7.1 "เซ็นเซอร์แสง + อุณหภูมิ"</h3>
+        <p>ชื่อ-สกุล <span class="dots">..................................................................</span> ชั้น ม.2/<span class="dots">....</span> เลขที่ <span class="dots">....</span></p>
+    </div>
+
+    <p><b>โปรเจกต์ที่เลือก:</b> ☐ A: Night Light &nbsp;&nbsp; ☐ B: เตือนอุณหภูมิ &nbsp;&nbsp; ☐ C: Smart Home</p>
+
+    <p class="bold">ตอนที่ 1: บันทึกค่าจริงจากบอร์ด</p>
+    <p class="indent">1. ค่าแสงในห้องเรียน: <span class="dots">..........</span> &nbsp; เมื่อบังจอ: <span class="dots">..........</span></p>
+    <p class="indent">2. อุณหภูมิที่อ่านได้: <span class="dots">..........</span> °C</p>
+    <p class="indent">3. อุณหภูมิห้องจริง (ดูที่เครื่องปรับอากาศ): <span class="dots">..........</span> °C</p>
+    <p class="indent">4. ค่าต่างกันเท่าไหร่? <span class="dots">..........</span> °C เพราะอะไร? <span class="dots">.........................</span></p>
+
+    <p class="bold">ตอนที่ 2: Pseudo code</p>
+    <div style="border: 1px solid #000; min-height: 4cm; padding: 8pt; margin: 6pt 0;">
+        <p style="color: #888; font-style: italic;">(พื้นที่สำหรับเขียน Pseudo)</p>
+    </div>
+
+    <p class="bold">ตอนที่ 3: ผลทดสอบ</p>
+    <p class="indent">1. โปรแกรมทำงานบนบอร์ดจริง? <span class="dots">..........</span></p>
+    <p class="indent">2. ปัญหาที่พบ + วิธีแก้: <span class="dots">..............................................................</span></p>
+
+    <p class="bold">ตอนที่ 4: คำถามท้าทาย</p>
+    <p class="indent">ออกแบบ "เครื่องเตือนภัยตู้เย็น" ที่จะส่งเสียงเตือนเมื่ออุณหภูมิเกิน 10°C — ใช้เซ็นเซอร์ใด และเขียนเงื่อนไขอย่างไร?</p>
+    <p class="indent dots">.................................................................................................................</p>
+
+    <div style="margin-top: 14pt; padding: 8pt; border: 1pt dashed #1e3a8a; background: #f0f9ff;">
+        <p class="bold" style="color: #1e3a8a;">เฉลย (สำหรับครู)</p>
+        <p><b>ภารกิจ A — Night Light:</b></p>
+        <div class="code-box">forever:
+    if light level &lt; 50:
+        show icon Heart
+    else:
+        clear screen</div>
+        <p><b>ตอนที่ 4:</b> เซ็นเซอร์อุณหภูมิ + เงื่อนไข <code>if temperature &gt; 10 → play tone</code></p>
+    </div>
+
+    <p class="bold" style="margin-top: 12pt;">แบบประเมินใบงาน 7.1</p>
+    <table>
+        <thead><tr><th style="width: 25%;">ประเด็น</th><th>ดีมาก (3)</th><th>ดี (2)</th><th>ปรับปรุง (1)</th></tr></thead>
+        <tbody>
+            <tr><td><b>บันทึกค่าจริง</b></td><td>ครบ + อธิบายความคลาดเคลื่อนได้</td><td>ครบแต่ไม่อธิบาย</td><td>ไม่ครบ</td></tr>
+            <tr><td><b>Pseudo code</b></td><td>มี forever + if-else + เซ็นเซอร์</td><td>โครงสร้างพื้นฐาน</td><td>ไม่ครบ</td></tr>
+            <tr><td><b>ผลทดสอบ</b></td><td>ทำงานบนบอร์ด + อธิบายปัญหาได้</td><td>ทำงานแต่ไม่อธิบาย</td><td>ไม่ทำงาน</td></tr>
+            <tr><td><b>คำถามท้าทาย</b></td><td>ออกแบบครบและเขียน Pseudo ได้</td><td>ตอบบางส่วน</td><td>ไม่ตอบ</td></tr>
+        </tbody>
+    </table>
+
+    <div class="page-break"></div>
+
+    <div class="tool-title">เครื่องมือที่ 2: แบบประเมินสมรรถนะการแก้ปัญหา</div>
+    <table>
+        <thead><tr><th style="width: 22%;">พฤติกรรม</th><th>ระดับ 3</th><th>ระดับ 2</th><th>ระดับ 1</th></tr></thead>
+        <tbody>
+            <tr><td><b>วิเคราะห์</b></td><td>เข้าใจหลักเซ็นเซอร์ + ข้อจำกัด</td><td>เข้าใจบางส่วน</td><td>ไม่เข้าใจ</td></tr>
+            <tr><td><b>วางแผน</b></td><td>ตั้งช่วงค่า threshold เหมาะสม</td><td>ตั้งค่าได้</td><td>ไม่ตั้งค่า</td></tr>
+            <tr><td><b>ดำเนินการ</b></td><td>โปรแกรมทำงานบนบอร์ดจริง</td><td>ทำใน Sim</td><td>ไม่ทำงาน</td></tr>
+            <tr><td><b>ตรวจสอบ</b></td><td>บันทึกค่าจริงและเปรียบเทียบ</td><td>บันทึกเฉพาะ</td><td>ไม่บันทึก</td></tr>
+        </tbody>
+    </table>
+
+    <div class="tool-title">เครื่องมือที่ 3: แบบประเมินพฤติกรรมการทำงาน</div>
+    <table>
+        <thead><tr><th>ลำดับ</th><th>ชื่อ-สกุล</th><th>ตั้งใจ (3)</th><th>รับผิดชอบ (3)</th><th>ตรงเวลา (3)</th><th>รวม (9)</th></tr></thead>
+        <tbody>
+            <tr><td>1</td><td class="dots">...........................................................</td><td></td><td></td><td></td><td></td></tr>
+            <tr><td>2</td><td class="dots">...........................................................</td><td></td><td></td><td></td><td></td></tr>
+            <tr><td>...</td><td class="dots">...........................................................</td><td></td><td></td><td></td><td></td></tr>
+        </tbody>
+    </table>
+
+    <div class="tool-title">เครื่องมือที่ 4: แบบประเมินคุณลักษณะอันพึงประสงค์</div>
+    <table>
+        <thead><tr><th>คุณลักษณะ</th><th>ดีเยี่ยม (3)</th><th>ดี (2)</th><th>ผ่าน (1)</th></tr></thead>
+        <tbody>
+            <tr><td><b>มีวินัย</b></td><td>ส่งงานในเวลา</td><td>ส่งช้าเล็กน้อย</td><td>ส่งช้า</td></tr>
+            <tr><td><b>ใฝ่เรียนรู้</b></td><td>ทดลองหลายค่า threshold</td><td>ทำตามที่บอก</td><td>ทำเฉพาะที่จำเป็น</td></tr>
+            <tr><td><b>พอเพียง</b></td><td>เห็นคุณค่าการประหยัดไฟ (Night Light)</td><td>เข้าใจแนวคิด</td><td>ไม่เห็นความสำคัญ</td></tr>
+            <tr><td><b>มุ่งมั่นทำงาน</b></td><td>ปรับ threshold จนทำงานสมบูรณ์</td><td>ขอความช่วยเหลือ</td><td>หยุดทำ</td></tr>
+        </tbody>
+    </table>
+
+    <div class="tool-title">บันทึกหลังการสอน</div>
+    <p><b>ผลที่เกิดกับผู้เรียน:</b></p><p class="dots">..........................................................................................................................</p>
+    <p><b>ปัญหา/อุปสรรค:</b></p><p class="dots">..........................................................................................................................</p>
+
+    <table class="signature" style="margin-top: 30pt;"><tr>
+        <td class="left" style="width: 50%;">ลงชื่อ <span class="dots">..............................................</span> ผู้สอน<br>(นายภาณุพงศ์ อุ่นคำ)<br>วันที่ <span class="dots">......./......./.........</span></td>
+        <td class="right">ลงชื่อ <span class="dots">..............................................</span><br>(<span class="dots">...........................................</span>)<br>ผู้อำนวยการโรงเรียนบ้านป่ายุบฯ</td>
+    </tr></table>
+</div>
+</body>
+</html>

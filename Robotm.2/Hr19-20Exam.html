@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>หุ่นยนต์ ม.2 | สอบกลางภาค (Hr 19-20)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Noto+Serif+Thai:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --bg-dark: #0f172a; --surface-dark: #1e293b; --cyber-blue: #0ea5e9;
+            --neon-green: #10b981; --neon-orange: #f59e0b; --neon-pink: #ec4899;
+            --neon-purple: #a855f7; --neon-cyan: #06b6d4; --gold: #fbbf24;
+            --exam-red: #dc2626;
+            --text-main: #f8fafc; --text-muted: #94a3b8; --border-line: #334155;
+        }
+        body { display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; background: radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 100%); color: var(--text-main); font-family: 'Sarabun', sans-serif; padding: 20px; margin: 0; overflow-x: hidden; }
+        body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px); background-size: 30px 30px; z-index: -1; }
+        .exam-container { width: 100%; max-width: 1100px; background: var(--surface-dark); border-radius: 24px; box-shadow: 0 0 40px rgba(0,0,0,0.5), 0 0 30px rgba(220,38,38,0.3); overflow: hidden; border: 1px solid var(--border-line); display: flex; flex-direction: column; min-height: 80vh; }
+        .exam-header { background: linear-gradient(90deg, rgba(220,38,38,0.2), rgba(15,23,42,0.95)); padding: 20px 30px; border-bottom: 1px solid var(--exam-red); display: flex; justify-content: space-between; align-items: center; }
+        .timer-box {
+            background: rgba(220,38,38,0.15); border: 2px solid var(--exam-red);
+            padding: 8px 18px; border-radius: 24px;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: bold; font-size: 18px; color: var(--exam-red);
+            display: none; align-items: center; gap: 8px;
+            box-shadow: 0 0 15px rgba(220,38,38,0.3);
+        }
+        .timer-box.warning { animation: blinkTimer 0.5s infinite alternate; }
+        @keyframes blinkTimer { from { background: rgba(220,38,38,0.15); } to { background: rgba(220,38,38,0.4); } }
+        .progress-track { height: 6px; background: var(--border-line); width: 100%; display: none; }
+        #progress-bar { height: 100%; background: linear-gradient(90deg, var(--exam-red), var(--neon-orange)); width: 0%; transition: width 0.6s ease; }
+        .exam-body { padding: 40px; flex-grow: 1; display: flex; flex-direction: column; }
+        .step { display: none; animation: glitchFadeIn 0.5s ease-out forwards; flex-grow: 1; }
+        .step.active { display: block; }
+        @keyframes glitchFadeIn { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 1; transform: translateY(0); } }
+        h3 { color: var(--exam-red); font-family: 'Noto Serif Thai', serif; font-size: 28px; margin-top: 0; text-shadow: 0 0 15px rgba(220,38,38,0.3); border-bottom: 1px dashed var(--border-line); padding-bottom: 15px; }
+        h4 { color: white; font-family: 'Noto Serif Thai', serif; font-size: 20px; margin: 20px 0 10px; }
+        p, li { line-height: 1.85; font-size: 17px; color: #cbd5e1; }
+        .btn { padding: 14px 28px; border: none; border-radius: 10px; font-family: 'Sarabun'; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.3s; display: inline-flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-primary { background: linear-gradient(135deg, var(--exam-red), #991b1b); color: white; box-shadow: 0 4px 20px rgba(220,38,38,0.5); }
+        .btn-primary:hover { transform: translateY(-3px); }
+        .btn-outline { background: transparent; color: var(--text-muted); border: 1px solid var(--border-line); }
+        .btn-outline:hover { color: white; border-color: white; }
+        .footer-nav { padding: 25px 40px; background: rgba(15,23,42,0.95); border-top: 1px solid var(--border-line); display: none; justify-content: space-between; align-items: center; margin-top: auto; }
+
+        .question-card {
+            background: rgba(0,0,0,0.3); border: 1px solid var(--border-line);
+            border-radius: 16px; padding: 25px; margin-bottom: 18px;
+            position: relative;
+        }
+        .q-num {
+            position: absolute; top: -12px; left: 20px;
+            background: var(--exam-red); color: white;
+            padding: 4px 14px; border-radius: 12px;
+            font-weight: bold; font-size: 14px;
+            font-family: monospace;
+        }
+        .q-text {
+            color: white; font-size: 17px;
+            margin: 8px 0 18px 0; font-weight: bold;
+            line-height: 1.6;
+        }
+        .q-options { display: flex; flex-direction: column; gap: 10px; }
+        .q-option {
+            background: rgba(255,255,255,0.04); border: 2px solid var(--border-line);
+            padding: 12px 18px; border-radius: 10px;
+            cursor: pointer; transition: 0.2s;
+            font-size: 15px; color: var(--text-main); text-align: left; width: 100%;
+            display: flex; align-items: center; gap: 12px;
+        }
+        .q-option:hover { background: rgba(220,38,38,0.08); border-color: var(--exam-red); }
+        .q-option.selected {
+            background: rgba(220,38,38,0.15); border-color: var(--exam-red);
+            color: white; font-weight: bold;
+        }
+        .q-letter {
+            background: var(--border-line); color: white;
+            width: 28px; height: 28px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; flex-shrink: 0; font-family: monospace;
+        }
+        .q-option.selected .q-letter { background: var(--exam-red); }
+
+        .code-box { background: #0a0e1a; padding: 16px; border-radius: 10px; color: #e2e8f0; font-size: 14px; font-family: 'JetBrains Mono', monospace; white-space: pre; overflow-x: auto; line-height: 1.6; border-left: 4px solid var(--exam-red); margin: 10px 0; }
+        .code-box .kw { color: #c792ea; } .code-box .str { color: #a3e635; } .code-box .num { color: #f59e0b; } .code-box .com { color: #64748b; font-style: italic; } .code-box .fn { color: #06b6d4; }
+
+        /* Sections */
+        .section-banner {
+            background: linear-gradient(135deg, var(--exam-red), #7f1d1d);
+            padding: 22px 28px; border-radius: 14px;
+            margin: 18px 0; text-align: center;
+        }
+        .section-banner h4 { margin: 0 0 5px 0; color: white; font-size: 24px; }
+        .section-banner p { margin: 0; color: rgba(255,255,255,0.85); font-size: 15px; }
+
+        /* Rubric */
+        .rubric-table { width: 100%; border-collapse: collapse; margin-top: 15px; background: rgba(0,0,0,0.3); border-radius: 12px; overflow: hidden; }
+        .rubric-table th, .rubric-table td { padding: 14px; text-align: left; border-bottom: 1px solid var(--border-line); font-size: 15px; }
+        .rubric-table th { background: rgba(220,38,38,0.15); color: var(--exam-red); font-weight: bold; }
+        .rubric-table td:last-child { text-align: center; color: var(--gold); font-weight: bold; font-size: 18px; }
+
+        /* Result */
+        .score-display {
+            background: linear-gradient(135deg, rgba(220,38,38,0.15), rgba(0,0,0,0.5));
+            border: 3px solid var(--exam-red); border-radius: 18px;
+            padding: 30px; text-align: center; margin: 20px 0;
+        }
+        .score-big {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 60px; font-weight: bold;
+            color: var(--exam-red); margin: 10px 0;
+            text-shadow: 0 0 20px rgba(220,38,38,0.5);
+        }
+        .score-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        .score-mini {
+            background: rgba(0,0,0,0.4); padding: 18px;
+            border-radius: 12px; border: 1px solid var(--border-line);
+        }
+        .score-mini h5 { margin: 0 0 8px 0; color: var(--text-muted); font-size: 14px; }
+        .score-mini .v { font-size: 28px; font-weight: bold; font-family: monospace; }
+
+        .grade-badge {
+            display: inline-block; padding: 10px 30px;
+            border-radius: 30px; font-size: 24px;
+            font-weight: bold; margin: 10px 0;
+        }
+        .grade-A { background: rgba(16,185,129,0.2); color: var(--neon-green); border: 2px solid var(--neon-green); }
+        .grade-B { background: rgba(14,165,233,0.2); color: var(--cyber-blue); border: 2px solid var(--cyber-blue); }
+        .grade-C { background: rgba(245,158,11,0.2); color: var(--neon-orange); border: 2px solid var(--neon-orange); }
+        .grade-D { background: rgba(239,68,68,0.2); color: #ef4444; border: 2px solid #ef4444; }
+
+        .callout { border-radius: 14px; padding: 18px 22px; margin: 18px 0; display: flex; gap: 15px; align-items: flex-start; }
+        .callout-icon { font-size: 28px; flex-shrink: 0; }
+        .callout-info { background: rgba(14,165,233,0.1); border-left: 4px solid var(--cyber-blue); }
+        .callout-warn { background: rgba(245,158,11,0.1); border-left: 4px solid var(--neon-orange); }
+        .callout-danger { background: rgba(220,38,38,0.1); border-left: 4px solid var(--exam-red); }
+        .callout b { color: white; }
+
+        .answered-counter {
+            display: inline-block; background: rgba(0,0,0,0.4);
+            padding: 6px 14px; border-radius: 20px; font-family: monospace;
+            font-size: 14px; border: 1px solid var(--border-line);
+        }
+
+        @media (max-width: 800px) { .exam-body { padding: 22px; } h3 { font-size: 22px; } .score-detail-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+<div class="exam-container">
+    <div class="exam-header">
+        <h2 style="margin: 0; font-size: 20px; letter-spacing: 1px;">🎯 MIDTERM EXAM | Hr 19-20</h2>
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <div class="timer-box" id="timer-box">⏱ <span id="timer-text">60:00</span></div>
+            <div id="header-guest-info" style="display: none; align-items: center; gap: 12px;">
+                <span style="background: rgba(220,38,38,0.15); color: var(--exam-red); padding: 6px 18px; border-radius: 20px; font-size: 14px; font-weight: bold; border: 1px solid var(--exam-red);" id="display-header-name">Student</span>
+                <button class="btn btn-outline" style="padding: 6px 15px; font-size: 12px;" onclick="if(confirm('ออกจากการสอบ? คะแนนจะหาย!')) location.reload()">EXIT</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="progress-track" id="progress-container"><div id="progress-bar"></div></div>
+
+    <div class="exam-body">
+
+        <!-- STEP 0: Login -->
+        <div class="step active" id="step-0">
+            <div style="text-align: center; padding: 50px 20px;">
+                <div style="font-size: 90px; margin-bottom: 20px;">📝</div>
+                <h2 style="color: white; font-size: 36px; margin-bottom: 10px;">สอบกลางภาค</h2>
+                <p style="color: var(--exam-red); font-size: 20px; font-weight: bold;">วิชาหุ่นยนต์ ม.2 — ชั่วโมงที่ 19-20</p>
+                <p style="color: var(--text-muted); font-size: 16px; margin: 20px 0;">เนื้อหา: VEXcode VR + micro:bit (Hr 1-18)</p>
+
+                <div class="callout callout-danger" style="text-align: left; max-width: 600px; margin: 25px auto;">
+                    <span class="callout-icon">⚠️</span>
+                    <div>
+                        <b>กฎการสอบ:</b>
+                        <ul style="margin: 10px 0 0 20px;">
+                            <li>เวลา <b>60 นาที</b> (1 ชั่วโมง) สำหรับทฤษฎี</li>
+                            <li>ทฤษฎี <b>20 ข้อ</b> (VEXcode VR 10 + micro:bit 10) คิดข้อละ 1 คะแนน</li>
+                            <li>ปฏิบัติ <b>1 โจทย์</b> (เพิ่ม 10 คะแนน) ส่งใน Hr 20</li>
+                            <li><b>ห้ามใช้</b> หนังสือ มือถือ ลอกเพื่อน</li>
+                            <li>กดเริ่ม = ยอมรับและเริ่มจับเวลา</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <p style="color: var(--text-muted); font-size: 16px; margin-top: 20px;">📝 ลงชื่อก่อนเริ่มสอบ</p>
+                <input type="text" id="guest-name-input" placeholder="ชื่อ-นามสกุล เลขที่ ห้อง" style="width:100%; max-width:520px; padding:16px 22px; background:rgba(0,0,0,0.4); border:2px solid var(--exam-red); border-radius:12px; color:white; font-size:18px; text-align:center; outline:none;" onkeypress="if(event.key === 'Enter') startExam()">
+                <div style="margin-top: 35px;">
+                    <button class="btn btn-primary" style="padding: 18px 60px; font-size: 19px;" onclick="startExam()">🚀 เริ่มสอบ (จับเวลาทันที)</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 1: VEXcode VR Section -->
+        <div class="step" id="step-1">
+            <div class="section-banner">
+                <h4>📘 ส่วนที่ 1: VEXcode VR (ข้อ 1-10)</h4>
+                <p>10 คะแนน — ทบทวนหน่วยที่ 1</p>
+            </div>
+
+            <div id="vex-questions"></div>
+
+            <div style="text-align: center; margin-top: 20px;">
+                <span class="answered-counter">ตอบแล้ว: <b id="vex-answered">0</b> / 10</span>
+            </div>
+        </div>
+
+        <!-- STEP 2: micro:bit Section -->
+        <div class="step" id="step-2">
+            <div class="section-banner" style="background: linear-gradient(135deg, var(--neon-green), #047857);">
+                <h4>📗 ส่วนที่ 2: micro:bit (ข้อ 11-20)</h4>
+                <p>10 คะแนน — ทบทวนหน่วยที่ 2</p>
+            </div>
+
+            <div id="mb-questions"></div>
+
+            <div style="text-align: center; margin-top: 20px;">
+                <span class="answered-counter">ตอบแล้ว: <b id="mb-answered">0</b> / 10</span>
+            </div>
+        </div>
+
+        <!-- STEP 3: Practical Exam Brief -->
+        <div class="step" id="step-3">
+            <div class="section-banner" style="background: linear-gradient(135deg, var(--neon-purple), #6b21a8);">
+                <h4>🛠️ ส่วนที่ 3: สอบปฏิบัติ (Hr 20)</h4>
+                <p>10 คะแนน — ส่งภายในชั่วโมง</p>
+            </div>
+
+            <h3>🎯 โจทย์สอบปฏิบัติ — "เครื่องวัดอุณหภูมิอัจฉริยะ"</h3>
+
+            <p>เขียนโปรแกรมบน <b>MakeCode</b> ให้ micro:bit ทำงานดังนี้:</p>
+
+            <div class="callout callout-info">
+                <span class="callout-icon">📝</span>
+                <div>
+                    <b>ข้อกำหนด:</b>
+                    <ol style="margin: 10px 0 0 20px; line-height: 2;">
+                        <li>เมื่อกด <b>ปุ่ม A</b> → แสดงค่าอุณหภูมิ (°C) บนจอ LED</li>
+                        <li>เมื่อกด <b>ปุ่ม B</b> → แสดงค่าระดับแสง (light level)</li>
+                        <li>ใน <b>forever loop</b>: ถ้า temperature &gt; 30 → แสดง icon Sad + เล่นเสียง</li>
+                        <li>ถ้า temperature ≤ 30 → ลบจอ (clear screen)</li>
+                        <li>ใช้บล็อก <b>show string</b>, <b>show number</b>, <b>show icon</b>, <b>if/else</b>, <b>forever</b></li>
+                    </ol>
+                </div>
+            </div>
+
+            <h4>📋 เกณฑ์การให้คะแนน (Rubric)</h4>
+            <table class="rubric-table">
+                <thead><tr><th>หัวข้อ</th><th>เกณฑ์</th><th>คะแนน</th></tr></thead>
+                <tbody>
+                    <tr><td><b>1. การใช้ on button</b></td><td>กด A/B แล้วทำงานถูก</td><td>2</td></tr>
+                    <tr><td><b>2. การอ่านเซ็นเซอร์</b></td><td>เรียก temperature + light level ถูก</td><td>2</td></tr>
+                    <tr><td><b>3. การใช้ if/else</b></td><td>เปรียบเทียบ temperature &gt; 30 ทำงานได้</td><td>2</td></tr>
+                    <tr><td><b>4. forever loop</b></td><td>วนตรวจอุณหภูมิตลอด</td><td>2</td></tr>
+                    <tr><td><b>5. ความสมบูรณ์</b></td><td>โค้ดทำงานครบทุกข้อ ไม่มี error</td><td>2</td></tr>
+                    <tr style="background: rgba(220,38,38,0.1);"><td colspan="2" style="text-align: right; color: var(--exam-red); font-weight: bold;">รวม</td><td>10</td></tr>
+                </tbody>
+            </table>
+
+            <div class="callout callout-danger">
+                <span class="callout-icon">📸</span>
+                <div>
+                    <b>ส่งงานปฏิบัติ:</b>
+                    <ol style="margin: 10px 0 0 20px;">
+                        <li>เขียนโปรแกรมใน <a href="https://makecode.microbit.org" target="_blank" style="color: var(--neon-green);">makecode.microbit.org</a></li>
+                        <li><b>แคปหน้าจอ</b> โค้ดบล็อกที่เขียนเสร็จ</li>
+                        <li><b>แคปหน้าจอ</b> Simulator แสดงผลลัพธ์ (กดปุ่ม A → แสดงตัวเลข)</li>
+                        <li><b>กด Share</b> → คัดลอกลิงก์</li>
+                        <li>ส่งทั้งหมด: เว็บโรงครูเจมส์ → ระบบส่งงาน → <b>"สอบกลางภาค ปฏิบัติ"</b></li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 4: Final result -->
+        <div class="step" id="step-4">
+            <h3>🏆 สรุปคะแนนสอบกลางภาค</h3>
+
+            <div class="score-display">
+                <p style="color: var(--text-muted); margin: 0;">นักเรียน</p>
+                <h4 style="margin: 5px 0;" class="student-name-inject"></h4>
+
+                <p style="color: var(--text-muted); margin: 15px 0 0 0;">คะแนนทฤษฎี (20 ข้อ)</p>
+                <div class="score-big" id="total-score">-</div>
+
+                <div id="grade-container"></div>
+
+                <div class="score-detail-grid">
+                    <div class="score-mini">
+                        <h5>📘 VEXcode VR</h5>
+                        <div class="v" id="vex-score" style="color: var(--cyber-blue);">-</div>
+                        <p style="margin: 5px 0 0 0; font-size: 12px; color: var(--text-muted);">เต็ม 10 คะแนน</p>
+                    </div>
+                    <div class="score-mini">
+                        <h5>📗 micro:bit</h5>
+                        <div class="v" id="mb-score" style="color: var(--neon-green);">-</div>
+                        <p style="margin: 5px 0 0 0; font-size: 12px; color: var(--text-muted);">เต็ม 10 คะแนน</p>
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px; padding-top: 20px; border-top: 1px dashed var(--border-line);">
+                    <p style="margin: 0; color: var(--text-muted); font-size: 14px;">⏱ เวลาที่ใช้: <b id="time-used" style="color: white;">-</b></p>
+                </div>
+            </div>
+
+            <div class="callout callout-danger">
+                <span class="callout-icon">📸</span>
+                <div>
+                    <b>ส่งภาพหน้าจอนี้ให้ครู:</b>
+                    <ol style="margin: 10px 0 0 20px;">
+                        <li>กด <b>Print Screen</b> (Win) หรือ <b>Cmd+Shift+4</b> (Mac) → แคปหน้าจอตอนนี้</li>
+                        <li>ส่งภาพในระบบส่งงาน → ใบงาน <b>"สอบกลางภาค ทฤษฎี"</b></li>
+                        <li>อย่าลืม! ทำสอบปฏิบัติให้เสร็จด้วย (กดปุ่ม "ดูโจทย์ปฏิบัติ" ด้านล่าง)</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 25px; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                <button class="btn btn-outline" onclick="currentStep=3; updateUI()">📋 ดูโจทย์ปฏิบัติอีกครั้ง</button>
+                <button class="btn btn-primary" onclick="finishExam()">🏠 กลับหน้าหลัก</button>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="footer-nav" id="footer-controls">
+        <button class="btn btn-outline" id="prevBtn" onclick="moveStep(-1)" style="visibility: hidden;">⬅️ ถอย</button>
+        <div id="step-label" style="color: var(--text-muted); font-family: monospace; font-size: 14px;">ส่วน 1/3</div>
+        <button class="btn btn-primary" id="nextBtn" onclick="nextStep()">ต่อไป ➔</button>
+    </div>
+</div>
+
+<script>
+    let currentStep = 0; let studentName = "";
+    let userAnswers = {}; // {questionId: selectedIndex}
+    let timerSeconds = 60 * 60; // 60 minutes
+    let timerInterval = null;
+    let timeUsed = 0;
+
+    // Question banks
+    const vexQuestions = [
+        { q: "เว็บไซต์ VEXcode VR เปิดใช้งานที่ URL ใด?", a: ["vex.com/vr", "vr.vex.com", "vexcode.org", "vrvex.com"], correct: 1 },
+        { q: "บล็อก 'drive forward 200 mm' หน่วยใช้อะไร?", a: ["เซนติเมตร", "มิลลิเมตร", "เมตร", "องศา"], correct: 1 },
+        { q: "ถ้าต้องการเขียนหุ่นยนต์เดินเป็นสามเหลี่ยมด้านเท่า ใช้ Loop กี่รอบ และเลี้ยวกี่องศา?", a: ["3 รอบ เลี้ยว 60°", "3 รอบ เลี้ยว 120°", "6 รอบ เลี้ยว 60°", "4 รอบ เลี้ยว 90°"], correct: 1 },
+        { q: "เซ็นเซอร์ใดใน VEXcode VR ใช้วัด 'ระยะข้างหน้า'?", a: ["Bumper", "Distance Sensor", "Eye Sensor", "Down Eye"], correct: 1 },
+        { q: "บล็อกใด NOT ใช่ Loop?", a: ["repeat 5 times", "forever", "if-else", "repeat until"], correct: 2 },
+        { q: "เซ็นเซอร์ที่ใช้ตรวจ 'การชน' ใน VEXcode VR คือ?", a: ["Bumper Sensor", "Distance Sensor", "Eye Sensor", "GPS"], correct: 0 },
+        { q: "หากต้องการให้หุ่นยนต์ทำงานตลอดเวลาและตรวจเซ็นเซอร์ ใช้บล็อกใด?", a: ["repeat 1 time", "forever", "wait until", "if"], correct: 1 },
+        { q: "ความแตกต่างระหว่าง if กับ if-else?", a: ["if มีหลายเงื่อนไข if-else มีเดียว", "if-else มีทางเลือก 2 ทาง (จริง/เท็จ) if มีทางเดียว", "ทั้งคู่เหมือนกัน", "if เร็วกว่า if-else"], correct: 1 },
+        { q: "ในภารกิจ Wall Maze เซ็นเซอร์ใดเหมาะสมที่สุด?", a: ["Eye Sensor", "Distance Sensor", "GPS", "Microphone"], correct: 1 },
+        { q: "ถ้าใส่ 'drive forward 200 mm' ใน forever loop จะเกิดอะไรขึ้น?", a: ["หุ่นยนต์เดินต่อเนื่อง", "หุ่นยนต์เดิน 200 mm แล้วเริ่มเดินใหม่ทุกรอบ — เซ็นเซอร์ไม่ทำงานต่อเนื่อง", "เกิด error", "หุ่นยนต์หยุดทันที"], correct: 1 }
+    ];
+
+    const mbQuestions = [
+        { q: "บอร์ด micro:bit ออกแบบโดยหน่วยงานใด?", a: ["NASA", "BBC ประเทศอังกฤษ", "Apple", "Google"], correct: 1 },
+        { q: "จอ LED ของ micro:bit มีกี่ดวง?", a: ["16", "25", "36", "100"], correct: 1 },
+        { q: "บล็อก 'on button A pressed' จะทำงานเมื่อใด?", a: ["ทุก 1 วินาที", "เมื่อกดปุ่ม A", "เปิดบอร์ด", "เมื่อ Radio รับข้อความ"], correct: 1 },
+        { q: "ตัวแปร (Variable) คืออะไร?", a: ["ฟังก์ชันคณิตศาสตร์", "กล่องเก็บค่าที่เปลี่ยนได้", "เซ็นเซอร์", "ปุ่มกด"], correct: 1 },
+        { q: "ค่าของ light level อยู่ในช่วงเท่าใด?", a: ["0-100", "0-255", "0-1000", "0-359"], correct: 1 },
+        { q: "ก่อนใช้เข็มทิศ (Compass) ต้องทำอะไรก่อน?", a: ["รีสตาร์ทบอร์ด", "Calibrate (ปรับเทียบ)", "เชื่อม Bluetooth", "ใส่ถ่านใหม่"], correct: 1 },
+        { q: "Accelerometer ใน micro:bit วัดอะไร?", a: ["ความเอียง การสั่น การเคลื่อนไหว", "อุณหภูมิ", "แสง", "เสียง"], correct: 0 },
+        { q: "Radio ของ micro:bit ใช้คลื่นความถี่ใด?", a: ["AM", "2.4 GHz", "FM", "WiFi"], correct: 1 },
+        { q: "บล็อกใดใช้สำหรับ 'รับ' ข้อความจาก Radio?", a: ["radio send", "on radio received", "radio set group", "radio listen"], correct: 1 },
+        { q: "หาก score = 5 และเขียน 'change score by 1' จะได้ค่าใด?", a: ["1", "5", "6", "0"], correct: 2 }
+    ];
+
+    function startExam() {
+        const input = document.getElementById('guest-name-input').value.trim();
+        if (!input) { alert('⚠️ กรุณาลงชื่อก่อน'); return; }
+        if (!confirm('เริ่มสอบจริง? เวลา 60 นาที จะเริ่มนับทันที!')) return;
+
+        studentName = input;
+        try { localStorage.setItem('robotm2_student', studentName); } catch(e){}
+        document.querySelectorAll('.student-name-inject').forEach(el => el.innerText = studentName);
+        document.getElementById('display-header-name').innerText = "👨‍💻 " + studentName;
+        document.getElementById('header-guest-info').style.display = 'flex';
+        document.getElementById('footer-controls').style.display = 'flex';
+        document.getElementById('progress-container').style.display = 'block';
+        document.getElementById('timer-box').style.display = 'inline-flex';
+
+        renderQuestions();
+        startTimer();
+        currentStep = 1;
+        updateUI();
+    }
+
+    function renderQuestions() {
+        const vexContainer = document.getElementById('vex-questions');
+        const mbContainer = document.getElementById('mb-questions');
+        vexContainer.innerHTML = '';
+        mbContainer.innerHTML = '';
+
+        vexQuestions.forEach((q, i) => {
+            vexContainer.appendChild(makeQuestionCard(q, i + 1, 'vex'));
+        });
+        mbQuestions.forEach((q, i) => {
+            mbContainer.appendChild(makeQuestionCard(q, i + 11, 'mb'));
+        });
+    }
+
+    function makeQuestionCard(q, num, prefix) {
+        const card = document.createElement('div');
+        card.className = 'question-card';
+        const qid = `${prefix}-${num}`;
+        const letters = ['ก', 'ข', 'ค', 'ง'];
+
+        card.innerHTML = `
+            <div class="q-num">ข้อ ${num}</div>
+            <div class="q-text">${q.q}</div>
+            <div class="q-options" id="opts-${qid}"></div>
+        `;
+        const opts = card.querySelector(`#opts-${qid}`);
+        q.a.forEach((choice, idx) => {
+            const div = document.createElement('button');
+            div.className = 'q-option';
+            div.innerHTML = `<span class="q-letter">${letters[idx]}</span><span>${choice}</span>`;
+            div.onclick = () => selectAnswer(qid, idx, opts);
+            opts.appendChild(div);
+        });
+        return card;
+    }
+
+    function selectAnswer(qid, idx, container) {
+        userAnswers[qid] = idx;
+        container.querySelectorAll('.q-option').forEach((el, i) => {
+            el.classList.toggle('selected', i === idx);
+        });
+        updateAnsweredCounts();
+    }
+
+    function updateAnsweredCounts() {
+        let vexCount = 0, mbCount = 0;
+        Object.keys(userAnswers).forEach(k => {
+            if (k.startsWith('vex-')) vexCount++;
+            else if (k.startsWith('mb-')) mbCount++;
+        });
+        document.getElementById('vex-answered').innerText = vexCount;
+        document.getElementById('mb-answered').innerText = mbCount;
+    }
+
+    function startTimer() {
+        timerInterval = setInterval(() => {
+            timerSeconds--;
+            timeUsed++;
+            updateTimerDisplay();
+            if (timerSeconds <= 0) {
+                clearInterval(timerInterval);
+                alert('⏰ หมดเวลา!\nระบบจะคำนวณคะแนนอัตโนมัติ');
+                computeResult();
+                currentStep = 4;
+                updateUI();
+            }
+        }, 1000);
+    }
+
+    function updateTimerDisplay() {
+        const min = String(Math.floor(timerSeconds / 60)).padStart(2, '0');
+        const sec = String(timerSeconds % 60).padStart(2, '0');
+        document.getElementById('timer-text').innerText = `${min}:${sec}`;
+        const box = document.getElementById('timer-box');
+        if (timerSeconds <= 300) box.classList.add('warning');
+    }
+
+    function nextStep() {
+        if (currentStep === 1) {
+            // Check VEX answered
+            let vexCount = Object.keys(userAnswers).filter(k => k.startsWith('vex-')).length;
+            if (vexCount < 10) {
+                if (!confirm(`คุณตอบ VEXcode VR ไปแล้ว ${vexCount}/10 ข้อ\nต่อไปยังไม่กลับมาได้! ต้องการต่อไปไหม?`)) return;
+            }
+        }
+        if (currentStep === 2) {
+            let mbCount = Object.keys(userAnswers).filter(k => k.startsWith('mb-')).length;
+            if (mbCount < 10) {
+                if (!confirm(`คุณตอบ micro:bit ไปแล้ว ${mbCount}/10 ข้อ\nกดดูโจทย์ปฏิบัติ?`)) return;
+            }
+        }
+        if (currentStep === 3) {
+            if (!confirm('ส่งคะแนนสอบทฤษฎี?\n(โจทย์ปฏิบัติยังต้องทำต่อในระบบ MakeCode)')) return;
+            computeResult();
+        }
+        currentStep++;
+        updateUI();
+    }
+
+    function moveStep(n) { currentStep += n; updateUI(); }
+
+    function updateUI() {
+        document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+        document.getElementById('step-' + currentStep).classList.add('active');
+        const totalSteps = 4;
+        document.getElementById('progress-bar').style.width = (currentStep / totalSteps) * 100 + '%';
+        const label = ['ลงชื่อ', 'ส่วน 1/3: VEXcode VR', 'ส่วน 2/3: micro:bit', 'ส่วน 3/3: ปฏิบัติ', 'ผลคะแนน'][currentStep];
+        document.getElementById('step-label').innerText = label;
+
+        const nextBtn = document.getElementById('nextBtn');
+        if (currentStep === 1) nextBtn.innerText = 'ต่อ → ส่วน 2 ➔';
+        else if (currentStep === 2) nextBtn.innerText = 'ต่อ → โจทย์ปฏิบัติ ➔';
+        else if (currentStep === 3) nextBtn.innerText = 'ส่งสอบทฤษฎี ➔';
+        else nextBtn.style.display = 'none';
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function computeResult() {
+        if (timerInterval) clearInterval(timerInterval);
+        let vexScore = 0, mbScore = 0;
+        vexQuestions.forEach((q, i) => {
+            if (userAnswers[`vex-${i+1}`] === q.correct) vexScore++;
+        });
+        mbQuestions.forEach((q, i) => {
+            if (userAnswers[`mb-${i+11}`] === q.correct) mbScore++;
+        });
+        const total = vexScore + mbScore;
+        document.getElementById('vex-score').innerText = vexScore + '/10';
+        document.getElementById('mb-score').innerText = mbScore + '/10';
+        document.getElementById('total-score').innerText = total + '/20';
+
+        // Time used
+        const min = String(Math.floor(timeUsed / 60)).padStart(2, '0');
+        const sec = String(timeUsed % 60).padStart(2, '0');
+        document.getElementById('time-used').innerText = `${min}:${sec}`;
+
+        // Grade
+        let grade, gradeClass;
+        if (total >= 17) { grade = 'A — ดีมาก'; gradeClass = 'grade-A'; confetti({ particleCount: 200, spread: 100, colors: ['#10b981', '#fbbf24'] }); }
+        else if (total >= 14) { grade = 'B — ดี'; gradeClass = 'grade-B'; }
+        else if (total >= 10) { grade = 'C — พอใช้'; gradeClass = 'grade-C'; }
+        else { grade = 'D — ต้องปรับปรุง'; gradeClass = 'grade-D'; }
+
+        document.getElementById('grade-container').innerHTML = `<div class="grade-badge ${gradeClass}">${grade}</div>`;
+    }
+
+    function finishExam() {
+        if (timerInterval) clearInterval(timerInterval);
+        window.location.href = "index.html";
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>บทที่ 5: Data Bias | คอมพิวเตอร์ ม.3</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Noto+Serif+Thai:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--accent:#E74C3C;--bg:#FFF5F5;--card-bg:#fff;--text:#1A1A2E;--text-muted:#6B7280;--border:#E5E7EB;--shadow:0 4px 20px rgba(231,76,60,.12);--radius:16px;}
+  [data-theme="dark"]{--bg:#1A0808;--card-bg:#280F0F;--text:#FFF0F0;--text-muted:#9CA3AF;--border:#3D1515;--shadow:0 4px 20px rgba(0,0,0,.4);}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);transition:background .3s,color .3s;}
+  .top-bar{display:flex;justify-content:space-between;align-items:center;padding:12px 24px;background:var(--card-bg);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;}
+  .top-bar-left{display:flex;align-items:center;gap:10px;}
+  .btn-back{display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;background:var(--bg);border:1px solid var(--border);color:var(--text);text-decoration:none;font-size:14px;font-weight:600;transition:all .2s;}
+  .btn-back:hover,.btn-theme:hover{background:var(--accent);color:white;border-color:var(--accent);}
+  .lesson-breadcrumb{font-size:13px;color:var(--text-muted);}
+  .btn-theme{background:var(--bg);border:1px solid var(--border);color:var(--text);padding:8px 14px;border-radius:10px;cursor:pointer;font-size:14px;font-family:'Sarabun',sans-serif;transition:all .2s;}
+  .hero{background: linear-gradient(135deg,#E74C3C 0%,#F5576C 50%,#FF9A44 100%);padding:48px 24px 56px;text-align:center;}
+  .hero-icon{font-size:64px;margin-bottom:16px;display:block;}
+  .hero-badge{display:inline-block;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);color:white;padding:5px 14px;border-radius:20px;font-size:12px;font-weight:600;margin-bottom:12px;}
+  .hero h1{font-family:'Noto Serif Thai',serif;font-size:clamp(24px,4vw,40px);color:white;font-weight:700;margin-bottom:8px;}
+  .hero-en{color:rgba(255,255,255,.75);font-size:16px;margin-bottom:16px;}
+  .hero-meta{display:flex;justify-content:center;gap:16px;flex-wrap:wrap;margin-top:20px;}
+  .hero-chip{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:white;padding:6px 14px;border-radius:20px;font-size:13px;}
+  .container{max-width:860px;margin:0 auto;padding:40px 24px;}
+  .section-card{background:var(--card-bg);border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow);margin-bottom:24px;overflow:hidden;}
+  .section-header{padding:18px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#E74C3C20,#E74C3C40);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+  .section-title{font-size:18px;font-weight:700;}
+  .section-subtitle{font-size:13px;color:var(--text-muted);margin-top:2px;}
+  .section-body{padding:24px;}
+  .concept-box{background:linear-gradient(135deg,#E74C3C15,#FF6B6B15);border:1px solid #E74C3C30;border-radius:12px;padding:20px;margin-bottom:16px;}
+  .concept-box h3{color:var(--accent);font-size:16px;margin-bottom:8px;}
+  .concept-box p{font-size:15px;line-height:1.75;}
+  .real-case{border-radius:14px;overflow:hidden;border:1px solid var(--border);margin:16px 0;}
+  .case-header{padding:14px 18px;font-size:14px;font-weight:700;display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,#FEF2F2,#FEE2E2);color:#991B1B;border-bottom:1px solid #FECACA;}
+  [data-theme="dark"] .case-header{background:linear-gradient(135deg,#3B1919,#280F0F);color:#FCA5A5;border-color:#7F1D1D;}
+  .case-body{padding:16px 18px;font-size:14px;line-height:1.7;color:var(--text-muted);background:var(--card-bg);}
+  .case-lesson{margin-top:12px;padding:10px 14px;background:var(--bg);border-radius:8px;font-size:13.5px;color:var(--text);border-left:4px solid var(--accent);}
+  .step-list{display:flex;flex-direction:column;gap:16px;}
+  .step-item{display:flex;gap:16px;align-items:flex-start;padding:16px;border-radius:12px;background:var(--bg);border:1px solid var(--border);}
+  .step-num{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#E74C3C,#FF6B6B);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex-shrink:0;}
+  .step-content h4{font-size:15px;font-weight:700;margin-bottom:4px;}
+  .step-content p{font-size:14px;color:var(--text-muted);line-height:1.65;}
+  .tip{margin-top:8px;background:#FFF9C4;border:1px solid #F59E0B30;border-radius:8px;padding:8px 12px;font-size:13px;color:#92400E;display:flex;align-items:flex-start;gap:6px;}
+  [data-theme="dark"] .tip{background:#2D2000;color:#FCD34D;border-color:#78350F;}
+  .qa-box{border-radius:12px;overflow:hidden;margin:12px 0;border:1px solid var(--border);}
+  .qa-q{background:linear-gradient(135deg,#E74C3C,#C0392B);color:white;padding:14px 18px;font-size:14px;font-weight:600;}
+  .qa-a{background:var(--card-bg);padding:14px 18px;font-size:14px;line-height:1.7;color:var(--text-muted);display:flex;align-items:flex-start;gap:8px;}
+  .qa-label{font-weight:700;color:#16A34A;white-space:nowrap;}
+  .activity-box{background:linear-gradient(135deg,#FFF5F5,#FEE2E2);border:1px solid #FECACA;border-radius:12px;padding:20px;margin:16px 0;}
+  [data-theme="dark"] .activity-box{background:linear-gradient(135deg,#1A0808,#3D151530);border-color:#7F1D1D;}
+  .activity-title{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:700;color:#991B1B;margin-bottom:12px;}
+  [data-theme="dark"] .activity-title{color:#FCA5A5;}
+  .activity-box ol{padding-left:20px;}
+  .activity-box ol li{font-size:14px;line-height:1.7;margin-bottom:6px;color:var(--text);}
+  .bias-flow{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px;margin:16px 0;padding:16px;background:var(--bg);border-radius:12px;border:1px solid var(--border);}
+  .bias-step{text-align:center;padding:12px 16px;border-radius:10px;background:var(--card-bg);border:1px solid var(--border);min-width:120px;}
+  .bias-step.bad{background:#FEF2F2;border-color:#FECACA;}
+  [data-theme="dark"] .bias-step.bad{background:#3B1919;border-color:#7F1D1D;}
+  .bias-step .bs-icon{font-size:24px;margin-bottom:4px;}
+  .bias-step .bs-label{font-size:12px;font-weight:700;color:var(--text-muted);}
+  .bias-step.bad .bs-label{color:#DC2626;}
+  .bias-arrow{font-size:18px;color:var(--accent);}
+  .worksheet{background:linear-gradient(135deg,#FFF5F5,#FEE2E2);border:2px dashed #E74C3C;border-radius:12px;padding:20px;margin-top:8px;}
+  [data-theme="dark"] .worksheet{background:linear-gradient(135deg,#1A0808,#280F0F30);border-color:#E74C3C;}
+  .worksheet-title{font-size:16px;font-weight:700;color:#991B1B;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+  [data-theme="dark"] .worksheet-title{color:#FCA5A5;}
+  .ws-question{background:var(--card-bg);border-radius:10px;padding:14px 16px;margin-bottom:10px;border:1px solid var(--border);}
+  .ws-q-label{font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
+  .ws-q-text{font-size:14px;font-weight:600;margin-bottom:10px;}
+  .ws-answer-box{background:var(--bg);border-radius:8px;border:1px dashed var(--border);min-height:80px;padding:10px;font-size:14px;width:100%;font-family:'Sarabun',sans-serif;color:var(--text);resize:vertical;}
+  .glossary{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;}
+  .glossary-item{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px;border-left:4px solid var(--accent);}
+  .glossary-term{font-size:14px;font-weight:700;color:var(--accent);margin-bottom:4px;}
+  .glossary-def{font-size:13px;color:var(--text-muted);line-height:1.55;}
+  .done-section{text-align:center;padding:32px 0;}
+  .btn-done{background:linear-gradient(135deg,#E74C3C,#C0392B);color:white;border:none;padding:16px 40px;border-radius:50px;font-size:16px;font-weight:700;font-family:'Sarabun',sans-serif;cursor:pointer;transition:all .25s;box-shadow:0 4px 20px rgba(231,76,60,.35);}
+  .btn-done:hover{transform:translateY(-2px);}
+  .btn-done.done{background:linear-gradient(135deg,#10B981,#059669);}
+  .nav-lessons{display:flex;justify-content:space-between;gap:12px;padding:24px 0;border-top:1px solid var(--border);}
+  .nav-btn{flex:1;padding:14px 20px;border-radius:12px;border:1px solid var(--border);background:var(--card-bg);text-decoration:none;color:var(--text);text-align:center;font-size:14px;font-weight:600;transition:all .2s;}
+  .nav-btn:hover{background:var(--accent);color:white;border-color:var(--accent);}
+  .nav-btn.next{background:var(--accent);color:white;border-color:var(--accent);}
+  @media(max-width:600px){.container{padding:24px 16px;}.top-bar{padding:10px 16px;}.lesson-breadcrumb{display:none;}.bias-flow{flex-direction:column;}.bias-arrow{transform:rotate(90deg);}}
+
+  /* ═══ ANIMATIONS ═══ */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(32px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50%       { transform: translateY(-10px); }
+  }
+  @keyframes floatSide {
+    0%, 100% { transform: translateX(0px) rotate(0deg); }
+    50%       { transform: translateX(-8px) rotate(5deg); }
+  }
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: 0.4; transform: scale(0.85); }
+  }
+  @keyframes gradientShift {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  @keyframes shimmerBar {
+    0%   { background-position: -200% center; }
+    100% { background-position: 200% center; }
+  }
+  @keyframes popIn {
+    0%   { opacity: 0; transform: scale(0.8) translateY(16px); }
+    70%  { transform: scale(1.04) translateY(-2px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  @keyframes sparkle {
+    0%, 100% { opacity: 0; transform: scale(0); }
+    50%       { opacity: 1; transform: scale(1); }
+  }
+  @keyframes slideInLeft {
+    from { opacity: 0; transform: translateX(-30px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  .anim-up   { opacity: 0; }
+  .anim-up.visible { animation: fadeInUp 0.55s ease both; opacity:1; }
+  .hero-icon { animation: float 3.5s ease-in-out infinite; filter: drop-shadow(0 6px 18px rgba(0,0,0,.15)); }
+  .step-num  { transition: transform 0.3s; }
+  .step-item:hover .step-num { transform: scale(1.15) rotate(-5deg); }
+  .section-card { transition: box-shadow 0.25s, transform 0.25s; }
+  .section-card:hover { transform: translateY(-3px); box-shadow: var(--shadow), 0 12px 40px rgba(0,0,0,.08); }
+  .concept-box { transition: transform 0.2s, box-shadow 0.2s; }
+  .concept-box:hover { transform: scale(1.01); }
+  .btn-done { transition: all 0.28s cubic-bezier(0.34,1.56,0.64,1) !important; }
+  .btn-done:hover { transform: translateY(-3px) scale(1.04) !important; }
+  /* Hero animated gradient */
+  .hero { background-size: 300% 300% !important; animation: gradientShift 8s ease infinite !important; }
+  /* Floating blobs in hero */
+  .hero-blob { position:absolute; border-radius:50%; background:rgba(255,255,255,.07); pointer-events:none; }
+  .blob-a { width:220px; height:220px; top:-60px; left:-60px; animation:float 6s ease-in-out infinite; }
+  .blob-b { width:160px; height:160px; bottom:-50px; right:-30px; animation:float 8s ease-in-out infinite reverse; }
+  /* sparkle dots */
+  .sp { position:absolute; width:5px; height:5px; border-radius:50%; background:rgba(255,255,255,.7); animation:pulse-dot 3s ease-in-out infinite; pointer-events:none; }
+  .sp1{top:15%;left:18%;animation-delay:0s;}
+  .sp2{top:65%;left:12%;animation-delay:.6s;}
+  .sp3{top:20%;right:18%;animation-delay:1.1s;}
+  .sp4{top:72%;right:14%;animation-delay:1.7s;}
+
+
+  /* ══════ ANIMATIONS & MOTION ══════ */
+  @keyframes fadeInUp   { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes fadeInLeft { from{opacity:0;transform:translateX(-24px)} to{opacity:1;transform:translateX(0)} }
+  @keyframes popIn      { 0%{opacity:0;transform:scale(.75)} 70%{transform:scale(1.05)} 100%{opacity:1;transform:scale(1)} }
+  @keyframes float      { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-11px)} }
+  @keyframes floatR     { 0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(-14px) rotate(6deg)} }
+  @keyframes gradientMove { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+  @keyframes pulseDot   { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.8)} }
+  @keyframes ripple     { 0%{transform:scale(1);opacity:.6} 100%{transform:scale(2.4);opacity:0} }
+  @keyframes shimmerLine{ 0%{background-position:-200% center} 100%{background-position:200% center} }
+  @keyframes spin       { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+  @keyframes wave {
+    0%,100% { transform: translateY(0); }
+    25%      { transform: translateY(-5px); }
+    75%      { transform: translateY(5px); }
+  }
+
+  /* Scroll reveal */
+  .reveal { opacity:0; transform:translateY(28px); transition: opacity .6s ease, transform .6s ease; }
+  .reveal.visible { opacity:1; transform:translateY(0); }
+  .reveal-left { opacity:0; transform:translateX(-28px); transition: opacity .55s ease, transform .55s ease; }
+  .reveal-left.visible { opacity:1; transform:translateX(0); }
+
+  /* Hero floating icon */
+  .hero-icon { animation: float 3.6s ease-in-out infinite; display:block;
+    filter: drop-shadow(0 8px 24px rgba(0,0,0,.2)); }
+
+  /* Hero blobs */
+  .h-blob { position:absolute; border-radius:50%; pointer-events:none; background:rgba(255,255,255,.09); }
+  .hb1 { width:260px;height:260px; top:-80px;left:-80px; animation:floatR 7s ease-in-out infinite; }
+  .hb2 { width:180px;height:180px; bottom:-55px;right:-40px; animation:floatR 9s ease-in-out infinite reverse; }
+  .hb3 { width:100px;height:100px; top:30%;left:12%; animation:float 5s ease-in-out infinite; opacity:.55; }
+  .hb4 { width:70px;height:70px;  top:18%;right:16%; animation:float 6.5s ease-in-out infinite reverse; opacity:.45; }
+
+  /* Sparkles in hero */
+  .hsp { position:absolute; border-radius:50%; background:rgba(255,255,255,.75); pointer-events:none; animation:pulseDot 3s ease-in-out infinite; }
+  .hsp:nth-child(1){width:7px;height:7px;top:15%;left:20%;animation-delay:0s;}
+  .hsp:nth-child(2){width:5px;height:5px;top:65%;left:10%;animation-delay:.6s;}
+  .hsp:nth-child(3){width:6px;height:6px;top:22%;right:20%;animation-delay:1.1s;}
+  .hsp:nth-child(4){width:4px;height:4px;top:72%;right:12%;animation-delay:1.8s;}
+  .hsp:nth-child(5){width:5px;height:5px;top:45%;left:45%;animation-delay:.9s;}
+
+  /* Animated hero gradient */
+  .hero { background-size:300% 300% !important; animation:gradientMove 9s ease infinite !important; overflow:hidden; }
+
+  /* Cards hover lift */
+  .section-card { transition:transform .25s ease,box-shadow .25s ease; }
+  .section-card:hover { transform:translateY(-4px); box-shadow:var(--shadow),0 16px 40px rgba(0,0,0,.1); }
+
+  /* Step item hover */
+  .step-item { transition:background .2s,transform .2s; }
+  .step-item:hover { background:var(--border); transform:translateX(4px); }
+  .step-num { transition:transform .3s; }
+  .step-item:hover .step-num { transform:scale(1.15) rotate(-6deg); }
+
+  /* Concept box hover */
+  .concept-box { transition:transform .2s,box-shadow .2s; cursor:default; }
+  .concept-box:hover { transform:scale(1.015); box-shadow:0 6px 24px rgba(0,0,0,.08); }
+
+  /* Done button spring */
+  .btn-done { transition:all .3s cubic-bezier(.34,1.56,.64,1) !important; }
+  .btn-done:hover { transform:translateY(-4px) scale(1.05) !important; }
+
+  /* Wave divider under hero */
+  .hero-wave { line-height:0; margin-top:-2px; }
+  .hero-wave svg { display:block; width:100%; }
+
+  /* Staggered section cards */
+  .section-card:nth-child(1){transition-delay:.05s}
+  .section-card:nth-child(2){transition-delay:.1s}
+  .section-card:nth-child(3){transition-delay:.15s}
+  .section-card:nth-child(4){transition-delay:.2s}
+
+  /* Ripple on btn-done click */
+  @keyframes btnRipple {
+    0%   {transform:scale(0);opacity:.6}
+    100% {transform:scale(4);opacity:0}
+  }
+  .btn-done .ripple-inner { position:absolute;border-radius:50%;background:rgba(255,255,255,.35);
+    width:80px;height:80px;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);
+    animation:btnRipple .6s ease forwards; pointer-events:none; }
+
+</style>
+</head>
+<body>
+<div class="top-bar">
+  <div class="top-bar-left">
+    <a href="index.html" class="btn-back">← กลับ</a>
+    <span class="lesson-breadcrumb">คอมพิวเตอร์ ม.3 › บทที่ 5</span>
+  </div>
+  <button class="btn-theme" onclick="toggleDark()">🌓</button>
+</div>
+
+<div class="hero">
+  <div class="h-blob hb1"></div><div class="h-blob hb2"></div>
+  <div class="h-blob hb3"></div><div class="h-blob hb4"></div>
+  <span class="hsp"></span><span class="hsp"></span><span class="hsp"></span>
+  <span class="hsp"></span><span class="hsp"></span>
+
+  <span class="hero-icon">⚖️</span>
+  <div class="hero-badge">แผนที่ 5 • หน่วยที่ 2</div>
+  <h1>ความลำเอียงของข้อมูล</h1>
+  <div class="hero-en">Data Bias in AI Systems</div>
+  <div class="hero-meta">
+    <span class="hero-chip">⏱ 3 ชั่วโมง (ชม.11–13)</span>
+    <span class="hero-chip">📝 ใบงาน 5.1</span>
+    <span class="hero-chip">⚠️ AI Fairness</span>
+  </div>
+</div>
+<div class="hero-wave">
+  <svg viewBox="0 0 1440 56" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" style="height:56px;">
+    <path d="M0,28 C480,56 960,0 1440,28 L1440,56 L0,56 Z" fill="var(--bg)"/>
+  </svg>
+</div>
+
+<div class="container">
+
+  <div class="section-card">
+    <div class="section-header"><div class="section-icon">🎯</div><div><div class="section-title">จุดประสงค์การเรียนรู้</div></div></div>
+    <div class="section-body">
+      <div class="step-list">
+        <div class="step-item"><div class="step-num">K</div><div class="step-content"><h4>ด้านความรู้</h4><p>อธิบายสาเหตุและผลกระทบของ Data Bias ได้ และวิเคราะห์สาเหตุที่ AI ทายผลผิดพลาดจาก Bias</p></div></div>
+        <div class="step-item"><div class="step-num">P</div><div class="step-content"><h4>ด้านทักษะ</h4><p>ทดลองสร้าง AI ที่มี Bias จงใจ แล้วหาวิธีแก้ไขชุดข้อมูลเพื่อลด Bias และวัด Accuracy ใหม่ได้</p></div></div>
+        <div class="step-item"><div class="step-num">A</div><div class="step-content"><h4>ด้านเจตคติ</h4><p>ตระหนักถึงความสำคัญของความเท่าเทียมและยุติธรรมของข้อมูล และผลกระทบที่ Bias มีต่อสังคม</p></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- เนื้อหา -->
+  <div class="section-card">
+    <div class="section-header"><div class="section-icon">📖</div><div><div class="section-title">เนื้อหา: Data Bias คืออะไร?</div></div></div>
+    <div class="section-body">
+      <div class="concept-box">
+        <h3>⚖️ Data Bias (ความลำเอียงของข้อมูล)</h3>
+        <p>คือเมื่อ Dataset ที่ใช้สอน AI ไม่สมดุลหรือไม่ครอบคลุม ทำให้ AI เรียนรู้แบบ "ลำเอียง" และตัดสินใจอย่างไม่ยุติธรรม</p><br>
+        <p>⚠️ <strong>ปัญหาสำคัญ:</strong> AI ไม่ได้ "เลือกปฏิบัติ" เอง แต่มันเรียนรู้ความลำเอียงมาจาก <strong>ข้อมูลที่มนุษย์สร้างขึ้น</strong></p>
+      </div>
+
+      <div class="bias-flow">
+        <div class="bias-step bad">
+          <div class="bs-icon">📊</div>
+          <div class="bs-label">Dataset ลำเอียง</div>
+        </div>
+        <div class="bias-arrow">→</div>
+        <div class="bias-step bad">
+          <div class="bs-icon">🧠</div>
+          <div class="bs-label">AI เรียนรู้ Bias</div>
+        </div>
+        <div class="bias-arrow">→</div>
+        <div class="bias-step bad">
+          <div class="bs-icon">⚠️</div>
+          <div class="bs-label">ผลลัพธ์ไม่ยุติธรรม</div>
+        </div>
+        <div class="bias-arrow">→</div>
+        <div class="bias-step bad">
+          <div class="bs-icon">😟</div>
+          <div class="bs-label">ผลกระทบต่อคน</div>
+        </div>
+      </div>
+
+      <p style="font-size:14px;color:var(--text-muted);margin-bottom:16px;">ตัวอย่าง Data Bias ในชีวิตจริง:</p>
+
+      <div class="real-case">
+        <div class="case-header">🏢 กรณีศึกษา: AI คัดเรซูเม่ของบริษัท Amazon (2018)</div>
+        <div class="case-body">
+          บริษัท Amazon พัฒนา AI สำหรับคัดกรองเรซูเม่ผู้สมัครงาน แต่พบว่า AI <strong>ให้คะแนนต่ำกับผู้สมัครที่เป็นผู้หญิงเสมอ</strong> และโน้มเอียงไปรับผู้ชายมากกว่า<br><br>
+          <strong>สาเหตุ:</strong> AI ถูกสอนด้วยเรซูเม่ของพนักงานที่ได้รับการจ้างงานในช่วง 10 ปีที่ผ่านมา ซึ่งส่วนใหญ่เป็นผู้ชาย ทำให้ AI เรียนรู้ว่า "ผู้ชาย = ดี" โดยไม่ตั้งใจ
+          <div class="case-lesson">💡 บทเรียน: ต้องระวังว่าข้อมูลประวัติศาสตร์ที่มีความเหลื่อมล้ำอยู่แล้ว จะถ่ายทอด Bias นั้นสู่ AI</div>
+        </div>
+      </div>
+
+      <div class="real-case">
+        <div class="case-header">🤖 กรณีศึกษา: ระบบจดจำใบหน้าที่แม่นยำกับบางกลุ่ม</div>
+        <div class="case-body">
+          ระบบจดจำใบหน้าหลายตัวมีความแม่นยำสูงกับคนผิวขาว แต่ผิดพลาดบ่อยกับคนผิวดำ โดยเฉพาะผู้หญิงผิวดำ<br><br>
+          <strong>สาเหตุ:</strong> Dataset ที่ใช้สอน AI มีภาพหน้าคนผิวขาวมากกว่ามาก ทำให้ AI "จำใบหน้า" ของคนบางกลุ่มได้ดีกว่ากลุ่มอื่น
+          <div class="case-lesson">💡 บทเรียน: Dataset ต้องมีความหลากหลายครอบคลุมทุกกลุ่ม ไม่ใช่แค่กลุ่มที่ใหญ่ที่สุด</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- กิจกรรม ชม.11 -->
+  <div class="section-card">
+    <div class="section-header"><div class="section-icon">⚡</div><div><div class="section-title">ชั่วโมงที่ 11: ทำความเข้าใจความลำเอียง</div></div></div>
+    <div class="section-body">
+      <div class="qa-box">
+        <div class="qa-q">🙋 คำถามคุณครู: ทำไม AI ถึงเลือกรับเข้าทำงานแต่ผู้ชาย?</div>
+        </div>
+
+      <div class="activity-box">
+        <div class="activity-title">🔬 วางแผนทดลองสร้าง AI ลำเอียง</div>
+        <ol>
+          <li>แบ่งกลุ่มและตกลงกันว่าจะสร้าง Bias เรื่องอะไร เช่น ถ่ายภาพแมวในที่สว่าง แต่ถ่ายภาพหมาในที่มืด</li>
+          <li>วางแผน Dataset: จะสร้าง Bias ด้านใด? แสง? มุมกล้อง? สีพื้นหลัง?</li>
+          <li>เขียนแผนในใบงาน: ภาพที่จะถ่าย, ลักษณะที่ลำเอียง, คาดว่า AI จะทายผิดในกรณีใด</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <!-- กิจกรรม ชม.12 -->
+  <div class="section-card">
+    <div class="section-header"><div class="section-icon">🧪</div><div><div class="section-title">ชั่วโมงที่ 12: สร้าง AI ลำเอียง</div><div class="section-subtitle">ทดลองสร้างเพื่อเรียนรู้!</div></div></div>
+    <div class="section-body">
+      <div class="step-list">
+        <div class="step-item">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <h4>สร้าง Dataset ลำเอียง</h4>
+            <p>เปิด Teachable Machine → Image Project → สร้าง 2 Class เช่น "แมว" และ "หมา"</p>
+            <div class="tip">🔬 จงใจสร้าง Bias: ถ่ายแมวในที่สว่างทั้งหมด แต่ถ่ายหมาในที่มืดทั้งหมด</div>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <h4>Train โมเดล</h4>
+            <p>Train ด้วย Dataset ที่มี Bias แล้วทดสอบด้วยภาพแมวในที่มืด — AI จะทายว่าเป็น "หมา" เพราะมันเรียนรู้ว่า "มืด = หมา"</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <h4>บันทึกผล</h4>
+            <p>บันทึกว่า AI ทายผิดในสถานการณ์ใดบ้าง และคิดว่าสาเหตุของความผิดพลาดคืออะไร</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- กิจกรรม ชม.13 -->
+  <div class="section-card">
+    <div class="section-header"><div class="section-icon">🔧</div><div><div class="section-title">ชั่วโมงที่ 13: แก้ปัญหา Bias</div></div></div>
+    <div class="section-body">
+      <div class="qa-box">
+        <div class="qa-q">🙋 คำถามคุณครู: เราจะแก้ Bias นี้อย่างไรให้ Accuracy กลับมาดี?</div>
+        </div>
+
+      <div class="activity-box">
+        <div class="activity-title">🔨 แก้ไข Bias ให้ Dataset สมดุล</div>
+        <ol>
+          <li>เพิ่มภาพแมวในที่มืดเข้าไปใน Dataset และภาพหมาในที่สว่าง</li>
+          <li>Train โมเดลใหม่ด้วย Dataset ที่สมดุลแล้ว</li>
+          <li>ทดสอบอีกครั้ง — Accuracy ดีขึ้นไหม? ต่างกันแค่ไหน?</li>
+          <li>บันทึกผลเปรียบเทียบก่อน-หลังแก้ Bias</li>
+        </ol>
+      </div>
+
+      <div class="concept-box" style="margin-top:16px;">
+        <h3>🛠️ วิธีป้องกัน Data Bias</h3>
+        <p>1. <strong>Dataset หลากหลาย</strong>: ครอบคลุมทุกกลุ่ม ทุกสถานการณ์ ทุกสภาพแสง<br>
+        2. <strong>Data Balance</strong>: แต่ละ Class ควรมีจำนวนภาพใกล้เคียงกัน<br>
+        3. <strong>ตรวจสอบก่อนใช้</strong>: ทดสอบ AI ในกรณีต่างๆ หลายๆ กลุ่ม<br>
+        4. <strong>Diverse Team</strong>: ทีมที่สร้าง AI ควรมีความหลากหลาย เพื่อมองเห็น Bias ที่อาจมองข้ามไป</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- คำศัพท์ -->
+  <div class="section-card">
+    <div class="section-header"><div class="section-icon">📚</div><div><div class="section-title">คำศัพท์สำคัญ</div></div></div>
+    <div class="section-body">
+      <div class="glossary">
+        <div class="glossary-item"><div class="glossary-term">Data Bias</div><div class="glossary-def">ความลำเอียงในข้อมูล ทำให้ AI ตัดสินใจอย่างไม่ยุติธรรม</div></div>
+        <div class="glossary-item"><div class="glossary-term">AI Fairness</div><div class="glossary-def">ความยุติธรรมของ AI การตัดสินใจต้องเท่าเทียมทุกกลุ่ม</div></div>
+        <div class="glossary-item"><div class="glossary-term">Data Balance</div><div class="glossary-def">การทำให้ Dataset สมดุล แต่ละ Class มีข้อมูลใกล้เคียงกัน</div></div>
+        <div class="glossary-item"><div class="glossary-term">Historical Bias</div><div class="glossary-def">Bias ที่มาจากข้อมูลในอดีตที่มีความเหลื่อมล้ำอยู่แล้ว</div></div>
+        <div class="glossary-item"><div class="glossary-term">Underrepresentation</div><div class="glossary-def">กลุ่มที่มีข้อมูลน้อยเกินไปใน Dataset ทำให้ AI เรียนรู้ไม่ครบ</div></div>
+        <div class="glossary-item"><div class="glossary-term">Algorithmic Bias</div><div class="glossary-def">ความลำเอียงที่ฝังอยู่ในอัลกอริทึมของ AI เนื่องจาก Bias ใน Data</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ใบงาน -->
+  <div class="section-card">
+    <div class="section-header"><div class="section-icon">📋</div><div><div class="section-title">ใบงานที่ 5.1 บันทึกผลทดลอง Data Bias</div></div></div>
+    <div class="section-body">
+      <div class="worksheet">
+        <div class="worksheet-title">📝 ใบงาน 5.1 — Data Bias</div>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">กลุ่มที่ _____ ชื่อ-สกุล: _________________________ ชั้น ม.3/_____</p>
+        <div class="ws-question">
+          <div class="ws-q-label">ข้อ 1</div>
+          <div class="ws-q-text">กลุ่มของนักเรียนสร้าง Bias ในข้อมูลเรื่องอะไร? อธิบายวิธีที่จงใจสร้าง Bias</div>
+          <textarea class="ws-answer-box" placeholder="สร้าง Bias เรื่อง: ... โดย: ..."></textarea>
+        </div>
+        <div class="ws-question">
+          <div class="ws-q-label">ข้อ 2</div>
+          <div class="ws-q-text">ผลการทดสอบตอนที่ข้อมูลมี Bias เป็นอย่างไร? AI ทายผิดในสถานการณ์ใด?</div>
+          <textarea class="ws-answer-box" placeholder="AI ทายผิดเมื่อ: ... เพราะ: ..."></textarea>
+        </div>
+        <div class="ws-question">
+          <div class="ws-q-label">ข้อ 3</div>
+          <div class="ws-q-text">วิธีแก้ไข Bias ของกลุ่มคืออะไร? และหลังแก้ไข Accuracy เปลี่ยนแปลงอย่างไร?</div>
+          <textarea class="ws-answer-box" placeholder="วิธีแก้: ... Accuracy ก่อนแก้: __% หลังแก้: __%"></textarea>
+        </div>
+        <div class="ws-question">
+          <div class="ws-q-label">ข้อ 4 — สรุป</div>
+          <div class="ws-q-text">ถ้า AI ที่มี Bias ถูกนำมาใช้จริงในสังคม เช่น ระบบสมัครงาน ระบบขอสินเชื่อ จะเกิดผลกระทบอะไรบ้าง?</div>
+          <textarea class="ws-answer-box" placeholder="ผลกระทบที่อาจเกิดขึ้น: ..."></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- สรุป -->
+  <div class="section-card">
+    <div class="section-header"><div class="section-icon">✅</div><div><div class="section-title">สรุปบทเรียน</div></div></div>
+    <div class="section-body">
+      <div class="concept-box">
+        <h3>🎓 สรุปความรู้บทที่ 5</h3>
+        <p>• <strong>Data Bias</strong> เกิดเมื่อ Dataset ไม่สมดุล ทำให้ AI เรียนรู้ความลำเอียงและตัดสินใจอย่างไม่ยุติธรรม</p><br>
+        <p>• วิธีแก้คือทำให้ Dataset <strong>สมดุล (Balance)</strong> และ <strong>หลากหลาย (Diverse)</strong></p><br>
+        <p>• AI ไม่ได้เลือกปฏิบัติเอง แต่มันสะท้อน <strong>ความลำเอียงที่มีอยู่ในข้อมูล</strong></p><br>
+        <p>• บทเรียนหน้า จะเรียนรู้ <strong>จริยธรรม AI และกฎหมาย PDPA</strong> — การใช้ AI อย่างมีความรับผิดชอบ</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="done-section">
+    <button class="btn-done" id="btn-done" onclick="markDone()">✅ เรียนจบแล้ว! บันทึกความคืบหน้า</button>
+  </div>
+  <div class="nav-lessons">
+    <a href="lesson4.html" class="nav-btn">← บทที่ 4: Pose Detection</a>
+    <a href="lesson6.html" class="nav-btn next">บทที่ 6: จริยธรรม AI →</a>
+  </div>
+</div>
+<script>
+  function toggleDark(){const d=document.documentElement.getAttribute('data-theme')==='dark';document.documentElement.setAttribute('data-theme',d?'':'dark');localStorage.setItem('theme-m3',d?'':'dark');}
+  (function(){if(localStorage.getItem('theme-m3')==='dark')document.documentElement.setAttribute('data-theme','dark');if(localStorage.getItem('done-lesson5')){document.getElementById('btn-done').textContent='✅ เรียนจบแล้ว!';document.getElementById('btn-done').classList.add('done');}})();
+  function markDone(){localStorage.setItem('done-lesson5','1');const b=document.getElementById('btn-done');b.textContent='🎉 บันทึกแล้ว!';b.classList.add('done');}
+
+  // Scroll-triggered animations
+  const _obs = new IntersectionObserver((entries) => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('visible'), i * 90);
+        _obs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.section-card, .concept-box, .step-item, .qa-box, .activity-box, .worksheet').forEach(el => {
+    el.classList.add('anim-up');
+    _obs.observe(el);
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แผนการจัดการเรียนรู้ที่ 4 — รู้จัก micro:bit + จอ LED 5×5</title>
+    <link rel="stylesheet" href="lesson-plan.css">
+</head>
+<body>
+
+<div class="nav-bar no-print">
+    <a href="index.html">⬅ กลับหน้ารวมแผน</a>
+    <div style="color: white;">แผนที่ 4 / 20 — Hr 7-8 (micro:bit)</div>
+    <button class="print-btn" onclick="window.print()">🖨️ พิมพ์ / Save PDF</button>
+</div>
+
+<div class="paper">
+
+    <h1 class="plan-title">แผนการจัดการเรียนรู้ที่ 4</h1>
+
+    <div class="plan-meta-row"><span>หน่วยที่ 2 เรื่อง micro:bit (ล้วน ไม่มีอุปกรณ์เสริม)</span><span>จำนวน 12 ชั่วโมง</span></div>
+    <div class="plan-meta-row"><span>เรื่อง รู้จัก micro:bit + MakeCode + จอ LED 5×5</span><span>จำนวน 2 ชั่วโมง (ชั่วโมงที่ 7-8)</span></div>
+    <div class="plan-meta-row"><span>วิชา หุ่นยนต์</span><span>กลุ่มสาระการเรียนรู้ วิทยาศาสตร์และเทคโนโลยี</span></div>
+    <div class="plan-meta-row"><span>ชั้นมัธยมศึกษาปีที่ 2</span><span>ภาคเรียนที่ 1 ปีการศึกษา 2569</span></div>
+    <div class="plan-meta-row"><span>ผู้สอน นายภาณุพงศ์ อุ่นคำ</span><span>โรงเรียนบ้านป่ายุบ (บุ้นกีประชานุเคราะห์)</span></div>
+    <hr class="divider">
+
+    <div class="section">
+        <div class="section-title">1. มาตรฐานการเรียนรู้/ตัวชี้วัด</div>
+        <p class="indent"><b>มาตรฐาน ว 4.2</b> เข้าใจและใช้แนวคิดเชิงคำนวณในการแก้ปัญหา</p>
+        <p class="indent bold">ตัวชี้วัดระหว่างทาง</p>
+        <p class="indent2"><b>ว 4.2 ม.2/2</b> ออกแบบและเขียนโปรแกรมที่ใช้ตรรกะและฟังก์ชันในการแก้ปัญหา</p>
+        <p class="indent2"><b>ว 4.2 ม.2/3</b> อภิปรายองค์ประกอบและหลักการทำงานของระบบคอมพิวเตอร์และเทคโนโลยีการสื่อสาร เพื่อประยุกต์ใช้งานหรือแก้ปัญหาเบื้องต้น</p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">2. จุดประสงค์การเรียนรู้</div>
+        <ol>
+            <li>อธิบายส่วนประกอบของบอร์ด micro:bit v2 และเซ็นเซอร์ที่มีในตัวได้ <span class="kpa">K</span></li>
+            <li>ใช้ MakeCode Editor บนเว็บ <code>makecode.microbit.org</code> ได้ <span class="kpa">P</span></li>
+            <li>เขียนโปรแกรมแสดงข้อความและไอคอนบนจอ LED 5×5 ได้ <span class="kpa">P</span></li>
+            <li>อัปโหลดไฟล์ .hex ลงบอร์ดจริงได้ <span class="kpa">P</span></li>
+            <li>ระมัดระวังในการจับบอร์ดจริง (ไฟฟ้าสถิต) <span class="kpa">A</span></li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">3. คุณลักษณะอันพึงประสงค์</div>
+        <p class="indent">☐ 1. รักชาติฯ ☑ 2. ซื่อสัตย์ ☑ 3. มีวินัย ☑ 4. ใฝ่เรียนรู้ ☐ 5. พอเพียง ☑ 6. มุ่งมั่น ☐ 7. รักไทย ☐ 8. จิตสาธารณะ</p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">4. สมรรถนะสำคัญของผู้เรียน</div>
+        <ol>
+            <li>ความสามารถในการคิด (คิดเชิงระบบ)</li>
+            <li>ความสามารถในการแก้ปัญหา</li>
+            <li>ความสามารถในการใช้เทคโนโลยี (ฮาร์ดแวร์จริง)</li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">5. สาระสำคัญ</div>
+        <p class="indent">บอร์ด micro:bit เป็นคอมพิวเตอร์จิ๋วขนาดเท่าฝ่ามือ ออกแบบโดย BBC ประเทศอังกฤษ มีจอ LED 5×5 (25 ดวง), ปุ่ม A, B, เซ็นเซอร์ Accelerometer, Compass, อุณหภูมิ, แสง, ไมโครโฟน, ลำโพง, Radio และ Bluetooth พร้อมใช้ในตัว เขียนโปรแกรมผ่านเว็บ MakeCode ที่ลากบล็อกได้ (Block-based) แล้วดาวน์โหลดเป็นไฟล์ .hex อัปโหลดลงบอร์ดผ่านสาย USB</p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">6. ความรู้เดิมที่นักเรียนต้องมี</div>
+        <ol>
+            <li>การใช้ Block-based Programming จากหน่วย 1 (VEXcode VR)</li>
+            <li>การคิดเป็นลำดับขั้นตอน</li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">7. การจัดกิจกรรมการเรียนรู้</div>
+
+        <div class="hour-banner">▶ ชั่วโมงที่ 7 (60 นาที) : รู้จัก micro:bit และ MakeCode</div>
+
+        <p class="step-banner">ขั้นที่ 1: การวิเคราะห์และกำหนดรายละเอียดของปัญหา (15 นาที)</p>
+        <ol>
+            <li>ครูเปิดเว็บไซต์ <code>Robotm.2/Hr7-8MB.html</code> และให้นักเรียนลงชื่อเข้าเรียน</li>
+            <li>ครูแจกบอร์ด micro:bit v2 พร้อมสาย USB ให้นักเรียน 1 ชุด/คน</li>
+            <li>ครูสาธิตการ "ถือบอร์ดอย่างปลอดภัย" (จับที่ขอบ, ไม่จับขาเหล็ก)</li>
+            <p class="teacher-q">บอร์ด micro:bit แตกต่างจาก VEXcode VR ที่เราเรียนมาอย่างไร?</p>
+            <p class="student-a">VEXcode VR เป็นจำลองในคอม จับไม่ได้ แต่ micro:bit เป็นบอร์ดจริงที่จับได้ ใส่กระเป๋าได้</p>
+        </ol>
+
+        <p class="step-banner">ขั้นที่ 2: การวางแผนการแก้ปัญหา (30 นาที)</p>
+        <ol start="4">
+            <li>ครูสาธิตส่วนประกอบของบอร์ดด้านหน้า: จอ LED 5×5, ปุ่ม A, B, โลโก้ทอง, ไมโครโฟน</li>
+            <li>ครูสาธิตส่วนประกอบด้านหลัง: Accelerometer, Compass, เซ็นเซอร์อุณหภูมิ, Radio, ลำโพง, USB</li>
+            <li>ครูพาเปิดเว็บ <a href="https://makecode.microbit.org">makecode.microbit.org</a> และสาธิตส่วนต่าง ๆ:
+                <ul>
+                    <li>Simulator (ซ้าย)</li>
+                    <li>Toolbox (กลาง)</li>
+                    <li>Workspace (ขวา)</li>
+                </ul>
+            </li>
+        </ol>
+
+        <p class="step-banner">ขั้นที่ 3: การดำเนินการแก้ปัญหา (15 นาที)</p>
+        <ol start="7">
+            <li>นักเรียนสร้างโปรเจกต์แรก: <code>show string "HELLO"</code></li>
+            <li>นักเรียนกด Download → ลากไฟล์ .hex ไปวางบน drive <code>MICROBIT</code></li>
+            <li>นักเรียนสังเกตข้อความเลื่อนบนจอ LED ของบอร์ดจริง</li>
+        </ol>
+
+        <div class="hour-banner">▶ ชั่วโมงที่ 8 (60 นาที) : จอ LED 5×5 และใบงาน "ป้ายชื่ออัจฉริยะ"</div>
+
+        <p class="step-banner">ขั้นที่ 3 (ต่อ): การดำเนินการแก้ปัญหา (40 นาที)</p>
+        <ol start="10">
+            <li>ครูแนะนำบล็อกหลักของจอ LED:
+                <ul>
+                    <li><code>show string</code> — แสดงข้อความเลื่อน</li>
+                    <li><code>show number</code> — แสดงตัวเลข</li>
+                    <li><code>show icon</code> — แสดงไอคอน (15 แบบ)</li>
+                    <li><code>show leds</code> — วาด pattern เอง</li>
+                    <li><code>clear screen</code> — ลบจอ</li>
+                </ul>
+            </li>
+            <li>นักเรียนทำใบงานที่ 4.1 "ป้ายชื่ออัจฉริยะ"</li>
+        </ol>
+
+        <p class="step-banner">ขั้นที่ 4: การตรวจสอบและประเมินผล (20 นาที)</p>
+        <ol start="12">
+            <li>นักเรียนกดปุ่ม Share ใน MakeCode → คัดลอกลิงก์ + แคปวิดีโอ</li>
+            <li>นักเรียนทำแบบทดสอบท้ายชั่วโมง (5 ข้อ) ในเว็บไซต์</li>
+            <p class="teacher-q">บอร์ด micro:bit มีเซ็นเซอร์อะไรบ้างที่ NOT มี แต่ VEXcode VR มี (และในทางกลับกัน)?</p>
+            <p class="student-a">VEXcode VR มี Distance Sensor และ Eye Sensor (ตรวจสี) แต่ micro:bit ไม่มี ส่วน micro:bit มีไมโครโฟน, Radio, อุณหภูมิ ที่ VEXcode VR ไม่มี</p>
+            <li>ครูสรุปบทเรียนและประเมินผล</li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">8. ชิ้นงาน / ภาระงาน</div>
+        <ol>
+            <li>ใบงานที่ 4.1 "ป้ายชื่ออัจฉริยะ" + ลิงก์ Share + วิดีโอ ≥15 วินาที</li>
+            <li>แบบทดสอบท้ายชั่วโมง 5 ข้อ</li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">9. การวัดและประเมินผล</div>
+        <table class="eval">
+            <thead><tr><th>รายการวัด</th><th>วิธีวัด</th><th>เครื่องมือ</th><th>เกณฑ์</th></tr></thead>
+            <tbody>
+                <tr><td><b>1. ด้านความรู้ (K)</b><br>ส่วนประกอบ micro:bit + MakeCode</td><td>ตรวจใบงาน + แบบทดสอบ</td><td>1. ใบงานที่ 4.1<br>2. แบบทดสอบ 5 ข้อ</td><td>ร้อยละ 60 ผ่านเกณฑ์</td></tr>
+                <tr><td><b>2. ด้านทักษะกระบวนการ (P)</b></td><td>ตรวจชิ้นงาน</td><td>3. แบบประเมินทักษะ</td><td>ระดับ "ดี" ผ่านเกณฑ์</td></tr>
+                <tr><td><b>3. พฤติกรรมการทำงาน</b></td><td>สังเกตในชั้น</td><td>4. แบบสังเกตพฤติกรรม</td><td>ระดับ "พอใช้" ผ่านเกณฑ์</td></tr>
+                <tr><td><b>4. คุณลักษณะอันพึงประสงค์</b></td><td>สังเกตและบันทึก</td><td>5. แบบประเมินคุณลักษณะ</td><td>ระดับ "ผ่าน" ผ่านเกณฑ์</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <div class="section-title">10. สื่อและแหล่งการเรียนรู้</div>
+        <p class="indent"><b>สื่อ:</b> 1. <code>Robotm.2/Hr7-8MB.html</code> &nbsp; 2. บอร์ด micro:bit v2 + สาย USB &nbsp; 3. <a href="https://makecode.microbit.org">makecode.microbit.org</a> &nbsp; 4. ใบงานที่ 4.1</p>
+        <p class="indent"><b>แหล่งการเรียนรู้:</b> 1. ห้องคอมพิวเตอร์ &nbsp; 2. อินเทอร์เน็ต</p>
+    </div>
+
+    <div class="page-break"></div>
+
+    <div class="appendix-banner">ภาคผนวก: เครื่องมือวัดและประเมินผล</div>
+
+    <div class="tool-title">เครื่องมือที่ 1: ใบงานที่ 4.1 และแบบประเมิน</div>
+
+    <div class="worksheet-header">
+        <h3>ใบงานที่ 4.1 "ป้ายชื่ออัจฉริยะ"</h3>
+        <p>ชื่อ-สกุล <span class="dots">..................................................................</span> ชั้น ม.2/<span class="dots">....</span> เลขที่ <span class="dots">....</span></p>
+    </div>
+
+    <p><b>คำชี้แจง</b> เขียนโปรแกรมใน MakeCode ให้บอร์ด micro:bit แสดง: ชื่อเล่นเลื่อน + ไอคอน + เลขประจำตัว วนตลอดเวลา</p>
+
+    <p class="bold">ตอนที่ 1: วางแผน</p>
+    <p class="indent">1. ชื่อเล่นที่จะแสดง: <span class="dots">..............................................</span></p>
+    <p class="indent">2. ไอคอนที่เลือก: <span class="dots">..............................................</span> เพราะอะไร? <span class="dots">..........</span></p>
+    <p class="indent">3. เลขประจำตัว: <span class="dots">..............................................</span></p>
+
+    <p class="bold">ตอนที่ 2: วาดบล็อกที่ใช้ (อย่างน้อย 4 บล็อก)</p>
+    <div style="border: 1px solid #000; min-height: 5cm; padding: 8pt; margin: 6pt 0;">
+        <p style="color: #888; font-style: italic;">(พื้นที่สำหรับวาดบล็อกหรือเขียน Pseudo)</p>
+    </div>
+
+    <p class="bold">ตอนที่ 3: ผลการทดสอบ</p>
+    <p class="indent">1. ทำงานบน Simulator ได้? <span class="dots">............</span></p>
+    <p class="indent">2. ทำงานบนบอร์ดจริงได้? <span class="dots">............</span></p>
+    <p class="indent">3. ลิงก์ Share: <span class="dots">.................................................................................</span></p>
+
+    <p class="bold">ตอนที่ 4: คำถามท้าทาย (โบนัส)</p>
+    <p class="indent">ใช้บล็อก <code>show leds</code> วาด pattern ตัวอักษรย่อของชื่อตัวเอง (เช่น "J" สำหรับ Jam)</p>
+    <p class="indent dots">.................................................................................................................</p>
+
+    <div style="margin-top: 14pt; padding: 8pt; border: 1pt dashed #1e3a8a; background: #f0f9ff;">
+        <p class="bold" style="color: #1e3a8a;">เฉลย ใบงานที่ 4.1 (สำหรับครูผู้สอน)</p>
+        <p><b>ตอนที่ 2:</b> โครงสร้างที่คาดหวัง:</p>
+        <div class="code-box">forever:
+    show string "JAM"
+    pause 500
+    show icon Heart
+    pause 500
+    show number 12
+    pause 500
+    clear screen</div>
+        <p><b>ตอนที่ 4:</b> ใช้บล็อก show leds สร้าง pattern อิสระ — ประเมินจากความสร้างสรรค์</p>
+    </div>
+
+    <p class="bold" style="margin-top: 12pt;">แบบประเมินใบงาน 4.1</p>
+    <table>
+        <thead><tr><th style="width: 25%;">ประเด็น</th><th>ดีมาก (3)</th><th>ดี (2)</th><th>ปรับปรุง (1)</th></tr></thead>
+        <tbody>
+            <tr><td><b>การวางแผน</b></td><td>ครบ 3 ข้อ + ให้เหตุผล</td><td>ครบ 3 ข้อ</td><td>ไม่ครบ</td></tr>
+            <tr><td><b>การเขียนโปรแกรม</b></td><td>มี forever + 3 บล็อก + pause</td><td>มีโครงสร้างพื้นฐาน</td><td>ขาดส่วนสำคัญ</td></tr>
+            <tr><td><b>ผลการทดสอบ</b></td><td>ทำงานบนบอร์ดจริง</td><td>ทำงานบน Simulator</td><td>ไม่ทำงาน</td></tr>
+            <tr><td><b>คำถามท้าทาย</b></td><td>วาด pattern สวยงาม</td><td>วาดได้พื้นฐาน</td><td>ไม่ได้ทำ</td></tr>
+        </tbody>
+    </table>
+
+    <div class="page-break"></div>
+
+    <div class="tool-title">เครื่องมือที่ 2: แบบประเมินสมรรถนะการแก้ปัญหา</div>
+    <table>
+        <thead><tr><th style="width: 22%;">พฤติกรรม</th><th>ระดับ 3 (ดีเยี่ยม)</th><th>ระดับ 2 (ดี)</th><th>ระดับ 1 (ปรับปรุง)</th></tr></thead>
+        <tbody>
+            <tr><td><b>วิเคราะห์</b></td><td>เข้าใจส่วนประกอบบอร์ดและ MakeCode ครบ</td><td>เข้าใจบางส่วน</td><td>ไม่เข้าใจ</td></tr>
+            <tr><td><b>วางแผน</b></td><td>วางแผนบล็อกที่จะใช้ก่อนเริ่ม</td><td>วางแผนคร่าว ๆ</td><td>เริ่มเลย</td></tr>
+            <tr><td><b>ดำเนินการ</b></td><td>อัปโหลดลงบอร์ดจริงได้</td><td>ทำใน Simulator ได้</td><td>ทำไม่ได้</td></tr>
+            <tr><td><b>ตรวจสอบ</b></td><td>ตรวจและปรับ pause ให้พอดี</td><td>ตรวจแต่ไม่ปรับ</td><td>ไม่ตรวจ</td></tr>
+        </tbody>
+    </table>
+
+    <div class="tool-title">เครื่องมือที่ 3: แบบประเมินพฤติกรรมการทำงาน</div>
+    <table>
+        <thead><tr><th>ลำดับ</th><th>ชื่อ-สกุล</th><th>ตั้งใจ (3)</th><th>รับผิดชอบ (3)</th><th>ตรงเวลา (3)</th><th>รวม (9)</th></tr></thead>
+        <tbody>
+            <tr><td>1</td><td class="dots">...........................................................</td><td></td><td></td><td></td><td></td></tr>
+            <tr><td>2</td><td class="dots">...........................................................</td><td></td><td></td><td></td><td></td></tr>
+            <tr><td>...</td><td class="dots">...........................................................</td><td></td><td></td><td></td><td></td></tr>
+        </tbody>
+    </table>
+
+    <div class="tool-title">เครื่องมือที่ 4: แบบประเมินคุณลักษณะอันพึงประสงค์</div>
+    <table>
+        <thead><tr><th>คุณลักษณะ</th><th>ดีเยี่ยม (3)</th><th>ดี (2)</th><th>ผ่าน (1)</th></tr></thead>
+        <tbody>
+            <tr><td><b>ซื่อสัตย์</b></td><td>ไม่ลอกชื่อหรือไอคอนเพื่อน</td><td>ปฏิบัติเป็นส่วนใหญ่</td><td>ลอก</td></tr>
+            <tr><td><b>มีวินัย</b></td><td>คืนบอร์ดและสาย USB ครบ</td><td>คืนแต่ไม่เก็บ</td><td>คืนช้า</td></tr>
+            <tr><td><b>ใฝ่เรียนรู้</b></td><td>ทดลองไอคอนหลายแบบ</td><td>ทำตามที่บอก</td><td>ทำเฉพาะส่วนพื้นฐาน</td></tr>
+            <tr><td><b>มุ่งมั่นทำงาน</b></td><td>ทำให้ทำงานบนบอร์ดจริงสำเร็จ</td><td>ทำใน Simulator</td><td>หยุดเมื่อยาก</td></tr>
+        </tbody>
+    </table>
+
+    <div class="tool-title">บันทึกหลังการสอน</div>
+    <p><b>ผลที่เกิดกับผู้เรียน:</b></p>
+    <p class="dots">..........................................................................................................................</p>
+    <p><b>ปัญหา/อุปสรรค:</b></p>
+    <p class="dots">..........................................................................................................................</p>
+
+    <table class="signature" style="margin-top: 30pt;">
+        <tr>
+            <td class="left" style="width: 50%;">
+                ลงชื่อ <span class="dots">..............................................</span> ผู้สอน<br>
+                (นายภาณุพงศ์ อุ่นคำ)<br>วันที่ <span class="dots">......./......./.........</span>
+            </td>
+            <td class="right">
+                ลงชื่อ <span class="dots">..............................................</span><br>
+                (<span class="dots">...........................................</span>)<br>ผู้อำนวยการโรงเรียนบ้านป่ายุบฯ
+            </td>
+        </tr>
+    </table>
+
+</div>
+</body>
+</html>

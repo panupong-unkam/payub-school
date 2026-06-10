@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>หุ่นยนต์ ม.2 | Hr 17-18: Radio + มินิโปรเจกต์จบหน่วย</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Noto+Serif+Thai:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root { --bg-dark: #0f172a; --surface-dark: #1e293b; --cyber-blue: #0ea5e9; --neon-green: #10b981; --neon-orange: #f59e0b; --neon-pink: #ec4899; --neon-purple: #a855f7; --neon-cyan: #06b6d4; --gold: #fbbf24; --text-main: #f8fafc; --text-muted: #94a3b8; --border-line: #334155; }
+        body { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 100%); color: var(--text-main); font-family: 'Sarabun', sans-serif; padding: 20px; margin: 0; overflow-x: hidden; }
+        body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px); background-size: 30px 30px; z-index: -1; }
+        .lesson-container { width: 100%; max-width: 1100px; background: var(--surface-dark); border-radius: 24px; box-shadow: 0 0 40px rgba(0,0,0,0.5), 0 0 15px rgba(16,185,129,0.3); overflow: hidden; border: 1px solid var(--border-line); display: flex; flex-direction: column; min-height: 80vh; }
+        .lesson-header { background: rgba(15,23,42,0.9); padding: 20px 30px; border-bottom: 1px solid var(--neon-green); display: flex; justify-content: space-between; align-items: center; }
+        .progress-track { height: 5px; background: var(--border-line); width: 100%; display: none; }
+        #progress-bar { height: 100%; background: var(--neon-green); width: 0%; box-shadow: 0 0 10px var(--neon-green); transition: width 0.6s ease; }
+        .lesson-body { padding: 40px; position: relative; flex-grow: 1; display: flex; flex-direction: column; }
+        .step { display: none; animation: glitchFadeIn 0.5s ease-out forwards; flex-grow: 1; }
+        .step.active { display: block; }
+        @keyframes glitchFadeIn { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 1; transform: translateY(0); } }
+        h3 { color: var(--neon-green); font-family: 'Noto Serif Thai', serif; font-size: 28px; margin-top: 0; text-shadow: 0 0 10px rgba(16,185,129,0.4); border-bottom: 1px dashed var(--border-line); padding-bottom: 15px; }
+        p, li { line-height: 1.8; font-size: 17px; color: #cbd5e1; }
+        .btn { padding: 14px 28px; border: none; border-radius: 10px; font-family: 'Sarabun'; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.3s; display: inline-flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-primary { background: var(--neon-green); color: white; box-shadow: 0 4px 15px rgba(16,185,129,0.4); }
+        .btn-primary:hover { transform: translateY(-3px); background: #059669; }
+        .btn-outline { background: transparent; color: var(--text-muted); border: 1px solid var(--border-line); }
+        .btn-outline:hover { color: white; border-color: white; }
+        .footer-nav { padding: 25px 40px; background: rgba(15,23,42,0.95); border-top: 1px solid var(--border-line); display: none; justify-content: space-between; align-items: center; margin-top: auto; }
+        .grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-top: 20px; }
+        .info-card { background: rgba(0,0,0,0.2); border: 1px solid var(--border-line); border-radius: 15px; padding: 20px; }
+        .quiz-option { background: rgba(255,255,255,0.05); border: 2px solid var(--border-line); padding: 15px 20px; border-radius: 12px; margin-bottom: 15px; cursor: pointer; transition: 0.2s; font-size: 16px; color: var(--text-main); text-align: left; width: 100%; }
+        .quiz-option:hover { background: rgba(16,185,129,0.1); border-color: var(--neon-green); }
+        .quiz-option.correct { background: rgba(16,185,129,0.2); border-color: var(--neon-green); color: var(--neon-green); font-weight: bold; }
+        .quiz-option.wrong { background: rgba(239,68,68,0.2); border-color: #ef4444; color: #ef4444; }
+        .code-box { background: rgba(0,0,0,0.5); padding: 15px; border-radius: 10px; color: #cbd5e1; font-size: 14px; font-family: 'Courier New', monospace; white-space: pre-wrap; overflow-x: auto; line-height: 1.6; border-left: 4px solid var(--neon-green); }
+
+        .radio-diagram { display: flex; justify-content: space-around; align-items: center; margin: 25px 0; flex-wrap: wrap; gap: 20px; }
+        .radio-board { background: #0a0a0a; border: 3px solid #444; border-radius: 16px; padding: 20px; text-align: center; min-width: 140px; }
+        .radio-wave { font-size: 40px; color: var(--neon-green); animation: wave 1.5s infinite; }
+        @keyframes wave { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.3); opacity: 0.6; } }
+
+        .project-card { background: rgba(0,0,0,0.3); border: 2px solid var(--border-line); border-radius: 16px; padding: 20px; transition: 0.3s; }
+        .project-card:hover { transform: translateY(-5px); }
+
+        .tag { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: bold; margin-right: 8px; }
+        .tag-mb { background: rgba(6,182,212,0.2); color: var(--neon-cyan); border: 1px solid var(--neon-cyan); }
+        .tag-time { background: rgba(245,158,11,0.2); color: var(--neon-orange); border: 1px solid var(--neon-orange); }
+        .tag-final { background: rgba(251,191,36,0.2); color: var(--gold); border: 1px solid var(--gold); }
+        @media (max-width: 900px) { .lesson-body { padding: 20px; } .grid-2col { grid-template-columns: 1fr !important; } }
+    </style>
+</head>
+<body>
+
+<div class="lesson-container">
+    <div class="lesson-header">
+        <h2 style="margin: 0; font-size: 20px; letter-spacing: 1px; color: var(--text-main);">📻 ROBOTICS M.2 | Hr 17-18 FINAL UNIT 2</h2>
+        <div id="header-guest-info" style="display: none; align-items: center; gap: 12px;">
+            <span style="background: rgba(16,185,129,0.15); color: var(--neon-green); padding: 6px 18px; border-radius: 20px; font-size: 14px; font-weight: bold; border: 1px solid var(--neon-green);" id="display-header-name">Student</span>
+            <button class="btn btn-outline" style="padding: 6px 15px; font-size: 12px;" onclick="location.reload()">EXIT</button>
+        </div>
+    </div>
+
+    <div class="progress-track" id="progress-container"><div id="progress-bar"></div></div>
+
+    <div class="lesson-body">
+
+        <div class="step active" id="step-0">
+            <div style="text-align: center; padding: 50px 20px;">
+                <div style="font-size: 80px; margin-bottom: 20px; filter: drop-shadow(0 0 15px var(--neon-green));">📻</div>
+                <h2 style="color: white; font-size: 32px; margin-bottom: 10px;">หุ่นยนต์ ม.2 | ชั่วโมงที่ 17-18</h2>
+                <p style="color: var(--neon-green); font-size: 20px; margin-bottom: 5px; font-weight: bold;">Radio + มินิโปรเจกต์ปิดหน่วย micro:bit</p>
+                <p style="color: var(--text-muted); font-size: 16px; margin-bottom: 30px;">Wireless Communication & Final Project</p>
+                <p style="color: var(--text-muted); font-size: 16px; margin-bottom: 20px;">📝 กรุณาลงชื่อเข้าเรียน</p>
+                <input type="text" id="guest-name-input" placeholder="ชื่อ-นามสกุล เลขที่ ห้อง" style="width:100%; max-width:500px; padding:15px 20px; background:rgba(0,0,0,0.3); border:2px solid var(--neon-green); border-radius:12px; color:white; font-size:18px; text-align:center; outline:none;" onkeypress="if(event.key === 'Enter') startLesson()">
+                <div style="margin-top: 35px;">
+                    <button class="btn btn-primary" style="padding: 16px 50px; font-size: 18px;" onclick="startLesson()">🚀 เริ่มภารกิจสุดท้าย</button>
+                </div>
+                <div style="margin-top: 30px;"><span class="tag tag-mb">micro:bit</span><span class="tag tag-time">2 ชั่วโมง</span><span class="tag tag-final">FINAL UNIT 2</span></div>
+            </div>
+        </div>
+
+        <div class="step" id="step-1">
+            <h3>🎯 ด่านที่ 1: Radio คืออะไร?</h3>
+            <p>สวัสดี <b class="student-name-inject" style="color: var(--cyber-blue);"></b>! ฟีเจอร์สุดท้ายและเจ๋งสุดของ micro:bit คือ <b>การสื่อสารไร้สาย</b> ระหว่างบอร์ด!</p>
+
+            <div style="background: rgba(16,185,129,0.1); border: 2px solid var(--neon-green); padding: 25px; border-radius: 15px; margin-top: 20px;">
+                <h4 style="color: var(--neon-green); margin-top: 0;">📡 Radio บน micro:bit</h4>
+                <p>ใช้คลื่นวิทยุ <b>2.4 GHz</b> ส่ง-รับข้อมูลระหว่าง micro:bit หลายบอร์ดในระยะ ~70 เมตร</p>
+                <ul style="padding-left: 20px;">
+                    <li><b>ส่งได้:</b> ตัวเลข, ข้อความ, คู่ key-value</li>
+                    <li><b>ไม่ต้องใช้:</b> WiFi, Bluetooth ต่อมือถือ</li>
+                    <li><b>ทำงานเป็นกลุ่ม</b> — บอร์ดที่อยู่ "กลุ่มเดียวกัน" จะคุยกันได้</li>
+                </ul>
+            </div>
+
+            <div class="radio-diagram">
+                <div class="radio-board">
+                    <div style="font-size: 30px;">🟧</div>
+                    <b style="color: var(--neon-cyan);">Board A</b>
+                    <p style="font-size: 12px; margin: 5px 0 0 0;">ส่งข้อมูล</p>
+                </div>
+                <div class="radio-wave">📡</div>
+                <div class="radio-board">
+                    <div style="font-size: 30px;">🟦</div>
+                    <b style="color: var(--neon-cyan);">Board B</b>
+                    <p style="font-size: 12px; margin: 5px 0 0 0;">รับข้อมูล</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="step" id="step-2">
+            <h3>📤 ด่านที่ 2: บล็อก Radio พื้นฐาน</h3>
+            <p>ใช้ 3 บล็อกหลักนี้ ทำได้ทุกอย่าง</p>
+
+            <div class="grid-2col">
+                <div class="info-card" style="border-color: var(--neon-cyan);">
+                    <h4 style="color: var(--neon-cyan); margin-top: 0;">🔹 กำหนดกลุ่ม</h4>
+                    <div class="code-box" style="border-left-color: var(--neon-cyan);">on start:
+    radio set group 1</div>
+                    <p style="font-size: 13px; margin-top: 10px;">ตั้งกลุ่ม 0-255 — บอร์ดที่กลุ่มเดียวกันจะคุยกันได้</p>
+                </div>
+                <div class="info-card" style="border-color: var(--neon-orange);">
+                    <h4 style="color: var(--neon-orange); margin-top: 0;">🔹 ส่ง (Send)</h4>
+                    <div class="code-box" style="border-left-color: var(--neon-orange);">on button A pressed:
+    radio send number 100
+    radio send string "HI"</div>
+                </div>
+            </div>
+
+            <div class="info-card" style="border-color: var(--neon-pink); margin-top: 20px;">
+                <h4 style="color: var(--neon-pink); margin-top: 0;">🔹 รับ (Receive) — ทำงานเมื่อมีข้อความเข้ามา</h4>
+                <div class="code-box" style="border-left-color: var(--neon-pink);">on radio received receivedNumber:
+    show number receivedNumber
+
+on radio received receivedString:
+    show string receivedString</div>
+            </div>
+
+            <div style="background: rgba(245,158,11,0.1); border-left: 4px solid var(--neon-orange); padding: 15px; border-radius: 10px; margin-top: 20px;">
+                <b style="color: var(--neon-orange);">⚠️ สำคัญ:</b> ถ้าบอร์ดอยู่กลุ่ม "0" ทุกบอร์ดในห้องจะคุยกันมั่ว — ตั้ง <b>กลุ่มเฉพาะคู่ของตัวเอง</b> (เช่น 1, 2, 3)!
+            </div>
+        </div>
+
+        <div class="step" id="step-3">
+            <h3>💬 ด่านที่ 3: ตัวอย่าง — Chat ระหว่างเพื่อน</h3>
+            <p>โปรแกรมเดียว → flash ลงบอร์ดทั้งของฉันและของเพื่อน → กดปุ่มคุยกันได้!</p>
+
+            <h4 style="color: var(--neon-green); margin-top: 15px;">📚 โค้ดเต็ม (ใช้ทั้ง 2 บอร์ด)</h4>
+            <div class="code-box">on start:
+    radio set group 7              // กลุ่มของคู่เรา
+
+on button A pressed:
+    radio send string "HI"
+
+on button B pressed:
+    radio send string "BYE"
+
+on radio received receivedString:
+    show string receivedString
+    pause 1000
+    clear screen</div>
+
+            <div style="background: rgba(168,85,247,0.1); border-left: 4px solid var(--neon-purple); padding: 15px; border-radius: 10px; margin-top: 20px;">
+                <b style="color: var(--neon-purple);">💡 ฝึกคิด:</b>
+                <p style="margin: 5px 0 0 0;">โค้ดเดียวกัน — แต่ละบอร์ดทั้ง <b>ส่งและรับ</b> ได้พร้อมกัน! ไม่ต้องเขียนแยกฝั่ง</p>
+            </div>
+        </div>
+
+        <div class="step" id="step-4">
+            <h3>🎮 ด่านที่ 4: ตัวอย่างขั้นสูง — เป่ายิ้งฉุบไร้สาย</h3>
+            <p>2 บอร์ดเล่นเป่ายิ้งฉุบกัน — เขย่าเลือก → ส่งให้อีกฝั่ง → ดูผล</p>
+
+            <h4 style="color: var(--neon-green);">📚 โค้ดเป่ายิ้งฉุบ</h4>
+            <div class="code-box">on start:
+    radio set group 5
+    set myChoice to 0
+
+on shake:                              // เขย่าเลือก
+    set myChoice to pick random 1 to 3   // 1=ค้อน 2=กระดาษ 3=กรรไกร
+    if myChoice == 1:    show icon Rectangle      // ค้อน
+    else if myChoice == 2: show icon SmallSquare  // กระดาษ
+    else:                show icon Scissors       // กรรไกร
+    radio send number myChoice
+
+on radio received receivedNumber:      // ได้รับของเพื่อน
+    pause 1500
+    if receivedNumber == myChoice:
+        show string "DRAW"
+    else if (myChoice == 1 and receivedNumber == 3)
+          or (myChoice == 2 and receivedNumber == 1)
+          or (myChoice == 3 and receivedNumber == 2):
+        show icon Happy             // ชนะ
+    else:
+        show icon Sad               // แพ้</div>
+
+            <div style="background: rgba(16,185,129,0.1); border-left: 4px solid var(--neon-green); padding: 15px; border-radius: 10px; margin-top: 20px;">
+                <b style="color: var(--neon-green);">🎯 ทำไมต้อง pause 1500?</b>
+                <p style="margin: 5px 0 0 0;">เพื่อให้ผู้เล่นเห็นว่าตัวเองเลือกอะไรก่อน แล้วถึงแสดงผลลัพธ์ — ไม่งั้นจะเปลี่ยนเร็วเกินไป</p>
+            </div>
+        </div>
+
+        <div class="step" id="step-5">
+            <h3>📝 ด่านที่ 5: ใบงานสรุปหน่วย — มินิโปรเจกต์</h3>
+
+            <div style="background: rgba(16,185,129,0.08); border: 2px solid var(--neon-green); padding: 30px; border-radius: 20px;">
+                <h4 style="color: white; margin-top: 0; font-size: 22px;">🎯 มินิโปรเจกต์จบหน่วย micro:bit</h4>
+                <p style="color: var(--text-muted);">เลือก 1 ใน 4 ภารกิจ → รวมความรู้ทั้งหมดที่เรียนมา 6 สัปดาห์ → ส่งเป็นโปรเจกต์ปิดหน่วย</p>
+
+                <div class="grid-2col" style="grid-template-columns: 1fr 1fr; margin-top: 20px;">
+                    <div class="project-card" style="border-color: var(--cyber-blue);">
+                        <div style="font-size: 35px; text-align: center;">✌️</div>
+                        <h4 style="color: var(--cyber-blue); margin: 8px 0; text-align: center;">A: เป่ายิ้งฉุบไร้สาย</h4>
+                        <p style="font-size: 13px;">ใช้: Radio + Accelerometer + จอ LED<br>เล่นกับเพื่อน 2 บอร์ด ⭐⭐⭐⭐</p>
+                    </div>
+                    <div class="project-card" style="border-color: var(--neon-purple);">
+                        <div style="font-size: 35px; text-align: center;">🔮</div>
+                        <h4 style="color: var(--neon-purple); margin: 8px 0; text-align: center;">B: Magic 8-Ball</h4>
+                        <p style="font-size: 13px;">ใช้: Accelerometer + จอ LED<br>เขย่าถามคำถาม ≥6 คำตอบ ⭐⭐⭐</p>
+                    </div>
+                    <div class="project-card" style="border-color: var(--neon-orange);">
+                        <div style="font-size: 35px; text-align: center;">👣</div>
+                        <h4 style="color: var(--neon-orange); margin: 8px 0; text-align: center;">C: Step Counter</h4>
+                        <p style="font-size: 13px;">ใช้: Accelerometer + ตัวแปร + ปุ่ม<br>นับก้าว + reset ⭐⭐⭐</p>
+                    </div>
+                    <div class="project-card" style="border-color: var(--neon-pink);">
+                        <div style="font-size: 35px; text-align: center;">📻</div>
+                        <h4 style="color: var(--neon-pink); margin: 8px 0; text-align: center;">D: Radio Chat 3 ทาง</h4>
+                        <p style="font-size: 13px;">ใช้: Radio + ปุ่ม + จอ LED<br>3 บอร์ด คุยกันได้หมด ⭐⭐⭐⭐⭐</p>
+                    </div>
+                </div>
+
+                <div style="background: rgba(0,0,0,0.4); padding: 20px; border-radius: 12px; margin-top: 20px;">
+                    <b style="color: var(--neon-green);">✅ เกณฑ์ประเมิน (เต็ม 10 คะแนน):</b>
+                    <ol style="margin-top: 10px; line-height: 2;">
+                        <li>ใช้เซ็นเซอร์/ฟีเจอร์อย่างน้อย <b>2 ตัว</b> รวมกัน (2 คะแนน)</li>
+                        <li>มี <b>เงื่อนไข if-else</b> ที่สมเหตุสมผล (2 คะแนน)</li>
+                        <li>มี <b>ตัวแปร</b> เก็บค่า/สถานะ (1 คะแนน)</li>
+                        <li>ทำงานได้จริงบน <b>บอร์ดจริง</b> (3 คะแนน)</li>
+                        <li>ความสมบูรณ์ + ความคิดสร้างสรรค์ (2 คะแนน)</li>
+                    </ol>
+                </div>
+
+                <div style="background: rgba(6,182,212,0.1); border-left: 4px solid var(--neon-cyan); padding: 18px; border-radius: 10px; margin-top: 20px;">
+                    <b style="color: var(--neon-cyan);">📤 ส่งงาน:</b>
+                    <ul style="margin: 10px 0 0 20px;">
+                        <li>ลิงก์ Share จาก MakeCode</li>
+                        <li>วิดีโอบอร์ดทำงานจริง (≥45 วินาที)</li>
+                        <li>อธิบายสั้น ๆ ว่าใช้บล็อกอะไร ทำไม</li>
+                        <li>เข้าเว็บโรงครูเจมส์ → ระบบส่งงาน → ใบงาน "Final micro:bit Project"</li>
+                    </ul>
+                </div>
+
+                <div style="background: rgba(251,191,36,0.1); border-left: 4px solid var(--gold); padding: 15px; border-radius: 10px; margin-top: 15px;">
+                    <b style="color: var(--gold);">🏆 หลังจากนี้:</b> สัปดาห์หน้าคือ <b>สอบกลางภาค</b> (ทฤษฎี + ปฏิบัติ VEX + micro:bit) — เตรียมตัวให้พร้อมนะครับ!
+                </div>
+            </div>
+        </div>
+
+        <div class="step" id="step-6">
+            <h3>🎮 ด่านที่ 6: ทดสอบสรุปหน่วย micro:bit (5 ข้อ)</h3>
+            <p>ทดสอบความเข้าใจรวมทั้งหน่วย <b style="color: var(--neon-orange);">สุ่ม + สลับ กันลอก!</b></p>
+
+            <div id="game-area" style="background: rgba(0,0,0,0.2); border: 2px solid var(--neon-green); border-radius: 20px; padding: 30px; text-align: center; max-width: 750px; margin: 0 auto;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 20px; font-weight: bold; color: var(--neon-green);">
+                    <span id="question-counter">คำถาม: 1 / 5</span>
+                    <span id="score-counter">คะแนน: 0</span>
+                </div>
+                <h4 id="question-text" style="font-size: 22px; color: white; margin-bottom: 30px; line-height: 1.5;">กำลังโหลด...</h4>
+                <div id="options-grid" style="display: flex; flex-direction: column; gap: 12px;"></div>
+            </div>
+
+            <div id="game-result" style="display: none; text-align: center; padding: 40px; background: rgba(0,0,0,0.2); border-radius: 20px; border: 2px solid var(--gold);">
+                <div style="font-size: 70px;">🏆</div>
+                <h3 style="border: none; text-shadow: none; font-size: 32px; color: var(--gold);">ยินดีด้วย! จบหน่วย micro:bit แล้ว</h3>
+                <p style="font-size: 20px; color: white;">นักเรียน: <span class="student-name-inject" style="color:var(--neon-green);"></span></p>
+                <p style="font-size: 20px; color: white;">คะแนน: <b id="final-score" style="color: var(--neon-orange); font-size: 36px;"></b> / 5</p>
+                <p style="color: var(--neon-orange); font-size: 16px; margin-top: 15px;">สัปดาห์หน้า → สอบกลางภาค! เตรียมตัวให้พร้อม</p>
+                <button class="btn btn-primary" style="padding: 16px 40px; font-size: 18px; margin-top: 20px;" onclick="finishMission()">📥 ยืนยันจบหน่วย 2</button>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="footer-nav" id="footer-controls">
+        <button class="btn btn-outline" id="prevBtn" onclick="moveStep(-1)">⬅️ ถอยกลับ</button>
+        <div style="color: var(--neon-green); font-family: monospace; font-size: 16px; font-weight: bold;" id="step-counter">LOADING...</div>
+        <button class="btn btn-primary" id="nextBtn" onclick="moveStep(1)">เดินหน้า ➔</button>
+    </div>
+</div>
+
+<script>
+    let currentStep = 0; const totalSteps = 6; let studentName = "";
+
+    function startLesson() {
+        const input = document.getElementById('guest-name-input').value.trim();
+        if (!input) { alert('⚠️ กรุณาลงชื่อก่อนเริ่มเรียนครับ'); return; }
+        studentName = input;
+        try { localStorage.setItem('robotm2_student', studentName); } catch(e){}
+        document.querySelectorAll('.student-name-inject').forEach(el => el.innerText = studentName);
+        document.getElementById('display-header-name').innerText = "👨‍💻 " + studentName;
+        document.getElementById('header-guest-info').style.display = 'flex';
+        document.getElementById('footer-controls').style.display = 'flex';
+        document.getElementById('progress-container').style.display = 'block';
+        currentStep = 1; updateUI();
+    }
+
+    function updateUI() {
+        document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+        document.getElementById('step-' + currentStep).classList.add('active');
+        document.getElementById('progress-bar').style.width = (currentStep / totalSteps) * 100 + '%';
+        document.getElementById('step-counter').innerText = `STEP: 0${currentStep}/0${totalSteps}`;
+        document.getElementById('prevBtn').style.visibility = currentStep === 1 ? 'hidden' : 'visible';
+        if (currentStep === totalSteps) {
+            document.getElementById('nextBtn').style.display = 'none';
+            if (!gameStarted) initGame();
+        } else { document.getElementById('nextBtn').style.display = 'inline-flex'; }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    function moveStep(n) { currentStep += n; updateUI(); }
+
+    function finishMission() {
+        confetti({ particleCount: 300, spread: 120, origin: { y: 0.5 }, colors: ['#10b981', '#fbbf24', '#0ea5e9', '#ec4899'] });
+        setTimeout(() => {
+            alert(`🏆 ยินดีด้วย ${studentName}!\nจบหน่วย micro:bit แล้ว (${score}/5 คะแนน)\nสัปดาห์หน้า → สอบกลางภาค!`);
+            window.location.href = "index.html";
+        }, 2500);
+    }
+
+    const quizBank = [
+        { q: "Radio ใน micro:bit ใช้คลื่นความถี่ใด?", ans: "2.4 GHz", choices: ["FM 88-108 MHz", "AM 530-1700 kHz", "2.4 GHz", "5 GHz (WiFi 5)"] },
+        { q: "ก่อนใช้ Radio ต้องตั้งอะไรก่อน?", ans: "radio set group (กำหนดกลุ่ม)", choices: ["radio set group (กำหนดกลุ่ม)", "ตั้งเวลา", "Calibrate", "เชื่อม Bluetooth"] },
+        { q: "ถ้าตั้งกลุ่ม Radio ไม่ตรงกัน 2 บอร์ดจะเป็นอย่างไร?", ans: "ส่ง-รับข้อความหากันไม่ได้", choices: ["ส่งได้แต่ช้า", "ส่ง-รับข้อความหากันไม่ได้", "บอร์ดเสียทั้ง 2", "ส่งได้ทุกบอร์ดในห้อง"] },
+        { q: "ข้อใดสามารถส่งผ่าน Radio ได้?", ans: "ตัวเลข, ข้อความ, คู่ key-value", choices: ["ภาพถ่ายและวิดีโอ", "ตัวเลข, ข้อความ, คู่ key-value", "ไฟล์ MP3", "เอกสาร PDF"] },
+        { q: "บล็อก 'on radio received receivedString' ทำงานเมื่อใด?", ans: "เมื่อมีบอร์ดอื่นในกลุ่มเดียวกันส่ง string มา", choices: ["ทุก 1 วินาที", "เมื่อมีบอร์ดอื่นในกลุ่มเดียวกันส่ง string มา", "เมื่อกดปุ่ม A", "เมื่อเปิดบอร์ด"] },
+        { q: "ระยะการสื่อสาร Radio ของ micro:bit ประมาณเท่าใด?", ans: "ประมาณ 70 เมตร (ในที่โล่ง)", choices: ["1 เมตร", "10 เมตร", "ประมาณ 70 เมตร (ในที่โล่ง)", "1 กิโลเมตร"] },
+        { q: "เซ็นเซอร์ใดที่ NOT มีในตัว micro:bit?", ans: "เซ็นเซอร์อัลตราโซนิก (HC-SR04)", choices: ["Accelerometer", "Compass", "เซ็นเซอร์อัลตราโซนิก (HC-SR04)", "เซ็นเซอร์อุณหภูมิ"] },
+        { q: "ในเกมเป่ายิ้งฉุบไร้สาย เหตุใดต้องใช้ pause 1500 ก่อนแสดงผลลัพธ์?", ans: "เพื่อให้ผู้เล่นเห็นการเลือกของตัวเองก่อน", choices: ["เพื่อให้บอร์ดเย็นลง", "เพื่อให้ผู้เล่นเห็นการเลือกของตัวเองก่อน", "เพราะ radio ส่งช้า", "เพื่อความสวยงาม"] },
+        { q: "การใช้ Radio ใน micro:bit เหมือนกับเทคโนโลยีใดในชีวิตจริง?", ans: "วิทยุสื่อสารหรือ Walkie-Talkie", choices: ["โทรศัพท์มือถือ", "วิทยุสื่อสารหรือ Walkie-Talkie", "อีเมล", "เว็บไซต์"] },
+        { q: "ในใบงานจบหน่วย ภารกิจ Radio Chat 3 ทาง ทำไมจึงยากที่สุด?", ans: "ต้องประสานบอร์ด 3 ตัวให้คุยกันได้ทั้งหมด", choices: ["ต้องใช้ภาษาที่ยาก", "ต้องประสานบอร์ด 3 ตัวให้คุยกันได้ทั้งหมด", "Radio ส่งได้สูงสุด 2 บอร์ด", "บอร์ดราคาแพง"] }
+    ];
+
+    let currentQIndex = 0; let score = 0; let gameStarted = false; let selectedQuestions = [];
+    function shuffle(array) { let curId = array.length; while (0 !== curId) { let randId = Math.floor(Math.random() * curId); curId -= 1; let tmp = array[curId]; array[curId] = array[randId]; array[randId] = tmp; } return array; }
+    function initGame() { gameStarted = true; score = 0; currentQIndex = 0; selectedQuestions = shuffle([...quizBank]).slice(0, 5); loadQuestion(); }
+    function loadQuestion() {
+        const qData = selectedQuestions[currentQIndex];
+        document.getElementById('question-counter').innerText = `คำถาม: ${currentQIndex + 1} / 5`;
+        document.getElementById('score-counter').innerText = `คะแนน: ${score}`;
+        document.getElementById('question-text').innerText = qData.q;
+        const optionsGrid = document.getElementById('options-grid'); optionsGrid.innerHTML = "";
+        shuffle([...qData.choices]).forEach(choice => {
+            const btn = document.createElement('button'); btn.className = 'quiz-option'; btn.innerText = choice;
+            btn.onclick = () => checkAnswer(btn, choice, qData.ans); optionsGrid.appendChild(btn);
+        });
+    }
+    function checkAnswer(selectedBtn, selectedText, correctText) {
+        document.querySelectorAll('.quiz-option').forEach(b => b.style.pointerEvents = 'none');
+        if (selectedText === correctText) { selectedBtn.classList.add('correct'); score++; document.getElementById('score-counter').innerText = `คะแนน: ${score}`; confetti({ particleCount: 50, spread: 60, origin: { y: 0.8 }, colors: ['#10b981'] }); }
+        else { selectedBtn.classList.add('wrong'); document.querySelectorAll('.quiz-option').forEach(b => { if(b.innerText === correctText) b.classList.add('correct'); }); }
+        setTimeout(() => { currentQIndex++; if (currentQIndex < 5) loadQuestion(); else showResult(); }, 2200);
+    }
+    function showResult() {
+        document.getElementById('game-area').style.display = 'none';
+        document.getElementById('game-result').style.display = 'block';
+        document.getElementById('final-score').innerText = score;
+        document.getElementById('footer-controls').style.display = 'none';
+    }
+</script>
+
+</body>
+</html>

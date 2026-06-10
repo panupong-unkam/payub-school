@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>หุ่นยนต์ ม.2 | Hr 29-30: HC-SR04 วัดระยะ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Noto+Serif+Thai:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --bg-dark: #0f172a; --surface-dark: #1e293b; --cyber-blue: #0ea5e9;
+            --neon-green: #10b981; --neon-orange: #f59e0b; --neon-pink: #ec4899;
+            --neon-purple: #a855f7; --neon-cyan: #06b6d4; --gold: #fbbf24;
+            --text-main: #f8fafc; --text-muted: #94a3b8; --border-line: #334155;
+        }
+        body { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 100%); color: var(--text-main); font-family: 'Sarabun', sans-serif; padding: 20px; margin: 0; overflow-x: hidden; }
+        body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px); background-size: 30px 30px; z-index: -1; }
+        .lesson-container { width: 100%; max-width: 1200px; background: var(--surface-dark); border-radius: 24px; box-shadow: 0 0 40px rgba(0,0,0,0.5), 0 0 30px rgba(14,165,233,0.3); overflow: hidden; border: 1px solid var(--border-line); display: flex; flex-direction: column; min-height: 80vh; }
+        .lesson-header { background: linear-gradient(90deg, rgba(14,165,233,0.15), rgba(15,23,42,0.95)); padding: 20px 30px; border-bottom: 1px solid var(--cyber-blue); display: flex; justify-content: space-between; align-items: center; }
+        .progress-track { height: 6px; background: var(--border-line); width: 100%; display: none; }
+        #progress-bar { height: 100%; background: linear-gradient(90deg, var(--cyber-blue), var(--neon-cyan)); width: 0%; box-shadow: 0 0 15px var(--cyber-blue); transition: width 0.6s ease; }
+        .lesson-body { padding: 40px; position: relative; flex-grow: 1; display: flex; flex-direction: column; }
+        .step { display: none; animation: glitchFadeIn 0.5s ease-out forwards; flex-grow: 1; }
+        .step.active { display: block; }
+        @keyframes glitchFadeIn { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 1; transform: translateY(0); } }
+        h3 { color: var(--cyber-blue); font-family: 'Noto Serif Thai', serif; font-size: 30px; margin-top: 0; text-shadow: 0 0 15px rgba(14,165,233,0.4); border-bottom: 1px dashed var(--border-line); padding-bottom: 15px; }
+        h4 { color: white; font-family: 'Noto Serif Thai', serif; font-size: 20px; margin: 20px 0 10px; }
+        p, li { line-height: 1.85; font-size: 17px; color: #cbd5e1; }
+        .btn { padding: 14px 28px; border: none; border-radius: 10px; font-family: 'Sarabun'; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.3s; display: inline-flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-primary { background: linear-gradient(135deg, var(--cyber-blue), #0284c7); color: white; box-shadow: 0 4px 20px rgba(14,165,233,0.5); }
+        .btn-primary:hover { transform: translateY(-3px); }
+        .btn-outline { background: transparent; color: var(--text-muted); border: 1px solid var(--border-line); }
+        .btn-outline:hover { color: white; border-color: white; }
+        .footer-nav { padding: 25px 40px; background: rgba(15,23,42,0.95); border-top: 1px solid var(--border-line); display: none; justify-content: space-between; align-items: center; margin-top: auto; }
+        .grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-top: 20px; }
+        .grid-3col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-top: 20px; }
+        .info-card { background: rgba(0,0,0,0.3); border: 1px solid var(--border-line); border-radius: 16px; padding: 22px; }
+        .quiz-option { background: rgba(255,255,255,0.05); border: 2px solid var(--border-line); padding: 16px 22px; border-radius: 12px; margin-bottom: 12px; cursor: pointer; transition: 0.2s; font-size: 16px; color: var(--text-main); text-align: left; width: 100%; }
+        .quiz-option:hover { background: rgba(14,165,233,0.1); border-color: var(--cyber-blue); }
+        .quiz-option.correct { background: rgba(16,185,129,0.2); border-color: var(--neon-green); color: var(--neon-green); font-weight: bold; }
+        .quiz-option.wrong { background: rgba(239,68,68,0.2); border-color: #ef4444; color: #ef4444; }
+        .code-box { background: #0a0e1a; padding: 18px; border-radius: 10px; color: #e2e8f0; font-size: 14px; font-family: 'JetBrains Mono', monospace; white-space: pre; overflow-x: auto; line-height: 1.7; border-left: 4px solid var(--cyber-blue); margin: 10px 0; }
+        .code-box .kw { color: #c792ea; } .code-box .str { color: #a3e635; } .code-box .num { color: #f59e0b; } .code-box .com { color: #64748b; font-style: italic; } .code-box .fn { color: #06b6d4; }
+
+        /* Ultrasonic demo */
+        .ultrasonic-scene {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border: 2px solid #444; border-radius: 18px;
+            padding: 30px; margin: 20px 0; position: relative;
+            min-height: 320px; overflow: hidden;
+        }
+        .scene-grid {
+            position: absolute; inset: 0;
+            background-image: linear-gradient(rgba(14,165,233,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(14,165,233,0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+        .sensor-fixed {
+            position: absolute; top: 50%; left: 30px;
+            transform: translateY(-50%);
+            width: 80px; z-index: 5;
+        }
+        .sensor-body {
+            background: linear-gradient(180deg, #1e3a8a, #1e293b);
+            border: 2px solid #334155; border-radius: 8px;
+            padding: 10px 5px; text-align: center;
+            box-shadow: 0 0 15px rgba(14,165,233,0.4);
+        }
+        .sensor-eyes {
+            display: flex; gap: 8px; justify-content: center;
+        }
+        .sensor-eye {
+            width: 22px; height: 22px; border-radius: 50%;
+            background: radial-gradient(circle, #0ea5e9, #0c4a6e);
+            border: 2px solid #06b6d4;
+            box-shadow: 0 0 8px var(--cyber-blue);
+        }
+        .sensor-label { color: white; font-size: 9px; font-family: monospace; margin-top: 5px; }
+
+        .target-obj {
+            position: absolute; top: 50%; transform: translateY(-50%);
+            width: 60px; height: 100px;
+            background: linear-gradient(135deg, #fbbf24, #d97706);
+            border-radius: 8px; transition: left 0.5s ease;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 40px; box-shadow: 0 0 20px rgba(251,191,36,0.3);
+        }
+
+        .sound-wave {
+            position: absolute; top: 50%; left: 110px;
+            transform: translateY(-50%);
+            display: flex; align-items: center;
+        }
+        .wave-line {
+            width: 100px; height: 2px;
+            background: linear-gradient(90deg, var(--cyber-blue), transparent);
+            margin-bottom: 8px;
+            animation: wavePulse 1.5s ease-in-out infinite;
+        }
+        @keyframes wavePulse {
+            0% { transform: scaleX(0); transform-origin: left; opacity: 1; }
+            100% { transform: scaleX(1); transform-origin: left; opacity: 0; }
+        }
+        .wave-set {
+            position: absolute; left: 110px; top: 50%; transform: translateY(-50%);
+            display: flex; flex-direction: column; gap: 6px;
+            pointer-events: none;
+        }
+        .wave-arc {
+            border: 2px solid var(--cyber-blue);
+            border-left: none; border-radius: 0 50% 50% 0 / 0 50% 50% 0;
+            opacity: 0;
+        }
+
+        .distance-display {
+            background: #000; border: 2px solid var(--neon-green);
+            border-radius: 12px; padding: 15px 25px;
+            text-align: center; font-family: monospace;
+            color: var(--neon-green); margin: 20px auto;
+            max-width: 400px;
+            box-shadow: 0 0 20px rgba(16,185,129,0.4);
+        }
+        .distance-display .value {
+            font-size: 48px; font-weight: bold;
+            text-shadow: 0 0 15px var(--neon-green);
+        }
+        .distance-display .label {
+            font-size: 12px; color: var(--text-muted);
+            margin-bottom: 5px;
+        }
+
+        .distance-control {
+            text-align: center; margin: 15px 0;
+            background: rgba(0,0,0,0.3); padding: 15px;
+            border-radius: 12px;
+        }
+        .distance-control input[type="range"] { width: 80%; max-width: 400px; }
+
+        .status-indicator {
+            display: inline-block; padding: 6px 16px;
+            border-radius: 20px; font-weight: bold;
+            font-family: monospace; font-size: 13px;
+            margin: 5px;
+        }
+        .status-safe { background: rgba(16,185,129,0.2); color: var(--neon-green); border: 1px solid var(--neon-green); }
+        .status-warn { background: rgba(245,158,11,0.2); color: var(--neon-orange); border: 1px solid var(--neon-orange); }
+        .status-danger { background: rgba(239,68,68,0.2); color: #ef4444; border: 1px solid #ef4444; animation: blinkDanger 0.5s infinite alternate; }
+        @keyframes blinkDanger { from { opacity: 0.7; } to { opacity: 1; box-shadow: 0 0 15px #ef4444; } }
+
+        /* HC-SR04 module illustration */
+        .hcsr04-module { display: flex; justify-content: center; margin: 20px 0; }
+        .hcsr04-svg { width: 100%; max-width: 300px; height: auto; }
+
+        .tag { display: inline-block; padding: 5px 14px; border-radius: 14px; font-size: 12px; font-weight: bold; margin-right: 8px; }
+        .tag-rp { background: rgba(245,158,11,0.2); color: var(--neon-orange); border: 1px solid var(--neon-orange); }
+        .tag-time { background: rgba(14,165,233,0.2); color: var(--cyber-blue); border: 1px solid var(--cyber-blue); }
+
+        .callout { border-radius: 14px; padding: 18px 22px; margin: 18px 0; display: flex; gap: 15px; align-items: flex-start; }
+        .callout-icon { font-size: 28px; flex-shrink: 0; }
+        .callout-info { background: rgba(14,165,233,0.1); border-left: 4px solid var(--cyber-blue); }
+        .callout-warn { background: rgba(245,158,11,0.1); border-left: 4px solid var(--neon-orange); }
+        .callout-tip { background: rgba(16,185,129,0.1); border-left: 4px solid var(--neon-green); }
+        .callout-bonus { background: rgba(236,72,153,0.1); border-left: 4px solid var(--neon-pink); }
+        .callout b { color: white; }
+
+        .step-dots { display: flex; gap: 8px; justify-content: center; }
+        .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--border-line); transition: 0.3s; }
+        .dot.active { background: var(--cyber-blue); box-shadow: 0 0 10px var(--cyber-blue); }
+
+        .bigprint { font-size: 19px; line-height: 1.9; }
+
+        table.compare { width: 100%; border-collapse: collapse; margin-top: 15px; background: rgba(0,0,0,0.3); border-radius: 12px; overflow: hidden; }
+        table.compare th, table.compare td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border-line); font-size: 15px; }
+        table.compare th { background: rgba(14,165,233,0.15); color: var(--cyber-blue); }
+        table.compare td:first-child { font-weight: bold; color: white; }
+
+        @media (max-width: 900px) { .lesson-body { padding: 22px; } .grid-2col, .grid-3col { grid-template-columns: 1fr !important; } h3 { font-size: 24px; } }
+    </style>
+</head>
+<body>
+
+<div class="lesson-container">
+    <div class="lesson-header">
+        <h2 style="margin: 0; font-size: 20px; letter-spacing: 1px;">📡 ROBOTICS M.2 | Hr 29-30</h2>
+        <div id="header-guest-info" style="display: none; align-items: center; gap: 12px;">
+            <span style="background: rgba(14,165,233,0.15); color: var(--cyber-blue); padding: 6px 18px; border-radius: 20px; font-size: 14px; font-weight: bold; border: 1px solid var(--cyber-blue);" id="display-header-name">Student</span>
+            <button class="btn btn-outline" style="padding: 6px 15px; font-size: 12px;" onclick="location.reload()">EXIT</button>
+        </div>
+    </div>
+
+    <div class="progress-track" id="progress-container"><div id="progress-bar"></div></div>
+
+    <div class="lesson-body">
+
+        <!-- STEP 0 -->
+        <div class="step active" id="step-0">
+            <div style="text-align: center; padding: 50px 20px;">
+                <div style="font-size: 90px; margin-bottom: 20px; filter: drop-shadow(0 0 20px var(--cyber-blue));">📡</div>
+                <h2 style="color: white; font-size: 32px; margin-bottom: 10px;">หุ่นยนต์ ม.2 | ชั่วโมงที่ 29-30</h2>
+                <p style="color: var(--cyber-blue); font-size: 22px; margin-bottom: 5px; font-weight: bold;">HC-SR04 อัลตราโซนิก — วัดระยะ</p>
+                <p style="color: var(--text-muted); font-size: 16px; margin-bottom: 30px;">ใส่ "ตา" ให้หุ่นยนต์เห็นวัตถุข้างหน้า</p>
+                <p style="color: var(--text-muted); font-size: 16px; margin-bottom: 20px;">📝 ลงชื่อเข้าเรียน</p>
+                <input type="text" id="guest-name-input" placeholder="ชื่อ-นามสกุล เลขที่ ห้อง" style="width:100%; max-width:520px; padding:16px 22px; background:rgba(0,0,0,0.4); border:2px solid var(--cyber-blue); border-radius:12px; color:white; font-size:18px; text-align:center; outline:none;" onkeypress="if(event.key === 'Enter') startLesson()">
+                <div style="margin-top: 35px;">
+                    <button class="btn btn-primary" style="padding: 18px 60px; font-size: 19px;" onclick="startLesson()">🚀 เริ่มเรียน</button>
+                </div>
+                <div style="margin-top: 30px;"><span class="tag tag-rp">RP2040</span><span class="tag tag-time">2 ชั่วโมง</span></div>
+            </div>
+        </div>
+
+        <!-- STEP 1: What is HC-SR04 -->
+        <div class="step" id="step-1">
+            <h3>🎯 ด่านที่ 1: HC-SR04 ทำงานยังไง?</h3>
+            <p class="bigprint">สวัสดี <b class="student-name-inject" style="color: var(--neon-green);"></b>! วันนี้เพิ่ม <b>"เซ็นเซอร์ตา"</b> ให้หุ่นยนต์ — มันจะรู้ว่ามีอะไรอยู่ข้างหน้าไกลแค่ไหน</p>
+
+            <div class="hcsr04-module">
+                <svg viewBox="0 0 300 130" class="hcsr04-svg">
+                    <rect x="10" y="20" width="280" height="90" rx="10" fill="#1e3a8a" stroke="#0c4a6e" stroke-width="2"/>
+                    <circle cx="80" cy="65" r="32" fill="#0c4a6e" stroke="#06b6d4" stroke-width="3"/>
+                    <text x="80" y="70" text-anchor="middle" fill="white" font-size="11" font-family="monospace">TRIG</text>
+                    <circle cx="220" cy="65" r="32" fill="#0c4a6e" stroke="#06b6d4" stroke-width="3"/>
+                    <text x="220" y="70" text-anchor="middle" fill="white" font-size="11" font-family="monospace">ECHO</text>
+                    <rect x="135" y="55" width="30" height="20" rx="3" fill="#0a0a0a" stroke="#444"/>
+                    <text x="150" y="68" text-anchor="middle" fill="#cbd5e1" font-size="9" font-family="monospace">IC</text>
+                    <text x="150" y="118" text-anchor="middle" fill="white" font-size="11" font-family="monospace">HC-SR04</text>
+                    <!-- pins -->
+                    <line x1="60" y1="110" x2="60" y2="125" stroke="#888" stroke-width="2"/>
+                    <line x1="120" y1="110" x2="120" y2="125" stroke="#888" stroke-width="2"/>
+                    <line x1="180" y1="110" x2="180" y2="125" stroke="#888" stroke-width="2"/>
+                    <line x1="240" y1="110" x2="240" y2="125" stroke="#888" stroke-width="2"/>
+                    <text x="60" y="20" text-anchor="middle" fill="#fbbf24" font-size="8">VCC</text>
+                    <text x="120" y="20" text-anchor="middle" fill="#fbbf24" font-size="8">TRIG</text>
+                    <text x="180" y="20" text-anchor="middle" fill="#fbbf24" font-size="8">ECHO</text>
+                    <text x="240" y="20" text-anchor="middle" fill="#fbbf24" font-size="8">GND</text>
+                </svg>
+            </div>
+
+            <h4>🦇 หลักการ: คลื่นเสียงสะท้อน (เหมือนค้างคาว!)</h4>
+            <div class="grid-3col">
+                <div class="info-card" style="border-color: var(--cyber-blue);">
+                    <div style="font-size: 35px; text-align: center;">📤</div>
+                    <h4 style="color: var(--cyber-blue); text-align: center; margin: 5px 0;">1. ส่ง (TRIG)</h4>
+                    <p style="font-size: 14px;">ขา TRIG ส่งคลื่นเสียง <b>40 kHz</b> (สูงเกินกว่าหูคนได้ยิน)</p>
+                </div>
+                <div class="info-card" style="border-color: var(--neon-orange);">
+                    <div style="font-size: 35px; text-align: center;">🔄</div>
+                    <h4 style="color: var(--neon-orange); text-align: center; margin: 5px 0;">2. สะท้อน</h4>
+                    <p style="font-size: 14px;">คลื่นกระทบวัตถุ → สะท้อนกลับ</p>
+                </div>
+                <div class="info-card" style="border-color: var(--neon-green);">
+                    <div style="font-size: 35px; text-align: center;">📥</div>
+                    <h4 style="color: var(--neon-green); text-align: center; margin: 5px 0;">3. รับ (ECHO)</h4>
+                    <p style="font-size: 14px;">ขา ECHO รับคลื่นกลับ → คำนวณเวลาที่ใช้ → แปลงเป็นระยะทาง</p>
+                </div>
+            </div>
+
+            <div class="callout callout-info">
+                <span class="callout-icon">🧠</span>
+                <div><b>คณิตศาสตร์ที่ใช้:</b> เสียงเดินทาง <b>343 ม./วินาที</b> ในอากาศ → ระยะทาง = (เวลา × 343) / 2 (หาร 2 เพราะคลื่นไป-กลับ)</div>
+            </div>
+
+            <h4>📊 ข้อมูลเทคนิค</h4>
+            <table class="compare">
+                <tbody>
+                    <tr><td>ระยะวัด</td><td>2 cm ถึง 400 cm (4 เมตร)</td></tr>
+                    <tr><td>ความแม่นยำ</td><td>±0.3 cm</td></tr>
+                    <tr><td>มุมตรวจจับ</td><td>15° (รูปกรวย)</td></tr>
+                    <tr><td>ไฟเลี้ยง</td><td>+5V</td></tr>
+                    <tr><td>จำนวนสาย</td><td>4 เส้น (VCC, TRIG, ECHO, GND)</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- STEP 2: Interactive ultrasonic demo -->
+        <div class="step" id="step-2">
+            <h3>🎮 ด่านที่ 2: ทดลอง! เลื่อนวัตถุดูค่าระยะ</h3>
+            <p>ลากแถบเพื่อขยับวัตถุ → ดูค่าระยะเปลี่ยนตามแบบจริง</p>
+
+            <div class="ultrasonic-scene">
+                <div class="scene-grid"></div>
+                <div class="sensor-fixed">
+                    <div class="sensor-body">
+                        <div class="sensor-eyes">
+                            <div class="sensor-eye"></div>
+                            <div class="sensor-eye"></div>
+                        </div>
+                        <div class="sensor-label">HC-SR04</div>
+                    </div>
+                </div>
+                <div class="wave-set" id="wave-set">
+                    <!-- waves added by JS -->
+                </div>
+                <div class="target-obj" id="target-obj" style="left: 60%;">📦</div>
+            </div>
+
+            <div class="distance-display">
+                <div class="label">ระยะที่วัดได้ (cm)</div>
+                <div class="value" id="dist-value">100</div>
+                <div id="dist-status" style="margin-top: 10px;">
+                    <span class="status-indicator status-safe">✅ ปลอดภัย</span>
+                </div>
+            </div>
+
+            <div class="distance-control">
+                <b style="color: white;">📦 ตำแหน่งวัตถุ:</b>
+                <br>
+                <input type="range" min="5" max="400" value="100" id="obj-slider" oninput="updateDistance(this.value)">
+                <div style="display: flex; justify-content: space-between; max-width: 500px; margin: 5px auto; font-family: monospace; color: var(--text-muted); font-size: 11px;">
+                    <span>2 cm (ใกล้สุด)</span><span>200 cm</span><span>400 cm (ไกลสุด)</span>
+                </div>
+            </div>
+
+            <div class="callout callout-tip">
+                <span class="callout-icon">💡</span>
+                <div><b>สังเกต:</b> เมื่อระยะ &lt; 20 cm → "อันตราย!" (สีแดงกระพริบ) | 20-50 cm → "ระวัง" (เหลือง) | &gt; 50 cm → "ปลอดภัย" (เขียว)</div>
+            </div>
+        </div>
+
+        <!-- STEP 3: Wiring + Code -->
+        <div class="step" id="step-3">
+            <h3>🔌 ด่านที่ 3: การต่อสาย + โค้ด CircuitPython</h3>
+
+            <p>HC-SR04 ต่อกับ Maker Pi RP2040 ผ่าน <b>GP Port</b> (Grove cable หรือสายจัมเปอร์)</p>
+
+            <table class="compare">
+                <thead><tr><th>HC-SR04</th><th>Maker Pi RP2040</th><th>หมายเหตุ</th></tr></thead>
+                <tbody>
+                    <tr><td>VCC</td><td style="color: var(--neon-orange); font-family: monospace;">5V</td><td>ไฟเลี้ยง</td></tr>
+                    <tr><td>TRIG</td><td style="color: var(--neon-orange); font-family: monospace;">GP3</td><td>สัญญาณส่ง</td></tr>
+                    <tr><td>ECHO</td><td style="color: var(--neon-orange); font-family: monospace;">GP2</td><td>สัญญาณรับ</td></tr>
+                    <tr><td>GND</td><td style="color: var(--neon-orange); font-family: monospace;">GND</td><td>กราวด์</td></tr>
+                </tbody>
+            </table>
+
+            <h4>🐍 โค้ดอ่านระยะ</h4>
+            <div class="code-box"><span class="kw">import</span> board
+<span class="kw">import</span> adafruit_hcsr04
+<span class="kw">import</span> time
+
+<span class="com"># สร้างเซ็นเซอร์ — TRIG=GP3, ECHO=GP2</span>
+sonar = adafruit_hcsr04.<span class="fn">HCSR04</span>(
+    trigger_pin=board.GP3,
+    echo_pin=board.GP2
+)
+
+<span class="kw">while</span> <span class="num">True</span>:
+    <span class="kw">try</span>:
+        d = sonar.distance      <span class="com"># คืนค่า cm</span>
+        <span class="fn">print</span>(<span class="str">"ระยะ:"</span>, d, <span class="str">"cm"</span>)
+    <span class="kw">except</span> RuntimeError:
+        <span class="fn">print</span>(<span class="str">"วัดไม่ได้"</span>)   <span class="com"># บางครั้งคลื่นหายไป</span>
+    time.<span class="fn">sleep</span>(<span class="num">0.2</span>)</div>
+
+            <div class="callout callout-warn">
+                <span class="callout-icon">⚠️</span>
+                <div><b>ทำไมต้อง try/except?</b> ถ้าระยะ &gt; 4 เมตร หรือคลื่นไม่กลับมา จะเกิด <code>RuntimeError</code> — ใช้ try/except กันโปรแกรมพัง</div>
+            </div>
+
+            <h4>🐍 โค้ดประยุกต์: แสดงสถานะด้วย LED</h4>
+            <div class="code-box"><span class="kw">import</span> board, neopixel, adafruit_hcsr04, time
+
+sonar = adafruit_hcsr04.<span class="fn">HCSR04</span>(trigger_pin=board.GP3, echo_pin=board.GP2)
+pixels = neopixel.<span class="fn">NeoPixel</span>(board.GP18, <span class="num">2</span>)
+
+<span class="kw">while</span> <span class="num">True</span>:
+    <span class="kw">try</span>:
+        d = sonar.distance
+        <span class="kw">if</span> d &lt; <span class="num">20</span>:
+            pixels.fill((<span class="num">255</span>, <span class="num">0</span>, <span class="num">0</span>))    <span class="com"># แดง = อันตราย</span>
+        <span class="kw">elif</span> d &lt; <span class="num">50</span>:
+            pixels.fill((<span class="num">255</span>, <span class="num">255</span>, <span class="num">0</span>))  <span class="com"># เหลือง = ระวัง</span>
+        <span class="kw">else</span>:
+            pixels.fill((<span class="num">0</span>, <span class="num">255</span>, <span class="num">0</span>))    <span class="com"># เขียว = ปลอดภัย</span>
+        <span class="fn">print</span>(d, <span class="str">"cm"</span>)
+    <span class="kw">except</span> RuntimeError:
+        <span class="kw">pass</span>
+    time.<span class="fn">sleep</span>(<span class="num">0.1</span>)</div>
+        </div>
+
+        <!-- STEP 4: Sounder -->
+        <div class="step" id="step-4">
+            <h3>🚨 ด่านที่ 4: ระบบเตือน (Sonar Beeper)</h3>
+            <p>ทำให้บัซเซอร์ "ปี๊บถี่ขึ้นเรื่อยๆ" เมื่อวัตถุใกล้ — เหมือน "เซ็นเซอร์ถอยรถ"!</p>
+
+            <h4>🐍 โค้ด Parking Sensor</h4>
+            <div class="code-box"><span class="kw">import</span> board, pwmio, adafruit_hcsr04, time
+
+sonar = adafruit_hcsr04.<span class="fn">HCSR04</span>(trigger_pin=board.GP3, echo_pin=board.GP2)
+buzzer = pwmio.<span class="fn">PWMOut</span>(board.GP22, frequency=<span class="num">880</span>, duty_cycle=<span class="num">0</span>)
+
+<span class="kw">while</span> <span class="num">True</span>:
+    <span class="kw">try</span>:
+        d = sonar.distance
+        <span class="kw">if</span> d &lt; <span class="num">100</span>:
+            <span class="com"># คำนวณช่วงเงียบ: ใกล้ → เงียบสั้น = ปี๊บถี่</span>
+            silence = d / <span class="num">100</span>  <span class="com"># 0.0 ถึง 1.0</span>
+            buzzer.duty_cycle = <span class="num">32768</span>
+            time.<span class="fn">sleep</span>(<span class="num">0.05</span>)
+            buzzer.duty_cycle = <span class="num">0</span>
+            time.<span class="fn">sleep</span>(silence)
+        <span class="kw">else</span>:
+            buzzer.duty_cycle = <span class="num">0</span>      <span class="com"># ไกล = เงียบ</span>
+            time.<span class="fn">sleep</span>(<span class="num">0.1</span>)
+    <span class="kw">except</span> RuntimeError:
+        <span class="kw">pass</span></div>
+
+            <div class="callout callout-tip">
+                <span class="callout-icon">🚗</span>
+                <div><b>ของจริง:</b> โค้ดนี้คือหัวใจของระบบ "เซ็นเซอร์ถอยรถ" ในรถยนต์! รถยุคใหม่ทุกคันมีเซ็นเซอร์แบบนี้</div>
+            </div>
+        </div>
+
+        <!-- STEP 5: Worksheet -->
+        <div class="step" id="step-5">
+            <h3>📝 ด่านที่ 5: ใบงานที่ 12 — "เซ็นเซอร์ถอยรถ"</h3>
+
+            <div style="background: rgba(14,165,233,0.08); border: 2px solid var(--cyber-blue); padding: 30px; border-radius: 20px;">
+                <h4 style="color: white; margin-top: 0; font-size: 22px;">🎯 ภารกิจ: ระบบเซ็นเซอร์ถอยรถ (10 คะแนน)</h4>
+                <p>สร้างระบบจริง — จับวัตถุข้างหน้าแล้วเตือนผู้ใช้</p>
+
+                <div style="background: rgba(0,0,0,0.4); padding: 22px; border-radius: 12px;">
+                    <b style="color: var(--cyber-blue);">✅ ต้องทำ:</b>
+                    <ol style="line-height: 2.2; margin-top: 10px;">
+                        <li>วัดระยะด้วย HC-SR04 ตลอดเวลา</li>
+                        <li><b>ระยะ &lt; 10 cm</b> → LED <b>แดง</b> + บัซเซอร์ <b>ปี๊บถี่ๆ</b> + แสดง "DANGER!" ที่ Console</li>
+                        <li><b>10-30 cm</b> → LED <b>เหลือง</b> + บัซเซอร์ <b>ปี๊บช้าๆ</b></li>
+                        <li><b>30-100 cm</b> → LED <b>เขียวอ่อน</b> + ไม่มีเสียง</li>
+                        <li><b>&gt; 100 cm</b> → LED ดับ + ไม่มีเสียง</li>
+                    </ol>
+                </div>
+
+                <h4 style="color: white;">🐍 โครงโค้ดให้เริ่ม</h4>
+                <div class="code-box"><span class="kw">import</span> board, neopixel, pwmio, adafruit_hcsr04, time
+
+sonar = adafruit_hcsr04.<span class="fn">HCSR04</span>(trigger_pin=board.GP3, echo_pin=board.GP2)
+pixels = neopixel.<span class="fn">NeoPixel</span>(board.GP18, <span class="num">2</span>)
+buzzer = pwmio.<span class="fn">PWMOut</span>(board.GP22, frequency=<span class="num">880</span>, duty_cycle=<span class="num">0</span>)
+
+<span class="kw">def</span> <span class="fn">beep</span>(times, gap):
+    <span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(times):
+        buzzer.duty_cycle = <span class="num">32768</span>; time.<span class="fn">sleep</span>(<span class="num">0.05</span>)
+        buzzer.duty_cycle = <span class="num">0</span>; time.<span class="fn">sleep</span>(gap)
+
+<span class="kw">while</span> <span class="num">True</span>:
+    <span class="kw">try</span>:
+        d = sonar.distance
+        <span class="fn">print</span>(d, <span class="str">"cm"</span>)
+        <span class="kw">if</span> d &lt; <span class="num">10</span>:
+            <span class="com"># TODO: LED แดง + บัซเซอร์ปี๊บถี่ + print "DANGER!"</span>
+            <span class="kw">pass</span>
+        <span class="kw">elif</span> d &lt; <span class="num">30</span>:
+            <span class="com"># TODO: LED เหลือง + ปี๊บช้า</span>
+            <span class="kw">pass</span>
+        <span class="kw">elif</span> d &lt; <span class="num">100</span>:
+            <span class="com"># TODO: LED เขียวอ่อน + ไม่มีเสียง</span>
+            <span class="kw">pass</span>
+        <span class="kw">else</span>:
+            <span class="com"># TODO: LED ดับ + ไม่มีเสียง</span>
+            <span class="kw">pass</span>
+    <span class="kw">except</span> RuntimeError:
+        <span class="kw">pass</span>
+    time.<span class="fn">sleep</span>(<span class="num">0.05</span>)</div>
+
+                <div style="background: rgba(0,0,0,0.5); padding: 22px; border-radius: 12px; margin-top: 20px;">
+                    <b style="color: var(--cyber-blue);">📸 แคปหน้าจอ + วิดีโอส่งครู:</b>
+                    <ol style="margin-top: 12px; line-height: 2;">
+                        <li><b>แคปโค้ดเต็ม</b> ที่เขียนเสร็จ</li>
+                        <li><b>แคปหน้า Simulator</b> ขณะที่วัตถุอยู่ &lt; 10 cm → LED แดง</li>
+                        <li><b>แคปหน้า Simulator</b> ขณะที่วัตถุอยู่ 30-100 cm → LED เขียวอ่อน</li>
+                        <li><b>วิดีโอ ≥30 วินาที</b> ของบอร์ดจริงทำงาน (ถ้ามี) แสดงทุกระดับ</li>
+                        <li><b>แคป Console</b> ขณะที่แสดงค่าระยะ + คำว่า "DANGER!"</li>
+                    </ol>
+                </div>
+
+                <div class="callout callout-info">
+                    <span class="callout-icon">📤</span>
+                    <div><b>วิธีส่ง:</b> รวมไฟล์ทั้งหมดเป็น zip ตั้งชื่อ <b>"Hr29-30_ชื่อ_เลขที่.zip"</b> → เว็บโรงครูเจมส์ → ใบงาน "เซ็นเซอร์ถอยรถ"</div>
+                </div>
+
+                <div class="callout callout-bonus">
+                    <span class="callout-icon">🌟</span>
+                    <div><b>โบนัส +3 คะแนน:</b> ทำให้เสียงบัซเซอร์ <b>"ค่อยๆ ถี่ขึ้น"</b> แบบ smooth ตามระยะ (linear) ไม่ใช่กระโดดเปลี่ยน</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 6: Quiz -->
+        <div class="step" id="step-6">
+            <h3>🎮 ด่านที่ 6: แบบทดสอบท้ายชั่วโมง (5 ข้อ)</h3>
+            <p>สุ่ม + สลับ <b style="color: var(--neon-orange);">กันลอก!</b></p>
+
+            <div id="game-area" style="background: rgba(0,0,0,0.2); border: 2px solid var(--cyber-blue); border-radius: 20px; padding: 30px; text-align: center; max-width: 750px; margin: 0 auto;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 20px; font-weight: bold; color: var(--cyber-blue);">
+                    <span id="question-counter">คำถาม: 1 / 5</span>
+                    <span id="score-counter">คะแนน: 0</span>
+                </div>
+                <h4 id="question-text" style="font-size: 22px; color: white; margin-bottom: 30px; line-height: 1.5;">กำลังโหลด...</h4>
+                <div id="options-grid" style="display: flex; flex-direction: column; gap: 12px;"></div>
+            </div>
+
+            <div id="game-result" style="display: none; text-align: center; padding: 40px; background: rgba(0,0,0,0.2); border-radius: 20px; border: 2px solid var(--neon-green);">
+                <div style="font-size: 70px;">🏆</div>
+                <h3 style="border: none; text-shadow: none; font-size: 32px; color: var(--neon-green);">จบชั่วโมงที่ 29-30!</h3>
+                <p style="font-size: 20px; color: white;">นักเรียน: <span class="student-name-inject" style="color:var(--cyber-blue);"></span></p>
+                <p style="font-size: 20px; color: white;">คะแนน: <b id="final-score" style="color: var(--neon-orange); font-size: 36px;"></b> / 5</p>
+                <p style="color: var(--cyber-blue); margin-top: 10px;">สัปดาห์หน้า: รวม HC-SR04 + Motor → หุ่นยนต์หลบสิ่งกีดขวาง!</p>
+                <button class="btn btn-primary" style="padding: 16px 40px; font-size: 18px; margin-top: 20px;" onclick="finishMission()">📥 ยืนยันส่งคะแนน</button>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="footer-nav" id="footer-controls">
+        <button class="btn btn-outline" id="prevBtn" onclick="moveStep(-1)">⬅️ ถอยกลับ</button>
+        <div class="step-dots" id="step-dots"></div>
+        <button class="btn btn-primary" id="nextBtn" onclick="moveStep(1)">เดินหน้า ➔</button>
+    </div>
+</div>
+
+<script>
+    let currentStep = 0; const totalSteps = 6; let studentName = "";
+
+    function startLesson() {
+        const input = document.getElementById('guest-name-input').value.trim();
+        if (!input) { alert('⚠️ กรุณาลงชื่อก่อนเริ่มเรียนครับ'); return; }
+        studentName = input;
+        try { localStorage.setItem('robotm2_student', studentName); } catch(e){}
+        document.querySelectorAll('.student-name-inject').forEach(el => el.innerText = studentName);
+        document.getElementById('display-header-name').innerText = "👨‍💻 " + studentName;
+        document.getElementById('header-guest-info').style.display = 'flex';
+        document.getElementById('footer-controls').style.display = 'flex';
+        document.getElementById('progress-container').style.display = 'block';
+        buildDots();
+        currentStep = 1; updateUI();
+    }
+    function buildDots() {
+        const dots = document.getElementById('step-dots'); dots.innerHTML = "";
+        for (let i = 1; i <= totalSteps; i++) { const d = document.createElement('div'); d.className = 'dot'; dots.appendChild(d); }
+    }
+    function updateUI() {
+        document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+        document.getElementById('step-' + currentStep).classList.add('active');
+        document.getElementById('progress-bar').style.width = (currentStep / totalSteps) * 100 + '%';
+        document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i < currentStep));
+        document.getElementById('prevBtn').style.visibility = currentStep === 1 ? 'hidden' : 'visible';
+        if (currentStep === totalSteps) { document.getElementById('nextBtn').style.display = 'none'; if (!gameStarted) initGame(); }
+        else { document.getElementById('nextBtn').style.display = 'inline-flex'; }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    function moveStep(n) { currentStep += n; updateUI(); }
+
+    function finishMission() {
+        confetti({ particleCount: 250, spread: 110, origin: { y: 0.5 }, colors: ['#0ea5e9', '#10b981', '#fbbf24'] });
+        setTimeout(() => {
+            alert(`🎉 ${studentName} ทำคะแนนได้ ${score}/5\nอย่าลืมส่งใบงาน "เซ็นเซอร์ถอยรถ" นะครับ!`);
+            window.location.href = "index.html";
+        }, 2200);
+    }
+
+    // Ultrasonic interactive
+    function updateDistance(d) {
+        d = parseInt(d);
+        // Map distance to position in arena (5cm = 11%, 400cm = 95%)
+        const pct = 11 + (d / 400) * 84;
+        document.getElementById('target-obj').style.left = pct + '%';
+        document.getElementById('dist-value').innerText = d;
+        const statusEl = document.getElementById('dist-status');
+        if (d < 20) {
+            statusEl.innerHTML = '<span class="status-indicator status-danger">⚠️ อันตราย!</span>';
+        } else if (d < 50) {
+            statusEl.innerHTML = '<span class="status-indicator status-warn">⚠️ ระวัง</span>';
+        } else {
+            statusEl.innerHTML = '<span class="status-indicator status-safe">✅ ปลอดภัย</span>';
+        }
+    }
+
+    const quizBank = [
+        { q: "HC-SR04 ทำงานโดยใช้คลื่นชนิดใด?", ans: "คลื่นอัลตราโซนิก (ความถี่สูงเกินกว่าหูคน)", choices: ["คลื่นวิทยุ", "คลื่นแสง (Laser)", "คลื่นอัลตราโซนิก (ความถี่สูงเกินกว่าหูคน)", "คลื่นแม่เหล็กไฟฟ้า"] },
+        { q: "HC-SR04 วัดระยะได้ในช่วงประมาณเท่าใด?", ans: "2 cm ถึง 4 เมตร", choices: ["1 mm ถึง 1 เมตร", "2 cm ถึง 4 เมตร", "1 เมตร ถึง 100 เมตร", "1 cm ถึง 1 กิโลเมตร"] },
+        { q: "ขาใดบน HC-SR04 ใช้ 'ส่ง' คลื่น?", ans: "TRIG", choices: ["VCC", "TRIG", "ECHO", "GND"] },
+        { q: "ขาใดบน HC-SR04 ใช้ 'รับ' คลื่นสะท้อน?", ans: "ECHO", choices: ["VCC", "TRIG", "ECHO", "GND"] },
+        { q: "ค่าที่ sonar.distance คืนกลับมามีหน่วยอะไร?", ans: "cm (เซนติเมตร)", choices: ["mm", "cm (เซนติเมตร)", "m (เมตร)", "ms (มิลลิวินาที)"] },
+        { q: "เหตุใดต้องใช้ try/except กับ HC-SR04?", ans: "ถ้าวัดระยะไม่ได้ (เช่นไกลเกิน) จะเกิด RuntimeError", choices: ["เพราะเป็นมารยาท", "ถ้าวัดระยะไม่ได้ (เช่นไกลเกิน) จะเกิด RuntimeError", "เพื่อความสวยงาม", "Python บังคับ"] },
+        { q: "ความเร็วของเสียงในอากาศประมาณเท่าใด?", ans: "343 เมตรต่อวินาที", choices: ["100 เมตรต่อวินาที", "343 เมตรต่อวินาที", "300,000 กิโลเมตรต่อวินาที", "3,000 เมตรต่อวินาที"] },
+        { q: "ทำไมต้องหารด้วย 2 ในการคำนวณระยะจากเวลา?", ans: "เพราะคลื่นเดินทาง 'ไป-กลับ' รวม 2 เท่าของระยะ", choices: ["ป้องกัน error", "เพื่อให้ค่าเป็นเซนติเมตร", "เพราะคลื่นเดินทาง 'ไป-กลับ' รวม 2 เท่าของระยะ", "ตามมาตรฐานนานาชาติ"] },
+        { q: "มุมตรวจจับของ HC-SR04 ประมาณเท่าใด?", ans: "15 องศา (รูปกรวย)", choices: ["1 องศา", "15 องศา (รูปกรวย)", "90 องศา", "360 องศา (ทุกทิศ)"] },
+        { q: "สัตว์ในธรรมชาติที่ใช้หลักการเดียวกันกับ HC-SR04 คือ?", ans: "ค้างคาว / โลมา", choices: ["นกพิราบ", "ค้างคาว / โลมา", "เต่าทะเล", "ผึ้ง"] },
+        { q: "ในระบบเซ็นเซอร์ถอยรถ ถ้าใกล้มาก เสียงปี๊บควรเป็นอย่างไร?", ans: "ปี๊บถี่ขึ้น (เร็วขึ้น)", choices: ["เงียบลง", "เบาลง", "ปี๊บถี่ขึ้น (เร็วขึ้น)", "ดับ"] },
+        { q: "ในโค้ดตัวอย่าง HC-SR04 ต่อกับขา GPIO ใด?", ans: "TRIG = GP3, ECHO = GP2", choices: ["TRIG = GP18, ECHO = GP22", "TRIG = GP3, ECHO = GP2", "TRIG = GP8, ECHO = GP9", "TRIG = GP20, ECHO = GP21"] }
+    ];
+
+    let currentQIndex = 0; let score = 0; let gameStarted = false; let selectedQuestions = [];
+    function shuffle(array) { let curId = array.length; while (0 !== curId) { let randId = Math.floor(Math.random() * curId); curId -= 1; let tmp = array[curId]; array[curId] = array[randId]; array[randId] = tmp; } return array; }
+    function initGame() { gameStarted = true; score = 0; currentQIndex = 0; selectedQuestions = shuffle([...quizBank]).slice(0, 5); loadQuestion(); }
+    function loadQuestion() {
+        const qData = selectedQuestions[currentQIndex];
+        document.getElementById('question-counter').innerText = `คำถาม: ${currentQIndex + 1} / 5`;
+        document.getElementById('score-counter').innerText = `คะแนน: ${score}`;
+        document.getElementById('question-text').innerText = qData.q;
+        const optionsGrid = document.getElementById('options-grid'); optionsGrid.innerHTML = "";
+        shuffle([...qData.choices]).forEach(choice => {
+            const btn = document.createElement('button'); btn.className = 'quiz-option'; btn.innerText = choice;
+            btn.onclick = () => checkAnswer(btn, choice, qData.ans); optionsGrid.appendChild(btn);
+        });
+    }
+    function checkAnswer(selectedBtn, selectedText, correctText) {
+        document.querySelectorAll('.quiz-option').forEach(b => b.style.pointerEvents = 'none');
+        if (selectedText === correctText) { selectedBtn.classList.add('correct'); score++; document.getElementById('score-counter').innerText = `คะแนน: ${score}`; confetti({ particleCount: 50, spread: 60, origin: { y: 0.8 }, colors: ['#0ea5e9'] }); }
+        else { selectedBtn.classList.add('wrong'); document.querySelectorAll('.quiz-option').forEach(b => { if(b.innerText === correctText) b.classList.add('correct'); }); }
+        setTimeout(() => { currentQIndex++; if (currentQIndex < 5) loadQuestion(); else showResult(); }, 2200);
+    }
+    function showResult() {
+        document.getElementById('game-area').style.display = 'none';
+        document.getElementById('game-result').style.display = 'block';
+        document.getElementById('final-score').innerText = score;
+        document.getElementById('footer-controls').style.display = 'none';
+    }
+</script>
+
+</body>
+</html>

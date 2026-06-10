@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>บทที่ 8: Demo Day นำเสนอ AI | คอมพิวเตอร์ ม.3</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Noto+Serif+Thai:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--accent:#D4A017;--accent2:#F59E0B;--bg:#FFFDF0;--card-bg:#fff;--text:#1A1A0E;--text-muted:#6B7280;--border:#E5E7EB;--shadow:0 4px 20px rgba(212,160,23,.15);--radius:16px;}
+  [data-theme="dark"]{--bg:#1A1500;--card-bg:#1E1A00;--text:#FFF9E0;--text-muted:#9CA3AF;--border:#3D3000;--shadow:0 4px 20px rgba(0,0,0,.4);}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);transition:background .3s,color .3s;}
+  .top-bar{display:flex;justify-content:space-between;align-items:center;padding:12px 24px;background:var(--card-bg);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;}
+  .top-bar-left{display:flex;align-items:center;gap:10px;}
+  .btn-back{display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;background:var(--bg);border:1px solid var(--border);color:var(--text);text-decoration:none;font-size:14px;font-weight:600;transition:all .2s;}
+  .btn-back:hover,.btn-theme:hover{background:var(--accent);color:white;border-color:var(--accent);}
+  .lesson-breadcrumb{font-size:13px;color:var(--text-muted);}
+  .btn-theme{background:var(--bg);border:1px solid var(--border);color:var(--text);padding:8px 14px;border-radius:10px;cursor:pointer;font-size:14px;font-family:'Sarabun',sans-serif;transition:all .2s;}
+  .hero{background: linear-gradient(135deg,#D4A017 0%,#B7860D 40%,#FFD700 100%);padding:48px 24px 56px;text-align:center;}
+  .hero-icon{font-size:64px;margin-bottom:16px;display:block;}
+  .hero-badge{display:inline-block;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);color:white;padding:5px 14px;border-radius:20px;font-size:12px;font-weight:600;margin-bottom:12px;}
+  .hero h1{font-family:'Noto Serif Thai',serif;font-size:clamp(24px,4vw,40px);color:white;font-weight:700;margin-bottom:8px;text-shadow:0 2px 8px rgba(0,0,0,.2);}
+  .hero-en{color:rgba(255,255,255,.85);font-size:16px;margin-bottom:16px;}
+  .hero-meta{display:flex;justify-content:center;gap:16px;flex-wrap:wrap;margin-top:20px;}
+  .hero-chip{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);color:white;padding:6px 14px;border-radius:20px;font-size:13px;}
+  .container{max-width:860px;margin:0 auto;padding:40px 24px;}
+  .section-card{background:var(--card-bg);border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow);margin-bottom:24px;overflow:hidden;}
+  .section-header{padding:18px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .section-icon{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#D4A01720,#FFD70040);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+  .section-title{font-size:18px;font-weight:700;}
+  .section-subtitle{font-size:13px;color:var(--text-muted);margin-top:2px;}
+  .section-body{padding:24px;}
+  .concept-box{background:linear-gradient(135deg,#D4A01715,#FFD70015);border:1px solid #D4A01730;border-radius:12px;padding:20px;margin-bottom:16px;}
+  .concept-box h3{color:var(--accent);font-size:16px;margin-bottom:8px;}
+  .concept-box p{font-size:15px;line-height:1.75;}
+  .objective-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin:16px 0;}
+  .obj-card{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center;}
+  .obj-label{display:inline-block;padding:3px 12px;border-radius:20px;font-size:11px;font-weight:700;margin-bottom:10px;letter-spacing:.5px;}
+  .obj-k{background:#DBEAFE;color:#1D4ED8;}
+  .obj-p{background:#DCFCE7;color:#15803D;}
+  .obj-a{background:#FEF3C7;color:#B45309;}
+  [data-theme="dark"] .obj-k{background:#1E3A5F;color:#93C5FD;}
+  [data-theme="dark"] .obj-p{background:#14532D;color:#86EFAC;}
+  [data-theme="dark"] .obj-a{background:#451A03;color:#FCD34D;}
+  .obj-text{font-size:13.5px;line-height:1.65;color:var(--text);}
+  .step-list{display:flex;flex-direction:column;gap:16px;}
+  .step-item{display:flex;gap:16px;align-items:flex-start;padding:16px;border-radius:12px;background:var(--bg);border:1px solid var(--border);}
+  .step-num{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#D4A017,#FFD700);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex-shrink:0;text-shadow:0 1px 3px rgba(0,0,0,.3);}
+  .step-content h4{font-size:15px;font-weight:700;margin-bottom:4px;}
+  .step-content p{font-size:14px;color:var(--text-muted);line-height:1.65;}
+  .tip{margin-top:8px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;padding:8px 12px;font-size:13px;color:#92400E;display:flex;align-items:flex-start;gap:6px;}
+  [data-theme="dark"] .tip{background:#1C1000;color:#FCD34D;border-color:#78350F;}
+  .qa-box{border-radius:12px;overflow:hidden;margin:12px 0;border:1px solid var(--border);}
+  .qa-q{background:linear-gradient(135deg,#D4A017,#B7860D);color:white;padding:14px 18px;font-size:14px;font-weight:600;}
+  .qa-a{background:var(--card-bg);padding:14px 18px;font-size:14px;line-height:1.7;color:var(--text-muted);display:flex;align-items:flex-start;gap:8px;}
+  .qa-label{font-weight:700;color:#16A34A;white-space:nowrap;}
+  .activity-box{background:linear-gradient(135deg,#FFFBEB,#FEF3C7);border:1px solid #FDE68A;border-radius:12px;padding:20px;margin:16px 0;}
+  [data-theme="dark"] .activity-box{background:linear-gradient(135deg,#1A1500,#2D2000);border-color:#78350F;}
+  .activity-title{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:700;color:#92400E;margin-bottom:12px;}
+  [data-theme="dark"] .activity-title{color:#FCD34D;}
+  .activity-box ol,.activity-box ul{padding-left:20px;}
+  .activity-box ol li,.activity-box ul li{font-size:14px;line-height:1.7;margin-bottom:6px;color:var(--text);}
+  .pitch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin:16px 0;}
+  .pitch-card{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px;}
+  .pitch-num{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#D4A017,#FFD700);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;margin-bottom:10px;text-shadow:0 1px 3px rgba(0,0,0,.3);}
+  .pitch-title{font-size:14px;font-weight:700;color:var(--accent);margin-bottom:4px;}
+  .pitch-desc{font-size:13px;color:var(--text-muted);line-height:1.6;}
+  .scoring-table{width:100%;border-collapse:collapse;margin:16px 0;}
+  .scoring-table th{background:linear-gradient(135deg,#D4A017,#B7860D);color:white;padding:12px 14px;text-align:left;font-size:14px;font-weight:600;}
+  .scoring-table td{padding:11px 14px;font-size:14px;border-bottom:1px solid var(--border);}
+  .scoring-table tr:last-child td{border-bottom:none;}
+  .scoring-table tr:nth-child(even) td{background:var(--bg);}
+  .score-badge{display:inline-block;padding:3px 10px;border-radius:10px;font-size:12px;font-weight:700;}
+  .score-20{background:#D1FAE5;color:#065F46;}
+  .score-15{background:#DBEAFE;color:#1E40AF;}
+  .score-10{background:#FEF3C7;color:#92400E;}
+  [data-theme="dark"] .score-20{background:#064E3B;color:#6EE7B7;}
+  [data-theme="dark"] .score-15{background:#1E3A5F;color:#93C5FD;}
+  [data-theme="dark"] .score-10{background:#451A03;color:#FCD34D;}
+  .feedback-criteria{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0;}
+  .criteria-card{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .criteria-icon{font-size:24px;margin-bottom:6px;}
+  .criteria-title{font-size:13px;font-weight:700;color:var(--accent);margin-bottom:4px;}
+  .criteria-desc{font-size:12.5px;color:var(--text-muted);line-height:1.55;}
+  @media(max-width:500px){.feedback-criteria{grid-template-columns:1fr;}}
+  .trophy-box{background:linear-gradient(135deg,#D4A01720,#FFD70030);border:2px solid #D4A017;border-radius:16px;padding:24px;text-align:center;margin:16px 0;}
+  .trophy-icon{font-size:48px;margin-bottom:12px;}
+  .trophy-title{font-family:'Noto Serif Thai',serif;font-size:20px;font-weight:700;color:#D4A017;margin-bottom:6px;}
+  .trophy-desc{font-size:14px;color:var(--text-muted);line-height:1.7;}
+  .reflection-box{background:linear-gradient(135deg,#F0FDF4,#DCFCE7);border:1px solid #86EFAC;border-radius:12px;padding:20px;margin:16px 0;}
+  [data-theme="dark"] .reflection-box{background:linear-gradient(135deg,#0A1F0A,#14280E);border-color:#166534;}
+  .reflection-title{font-size:15px;font-weight:700;color:#15803D;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+  [data-theme="dark"] .reflection-title{color:#86EFAC;}
+  .reflection-q{background:var(--card-bg);border-radius:10px;padding:12px 14px;margin-bottom:10px;border:1px solid var(--border);font-size:14px;line-height:1.65;}
+  .worksheet{background:linear-gradient(135deg,#FFFBEB,#FEF3C7);border:2px dashed #D4A017;border-radius:12px;padding:20px;margin-top:8px;}
+  [data-theme="dark"] .worksheet{background:linear-gradient(135deg,#1A1500,#1E1A00);border-color:#D4A017;}
+  .worksheet-title{font-size:16px;font-weight:700;color:#92400E;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+  [data-theme="dark"] .worksheet-title{color:#FCD34D;}
+  .ws-question{background:var(--card-bg);border-radius:10px;padding:14px 16px;margin-bottom:10px;border:1px solid var(--border);}
+  .ws-q-label{font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
+  .ws-q-text{font-size:14px;font-weight:600;margin-bottom:10px;}
+  .ws-answer-box{background:var(--bg);border-radius:8px;border:1px dashed var(--border);min-height:80px;padding:10px;font-size:14px;width:100%;font-family:'Sarabun',sans-serif;color:var(--text);resize:vertical;}
+  .rating-row{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;}
+  .rating-btn{padding:6px 14px;border-radius:20px;border:2px solid var(--border);background:var(--bg);cursor:pointer;font-size:13px;font-family:'Sarabun',sans-serif;color:var(--text);transition:all .2s;}
+  .rating-btn.selected{border-color:var(--accent);background:var(--accent);color:white;}
+  .summary-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin:16px 0;}
+  .summary-card{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center;}
+  .summary-card-icon{font-size:32px;margin-bottom:8px;}
+  .summary-card-title{font-size:12px;font-weight:700;color:var(--text-muted);margin-bottom:4px;}
+  .summary-card-value{font-size:16px;font-weight:700;color:var(--accent);}
+  .done-section{text-align:center;padding:32px 0;}
+  .btn-done{background:linear-gradient(135deg,#D4A017,#B7860D);color:white;border:none;padding:16px 40px;border-radius:50px;font-size:16px;font-weight:700;font-family:'Sarabun',sans-serif;cursor:pointer;transition:all .25s;box-shadow:0 4px 20px rgba(212,160,23,.4);}
+  .btn-done:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(212,160,23,.5);}
+  .btn-done.done{background:linear-gradient(135deg,#10B981,#059669);}
+  .confetti-msg{font-size:14px;color:var(--text-muted);margin-top:10px;}
+  .nav-lessons{display:flex;justify-content:space-between;gap:12px;padding:24px 0;border-top:1px solid var(--border);}
+  .nav-btn{flex:1;padding:14px 20px;border-radius:12px;border:1px solid var(--border);background:var(--card-bg);text-decoration:none;color:var(--text);text-align:center;font-size:14px;font-weight:600;transition:all .2s;}
+  .nav-btn:hover{background:var(--accent);color:white;border-color:var(--accent);}
+  .nav-btn.prev{border-color:var(--accent);color:var(--accent);}
+  .tag{display:inline-block;padding:2px 10px;border-radius:10px;font-size:11px;font-weight:700;background:linear-gradient(135deg,#D4A017,#FFD700);color:white;margin-right:4px;}
+  .highlight-box{border-left:4px solid var(--accent);background:linear-gradient(135deg,#D4A01710,#FFD70010);border-radius:0 12px 12px 0;padding:14px 18px;margin:12px 0;}
+  .highlight-box p{font-size:14px;line-height:1.75;}
+  @media(max-width:600px){.container{padding:24px 16px;}.top-bar{padding:10px 16px;}.lesson-breadcrumb{display:none;}.pitch-grid{grid-template-columns:1fr;}}
+
+  /* ═══ ANIMATIONS ═══ */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(32px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50%       { transform: translateY(-10px); }
+  }
+  @keyframes floatSide {
+    0%, 100% { transform: translateX(0px) rotate(0deg); }
+    50%       { transform: translateX(-8px) rotate(5deg); }
+  }
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: 0.4; transform: scale(0.85); }
+  }
+  @keyframes gradientShift {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  @keyframes shimmerBar {
+    0%   { background-position: -200% center; }
+    100% { background-position: 200% center; }
+  }
+  @keyframes popIn {
+    0%   { opacity: 0; transform: scale(0.8) translateY(16px); }
+    70%  { transform: scale(1.04) translateY(-2px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  @keyframes sparkle {
+    0%, 100% { opacity: 0; transform: scale(0); }
+    50%       { opacity: 1; transform: scale(1); }
+  }
+  @keyframes slideInLeft {
+    from { opacity: 0; transform: translateX(-30px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  .anim-up   { opacity: 0; }
+  .anim-up.visible { animation: fadeInUp 0.55s ease both; opacity:1; }
+  .hero-icon { animation: float 3.5s ease-in-out infinite; filter: drop-shadow(0 6px 18px rgba(0,0,0,.15)); }
+  .step-num  { transition: transform 0.3s; }
+  .step-item:hover .step-num { transform: scale(1.15) rotate(-5deg); }
+  .section-card { transition: box-shadow 0.25s, transform 0.25s; }
+  .section-card:hover { transform: translateY(-3px); box-shadow: var(--shadow), 0 12px 40px rgba(0,0,0,.08); }
+  .concept-box { transition: transform 0.2s, box-shadow 0.2s; }
+  .concept-box:hover { transform: scale(1.01); }
+  .btn-done { transition: all 0.28s cubic-bezier(0.34,1.56,0.64,1) !important; }
+  .btn-done:hover { transform: translateY(-3px) scale(1.04) !important; }
+  /* Hero animated gradient */
+  .hero { background-size: 300% 300% !important; animation: gradientShift 8s ease infinite !important; }
+  /* Floating blobs in hero */
+  .hero-blob { position:absolute; border-radius:50%; background:rgba(255,255,255,.07); pointer-events:none; }
+  .blob-a { width:220px; height:220px; top:-60px; left:-60px; animation:float 6s ease-in-out infinite; }
+  .blob-b { width:160px; height:160px; bottom:-50px; right:-30px; animation:float 8s ease-in-out infinite reverse; }
+  /* sparkle dots */
+  .sp { position:absolute; width:5px; height:5px; border-radius:50%; background:rgba(255,255,255,.7); animation:pulse-dot 3s ease-in-out infinite; pointer-events:none; }
+  .sp1{top:15%;left:18%;animation-delay:0s;}
+  .sp2{top:65%;left:12%;animation-delay:.6s;}
+  .sp3{top:20%;right:18%;animation-delay:1.1s;}
+  .sp4{top:72%;right:14%;animation-delay:1.7s;}
+
+
+  /* ══════ ANIMATIONS & MOTION ══════ */
+  @keyframes fadeInUp   { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes fadeInLeft { from{opacity:0;transform:translateX(-24px)} to{opacity:1;transform:translateX(0)} }
+  @keyframes popIn      { 0%{opacity:0;transform:scale(.75)} 70%{transform:scale(1.05)} 100%{opacity:1;transform:scale(1)} }
+  @keyframes float      { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-11px)} }
+  @keyframes floatR     { 0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(-14px) rotate(6deg)} }
+  @keyframes gradientMove { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+  @keyframes pulseDot   { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.8)} }
+  @keyframes ripple     { 0%{transform:scale(1);opacity:.6} 100%{transform:scale(2.4);opacity:0} }
+  @keyframes shimmerLine{ 0%{background-position:-200% center} 100%{background-position:200% center} }
+  @keyframes spin       { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+  @keyframes wave {
+    0%,100% { transform: translateY(0); }
+    25%      { transform: translateY(-5px); }
+    75%      { transform: translateY(5px); }
+  }
+
+  /* Scroll reveal */
+  .reveal { opacity:0; transform:translateY(28px); transition: opacity .6s ease, transform .6s ease; }
+  .reveal.visible { opacity:1; transform:translateY(0); }
+  .reveal-left { opacity:0; transform:translateX(-28px); transition: opacity .55s ease, transform .55s ease; }
+  .reveal-left.visible { opacity:1; transform:translateX(0); }
+
+  /* Hero floating icon */
+  .hero-icon { animation: float 3.6s ease-in-out infinite; display:block;
+    filter: drop-shadow(0 8px 24px rgba(0,0,0,.2)); }
+
+  /* Hero blobs */
+  .h-blob { position:absolute; border-radius:50%; pointer-events:none; background:rgba(255,255,255,.09); }
+  .hb1 { width:260px;height:260px; top:-80px;left:-80px; animation:floatR 7s ease-in-out infinite; }
+  .hb2 { width:180px;height:180px; bottom:-55px;right:-40px; animation:floatR 9s ease-in-out infinite reverse; }
+  .hb3 { width:100px;height:100px; top:30%;left:12%; animation:float 5s ease-in-out infinite; opacity:.55; }
+  .hb4 { width:70px;height:70px;  top:18%;right:16%; animation:float 6.5s ease-in-out infinite reverse; opacity:.45; }
+
+  /* Sparkles in hero */
+  .hsp { position:absolute; border-radius:50%; background:rgba(255,255,255,.75); pointer-events:none; animation:pulseDot 3s ease-in-out infinite; }
+  .hsp:nth-child(1){width:7px;height:7px;top:15%;left:20%;animation-delay:0s;}
+  .hsp:nth-child(2){width:5px;height:5px;top:65%;left:10%;animation-delay:.6s;}
+  .hsp:nth-child(3){width:6px;height:6px;top:22%;right:20%;animation-delay:1.1s;}
+  .hsp:nth-child(4){width:4px;height:4px;top:72%;right:12%;animation-delay:1.8s;}
+  .hsp:nth-child(5){width:5px;height:5px;top:45%;left:45%;animation-delay:.9s;}
+
+  /* Animated hero gradient */
+  .hero { background-size:300% 300% !important; animation:gradientMove 9s ease infinite !important; overflow:hidden; }
+
+  /* Cards hover lift */
+  .section-card { transition:transform .25s ease,box-shadow .25s ease; }
+  .section-card:hover { transform:translateY(-4px); box-shadow:var(--shadow),0 16px 40px rgba(0,0,0,.1); }
+
+  /* Step item hover */
+  .step-item { transition:background .2s,transform .2s; }
+  .step-item:hover { background:var(--border); transform:translateX(4px); }
+  .step-num { transition:transform .3s; }
+  .step-item:hover .step-num { transform:scale(1.15) rotate(-6deg); }
+
+  /* Concept box hover */
+  .concept-box { transition:transform .2s,box-shadow .2s; cursor:default; }
+  .concept-box:hover { transform:scale(1.015); box-shadow:0 6px 24px rgba(0,0,0,.08); }
+
+  /* Done button spring */
+  .btn-done { transition:all .3s cubic-bezier(.34,1.56,.64,1) !important; }
+  .btn-done:hover { transform:translateY(-4px) scale(1.05) !important; }
+
+  /* Wave divider under hero */
+  .hero-wave { line-height:0; margin-top:-2px; }
+  .hero-wave svg { display:block; width:100%; }
+
+  /* Staggered section cards */
+  .section-card:nth-child(1){transition-delay:.05s}
+  .section-card:nth-child(2){transition-delay:.1s}
+  .section-card:nth-child(3){transition-delay:.15s}
+  .section-card:nth-child(4){transition-delay:.2s}
+
+  /* Ripple on btn-done click */
+  @keyframes btnRipple {
+    0%   {transform:scale(0);opacity:.6}
+    100% {transform:scale(4);opacity:0}
+  }
+  .btn-done .ripple-inner { position:absolute;border-radius:50%;background:rgba(255,255,255,.35);
+    width:80px;height:80px;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);
+    animation:btnRipple .6s ease forwards; pointer-events:none; }
+
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="top-bar">
+  <div class="top-bar-left">
+    <a href="index.html" class="btn-back">← กลับ</a>
+    <span class="lesson-breadcrumb">คอมพิวเตอร์ ม.3 › หน่วยที่ 2 › บทที่ 8</span>
+  </div>
+  <button class="btn-theme" onclick="toggleDark()">🌙 ธีม</button>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="h-blob hb1"></div><div class="h-blob hb2"></div>
+  <div class="h-blob hb3"></div><div class="h-blob hb4"></div>
+  <span class="hsp"></span><span class="hsp"></span><span class="hsp"></span>
+  <span class="hsp"></span><span class="hsp"></span>
+
+  <span class="hero-icon">🏆</span>
+  <div class="hero-badge">บทที่ 8 · หน่วยที่ 2</div>
+  <h1>Demo Day นำเสนอโมเดล AI</h1>
+  <div class="hero-en">AI Project Showcase Day</div>
+  <div class="hero-meta">
+    <span class="hero-chip">⏱ ชั่วโมงที่ 18–19</span>
+    <span class="hero-chip">📋 ใบงาน 8.1</span>
+    <span class="hero-chip">🎯 บทสุดท้าย</span>
+  </div>
+</div>
+<div class="hero-wave">
+  <svg viewBox="0 0 1440 56" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" style="height:56px;">
+    <path d="M0,28 C480,56 960,0 1440,28 L1440,56 L0,56 Z" fill="var(--bg)"/>
+  </svg>
+</div>
+
+<div class="container">
+
+  <!-- OBJECTIVES -->
+  <div class="section-card">
+    <div class="section-header">
+      <div class="section-icon">🎯</div>
+      <div>
+        <div class="section-title">จุดประสงค์การเรียนรู้</div>
+        <div class="section-subtitle">สิ่งที่นักเรียนจะได้เรียนรู้จากบทนี้</div>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="objective-grid">
+        <div class="obj-card">
+          <div class="obj-label obj-k">K · ความรู้</div>
+          <div class="obj-text">อธิบายกระบวนการสร้างโปรเจกต์ AI ตั้งแต่ต้นจนจบได้ — ตั้งแต่ไอเดีย เก็บข้อมูล เทรนโมเดล จนถึงนำเสนอ</div>
+        </div>
+        <div class="obj-card">
+          <div class="obj-label obj-p">P · ทักษะ</div>
+          <div class="obj-text">นำเสนอและสาธิตโมเดล AI ของกลุ่มต่อหน้าชั้นเรียนได้ และให้ Feedback เพื่อนได้อย่างสร้างสรรค์</div>
+        </div>
+        <div class="obj-card">
+          <div class="obj-label obj-a">A · เจตคติ</div>
+          <div class="obj-text">รับฟัง Feedback ด้วยใจเปิดกว้าง ยอมรับทั้งคำชมและคำวิจารณ์ มีน้ำใจนักกีฬา เคารพผลงานเพื่อน</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WHAT IS DEMO DAY -->
+  <div class="section-card">
+    <div class="section-header">
+      <div class="section-icon">💡</div>
+      <div>
+        <div class="section-title">Demo Day คืออะไร?</div>
+        <div class="section-subtitle">ทำความเข้าใจก่อนวันนำเสนอ</div>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="concept-box">
+        <h3>🏆 วันแห่งการแสดงผลงาน</h3>
+        <p>Demo Day คือวันที่ทุกกลุ่มนำโมเดล AI ที่ฝึกมาตลอดทั้งเทอมออกมา <strong>แสดงให้คนอื่นดูจริงๆ</strong> ไม่ใช่แค่ส่งงาน แต่ต้อง "พิสูจน์" ให้เห็นว่าโมเดลทำงานได้จริง แม่นแค่ไหน และมีประโยชน์อย่างไร</p>
+      </div>
+      <div class="concept-box">
+        <h3>🚀 ทำไม Demo Day ถึงสำคัญ?</h3>
+        <p>ในโลกจริงของวงการเทคโนโลยี นักพัฒนาซอฟต์แวร์และนักวิทยาศาสตร์ข้อมูลต้องนำเสนองานให้ผู้บริหารหรือลูกค้าเข้าใจเสมอ ไม่ใช่แค่โปรแกรมเมอร์เท่านั้นที่ต้องเข้าใจ <strong>ทุกคนต้องเข้าใจ</strong> การฝึกนำเสนอวันนี้จึงเป็นทักษะที่ใช้จริงในชีวิต</p>
+      </div>
+      <div class="highlight-box">
+        <p>💬 คำถามจากครู: <em>"ทำไมถึงเลือกโจทย์นี้? โมเดลของคุณมี Accuracy เท่าไหร่? และมันช่วยแก้ปัญหาอะไรได้จริงๆ?"</em> — เตรียมตอบคำถามเหล่านี้ให้พร้อม!</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOUR 18: PITCHING -->
+  <div class="section-card">
+    <div class="section-header">
+      <div class="section-icon">🎤</div>
+      <div>
+        <div class="section-title">ชั่วโมงที่ 18: นำเสนอและสาธิต</div>
+        <div class="section-subtitle">Pitching & Live Demo — แต่ละกลุ่มออกมาแสดง</div>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="concept-box">
+        <h3>📢 การ Pitch คืออะไร?</h3>
+        <p>Pitch = การนำเสนอไอเดียหรือผลงานให้คนอื่นเข้าใจใน <strong>เวลาสั้น</strong> แต่ครบถ้วน เหมือนรายการ Shark Tank ที่ผู้ประกอบการต้องอธิบายว่าสินค้าตัวเองดีอย่างไรใน 2 นาที การ Pitch ที่ดีต้องมี: ปัญหาที่แก้ + วิธีแก้ + หลักฐาน (โมเดลจริง)</p>
+      </div>
+
+      <p style="font-size:15px;font-weight:600;margin-bottom:12px;">📋 โครงสร้างการนำเสนอของแต่ละกลุ่ม (5–7 นาที)</p>
+      <div class="pitch-grid">
+        <div class="pitch-card">
+          <div class="pitch-num">1</div>
+          <div class="pitch-title">เกริ่นนำ — "เราทำอะไร?"</div>
+          <div class="pitch-desc">บอกชื่อโปรเจกต์ + ปัญหาที่เลือกแก้ + ว่าทำไมถึงเลือกโจทย์นี้ (30 วิ–1 นาที)</div>
+        </div>
+        <div class="pitch-card">
+          <div class="pitch-num">2</div>
+          <div class="pitch-title">อธิบายวิธีทำ — "เราทำอย่างไร?"</div>
+          <div class="pitch-desc">อธิบายสั้นๆ ว่าเก็บข้อมูลอย่างไร เทรนโมเดลด้วยอะไร (Teachable Machine) และข้อมูลที่ใช้มีอะไรบ้าง (1–2 นาที)</div>
+        </div>
+        <div class="pitch-card">
+          <div class="pitch-num">3</div>
+          <div class="pitch-title">สาธิตสด — Live Demo</div>
+          <div class="pitch-desc">เปิด Teachable Machine แล้ว Demo ให้ดูสด! ใส่ Input จริง แล้วแสดงว่า AI ทายถูกหรือไม่ บอก Accuracy ที่ได้ (2–3 นาที)</div>
+        </div>
+        <div class="pitch-card">
+          <div class="pitch-num">4</div>
+          <div class="pitch-title">สิ่งที่ได้เรียนรู้ — "เราเจออะไร?"</div>
+          <div class="pitch-desc">บอกสิ่งที่ยากที่สุด สิ่งที่ทำได้ดี และถ้าทำใหม่จะปรับอะไร — นี่คือส่วนสำคัญที่แสดงให้เห็นว่าเรียนรู้จริง (1 นาที)</div>
+        </div>
+        <div class="pitch-card">
+          <div class="pitch-num">5</div>
+          <div class="pitch-title">Q&amp;A — รับคำถาม</div>
+          <div class="pitch-desc">ตอบคำถามจากครูและเพื่อน ไม่ต้องกลัวถ้าไม่รู้ — การบอกว่า "ยังไม่รู้ แต่จะไปหาคำตอบ" ก็โอเค! (1 นาที)</div>
+        </div>
+        <div class="pitch-card">
+          <div class="pitch-num">6</div>
+          <div class="pitch-title">ขอบคุณ — Close Strong</div>
+          <div class="pitch-desc">ปิดด้วยการขอบคุณผู้ฟัง และบอกว่าถ้าจะพัฒนาต่อในอนาคต อยากทำอะไรเพิ่ม</div>
+        </div>
+      </div>
+
+      <div class="activity-box">
+        <div class="activity-title">🎯 เกณฑ์การให้คะแนน Demo Day</div>
+        <table class="scoring-table">
+          <tr>
+            <th>หัวข้อ</th>
+            <th>คะแนน</th>
+            <th>รายละเอียด</th>
+          </tr>
+          <tr>
+            <td>ความสมบูรณ์ของโมเดล</td>
+            <td><span class="score-badge score-20">20 คะแนน</span></td>
+            <td>โมเดลทำงานได้จริง มี Accuracy ≥ 70%</td>
+          </tr>
+          <tr>
+            <td>คุณภาพของ Dataset</td>
+            <td><span class="score-badge score-20">20 คะแนน</span></td>
+            <td>ข้อมูลหลากหลาย ≥ 50 ภาพต่อประเภท</td>
+          </tr>
+          <tr>
+            <td>การนำเสนอ</td>
+            <td><span class="score-badge score-15">15 คะแนน</span></td>
+            <td>ชัดเจน มีโครงสร้าง ตอบคำถามได้</td>
+          </tr>
+          <tr>
+            <td>Live Demo</td>
+            <td><span class="score-badge score-15">15 คะแนน</span></td>
+            <td>Demo สดสำเร็จ แสดง Output จริง</td>
+          </tr>
+          <tr>
+            <td>ความคิดสร้างสรรค์</td>
+            <td><span class="score-badge score-10">10 คะแนน</span></td>
+            <td>โจทย์น่าสนใจ มีประโยชน์จริง</td>
+          </tr>
+          <tr>
+            <td>การทำงานเป็นทีม</td>
+            <td><span class="score-badge score-10">10 คะแนน</span></td>
+            <td>ทุกคนมีส่วนร่วม ช่วยกันตอบคำถาม</td>
+          </tr>
+        </table>
+        <p style="font-size:13px;color:var(--text-muted);margin-top:8px;">รวม 90 คะแนน + 10 คะแนน Peer Feedback = 100 คะแนน</p>
+      </div>
+
+      <div class="qa-box">
+        <div class="qa-q">❓ ถ้าโมเดลของฉัน Demo แล้วทายผิดต่อหน้าชั้น ทำอย่างไร?</div>
+        <div class="qa-a"><span class="qa-label">ตอบ</span> ไม่เป็นไร! บอกตรงๆ ว่า "โมเดลยังมีข้อจำกัด เพราะ..." แล้วอธิบายว่าจะแก้อย่างไร — นี่แสดงให้เห็นว่าคุณเข้าใจปัญหาจริง ซึ่งสำคัญกว่าโมเดลที่สมบูรณ์แบบ 100% เสียอีก</div>
+      </div>
+
+      <div class="qa-box">
+        <div class="qa-q">❓ แต่ละกลุ่มต้องนำเสนอทุกคนเลยไหม?</div>
+        <div class="qa-a"><span class="qa-label">ตอบ</span> ขึ้นอยู่กับการแบ่งบทบาทของกลุ่ม แต่แนะนำให้ทุกคนได้พูดบางส่วน เพราะถ้าครูถามคำถามคนใดคนหนึ่ง ทุกคนในกลุ่มควรตอบได้ ดังนั้นทุกคนต้องรู้งานของกลุ่มตัวเองจริงๆ</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DEMO TIPS -->
+  <div class="section-card">
+    <div class="section-header">
+      <div class="section-icon">💡</div>
+      <div>
+        <div class="section-title">เคล็ดลับ Demo ให้ประทับใจ</div>
+        <div class="section-subtitle">เตรียมตัวให้พร้อมก่อนออกไปนำเสนอ</div>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="step-list">
+        <div class="step-item">
+          <div class="step-num">💻</div>
+          <div class="step-content">
+            <h4>เตรียมอุปกรณ์ให้พร้อม</h4>
+            <p>เปิด Teachable Machine ทิ้งไว้ก่อนขึ้นนำเสนอ ทดสอบกล้องว่าใช้งานได้ ถ้า Demo ด้วยภาพ ให้เตรียมภาพตัวอย่างหลายๆ ภาพไว้ล่วงหน้า อย่าเพิ่งเปิดครั้งแรกต่อหน้าคน</p>
+            <div class="tip">💡 ซ้อม Demo อย่างน้อย 3 ครั้งก่อนวันจริง เพื่อให้มั่นใจว่าทุกอย่างใช้งานได้จริง</div>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">📊</div>
+          <div class="step-content">
+            <h4>รู้ตัวเลขของตัวเอง</h4>
+            <p>จำ Accuracy ของโมเดลไว้ เช่น "โมเดลของเราได้ 84%" และเตรียมอธิบายว่าตัวเลขนี้หมายความว่าอะไร — ถูก 84 ครั้งจากทดสอบ 100 ครั้ง ถ้า Accuracy ต่ำ อธิบายสาเหตุและสิ่งที่จะแก้</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">🗣️</div>
+          <div class="step-content">
+            <h4>พูดให้คนที่ไม่รู้เรื่อง AI เข้าใจ</h4>
+            <p>จินตนาการว่ากำลังอธิบายให้ผู้ปกครองหรือน้องป.6 ฟัง — ใช้ภาษาง่ายๆ เช่น แทน "Training Dataset" ด้วย "ภาพที่ใช้สอน AI" หลีกเลี่ยงศัพท์เทคนิคโดยไม่อธิบาย</p>
+            <div class="tip">💡 ประโยคที่ดี: "เราสอน AI ด้วยภาพ 200 ภาพ แบ่งเป็น 2 กลุ่ม กลุ่มละ 100 ภาพ แล้ว AI เรียนรู้ว่าภาพแบบไหนคือกลุ่มไหน"</div>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">🤝</div>
+          <div class="step-content">
+            <h4>แบ่งบทบาทให้ชัดเจน</h4>
+            <p>ตัวอย่างการแบ่ง: คนที่ 1 = เกริ่นนำ + อธิบายโปรเจกต์, คนที่ 2 = Demo สด + แสดง Accuracy, คนที่ 3 = อธิบายข้อมูลและสิ่งที่เรียนรู้, ทุกคน = ตอบ Q&amp;A ร่วมกัน</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOUR 19: PEER FEEDBACK -->
+  <div class="section-card">
+    <div class="section-header">
+      <div class="section-icon">🔄</div>
+      <div>
+        <div class="section-title">ชั่วโมงที่ 19: Peer Feedback และสรุป</div>
+        <div class="section-subtitle">ให้ Feedback เพื่อน + โหวต Most Creative AI</div>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="concept-box">
+        <h3>📝 Peer Feedback คืออะไร?</h3>
+        <p>Peer Feedback = การให้ข้อเสนอแนะจากเพื่อนสู่เพื่อน ไม่ใช่การ "วิจารณ์" แต่เป็นการ <strong>"ช่วยกันพัฒนา"</strong> Feedback ที่ดีต้องพูดถึงทั้งสิ่งที่ดีและสิ่งที่ปรับปรุงได้ ไม่ใช่แค่บอกว่า "ดีมาก" หรือ "แย่มาก"</p>
+      </div>
+
+      <p style="font-size:15px;font-weight:600;margin:16px 0 10px;">🌟 Feedback ที่ดี vs ไม่ดี</p>
+      <div class="feedback-criteria">
+        <div class="criteria-card" style="border-left:3px solid #16A34A;">
+          <div class="criteria-icon">✅</div>
+          <div class="criteria-title">Feedback ที่ดี (Constructive)</div>
+          <div class="criteria-desc">"โมเดลของกลุ่มนี้แม่นมาก แต่ถ้าเพิ่มภาพในมุมต่างๆ อีก น่าจะแม่นขึ้นอีก"</div>
+        </div>
+        <div class="criteria-card" style="border-left:3px solid #16A34A;">
+          <div class="criteria-icon">✅</div>
+          <div class="criteria-title">ชมอย่างมีเหตุผล</div>
+          <div class="criteria-desc">"ชอบที่เลือกโจทย์ AI แยกขยะ เพราะมีประโยชน์จริงๆ และนำไปใช้ที่บ้านได้เลย"</div>
+        </div>
+        <div class="criteria-card" style="border-left:3px solid #DC2626;">
+          <div class="criteria-icon">❌</div>
+          <div class="criteria-title">Feedback ที่ควรหลีกเลี่ยง</div>
+          <div class="criteria-desc">"กลุ่มนี้แย่มาก โมเดลมั่ว ทำไม่ดีเลย" — ไม่ระบุสาเหตุ ไม่ช่วยให้พัฒนาได้</div>
+        </div>
+        <div class="criteria-card" style="border-left:3px solid #DC2626;">
+          <div class="criteria-icon">❌</div>
+          <div class="criteria-title">ชมแบบไม่มีเหตุผล</div>
+          <div class="criteria-desc">"ดีมากๆๆๆ เลย" — ไม่มีประโยชน์ เพราะไม่บอกว่าดีตรงไหน ทำให้พัฒนาต่อไม่ได้</div>
+        </div>
+      </div>
+
+      <div class="activity-box">
+        <div class="activity-title">🏆 รางวัล "Most Creative AI" — โหวตประจำห้อง</div>
+        <ul>
+          <li>หลังฟังทุกกลุ่มนำเสนอแล้ว แต่ละคนโหวตให้กลุ่มที่ <strong>ไม่ใช่กลุ่มตัวเอง</strong> ที่คิดว่าสร้างสรรค์ที่สุดหรือมีประโยชน์ที่สุด</li>
+          <li>เกณฑ์โหวต: ไม่ใช่แค่โมเดลแม่น แต่ดูด้วยว่าโจทย์น่าสนใจไหม ใช้แก้ปัญหาจริงในชีวิตได้ไหม</li>
+          <li>กลุ่มที่ได้โหวตสูงสุดรับรางวัล "Most Creative AI" ของห้อง 🏆</li>
+          <li>ถ้าคะแนนเท่ากัน ครูจะถามคำถามเพิ่มเติม กลุ่มที่ตอบได้ดีกว่าจะชนะ</li>
+        </ul>
+      </div>
+
+      <div class="reflection-box">
+        <div class="reflection-title">🤔 คำถามสรุปจากครู</div>
+        <div class="reflection-q">📌 "วันนี้นักเรียนได้เรียนรู้อะไรจากการดูผลงานเพื่อน? มีกลุ่มไหนที่ทำในสิ่งที่เราไม่เคยคิดถึง แล้วรู้สึกอย่างไร?"</div>
+        <div class="reflection-q">📌 "ถ้าต้องทำโปรเจกต์ AI อีกครั้ง จะเปลี่ยนอะไร? เรียนรู้อะไรจากโปรเจกต์นี้มากที่สุด?"</div>
+        <div class="reflection-q">📌 "AI ที่เราสร้างมีจุดอ่อนอะไร? ถ้าจะให้แม่นขึ้น 10% ต้องปรับอะไร?"</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COURSE SUMMARY -->
+  <div class="section-card">
+    <div class="section-header">
+      <div class="section-icon">📊</div>
+      <div>
+        <div class="section-title">สรุปสิ่งที่เรียนมาทั้งหมด</div>
+        <div class="section-subtitle">จากบทที่ 1 ถึง 8 — เราผ่านอะไรมาบ้าง?</div>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="summary-grid">
+        <div class="summary-card">
+          <div class="summary-card-icon">🤖</div>
+          <div class="summary-card-title">บทที่ 1</div>
+          <div class="summary-card-value">AI คืออะไร</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-card-icon">📊</div>
+          <div class="summary-card-title">บทที่ 2</div>
+          <div class="summary-card-value">ข้อมูลดี vs แย่</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-card-icon">🖼️</div>
+          <div class="summary-card-title">บทที่ 3</div>
+          <div class="summary-card-value">Image Classification</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-card-icon">🧘</div>
+          <div class="summary-card-title">บทที่ 4</div>
+          <div class="summary-card-value">Pose Detection</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-card-icon">⚖️</div>
+          <div class="summary-card-title">บทที่ 5</div>
+          <div class="summary-card-value">Data Bias</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-card-icon">📜</div>
+          <div class="summary-card-title">บทที่ 6</div>
+          <div class="summary-card-value">จริยธรรม &amp; PDPA</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-card-icon">💾</div>
+          <div class="summary-card-title">บทที่ 7</div>
+          <div class="summary-card-value">AI Project Dataset</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-card-icon">🏆</div>
+          <div class="summary-card-title">บทที่ 8</div>
+          <div class="summary-card-value">Demo Day!</div>
+        </div>
+      </div>
+      <div class="trophy-box">
+        <div class="trophy-icon">🎓</div>
+        <div class="trophy-title">ยินดีด้วย! คุณเรียนจบหลักสูตร AI เบื้องต้นแล้ว</div>
+        <div class="trophy-desc">ตลอด 19 ชั่วโมงที่ผ่านมา คุณได้เรียนรู้ว่า AI คืออะไร ทำงานอย่างไร มีความลำเอียงได้อย่างไร และต้องใช้อย่างรับผิดชอบ ที่สำคัญที่สุด คุณได้ <strong>สร้าง AI ของตัวเองจริงๆ</strong> สิ่งที่คุณทำมันไม่ใช่แค่การบ้าน — มันคือทักษะแห่งอนาคต</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WORKSHEET 8.1 -->
+  <div class="section-card">
+    <div class="section-header">
+      <div class="section-icon">📝</div>
+      <div>
+        <div class="section-title">ใบงาน 8.1 — Peer Feedback Form</div>
+        <div class="section-subtitle">ให้ Feedback กลุ่มที่คุณประทับใจที่สุด</div>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="worksheet">
+        <div class="worksheet-title">📋 ใบงาน 8.1 : Peer Feedback (Demo Day)</div>
+
+        <div class="ws-question">
+          <div class="ws-q-label">ข้อที่ 1</div>
+          <div class="ws-q-text">กลุ่มที่คุณชื่นชอบมากที่สุด คือกลุ่มอะไร? และเพราะอะไร?</div>
+          <textarea class="ws-answer-box" placeholder="เขียนคำตอบที่นี่..."></textarea>
+        </div>
+
+        <div class="ws-question">
+          <div class="ws-q-label">ข้อที่ 2</div>
+          <div class="ws-q-text">คุณเห็นจุดอ่อนหรือสิ่งที่ควรพัฒนาของกลุ่มไหน? และแนะนำอะไรให้พวกเขา?</div>
+          <textarea class="ws-answer-box" placeholder="เขียนคำตอบที่นี่..."></textarea>
+        </div>
+
+        <div class="ws-question">
+          <div class="ws-q-label">ข้อที่ 3</div>
+          <div class="ws-q-text">วันนี้คุณได้เรียนรู้อะไรใหม่จากการดูผลงานเพื่อน? (อย่างน้อย 2 สิ่ง)</div>
+          <textarea class="ws-answer-box" placeholder="เขียนคำตอบที่นี่..."></textarea>
+        </div>
+
+        <div class="ws-question">
+          <div class="ws-q-label">โบนัส</div>
+          <div class="ws-q-text">กลุ่มที่คุณโหวตให้รางวัล "Most Creative AI" คือกลุ่มไหน? และเพราะอะไร?</div>
+          <textarea class="ws-answer-box" style="min-height:60px;" placeholder="เขียนคำตอบที่นี่..."></textarea>
+        </div>
+
+        <div class="ws-question">
+          <div class="ws-q-label">สะท้อนคิด</div>
+          <div class="ws-q-text">ให้คะแนนตัวเองในโปรเจกต์ครั้งนี้ (1–5 ดาว) และอธิบายเหตุผล</div>
+          <div style="margin-bottom:10px;">
+            <div class="rating-row">
+              <button class="rating-btn" onclick="selectRating(this, 1)">⭐ 1</button>
+              <button class="rating-btn" onclick="selectRating(this, 2)">⭐⭐ 2</button>
+              <button class="rating-btn" onclick="selectRating(this, 3)">⭐⭐⭐ 3</button>
+              <button class="rating-btn" onclick="selectRating(this, 4)">⭐⭐⭐⭐ 4</button>
+              <button class="rating-btn" onclick="selectRating(this, 5)">⭐⭐⭐⭐⭐ 5</button>
+            </div>
+          </div>
+          <textarea class="ws-answer-box" style="min-height:60px;" placeholder="อธิบายว่าทำไมถึงให้คะแนนตัวเองเท่านี้..."></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DONE -->
+  <div class="done-section">
+    <button class="btn-done" id="btn-done" onclick="markDone()">🏆 จบหลักสูตรแล้ว! กดบันทึก</button>
+    <p class="confetti-msg" id="done-msg" style="display:none;">🎉 ยินดีด้วย! คุณเรียนครบ 8 บทแล้ว กลับไปดูความคืบหน้าที่หน้าหลักได้เลย</p>
+  </div>
+
+  <!-- NAV -->
+  <div class="nav-lessons">
+    <a href="lesson7.html" class="nav-btn prev">← บทที่ 7: AI Project Dataset</a>
+    <a href="index.html" class="nav-btn next">🏠 กลับหน้าหลัก →</a>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  if(localStorage.getItem('theme-m3')==='dark')
+    document.documentElement.setAttribute('data-theme','dark');
+  if(localStorage.getItem('done-lesson8')){
+    var b=document.getElementById('btn-done');
+    b.textContent='✅ เรียนจบแล้ว!';
+    b.classList.add('done');
+    document.getElementById('done-msg').style.display='block';
+  }
+})();
+
+function toggleDark(){
+  var isDark=document.documentElement.getAttribute('data-theme')==='dark';
+  document.documentElement.setAttribute('data-theme',isDark?'':'dark');
+  localStorage.setItem('theme-m3',isDark?'':'dark');
+}
+
+function markDone(){
+  localStorage.setItem('done-lesson8','1');
+  var b=document.getElementById('btn-done');
+  b.textContent='🎉 บันทึกแล้ว! ยินดีด้วย!';
+  b.classList.add('done');
+  document.getElementById('done-msg').style.display='block';
+}
+
+function selectRating(el, val){
+  document.querySelectorAll('.rating-btn').forEach(function(b){ b.classList.remove('selected'); });
+  el.classList.add('selected');
+}
+
+  // Scroll-triggered animations
+  const _obs = new IntersectionObserver((entries) => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('visible'), i * 90);
+        _obs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.section-card, .concept-box, .step-item, .qa-box, .activity-box, .worksheet').forEach(el => {
+    el.classList.add('anim-up');
+    _obs.observe(el);
+  });
+</script>
+</body>
+</html>

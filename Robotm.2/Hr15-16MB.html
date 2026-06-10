@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>หุ่นยนต์ ม.2 | Hr 15-16: เข็มทิศ Compass</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Noto+Serif+Thai:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root { --bg-dark: #0f172a; --surface-dark: #1e293b; --cyber-blue: #0ea5e9; --neon-green: #10b981; --neon-orange: #f59e0b; --neon-pink: #ec4899; --neon-purple: #a855f7; --neon-cyan: #06b6d4; --text-main: #f8fafc; --text-muted: #94a3b8; --border-line: #334155; }
+        body { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 100%); color: var(--text-main); font-family: 'Sarabun', sans-serif; padding: 20px; margin: 0; overflow-x: hidden; }
+        body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px); background-size: 30px 30px; z-index: -1; }
+        .lesson-container { width: 100%; max-width: 1100px; background: var(--surface-dark); border-radius: 24px; box-shadow: 0 0 40px rgba(0,0,0,0.5), 0 0 15px var(--cyber-blue); overflow: hidden; border: 1px solid var(--border-line); display: flex; flex-direction: column; min-height: 80vh; }
+        .lesson-header { background: rgba(15,23,42,0.9); padding: 20px 30px; border-bottom: 1px solid var(--cyber-blue); display: flex; justify-content: space-between; align-items: center; }
+        .progress-track { height: 5px; background: var(--border-line); width: 100%; display: none; }
+        #progress-bar { height: 100%; background: var(--cyber-blue); width: 0%; box-shadow: 0 0 10px var(--cyber-blue); transition: width 0.6s ease; }
+        .lesson-body { padding: 40px; position: relative; flex-grow: 1; display: flex; flex-direction: column; }
+        .step { display: none; animation: glitchFadeIn 0.5s ease-out forwards; flex-grow: 1; }
+        .step.active { display: block; }
+        @keyframes glitchFadeIn { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 1; transform: translateY(0); } }
+        h3 { color: var(--cyber-blue); font-family: 'Noto Serif Thai', serif; font-size: 28px; margin-top: 0; text-shadow: 0 0 10px rgba(14,165,233,0.4); border-bottom: 1px dashed var(--border-line); padding-bottom: 15px; }
+        p, li { line-height: 1.8; font-size: 17px; color: #cbd5e1; }
+        .btn { padding: 14px 28px; border: none; border-radius: 10px; font-family: 'Sarabun'; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.3s; display: inline-flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-primary { background: var(--cyber-blue); color: white; box-shadow: 0 4px 15px rgba(14,165,233,0.4); }
+        .btn-primary:hover { transform: translateY(-3px); background: #0284c7; }
+        .btn-outline { background: transparent; color: var(--text-muted); border: 1px solid var(--border-line); }
+        .btn-outline:hover { color: white; border-color: white; }
+        .footer-nav { padding: 25px 40px; background: rgba(15,23,42,0.95); border-top: 1px solid var(--border-line); display: none; justify-content: space-between; align-items: center; margin-top: auto; }
+        .grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-top: 20px; }
+        .info-card { background: rgba(0,0,0,0.2); border: 1px solid var(--border-line); border-radius: 15px; padding: 20px; }
+        .quiz-option { background: rgba(255,255,255,0.05); border: 2px solid var(--border-line); padding: 15px 20px; border-radius: 12px; margin-bottom: 15px; cursor: pointer; transition: 0.2s; font-size: 16px; color: var(--text-main); text-align: left; width: 100%; }
+        .quiz-option:hover { background: rgba(14,165,233,0.1); border-color: var(--cyber-blue); }
+        .quiz-option.correct { background: rgba(16,185,129,0.2); border-color: var(--neon-green); color: var(--neon-green); font-weight: bold; }
+        .quiz-option.wrong { background: rgba(239,68,68,0.2); border-color: #ef4444; color: #ef4444; }
+        .code-box { background: rgba(0,0,0,0.5); padding: 15px; border-radius: 10px; color: #cbd5e1; font-size: 14px; font-family: 'Courier New', monospace; white-space: pre-wrap; overflow-x: auto; line-height: 1.6; border-left: 4px solid var(--cyber-blue); }
+
+        /* Compass rose interactive */
+        .compass {
+            width: 240px; height: 240px; border-radius: 50%;
+            background: radial-gradient(circle, #1e293b, #0f172a);
+            border: 3px solid var(--cyber-blue); margin: 20px auto;
+            position: relative; box-shadow: 0 0 30px rgba(14,165,233,0.3);
+        }
+        .compass-needle {
+            position: absolute; top: 50%; left: 50%;
+            width: 4px; height: 100px; background: linear-gradient(180deg, #ef4444 0%, #ef4444 50%, white 50%, white 100%);
+            transform-origin: 50% 0%;
+            transform: translate(-50%, 0) rotate(0deg);
+            transition: transform 0.3s ease;
+            box-shadow: 0 0 10px rgba(239,68,68,0.5);
+        }
+        .compass-label {
+            position: absolute; color: white; font-weight: bold; font-size: 18px;
+        }
+        .label-N { top: 8px; left: 50%; transform: translateX(-50%); color: #ef4444; }
+        .label-S { bottom: 8px; left: 50%; transform: translateX(-50%); }
+        .label-E { right: 8px; top: 50%; transform: translateY(-50%); }
+        .label-W { left: 8px; top: 50%; transform: translateY(-50%); }
+        .compass-center { position: absolute; top: 50%; left: 50%; width: 12px; height: 12px; background: var(--cyber-blue); border-radius: 50%; transform: translate(-50%, -50%); box-shadow: 0 0 10px var(--cyber-blue); }
+
+        .tag { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: bold; margin-right: 8px; }
+        .tag-mb { background: rgba(6,182,212,0.2); color: var(--neon-cyan); border: 1px solid var(--neon-cyan); }
+        .tag-time { background: rgba(245,158,11,0.2); color: var(--neon-orange); border: 1px solid var(--neon-orange); }
+        @media (max-width: 900px) { .lesson-body { padding: 20px; } .grid-2col { grid-template-columns: 1fr !important; } }
+    </style>
+</head>
+<body>
+
+<div class="lesson-container">
+    <div class="lesson-header">
+        <h2 style="margin: 0; font-size: 20px; letter-spacing: 1px; color: var(--text-main);">🧭 ROBOTICS M.2 | Hr 15-16</h2>
+        <div id="header-guest-info" style="display: none; align-items: center; gap: 12px;">
+            <span style="background: rgba(14,165,233,0.15); color: var(--cyber-blue); padding: 6px 18px; border-radius: 20px; font-size: 14px; font-weight: bold; border: 1px solid var(--cyber-blue);" id="display-header-name">Student</span>
+            <button class="btn btn-outline" style="padding: 6px 15px; font-size: 12px;" onclick="location.reload()">EXIT</button>
+        </div>
+    </div>
+
+    <div class="progress-track" id="progress-container"><div id="progress-bar"></div></div>
+
+    <div class="lesson-body">
+
+        <div class="step active" id="step-0">
+            <div style="text-align: center; padding: 50px 20px;">
+                <div style="font-size: 80px; margin-bottom: 20px; filter: drop-shadow(0 0 15px var(--cyber-blue));">🧭</div>
+                <h2 style="color: white; font-size: 32px; margin-bottom: 10px;">หุ่นยนต์ ม.2 | ชั่วโมงที่ 15-16</h2>
+                <p style="color: var(--cyber-blue); font-size: 20px; margin-bottom: 5px; font-weight: bold;">เข็มทิศดิจิทัล (Compass)</p>
+                <p style="color: var(--text-muted); font-size: 16px; margin-bottom: 30px;">เซ็นเซอร์แม่เหล็กในตัวบอร์ด</p>
+                <p style="color: var(--text-muted); font-size: 16px; margin-bottom: 20px;">📝 กรุณาลงชื่อเข้าเรียน</p>
+                <input type="text" id="guest-name-input" placeholder="ชื่อ-นามสกุล เลขที่ ห้อง" style="width:100%; max-width:500px; padding:15px 20px; background:rgba(0,0,0,0.3); border:2px solid var(--cyber-blue); border-radius:12px; color:white; font-size:18px; text-align:center; outline:none;" onkeypress="if(event.key === 'Enter') startLesson()">
+                <div style="margin-top: 35px;">
+                    <button class="btn btn-primary" style="padding: 16px 50px; font-size: 18px;" onclick="startLesson()">🚀 เริ่มเรียน</button>
+                </div>
+                <div style="margin-top: 30px;"><span class="tag tag-mb">micro:bit</span><span class="tag tag-time">2 ชั่วโมง</span></div>
+            </div>
+        </div>
+
+        <div class="step" id="step-1">
+            <h3>🎯 ด่านที่ 1: เข็มทิศใน micro:bit คืออะไร?</h3>
+            <p>สวัสดี <b class="student-name-inject" style="color: var(--neon-green);"></b>! สัปดาห์นี้เราจะใช้ <b>เข็มทิศดิจิทัล</b> หาทิศเหนือเหมือนนักสำรวจสมัยก่อน — แต่ใช้ชิปจิ๋วแทน!</p>
+
+            <div style="background: rgba(14,165,233,0.1); border: 2px solid var(--cyber-blue); padding: 25px; border-radius: 15px; margin-top: 20px;">
+                <h4 style="color: var(--cyber-blue); margin-top: 0;">🧲 Magnetometer (เซ็นเซอร์แม่เหล็ก)</h4>
+                <p>ชิปที่อยู่หลังบอร์ด ทำหน้าที่วัด <b>สนามแม่เหล็กของโลก</b> เพื่อหาทิศเหนือ</p>
+                <ul style="padding-left: 20px;">
+                    <li>วัด <b>มุม 0-359 องศา</b> เทียบกับทิศเหนือ</li>
+                    <li>0° = หันหน้าไปทางทิศเหนือ</li>
+                    <li>90° = ทิศตะวันออก, 180° = ทิศใต้, 270° = ทิศตะวันตก</li>
+                </ul>
+            </div>
+
+            <div style="background: rgba(245,158,11,0.1); border-left: 4px solid var(--neon-orange); padding: 15px; border-radius: 10px; margin-top: 20px;">
+                <b style="color: var(--neon-orange);">⚠️ ต้อง Calibrate ก่อนใช้!</b>
+                <p style="margin: 5px 0 0 0;">ครั้งแรกที่เรียกใช้เข็มทิศ บอร์ดจะขอให้คุณ <b>"เอียงให้ครบทุกทิศ"</b> เพื่อปรับค่าก่อน — ทำตามทีเดียวพอ ใช้ตลอดทั้ง session</p>
+            </div>
+        </div>
+
+        <div class="step" id="step-2">
+            <h3>🔧 ด่านที่ 2: Calibrate (ปรับเทียบ) เข็มทิศ</h3>
+            <p>การ Calibrate คือการ "สอน" เข็มทิศให้รู้จักสนามแม่เหล็กของพื้นที่ที่เราอยู่</p>
+
+            <div style="background: rgba(0,0,0,0.4); padding: 25px; border-radius: 15px; margin-top: 15px;">
+                <h4 style="color: var(--neon-pink); margin-top: 0;">📋 ขั้นตอน Calibrate</h4>
+                <ol style="line-height: 2; padding-left: 20px;">
+                    <li>เปิดบอร์ดและรันโปรแกรมที่เรียก <code>compass heading</code></li>
+                    <li>จอจะแสดงข้อความ <b>"TILT TO FILL SCREEN"</b></li>
+                    <li><b>เอียงบอร์ด</b> ให้จุด LED แต่ละดวงค่อย ๆ เปิดขึ้น (ทำเป็นวงกลม)</li>
+                    <li>เมื่อไฟครบทั้ง 25 ดวง → จอแสดง <b>หน้ายิ้ม</b> = พร้อมใช้!</li>
+                </ol>
+            </div>
+
+            <h4 style="color: var(--cyber-blue); margin-top: 25px;">📚 บล็อก calibrate compass</h4>
+            <div class="code-box">on start:
+    calibrate compass     // เรียกครั้งเดียวตอนเริ่ม</div>
+
+            <div style="background: rgba(168,85,247,0.1); border-left: 4px solid var(--neon-purple); padding: 15px; border-radius: 10px; margin-top: 20px;">
+                <b style="color: var(--neon-purple);">💡 เกร็ดความรู้:</b>
+                <p style="margin: 5px 0 0 0;">ถ้าใกล้สิ่งของเหล็ก/แม่เหล็ก/มือถือ — เข็มทิศจะเพี้ยน! ทดสอบในที่โล่ง</p>
+            </div>
+        </div>
+
+        <div class="step" id="step-3">
+            <h3>📐 ด่านที่ 3: ลองอ่านค่ามุม</h3>
+            <p>บล็อก <b>compass heading (°)</b> คืนค่ามุมเป็นองศา <b>0-359</b></p>
+
+            <div style="text-align: center;">
+                <div class="compass" id="compass">
+                    <div class="compass-label label-N">N</div>
+                    <div class="compass-label label-E">E</div>
+                    <div class="compass-label label-S">S</div>
+                    <div class="compass-label label-W">W</div>
+                    <div class="compass-needle" id="needle"></div>
+                    <div class="compass-center"></div>
+                </div>
+                <p style="color: var(--cyber-blue); font-size: 22px; font-weight: bold;" id="heading-text">0°</p>
+                <input type="range" min="0" max="359" value="0" style="width: 80%; max-width: 300px;" oninput="rotateNeedle(this.value)">
+                <p style="color: var(--text-muted); font-size: 13px;">🎮 ลากเพื่อหมุน — ดูค่ามุม</p>
+            </div>
+
+            <h4 style="color: var(--cyber-blue); margin-top: 25px;">📚 ตัวอย่าง: แสดงมุมเมื่อกดปุ่ม A</h4>
+            <div class="code-box">on button A pressed:
+    show number (compass heading)</div>
+        </div>
+
+        <div class="step" id="step-4">
+            <h3>🎯 ด่านที่ 4: ลูกศรนำทาง 4 ทิศ</h3>
+            <p>เทคนิคที่ใช้บ่อยที่สุด — แปลงมุมเป็น <b>ทิศหลัก 4 ทิศ (N E S W)</b> แล้วแสดงลูกศร</p>
+
+            <h4 style="color: var(--cyber-blue);">📚 โค้ดเต็ม</h4>
+            <div class="code-box">on start:
+    calibrate compass
+
+forever:
+    set h to (compass heading)
+
+    if (h &lt; 45 or h &gt; 315):
+        show arrow North       // ทิศเหนือ
+    else if (h &lt; 135):
+        show arrow East        // ทิศตะวันออก
+    else if (h &lt; 225):
+        show arrow South       // ทิศใต้
+    else:
+        show arrow West        // ทิศตะวันตก</div>
+
+            <div style="background: rgba(16,185,129,0.1); border-left: 4px solid var(--neon-green); padding: 18px; border-radius: 10px; margin-top: 20px;">
+                <b style="color: var(--neon-green);">🧠 วิเคราะห์ช่วงมุม:</b>
+                <ul style="margin: 10px 0 0 20px;">
+                    <li><b>เหนือ (N):</b> 315° → 0° → 45° (เป็นช่วงข้าม 0)</li>
+                    <li><b>ตะวันออก (E):</b> 45° → 135°</li>
+                    <li><b>ใต้ (S):</b> 135° → 225°</li>
+                    <li><b>ตะวันตก (W):</b> 225° → 315°</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="step" id="step-5">
+            <h3>📝 ด่านที่ 5: ใบงานที่ 7 — เข็มทิศของฉัน</h3>
+
+            <div style="background: rgba(14,165,233,0.08); border: 2px solid var(--cyber-blue); padding: 30px; border-radius: 20px;">
+                <h4 style="color: white; margin-top: 0; font-size: 22px;">🎯 เลือก 1 โปรเจกต์</h4>
+
+                <div class="grid-2col" style="grid-template-columns: 1fr 1fr 1fr;">
+                    <div class="info-card" style="border-color: var(--cyber-blue); text-align: center;">
+                        <div style="font-size: 40px;">➡️</div>
+                        <h4 style="color: var(--cyber-blue); margin: 5px 0;">A: ลูกศรนำทาง</h4>
+                        <p style="font-size: 13px;">แสดงลูกศร 4 ทิศ<br>⭐⭐⭐</p>
+                    </div>
+                    <div class="info-card" style="border-color: var(--neon-purple); text-align: center;">
+                        <div style="font-size: 40px;">🏴</div>
+                        <h4 style="color: var(--neon-purple); margin: 5px 0;">B: ตามล่าหาธง</h4>
+                        <p style="font-size: 13px;">บอกว่าหันถูกหรือผิดทิศ<br>⭐⭐⭐⭐</p>
+                    </div>
+                    <div class="info-card" style="border-color: var(--neon-pink); text-align: center;">
+                        <div style="font-size: 40px;">🧭</div>
+                        <h4 style="color: var(--neon-pink); margin: 5px 0;">C: แสดงตัวอักษร</h4>
+                        <p style="font-size: 13px;">"N", "E", "S", "W"<br>⭐⭐⭐</p>
+                    </div>
+                </div>
+
+                <div style="background: rgba(0,0,0,0.4); padding: 20px; border-radius: 12px; margin-top: 20px;">
+                    <b style="color: var(--cyber-blue);">✅ ต้องมีในโปรแกรม:</b>
+                    <ol style="margin-top: 10px; line-height: 2;">
+                        <li>เรียก <b>calibrate compass</b> ใน on start</li>
+                        <li>ใช้ <b>compass heading</b> อ่านมุม</li>
+                        <li>ใช้ <b>if-else if</b> แยกช่วงมุม 4 ทิศ</li>
+                        <li>แสดงผลบนจอ LED (ลูกศรหรือตัวอักษร)</li>
+                    </ol>
+                </div>
+
+                <div style="background: rgba(6,182,212,0.1); border-left: 4px solid var(--neon-cyan); padding: 18px; border-radius: 10px; margin-top: 20px;">
+                    <b style="color: var(--neon-cyan);">📤 ส่งงาน:</b> ลิงก์ Share + วิดีโอ <b>หมุนบอร์ด</b> ให้เห็นลูกศรเปลี่ยน → ใบงาน "เข็มทิศของฉัน"
+                </div>
+
+                <div style="background: rgba(236,72,153,0.1); border-left: 4px solid var(--neon-pink); padding: 15px; border-radius: 10px; margin-top: 15px;">
+                    <b style="color: var(--neon-pink);">🌟 โบนัส (+2 คะแนน):</b> ทำ <b>8 ทิศ</b> (เพิ่ม NE, SE, SW, NW) แทน 4 ทิศ
+                </div>
+            </div>
+        </div>
+
+        <div class="step" id="step-6">
+            <h3>🎮 ด่านที่ 6: แบบทดสอบ (5 ข้อ)</h3>
+            <p>สุ่ม + สลับ <b style="color: var(--neon-orange);">กันลอก!</b></p>
+
+            <div id="game-area" style="background: rgba(0,0,0,0.2); border: 2px solid var(--cyber-blue); border-radius: 20px; padding: 30px; text-align: center; max-width: 750px; margin: 0 auto;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 20px; font-weight: bold; color: var(--cyber-blue);">
+                    <span id="question-counter">คำถาม: 1 / 5</span>
+                    <span id="score-counter">คะแนน: 0</span>
+                </div>
+                <h4 id="question-text" style="font-size: 22px; color: white; margin-bottom: 30px; line-height: 1.5;">กำลังโหลด...</h4>
+                <div id="options-grid" style="display: flex; flex-direction: column; gap: 12px;"></div>
+            </div>
+
+            <div id="game-result" style="display: none; text-align: center; padding: 40px; background: rgba(0,0,0,0.2); border-radius: 20px; border: 2px solid var(--neon-green);">
+                <div style="font-size: 70px;">🏆</div>
+                <h3 style="border: none; text-shadow: none; font-size: 32px; color: var(--neon-green);">จบชั่วโมงที่ 15-16!</h3>
+                <p style="font-size: 20px; color: white;">นักเรียน: <span class="student-name-inject" style="color:var(--cyber-blue);"></span></p>
+                <p style="font-size: 20px; color: white;">คะแนน: <b id="final-score" style="color: var(--neon-orange); font-size: 36px;"></b> / 5</p>
+                <button class="btn btn-primary" style="padding: 16px 40px; font-size: 18px; margin-top: 20px;" onclick="finishMission()">📥 ยืนยันส่งคะแนน</button>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="footer-nav" id="footer-controls">
+        <button class="btn btn-outline" id="prevBtn" onclick="moveStep(-1)">⬅️ ถอยกลับ</button>
+        <div style="color: var(--cyber-blue); font-family: monospace; font-size: 16px; font-weight: bold;" id="step-counter">LOADING...</div>
+        <button class="btn btn-primary" id="nextBtn" onclick="moveStep(1)">เดินหน้า ➔</button>
+    </div>
+</div>
+
+<script>
+    let currentStep = 0; const totalSteps = 6; let studentName = "";
+
+    function rotateNeedle(deg) {
+        document.getElementById('needle').style.transform = `translate(-50%, 0) rotate(${deg}deg)`;
+        document.getElementById('heading-text').innerText = deg + '°';
+    }
+
+    function startLesson() {
+        const input = document.getElementById('guest-name-input').value.trim();
+        if (!input) { alert('⚠️ กรุณาลงชื่อก่อนเริ่มเรียนครับ'); return; }
+        studentName = input;
+        try { localStorage.setItem('robotm2_student', studentName); } catch(e){}
+        document.querySelectorAll('.student-name-inject').forEach(el => el.innerText = studentName);
+        document.getElementById('display-header-name').innerText = "👨‍💻 " + studentName;
+        document.getElementById('header-guest-info').style.display = 'flex';
+        document.getElementById('footer-controls').style.display = 'flex';
+        document.getElementById('progress-container').style.display = 'block';
+        currentStep = 1; updateUI();
+    }
+
+    function updateUI() {
+        document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+        document.getElementById('step-' + currentStep).classList.add('active');
+        document.getElementById('progress-bar').style.width = (currentStep / totalSteps) * 100 + '%';
+        document.getElementById('step-counter').innerText = `STEP: 0${currentStep}/0${totalSteps}`;
+        document.getElementById('prevBtn').style.visibility = currentStep === 1 ? 'hidden' : 'visible';
+        if (currentStep === totalSteps) {
+            document.getElementById('nextBtn').style.display = 'none';
+            if (!gameStarted) initGame();
+        } else { document.getElementById('nextBtn').style.display = 'inline-flex'; }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    function moveStep(n) { currentStep += n; updateUI(); }
+
+    function finishMission() {
+        confetti({ particleCount: 200, spread: 100, origin: { y: 0.5 }, colors: ['#0ea5e9', '#10b981', '#a855f7'] });
+        setTimeout(() => {
+            alert(`🎉 ${studentName} ทำคะแนนได้ ${score}/5\nอย่าลืมส่งใบงาน "เข็มทิศของฉัน" นะครับ!`);
+            window.location.href = "index.html";
+        }, 2000);
+    }
+
+    const quizBank = [
+        { q: "เข็มทิศใน micro:bit ใช้เซ็นเซอร์ชนิดใด?", ans: "Magnetometer (เซ็นเซอร์แม่เหล็ก)", choices: ["Accelerometer", "Magnetometer (เซ็นเซอร์แม่เหล็ก)", "Gyroscope", "Light sensor"] },
+        { q: "ค่ามุมที่ compass heading คืนมาอยู่ในช่วงเท่าใด?", ans: "0 ถึง 359 องศา", choices: ["0 ถึง 90 องศา", "0 ถึง 359 องศา", "-180 ถึง 180 องศา", "0 ถึง 1000 หน่วย"] },
+        { q: "ทิศเหนือมีค่ามุมเท่าใด?", ans: "0 องศา", choices: ["0 องศา", "90 องศา", "180 องศา", "270 องศา"] },
+        { q: "ทิศตะวันออกมีค่ามุมเท่าใด?", ans: "90 องศา", choices: ["0 องศา", "90 องศา", "180 องศา", "270 องศา"] },
+        { q: "ก่อนใช้เข็มทิศต้องทำอะไรก่อน?", ans: "Calibrate (ปรับเทียบ) โดยเอียงให้ครบทุกทิศ", choices: ["เสียบสาย USB ใหม่", "Calibrate (ปรับเทียบ) โดยเอียงให้ครบทุกทิศ", "ตั้งเวลา", "เปลี่ยนถ่านใหม่"] },
+        { q: "ทำไม Calibrate จึงสำคัญ?", ans: "เพื่อปรับให้เซ็นเซอร์เข้ากับสนามแม่เหล็กของพื้นที่นั้น", choices: ["เพื่อความสวยงาม", "เพื่อปรับให้เซ็นเซอร์เข้ากับสนามแม่เหล็กของพื้นที่นั้น", "ลดการใช้แบตเตอรี่", "ทำให้บอร์ดเร็วขึ้น"] },
+        { q: "ถ้า heading = 180 จะเป็นทิศใด?", ans: "ทิศใต้", choices: ["ทิศเหนือ", "ทิศใต้", "ทิศตะวันออก", "ทิศตะวันตก"] },
+        { q: "อะไรที่อาจรบกวนการทำงานของเข็มทิศ?", ans: "วัตถุที่มีแม่เหล็กหรือเหล็กใกล้บอร์ด", choices: ["แสงแดด", "วัตถุที่มีแม่เหล็กหรือเหล็กใกล้บอร์ด", "ความชื้น", "เสียงดัง"] },
+        { q: "ในโค้ดลูกศรนำทาง 4 ทิศ ทำไมต้องใช้เงื่อนไข 'h < 45 OR h > 315' สำหรับทิศเหนือ?", ans: "เพราะมุมรอบทิศเหนือคร่อมที่ 0° ทั้งฝั่งบวกและลบ", choices: ["เพราะทิศเหนือเป็นทิศพิเศษ", "เพราะมุมรอบทิศเหนือคร่อมที่ 0° ทั้งฝั่งบวกและลบ", "เพราะเขียนแบบนี้สวยกว่า", "เพราะ if มีข้อจำกัด"] },
+        { q: "บล็อก 'show arrow' ใช้ทำอะไร?", ans: "แสดงไอคอนลูกศรชี้ทิศบนจอ LED", choices: ["ปริ้นข้อความ", "แสดงไอคอนลูกศรชี้ทิศบนจอ LED", "เล่นเสียงลูกศร", "ส่งวิทยุ"] }
+    ];
+
+    let currentQIndex = 0; let score = 0; let gameStarted = false; let selectedQuestions = [];
+    function shuffle(array) { let curId = array.length; while (0 !== curId) { let randId = Math.floor(Math.random() * curId); curId -= 1; let tmp = array[curId]; array[curId] = array[randId]; array[randId] = tmp; } return array; }
+    function initGame() { gameStarted = true; score = 0; currentQIndex = 0; selectedQuestions = shuffle([...quizBank]).slice(0, 5); loadQuestion(); }
+    function loadQuestion() {
+        const qData = selectedQuestions[currentQIndex];
+        document.getElementById('question-counter').innerText = `คำถาม: ${currentQIndex + 1} / 5`;
+        document.getElementById('score-counter').innerText = `คะแนน: ${score}`;
+        document.getElementById('question-text').innerText = qData.q;
+        const optionsGrid = document.getElementById('options-grid'); optionsGrid.innerHTML = "";
+        shuffle([...qData.choices]).forEach(choice => {
+            const btn = document.createElement('button'); btn.className = 'quiz-option'; btn.innerText = choice;
+            btn.onclick = () => checkAnswer(btn, choice, qData.ans); optionsGrid.appendChild(btn);
+        });
+    }
+    function checkAnswer(selectedBtn, selectedText, correctText) {
+        document.querySelectorAll('.quiz-option').forEach(b => b.style.pointerEvents = 'none');
+        if (selectedText === correctText) { selectedBtn.classList.add('correct'); score++; document.getElementById('score-counter').innerText = `คะแนน: ${score}`; confetti({ particleCount: 50, spread: 60, origin: { y: 0.8 }, colors: ['#0ea5e9'] }); }
+        else { selectedBtn.classList.add('wrong'); document.querySelectorAll('.quiz-option').forEach(b => { if(b.innerText === correctText) b.classList.add('correct'); }); }
+        setTimeout(() => { currentQIndex++; if (currentQIndex < 5) loadQuestion(); else showResult(); }, 2200);
+    }
+    function showResult() {
+        document.getElementById('game-area').style.display = 'none';
+        document.getElementById('game-result').style.display = 'block';
+        document.getElementById('final-score').innerText = score;
+        document.getElementById('footer-controls').style.display = 'none';
+    }
+</script>
+
+</body>
+</html>

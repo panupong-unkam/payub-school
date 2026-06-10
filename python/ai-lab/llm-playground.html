@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>💬 LLM Playground — AI Lab</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Noto+Serif+Thai:wght@400;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="ai-lab.css">
+<style>
+  .llm-shell {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 16px;
+    align-items: start;
+  }
+  @media (max-width: 1024px) {
+    .llm-shell { grid-template-columns: 1fr; }
+  }
+  .llm-model-card {
+    background: var(--ai-card-2);
+    border: 1px solid var(--ai-border);
+    padding: 12px;
+    border-radius: var(--ai-radius-sm);
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .llm-model-card:hover {
+    border-color: var(--ai-cyan);
+  }
+  .llm-model-card.active {
+    border-color: var(--ai-purple);
+    background: rgba(124,58,237,0.12);
+  }
+  .llm-model-card.locked {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .llm-model-name {
+    font-weight: 700;
+    font-size: 14px;
+  }
+  .llm-model-size {
+    font-size: 11px;
+    color: var(--ai-text-muted);
+    margin-top: 2px;
+  }
+  .llm-model-tag {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    margin-right: 4px;
+    background: var(--ai-purple);
+    color: white;
+    font-weight: 600;
+  }
+  .llm-load-status {
+    text-align: center;
+    padding: 30px 20px;
+  }
+  .llm-progress {
+    background: var(--ai-card-2);
+    height: 8px;
+    border-radius: 20px;
+    margin: 10px 0;
+    overflow: hidden;
+  }
+  .llm-progress-bar {
+    background: var(--ai-gradient-1);
+    height: 100%;
+    border-radius: 20px;
+    transition: width .25s;
+  }
+  .preset-btn {
+    background: var(--ai-card-2);
+    border: 1px solid var(--ai-border);
+    color: var(--ai-text);
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: inherit;
+    margin: 0 4px 4px 0;
+    transition: all .15s;
+  }
+  .preset-btn:hover {
+    border-color: var(--ai-cyan);
+    background: rgba(6,182,212,0.1);
+  }
+  .nogpu {
+    background: rgba(239,68,68,0.1);
+    border: 1px solid rgba(239,68,68,0.4);
+    color: #FCA5A5;
+    padding: 20px;
+    border-radius: var(--ai-radius);
+    margin-bottom: 16px;
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="ai-topbar">
+  <div class="ai-topbar-left">
+    <a href="index.html" class="ai-btn ai-btn-sm">⬅️ AI Lab</a>
+    <div class="ai-brand"><span class="ai-brand-icon">💬</span><span>LLM Playground</span></div>
+  </div>
+  <div class="ai-flex">
+    <span id="llm-status" class="ai-status ai-status-loading">
+      <span class="ai-status-dot"></span><span id="llm-status-text">รอเลือกโมเดล...</span>
+    </span>
+  </div>
+</div>
+
+<div class="ai-container-wide">
+
+  <div id="nogpu-warning" class="nogpu" style="display:none;">
+    <h3 style="margin-bottom:8px;">⚠️ เครื่องไม่รองรับ WebGPU</h3>
+    <p style="font-size:14px;">
+      LLM ต้องใช้ <b>WebGPU</b> ในการรัน ลองทำตามนี้:<br>
+      1. ใช้ <b>Google Chrome หรือ Microsoft Edge</b> เวอร์ชัน 121+<br>
+      2. หรือเปิด flag: <code>chrome://flags/#enable-unsafe-webgpu</code><br>
+      3. รีสตาร์ทเบราว์เซอร์
+    </p>
+  </div>
+
+  <div class="llm-shell">
+
+    <!-- LEFT: Model picker + Params -->
+    <aside>
+      <div class="ai-panel">
+        <div class="ai-panel-title">🤖 เลือกโมเดล</div>
+        <p style="font-size:12px; color:var(--ai-text-muted); margin-bottom:10px;">
+          ครั้งแรกจะดาวน์โหลด ~500MB-2GB เก็บใน browser cache
+        </p>
+        <div id="model-list"></div>
+      </div>
+
+      <div class="ai-panel ai-mt-2">
+        <div class="ai-panel-title">⚙️ Parameters</div>
+
+        <label class="ai-label">Temperature: <span id="t-val">0.7</span></label>
+        <input type="range" class="ai-range" id="t-slider" min="0" max="2" step="0.1" value="0.7"
+               oninput="document.getElementById('t-val').textContent=this.value">
+        <div style="font-size:11px; color:var(--ai-text-muted);">สูง = สร้างสรรค์, ต่ำ = แน่นอน</div>
+
+        <label class="ai-label" style="margin-top:10px;">Top P: <span id="p-val">0.9</span></label>
+        <input type="range" class="ai-range" id="p-slider" min="0.1" max="1" step="0.05" value="0.9"
+               oninput="document.getElementById('p-val').textContent=this.value">
+
+        <label class="ai-label" style="margin-top:10px;">Max Tokens: <span id="mx-val">512</span></label>
+        <input type="range" class="ai-range" id="mx-slider" min="64" max="2048" step="64" value="512"
+               oninput="document.getElementById('mx-val').textContent=this.value">
+      </div>
+
+      <div class="ai-panel ai-mt-2">
+        <div class="ai-panel-title">📝 System Prompt</div>
+        <textarea class="ai-textarea" id="sys-prompt" rows="4"
+          placeholder="บอกบุคลิก/บทบาทของ AI">You are a friendly AI assistant that helps Thai students learn. Always answer in Thai unless asked otherwise. Be concise and clear.</textarea>
+
+        <div style="margin-top:8px;">
+          <button class="preset-btn" onclick="setPreset('teacher')">👨‍🏫 ครู</button>
+          <button class="preset-btn" onclick="setPreset('coder')">👨‍💻 โปรแกรมเมอร์</button>
+          <button class="preset-btn" onclick="setPreset('translator')">🌐 แปลภาษา</button>
+          <button class="preset-btn" onclick="setPreset('friend')">😊 เพื่อน</button>
+          <button class="preset-btn" onclick="setPreset('writer')">✍️ นักเขียน</button>
+        </div>
+      </div>
+
+      <div class="ai-panel ai-mt-2">
+        <div class="ai-panel-title">🛠️ เครื่องมือ</div>
+        <button class="ai-btn ai-btn-sm" style="width:100%; margin-bottom:6px;" onclick="clearChat()">🧹 ล้างแชท</button>
+        <button class="ai-btn ai-btn-sm" style="width:100%; margin-bottom:6px;" onclick="exportChat()">⬇️ Export แชท</button>
+        <button class="ai-btn ai-btn-sm" style="width:100%;" onclick="clearCache()">🗑️ ล้าง Cache โมเดล</button>
+      </div>
+    </aside>
+
+    <!-- MAIN: Chat -->
+    <main>
+      <div class="ai-chat-shell">
+        <div class="ai-chat-messages" id="messages">
+          <div class="ai-alert ai-alert-info">
+            <span style="font-size:20px;">👋</span>
+            <div>
+              <b>ยินดีต้อนรับสู่ LLM Playground</b><br>
+              เลือกโมเดลจากด้านซ้าย รอให้โหลดเสร็จ แล้วเริ่มคุยได้เลย<br>
+              ครั้งแรกอาจใช้เวลา 2-5 นาที (ขึ้นกับความเร็วเน็ต) ครั้งต่อไปจะเร็วเพราะใช้ cache
+            </div>
+          </div>
+        </div>
+        <div class="ai-chat-input-bar">
+          <textarea class="ai-chat-input" id="chat-input" rows="2"
+            placeholder="พิมพ์ข้อความ... (Enter เพื่อส่ง, Shift+Enter ขึ้นบรรทัด)"
+            onkeydown="onChatKey(event)"></textarea>
+          <button class="ai-btn ai-btn-primary" id="send-btn" onclick="sendMessage()" disabled>
+            <span id="send-label">📤 ส่ง</span>
+          </button>
+        </div>
+      </div>
+    </main>
+
+  </div>
+
+  <!-- DOC -->
+  <div class="ai-alert ai-alert-info ai-mt-2" style="margin-top:24px;">
+    <span style="font-size:20px;">💡</span>
+    <div>
+      <b>เคล็ดลับการใช้:</b> เริ่มจากโมเดลขนาดเล็กก่อน (Qwen 0.5B หรือ TinyLlama) เพื่อทดสอบว่าเครื่องรองรับ
+      ถ้ารันได้ดีค่อยลองโมเดลใหญ่ขึ้น (Phi-3 mini, Llama 3.2 1B)
+    </div>
+  </div>
+
+</div>
+
+<script type="module">
+// ============================================
+//   WebLLM
+// ============================================
+let webllm = null;
+let engine = null;
+let isGenerating = false;
+
+const MODELS = [
+  {
+    id: 'Qwen2.5-0.5B-Instruct-q4f16_1-MLC',
+    name: 'Qwen 2.5 0.5B',
+    size: '~400 MB',
+    tag: 'เล็กสุด',
+    desc: 'เริ่มต้นดี เร็ว ตอบสั้น',
+  },
+  {
+    id: 'TinyLlama-1.1B-Chat-v1.0-q4f16_1-MLC',
+    name: 'TinyLlama 1.1B',
+    size: '~700 MB',
+    tag: 'เล็ก',
+    desc: 'เก่งภาษาอังกฤษ ภาษาไทยพอใช้',
+  },
+  {
+    id: 'Llama-3.2-1B-Instruct-q4f16_1-MLC',
+    name: 'Llama 3.2 1B',
+    size: '~900 MB',
+    tag: 'แนะนำ',
+    desc: 'รวดเร็ว คุณภาพดี',
+  },
+  {
+    id: 'Llama-3.2-3B-Instruct-q4f16_1-MLC',
+    name: 'Llama 3.2 3B',
+    size: '~2 GB',
+    tag: 'คุณภาพดี',
+    desc: 'ฉลาดขึ้น ต้อง RAM ≥ 6GB',
+  },
+  {
+    id: 'Phi-3.5-mini-instruct-q4f16_1-MLC',
+    name: 'Phi-3.5 mini',
+    size: '~2.4 GB',
+    tag: 'เทพ',
+    desc: 'Microsoft - ตอบเก่ง เข้าใจ context',
+  },
+  {
+    id: 'gemma-2-2b-it-q4f16_1-MLC',
+    name: 'Gemma 2 2B',
+    size: '~1.6 GB',
+    tag: 'Google',
+    desc: 'Google - หลายภาษา',
+  },
+];
+
+let currentModel = null;
+let chatHistory = [];
+
+// ============================================
+//   INIT
+// ============================================
+async function init() {
+  // Check WebGPU
+  if (!('gpu' in navigator)) {
+    document.getElementById('nogpu-warning').style.display = 'block';
+    document.getElementById('llm-status').className = 'ai-status ai-status-error';
+    document.getElementById('llm-status-text').textContent = 'ไม่มี WebGPU';
+    renderModels(true);
+    return;
+  }
+  try {
+    const adapter = await navigator.gpu.requestAdapter();
+    if (!adapter) throw new Error('No GPU adapter');
+  } catch (e) {
+    document.getElementById('nogpu-warning').style.display = 'block';
+    document.getElementById('llm-status').className = 'ai-status ai-status-error';
+    document.getElementById('llm-status-text').textContent = 'ไม่มี GPU adapter';
+    renderModels(true);
+    return;
+  }
+
+  // Load WebLLM
+  try {
+    document.getElementById('llm-status-text').textContent = 'โหลด WebLLM library...';
+    webllm = await import('https://esm.run/@mlc-ai/web-llm');
+    document.getElementById('llm-status-text').textContent = 'พร้อมเลือกโมเดล';
+    document.getElementById('llm-status').className = 'ai-status ai-status-ok';
+    renderModels(false);
+  } catch (e) {
+    console.error('WebLLM load failed', e);
+    document.getElementById('llm-status-text').textContent = 'โหลด WebLLM ล้มเหลว';
+    document.getElementById('llm-status').className = 'ai-status ai-status-error';
+    addMessage('system', '❌ โหลด WebLLM library ไม่สำเร็จ: ' + e.message);
+  }
+}
+
+function renderModels(locked) {
+  const wrap = document.getElementById('model-list');
+  wrap.innerHTML = MODELS.map(m => `
+    <div class="llm-model-card ${currentModel?.id === m.id ? 'active' : ''} ${locked ? 'locked' : ''}"
+         onclick="${locked ? '' : `window.selectModel('${m.id}')`}">
+      <div>
+        <span class="llm-model-tag">${m.tag}</span>
+        <span class="llm-model-name">${m.name}</span>
+      </div>
+      <div class="llm-model-size">${m.size} · ${m.desc}</div>
+    </div>
+  `).join('');
+}
+
+// ============================================
+//   LOAD MODEL
+// ============================================
+window.selectModel = async function(id) {
+  if (isGenerating) {
+    alert('กำลังสร้างคำตอบอยู่ รอให้เสร็จก่อน');
+    return;
+  }
+  const model = MODELS.find(m => m.id === id);
+  if (!model) return;
+
+  if (currentModel?.id === id && engine) {
+    return; // already loaded
+  }
+
+  currentModel = model;
+  renderModels(false);
+
+  const status = document.getElementById('llm-status');
+  const statusText = document.getElementById('llm-status-text');
+  status.className = 'ai-status ai-status-loading';
+  statusText.textContent = 'เริ่มโหลด...';
+
+  // Show load progress in chat
+  const loadBubbleId = addMessage('bot',
+    `<div class="llm-load-status">
+       <div style="font-size:32px; margin-bottom:10px;">⬇️</div>
+       <h3>กำลังโหลด ${model.name}</h3>
+       <p class="ai-text-muted" style="font-size:13px;">${model.size}</p>
+       <div class="llm-progress"><div class="llm-progress-bar" id="lp-bar-${id}" style="width:0%"></div></div>
+       <p style="font-size:12px; color:var(--ai-text-muted);" id="lp-text-${id}">เริ่ม...</p>
+     </div>`,
+    true);
+
+  try {
+    engine = await webllm.CreateMLCEngine(id, {
+      initProgressCallback: (report) => {
+        const pct = Math.round((report.progress || 0) * 100);
+        const bar = document.getElementById(`lp-bar-${id}`);
+        const txt = document.getElementById(`lp-text-${id}`);
+        if (bar) bar.style.width = pct + '%';
+        if (txt) txt.textContent = report.text || `${pct}%`;
+        statusText.textContent = `โหลด ${pct}%`;
+      },
+    });
+
+    status.className = 'ai-status ai-status-ok';
+    statusText.textContent = `✓ ${model.name} พร้อม`;
+
+    document.getElementById('send-btn').disabled = false;
+
+    // Update load bubble
+    const loadBubble = document.getElementById(loadBubbleId);
+    if (loadBubble) {
+      loadBubble.querySelector('.ai-msg-bubble').innerHTML =
+        `✅ โหลด <b>${model.name}</b> เรียบร้อย! เริ่มคุยได้เลย`;
+    }
+    chatHistory = []; // reset history with new model
+  } catch (e) {
+    console.error('Load model failed', e);
+    status.className = 'ai-status ai-status-error';
+    statusText.textContent = 'โหลดโมเดลล้มเหลว';
+    const loadBubble = document.getElementById(loadBubbleId);
+    if (loadBubble) {
+      loadBubble.querySelector('.ai-msg-bubble').innerHTML =
+        `❌ โหลดล้มเหลว: ${e.message}<br><br>
+         อาจเป็นเพราะ:<br>
+         • RAM ไม่พอ — ลองโมเดลเล็กกว่านี้<br>
+         • เน็ตช้า/หลุด — ลองอีกครั้ง<br>
+         • WebGPU ไม่ stable — refresh แล้วลองใหม่`;
+    }
+  }
+};
+
+// ============================================
+//   CHAT
+// ============================================
+window.sendMessage = async function() {
+  if (!engine || isGenerating) return;
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+
+  isGenerating = true;
+  document.getElementById('send-btn').disabled = true;
+  document.getElementById('send-label').innerHTML = '<span class="ai-spinner"></span> สร้าง...';
+
+  addMessage('user', text);
+  input.value = '';
+
+  const sysPrompt = document.getElementById('sys-prompt').value;
+  const temperature = parseFloat(document.getElementById('t-slider').value);
+  const top_p = parseFloat(document.getElementById('p-slider').value);
+  const max_tokens = parseInt(document.getElementById('mx-slider').value);
+
+  const messages = [
+    { role: 'system', content: sysPrompt },
+    ...chatHistory,
+    { role: 'user', content: text },
+  ];
+
+  // Create empty bot bubble
+  const botBubbleId = addMessage('bot', '<span class="ai-spinner"></span> กำลังคิด...');
+  const botBubble = document.getElementById(botBubbleId).querySelector('.ai-msg-bubble');
+
+  try {
+    const stream = await engine.chat.completions.create({
+      messages,
+      temperature,
+      top_p,
+      max_tokens,
+      stream: true,
+    });
+
+    let fullText = '';
+    let first = true;
+    for await (const chunk of stream) {
+      const delta = chunk.choices[0]?.delta?.content || '';
+      if (delta) {
+        if (first) { botBubble.textContent = ''; first = false; }
+        fullText += delta;
+        botBubble.textContent = fullText;
+        scrollToBottom();
+      }
+    }
+
+    if (!fullText) {
+      botBubble.textContent = '(ไม่มีคำตอบ)';
+    }
+
+    chatHistory.push({ role: 'user', content: text });
+    chatHistory.push({ role: 'assistant', content: fullText });
+
+    // Trim history (keep last 10 turns)
+    if (chatHistory.length > 20) {
+      chatHistory = chatHistory.slice(-20);
+    }
+  } catch (e) {
+    botBubble.innerHTML = '❌ Error: ' + e.message;
+    botBubble.style.color = 'var(--ai-red)';
+    console.error(e);
+  } finally {
+    isGenerating = false;
+    document.getElementById('send-btn').disabled = false;
+    document.getElementById('send-label').textContent = '📤 ส่ง';
+    input.focus();
+  }
+};
+
+window.onChatKey = function(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    window.sendMessage();
+  }
+};
+
+function addMessage(role, content, isHtml = false) {
+  const wrap = document.getElementById('messages');
+  const id = 'msg-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6);
+  const div = document.createElement('div');
+  div.id = id;
+  div.className = 'ai-msg ai-msg-' + role;
+
+  const avatar = role === 'user' ? '👤' : (role === 'bot' ? '🤖' : '⚙️');
+  const avatarClass = role === 'user' ? 'ai-msg-avatar-user' : 'ai-msg-avatar-bot';
+
+  div.innerHTML = `
+    <div class="ai-msg-avatar ${avatarClass}">${avatar}</div>
+    <div class="ai-msg-bubble"></div>
+  `;
+  const bubble = div.querySelector('.ai-msg-bubble');
+  if (isHtml || role === 'system') {
+    bubble.innerHTML = content;
+  } else {
+    bubble.textContent = content;
+  }
+  wrap.appendChild(div);
+  scrollToBottom();
+  return id;
+}
+
+function scrollToBottom() {
+  const wrap = document.getElementById('messages');
+  wrap.scrollTop = wrap.scrollHeight;
+}
+
+window.clearChat = function() {
+  chatHistory = [];
+  const wrap = document.getElementById('messages');
+  wrap.innerHTML = `
+    <div class="ai-alert ai-alert-info">
+      <span style="font-size:20px;">🧹</span>
+      <div>ล้างประวัติแชทแล้ว เริ่มคุยใหม่ได้เลย</div>
+    </div>
+  `;
+};
+
+window.exportChat = function() {
+  if (chatHistory.length === 0) {
+    alert('ยังไม่มีแชท');
+    return;
+  }
+  let txt = `# LLM Chat Export\nModel: ${currentModel?.name || '-'}\nDate: ${new Date().toLocaleString('th-TH')}\n\n`;
+  for (const m of chatHistory) {
+    txt += `## ${m.role === 'user' ? '👤 User' : '🤖 Assistant'}\n${m.content}\n\n`;
+  }
+  const blob = new Blob([txt], { type: 'text/markdown' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'llm-chat.md';
+  a.click();
+  URL.revokeObjectURL(url);
+};
+
+window.clearCache = async function() {
+  if (!confirm('ล้าง cache โมเดลทั้งหมด? ครั้งหน้าจะต้องโหลดใหม่ทั้งหมด')) return;
+  try {
+    if ('caches' in window) {
+      const keys = await caches.keys();
+      for (const k of keys) {
+        if (k.includes('webllm') || k.includes('mlc')) {
+          await caches.delete(k);
+        }
+      }
+    }
+    if (indexedDB.databases) {
+      const dbs = await indexedDB.databases();
+      for (const db of dbs) {
+        if (db.name && (db.name.includes('webllm') || db.name.includes('mlc'))) {
+          indexedDB.deleteDatabase(db.name);
+        }
+      }
+    }
+    alert('✅ ล้าง cache แล้ว — refresh หน้าเพื่อเริ่มใหม่');
+  } catch (e) {
+    alert('❌ ล้าง cache ล้มเหลว: ' + e.message);
+  }
+};
+
+// ============================================
+//   PRESETS
+// ============================================
+const PRESETS = {
+  teacher: 'You are a friendly Thai teacher who explains concepts clearly with examples. Always answer in Thai. Use simple language suitable for middle school students.',
+  coder: 'You are a programming tutor specialized in Python. Show clean, well-commented code examples. Always answer in Thai unless code requires English.',
+  translator: 'You are a translator. Translate the user message between Thai and English. Detect the language automatically and translate to the other one. Be accurate and natural.',
+  friend: 'You are a friendly companion. Chat casually like a friend would. Always answer in Thai with a warm, supportive tone.',
+  writer: 'You are a creative writer who helps users craft stories, poems, and creative content in Thai. Be imaginative and inspiring.',
+};
+
+window.setPreset = function(key) {
+  const sys = document.getElementById('sys-prompt');
+  if (PRESETS[key]) {
+    sys.value = PRESETS[key];
+  }
+};
+
+// ============================================
+//   BOOT
+// ============================================
+init();
+</script>
+
+</body>
+</html>

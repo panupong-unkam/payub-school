@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>หุ่นยนต์ ม.2 | Hr 5-6: VEXcode VR ภารกิจสรุปหน่วย</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Noto+Serif+Thai:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --bg-dark: #0f172a; --surface-dark: #1e293b; --cyber-blue: #0ea5e9;
+            --cyber-blue-glow: rgba(14, 165, 233, 0.4); --neon-green: #10b981;
+            --neon-orange: #f59e0b; --neon-pink: #ec4899; --neon-purple: #a855f7;
+            --gold: #fbbf24;
+            --text-main: #f8fafc; --text-muted: #94a3b8; --border-line: #334155;
+        }
+        body {
+            display: flex; justify-content: center; align-items: center; min-height: 100vh;
+            background: radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 100%);
+            color: var(--text-main); font-family: 'Sarabun', sans-serif;
+            padding: 20px; margin: 0; overflow-x: hidden;
+        }
+        body::before {
+            content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 30px 30px; z-index: -1;
+        }
+        .lesson-container {
+            width: 100%; max-width: 1100px; background: var(--surface-dark);
+            border-radius: 24px; box-shadow: 0 0 40px rgba(0,0,0,0.5), 0 0 15px rgba(251,191,36,0.3);
+            overflow: hidden; border: 1px solid var(--border-line);
+            display: flex; flex-direction: column; min-height: 80vh;
+        }
+        .lesson-header {
+            background: rgba(15, 23, 42, 0.9); padding: 20px 30px;
+            border-bottom: 1px solid var(--gold);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .progress-track { height: 5px; background: var(--border-line); width: 100%; display: none; }
+        #progress-bar { height: 100%; background: var(--gold); width: 0%; box-shadow: 0 0 10px var(--gold); transition: width 0.6s ease; }
+        .lesson-body { padding: 40px; position: relative; flex-grow: 1; display: flex; flex-direction: column; }
+        .step { display: none; animation: glitchFadeIn 0.5s ease-out forwards; flex-grow: 1; }
+        .step.active { display: block; }
+        @keyframes glitchFadeIn { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 1; transform: translateY(0); } }
+        h3 {
+            color: var(--gold); font-family: 'Noto Serif Thai', serif; font-size: 28px;
+            margin-top: 0; text-shadow: 0 0 10px rgba(251,191,36,0.4);
+            border-bottom: 1px dashed var(--border-line); padding-bottom: 15px;
+        }
+        p, li { line-height: 1.8; font-size: 17px; color: #cbd5e1; }
+        .btn {
+            padding: 14px 28px; border: none; border-radius: 10px; font-family: 'Sarabun'; font-weight: bold;
+            font-size: 16px; cursor: pointer; transition: 0.3s; display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        .btn-primary { background: var(--gold); color: #1e293b; box-shadow: 0 4px 15px rgba(251,191,36,0.4); }
+        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(251,191,36,0.5); background: #f59e0b; }
+        .btn-outline { background: transparent; color: var(--text-muted); border: 1px solid var(--border-line); }
+        .btn-outline:hover { color: white; border-color: white; }
+        .footer-nav {
+            padding: 25px 40px; background: rgba(15, 23, 42, 0.95); border-top: 1px solid var(--border-line);
+            display: none; justify-content: space-between; align-items: center; margin-top: auto;
+        }
+        .mission-card {
+            background: rgba(0,0,0,0.3); border-radius: 18px; padding: 25px;
+            border: 2px solid var(--border-line); transition: 0.3s;
+            display: flex; flex-direction: column; height: 100%;
+        }
+        .mission-card:hover { transform: translateY(-5px); }
+        .grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-top: 20px; }
+        .info-card {
+            background: rgba(0,0,0,0.2); border: 1px solid var(--border-line);
+            border-radius: 15px; padding: 20px;
+        }
+        .quiz-option {
+            background: rgba(255,255,255,0.05); border: 2px solid var(--border-line);
+            padding: 15px 20px; border-radius: 12px; margin-bottom: 15px; cursor: pointer;
+            transition: 0.2s; font-size: 16px; color: var(--text-main); text-align: left; width: 100%;
+        }
+        .quiz-option:hover { background: rgba(251,191,36,0.1); border-color: var(--gold); }
+        .quiz-option.correct { background: rgba(16,185,129,0.2); border-color: var(--neon-green); color: var(--neon-green); font-weight: bold; }
+        .quiz-option.wrong { background: rgba(239,68,68,0.2); border-color: #ef4444; color: #ef4444; }
+        .rubric-table {
+            width: 100%; border-collapse: collapse; margin-top: 15px;
+            background: rgba(0,0,0,0.2); border-radius: 10px; overflow: hidden;
+        }
+        .rubric-table th, .rubric-table td {
+            padding: 12px; text-align: left; border-bottom: 1px solid var(--border-line);
+            font-size: 15px;
+        }
+        .rubric-table th { background: rgba(251,191,36,0.15); color: var(--gold); font-weight: bold; }
+        .rubric-table td:last-child { text-align: center; color: var(--neon-orange); font-weight: bold; }
+        .tag {
+            display: inline-block; padding: 4px 12px; border-radius: 12px;
+            font-size: 12px; font-weight: bold; margin-right: 8px;
+        }
+        .tag-vex { background: rgba(14, 165, 233, 0.2); color: var(--cyber-blue); border: 1px solid var(--cyber-blue); }
+        .tag-time { background: rgba(245, 158, 11, 0.2); color: var(--neon-orange); border: 1px solid var(--neon-orange); }
+        .tag-final { background: rgba(251,191,36,0.2); color: var(--gold); border: 1px solid var(--gold); }
+        @media (max-width: 900px) {
+            .lesson-body { padding: 20px; }
+            .grid-2col { grid-template-columns: 1fr !important; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="lesson-container">
+    <div class="lesson-header">
+        <h2 style="margin: 0; font-size: 20px; letter-spacing: 1px; color: var(--text-main);">🤖 ROBOTICS M.2 | Hr 5-6 FINAL</h2>
+        <div id="header-guest-info" style="display: none; align-items: center; gap: 12px;">
+            <span style="background: rgba(251,191,36,0.15); color: var(--gold); padding: 6px 18px; border-radius: 20px; font-size: 14px; font-weight: bold; border: 1px solid var(--gold);" id="display-header-name">Student</span>
+            <button class="btn btn-outline" style="padding: 6px 15px; font-size: 12px;" onclick="location.reload()">EXIT</button>
+        </div>
+    </div>
+
+    <div class="progress-track" id="progress-container"><div id="progress-bar"></div></div>
+
+    <div class="lesson-body">
+
+        <!-- STEP 0: SIGN IN -->
+        <div class="step active" id="step-0">
+            <div style="text-align: center; padding: 50px 20px;">
+                <div style="font-size: 80px; margin-bottom: 20px; filter: drop-shadow(0 0 15px var(--gold));">🏆</div>
+                <h2 style="color: white; font-size: 32px; margin-bottom: 10px;">หุ่นยนต์ ม.2 | ชั่วโมงที่ 5-6</h2>
+                <p style="color: var(--gold); font-size: 20px; margin-bottom: 5px; font-weight: bold;">ภารกิจสรุปหน่วย VEXcode VR</p>
+                <p style="color: var(--text-muted); font-size: 16px; margin-bottom: 30px;">Final Challenge & Assessment</p>
+                <p style="color: var(--text-muted); font-size: 16px; margin-bottom: 20px;">📝 กรุณาลงชื่อเข้าเรียน</p>
+                <input type="text" id="guest-name-input" placeholder="ชื่อ-นามสกุล เลขที่ ห้อง" style="width:100%; max-width:500px; padding:15px 20px; background:rgba(0,0,0,0.3); border:2px solid var(--gold); border-radius:12px; color:white; font-size:18px; text-align:center; outline:none;" onkeypress="if(event.key === 'Enter') startLesson()">
+                <div style="margin-top: 35px;">
+                    <button class="btn btn-primary" style="padding: 16px 50px; font-size: 18px;" onclick="startLesson()">🚀 เริ่มภารกิจสุดท้าย</button>
+                </div>
+                <div style="margin-top: 30px; color: var(--text-muted); font-size: 13px;">
+                    <span class="tag tag-vex">VEXcode VR</span>
+                    <span class="tag tag-time">2 ชั่วโมง</span>
+                    <span class="tag tag-final">FINAL UNIT 1</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 1: SUMMARY -->
+        <div class="step" id="step-1">
+            <h3>📚 ด่านที่ 1: สรุปสิ่งที่เรียนใน VEXcode VR</h3>
+            <p>ผ่านมา 4 ชั่วโมงแล้ว <b class="student-name-inject" style="color: var(--neon-green);"></b>! มาทบทวนทุกอย่างก่อนปิดหน่วย</p>
+
+            <div class="grid-2col" style="margin-top: 25px;">
+                <div class="info-card" style="border-color: var(--cyber-blue);">
+                    <h4 style="color: var(--cyber-blue); margin-top: 0;">🛞 Drivetrain (เคลื่อนที่)</h4>
+                    <ul style="padding-left: 20px; margin: 0;">
+                        <li>drive forward / reverse</li>
+                        <li>turn left / right (องศา)</li>
+                        <li>stop driving</li>
+                    </ul>
+                </div>
+                <div class="info-card" style="border-color: var(--neon-green);">
+                    <h4 style="color: var(--neon-green); margin-top: 0;">🔁 Loops (วนซ้ำ)</h4>
+                    <ul style="padding-left: 20px; margin: 0;">
+                        <li>repeat N times</li>
+                        <li>forever</li>
+                        <li>repeat until</li>
+                    </ul>
+                </div>
+                <div class="info-card" style="border-color: var(--neon-orange);">
+                    <h4 style="color: var(--neon-orange); margin-top: 0;">🤔 Conditions (เงื่อนไข)</h4>
+                    <ul style="padding-left: 20px; margin: 0;">
+                        <li>if (ถ้า)</li>
+                        <li>if-else (ถ้า-ไม่งั้น)</li>
+                        <li>operators: &lt;, &gt;, =</li>
+                    </ul>
+                </div>
+                <div class="info-card" style="border-color: var(--neon-purple);">
+                    <h4 style="color: var(--neon-purple); margin-top: 0;">📡 Sensors (เซ็นเซอร์)</h4>
+                    <ul style="padding-left: 20px; margin: 0;">
+                        <li>Distance, Bumper</li>
+                        <li>Eye (Front/Down)</li>
+                        <li>Electromagnet</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div style="background: rgba(251,191,36,0.1); border: 2px solid var(--gold); padding: 20px; border-radius: 15px; margin-top: 25px; text-align: center;">
+                <b style="color: var(--gold); font-size: 18px;">🎯 ภารกิจวันนี้:</b>
+                <p style="margin: 8px 0 0 0;">เลือก 1 ใน 2 ภารกิจสุดท้าย → ใช้ทักษะทั้งหมดที่เรียนมา → ส่งงานเก็บคะแนนหน่วย VEXcode VR</p>
+            </div>
+        </div>
+
+        <!-- STEP 2: MISSION 1 (Disco) -->
+        <div class="step" id="step-2">
+            <h3>🪩 ด่านที่ 2: ภารกิจ A — "Disco Dance"</h3>
+            <p>ใน Playground <b>"Disco"</b> หุ่นยนต์ต้องเต้นตามพื้นที่มีสีต่าง ๆ — ใช้ <b>Eye Sensor</b> ตรวจสีและตอบสนอง</p>
+
+            <div style="background: rgba(168,85,247,0.1); border: 2px solid var(--neon-purple); padding: 25px; border-radius: 15px; margin-top: 20px;">
+                <h4 style="margin-top: 0; color: var(--neon-purple);">🎯 เป้าหมาย</h4>
+                <p>ให้หุ่นยนต์เดินบนพื้นแล้วเช็คสีพื้น → ถ้าเจอสีไหนให้ทำท่าตามที่กำหนด</p>
+                <table class="rubric-table">
+                    <thead>
+                        <tr><th>สีพื้น</th><th>ท่าเต้น</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td style="color: #ef4444;">🔴 แดง</td><td style="text-align: left;">หมุน 360° ขวา</td></tr>
+                        <tr><td style="color: #10b981;">🟢 เขียว</td><td style="text-align: left;">หมุน 360° ซ้าย</td></tr>
+                        <tr><td style="color: #3b82f6;">🔵 น้ำเงิน</td><td style="text-align: left;">ถอยหลัง 100 mm</td></tr>
+                        <tr><td style="color: #fde047;">🟡 เหลือง</td><td style="text-align: left;">เดินหน้า 100 mm</td></tr>
+                    </tbody>
+                </table>
+                <p style="margin-top: 15px; color: var(--cyber-blue);"><b>💡 บล็อกหลักที่ต้องใช้:</b> forever + if-else if + Down Eye Sensor</p>
+            </div>
+        </div>
+
+        <!-- STEP 3: MISSION 2 (Castle Crasher) -->
+        <div class="step" id="step-3">
+            <h3>🏰 ด่านที่ 3: ภารกิจ B — "Castle Crasher"</h3>
+            <p>ใน Playground <b>"Castle Crasher"</b> หุ่นยนต์ต้องชนปราสาทบล็อกให้ล้มทั้งหมดในห้อง</p>
+
+            <div style="background: rgba(239,68,68,0.1); border: 2px solid #ef4444; padding: 25px; border-radius: 15px; margin-top: 20px;">
+                <h4 style="margin-top: 0; color: #ef4444;">🎯 เป้าหมาย</h4>
+                <p>เขียนโปรแกรมให้หุ่นยนต์เดินรอบห้อง → ใช้ <b>Bumper</b> ตรวจการชนกำแพง → ใช้ <b>Distance Sensor</b> หลีกเลี่ยงการติด</p>
+                <ul style="line-height: 2; padding-left: 20px;">
+                    <li>หุ่นยนต์ต้อง <b>ชนปราสาท</b> ให้ครบทุกหลังในห้อง (มีหลายบล็อก)</li>
+                    <li>เมื่อชน Bumper จุดใด → ถอย + หมุน + ลุยใหม่</li>
+                    <li>เมื่อ Distance &lt; 100 mm → ลุยให้แรงขึ้น (drive forward)</li>
+                    <li>ใช้ <b>forever loop</b> ครอบ</li>
+                </ul>
+                <p style="margin-top: 15px; color: var(--cyber-blue);"><b>💡 บล็อกหลักที่ต้องใช้:</b> forever + Bumper + Distance + Drivetrain + Loop</p>
+            </div>
+        </div>
+
+        <!-- STEP 4: RUBRIC -->
+        <div class="step" id="step-4">
+            <h3>📊 ด่านที่ 4: เกณฑ์การประเมิน (Rubric)</h3>
+            <p>คุณครูจะตรวจงานตามเกณฑ์ด้านล่าง <b>เต็ม 10 คะแนน</b> สำหรับภารกิจหน่วย 1</p>
+
+            <table class="rubric-table">
+                <thead>
+                    <tr>
+                        <th style="width: 35%;">หัวข้อ</th>
+                        <th>เกณฑ์</th>
+                        <th style="width: 15%;">คะแนน</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><b>1. การใช้ Loop</b></td>
+                        <td>ใช้ forever หรือ repeat ครอบโปรแกรมได้ถูกต้อง</td>
+                        <td>2</td>
+                    </tr>
+                    <tr>
+                        <td><b>2. การใช้เซ็นเซอร์</b></td>
+                        <td>เรียกค่าจากเซ็นเซอร์อย่างน้อย 1 ตัวอย่างถูกต้อง</td>
+                        <td>2</td>
+                    </tr>
+                    <tr>
+                        <td><b>3. การใช้เงื่อนไข if/else</b></td>
+                        <td>เปรียบเทียบค่าเซ็นเซอร์กับค่าคงที่ + แตกสาขาได้</td>
+                        <td>2</td>
+                    </tr>
+                    <tr>
+                        <td><b>4. ผลลัพธ์ทำงานครบ</b></td>
+                        <td>หุ่นยนต์ทำตามภารกิจได้สำเร็จ (เต้นถูกสี / ชนปราสาทครบ)</td>
+                        <td>3</td>
+                    </tr>
+                    <tr>
+                        <td><b>5. ความคิดสร้างสรรค์</b></td>
+                        <td>เพิ่มไอเดียพิเศษ เช่น เปลี่ยนสีปากกา, ใส่เสียง, ฯลฯ</td>
+                        <td>1</td>
+                    </tr>
+                    <tr style="background: rgba(251,191,36,0.15);">
+                        <td colspan="2" style="text-align: right; font-weight: bold; color: var(--gold);">รวม</td>
+                        <td>10</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div style="background: rgba(16,185,129,0.1); border-left: 4px solid var(--neon-green); padding: 15px; border-radius: 10px; margin-top: 20px;">
+                <b style="color: var(--neon-green);">🏆 เกณฑ์ตัดเกรด:</b>
+                <p style="margin: 5px 0 0 0;">9-10 คะแนน = ดีมาก | 7-8 = ดี | 5-6 = พอใช้ | ต่ำกว่า 5 = ต้องทำส่งใหม่</p>
+            </div>
+        </div>
+
+        <!-- STEP 5: WORKSHEET -->
+        <div class="step" id="step-5">
+            <h3>📝 ด่านที่ 5: ใบงานสุดท้าย — เลือก 1 ภารกิจ</h3>
+
+            <div style="background: rgba(251,191,36,0.08); border: 2px solid var(--gold); padding: 30px; border-radius: 20px;">
+                <h4 style="color: white; margin-top: 0; font-size: 22px;">🎯 ใบงานสุดท้ายของหน่วย 1</h4>
+
+                <div class="grid-2col" style="margin-top: 20px;">
+                    <div class="mission-card" style="border-color: var(--neon-purple);">
+                        <div style="font-size: 50px; text-align: center;">🪩</div>
+                        <h4 style="color: var(--neon-purple); text-align: center; margin: 10px 0;">ภารกิจ A: Disco Dance</h4>
+                        <p style="font-size: 14px;">เน้น: <b>Eye Sensor + If-else if</b><br>ระดับ: ⭐⭐⭐</p>
+                    </div>
+                    <div class="mission-card" style="border-color: #ef4444;">
+                        <div style="font-size: 50px; text-align: center;">🏰</div>
+                        <h4 style="color: #ef4444; text-align: center; margin: 10px 0;">ภารกิจ B: Castle Crasher</h4>
+                        <p style="font-size: 14px;">เน้น: <b>Bumper + Distance</b><br>ระดับ: ⭐⭐⭐⭐</p>
+                    </div>
+                </div>
+
+                <div style="background: rgba(0,0,0,0.4); padding: 20px; border-radius: 12px; margin-top: 20px;">
+                    <b style="color: var(--gold);">✅ สิ่งที่ต้องส่ง:</b>
+                    <ol style="margin-top: 10px; line-height: 2;">
+                        <li><b>วิดีโอ</b> หน้าจอแสดงหุ่นยนต์ทำงาน (≥ 30 วินาที)</li>
+                        <li><b>ลิงก์ Share</b> โปรแกรมจาก VEXcode VR</li>
+                        <li><b>คำอธิบาย</b> สั้น ๆ ว่าคุณใช้บล็อกอะไรบ้าง และทำไม</li>
+                    </ol>
+                </div>
+
+                <div style="background: rgba(245,158,11,0.1); border-left: 4px solid var(--neon-orange); padding: 18px; border-radius: 10px; margin-top: 20px;">
+                    <b style="color: var(--neon-orange);">📤 ส่งงานที่:</b> เว็บโรงครูเจมส์ → ระบบส่งงาน → ใบงาน "Final VEXcode VR Mission"
+                </div>
+
+                <div style="background: rgba(236,72,153,0.1); border-left: 4px solid var(--neon-pink); padding: 15px; border-radius: 10px; margin-top: 15px;">
+                    <b style="color: var(--neon-pink);">🎁 ทำทั้ง 2 ภารกิจ:</b> ได้คะแนนเพิ่ม +5 คะแนนพิเศษ! (สำหรับนักเรียนที่อยากท้าตัวเอง)
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 6: QUIZ FINAL UNIT 1 -->
+        <div class="step" id="step-6">
+            <h3>🎮 ด่านที่ 6: แบบทดสอบสรุปหน่วย 1 (5 ข้อ)</h3>
+            <p>ทดสอบความเข้าใจเรื่อง VEXcode VR ทั้งหมด <b style="color: var(--neon-orange);">สุ่ม + สลับ กันลอก!</b></p>
+
+            <div id="game-area" style="background: rgba(0,0,0,0.2); border: 2px solid var(--gold); border-radius: 20px; padding: 30px; text-align: center; max-width: 750px; margin: 0 auto; box-shadow: 0 10px 30px rgba(251,191,36,0.15);">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 20px; font-weight: bold; color: var(--gold);">
+                    <span id="question-counter">คำถาม: 1 / 5</span>
+                    <span id="score-counter">คะแนน: 0</span>
+                </div>
+                <h4 id="question-text" style="font-size: 22px; color: white; margin-bottom: 30px; line-height: 1.5;">กำลังโหลด...</h4>
+                <div id="options-grid" style="display: flex; flex-direction: column; gap: 12px;"></div>
+            </div>
+
+            <div id="game-result" style="display: none; text-align: center; padding: 40px; background: rgba(0,0,0,0.2); border-radius: 20px; border: 2px solid var(--gold);">
+                <div style="font-size: 70px; margin-bottom: 10px;">🏆</div>
+                <h3 style="border: none; text-shadow: none; font-size: 32px; color: var(--gold); margin-bottom: 10px;">ยินดีด้วย! จบหน่วย VEXcode VR แล้ว</h3>
+                <p style="font-size: 20px; color: white;">นักเรียน: <span class="student-name-inject" style="color:var(--neon-green);"></span></p>
+                <p style="font-size: 20px; color: white;">คะแนน: <b id="final-score" style="color: var(--neon-orange); font-size: 36px;"></b> / 5</p>
+                <p style="color: var(--cyber-blue); font-size: 16px; margin-top: 15px;">สัปดาห์หน้าเริ่มหน่วย micro:bit แล้ว — เตรียมจับบอร์ดจริงกันได้เลย!</p>
+                <div style="margin-top: 30px;">
+                    <button class="btn btn-primary" style="padding: 16px 40px; font-size: 18px;" onclick="finishMission()">📥 ยืนยันจบหน่วย 1</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="footer-nav" id="footer-controls">
+        <button class="btn btn-outline" id="prevBtn" onclick="moveStep(-1)">⬅️ ถอยกลับ</button>
+        <div style="color: var(--gold); font-family: monospace; font-size: 16px; font-weight: bold;" id="step-counter">LOADING...</div>
+        <button class="btn btn-primary" id="nextBtn" onclick="moveStep(1)">เดินหน้า ➔</button>
+    </div>
+</div>
+
+<script>
+    let currentStep = 0;
+    const totalSteps = 6;
+    let studentName = "";
+
+    function startLesson() {
+        const input = document.getElementById('guest-name-input').value.trim();
+        if (!input) { alert('⚠️ กรุณาลงชื่อก่อนเริ่มเรียนครับ'); return; }
+        studentName = input;
+        try { localStorage.setItem('robotm2_student', studentName); } catch(e){}
+
+        document.querySelectorAll('.student-name-inject').forEach(el => el.innerText = studentName);
+        document.getElementById('display-header-name').innerText = "👨‍💻 " + studentName;
+        document.getElementById('header-guest-info').style.display = 'flex';
+        document.getElementById('footer-controls').style.display = 'flex';
+        document.getElementById('progress-container').style.display = 'block';
+
+        currentStep = 1; updateUI();
+    }
+
+    function updateUI() {
+        document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+        document.getElementById('step-' + currentStep).classList.add('active');
+        const progress = (currentStep / totalSteps) * 100;
+        document.getElementById('progress-bar').style.width = progress + '%';
+        document.getElementById('step-counter').innerText = `STEP: 0${currentStep}/0${totalSteps}`;
+        document.getElementById('prevBtn').style.visibility = currentStep === 1 ? 'hidden' : 'visible';
+        if (currentStep === totalSteps) {
+            document.getElementById('nextBtn').style.display = 'none';
+            if (!gameStarted) initGame();
+        } else {
+            document.getElementById('nextBtn').style.display = 'inline-flex';
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function moveStep(n) { currentStep += n; updateUI(); }
+
+    function finishMission() {
+        confetti({ particleCount: 300, spread: 120, origin: { y: 0.5 }, colors: ['#fbbf24', '#10b981', '#0ea5e9', '#a855f7'] });
+        setTimeout(() => {
+            alert(`🏆 ยินดีด้วย ${studentName}!\nจบหน่วย VEXcode VR แล้ว (${score}/5 คะแนน)\nสัปดาห์หน้าเจอกันที่หน่วย micro:bit!`);
+            window.location.href = "index.html";
+        }, 2500);
+    }
+
+    const quizBank = [
+        { q: "VEXcode VR แตกต่างจากหุ่นยนต์จริงอย่างไร?", ans: "VEXcode VR เป็นการจำลองบนคอมพิวเตอร์ ไม่ต้องมีฮาร์ดแวร์จริง", choices: ["VEXcode VR เร็วกว่าหุ่นยนต์จริง", "VEXcode VR เป็นการจำลองบนคอมพิวเตอร์ ไม่ต้องมีฮาร์ดแวร์จริง", "VEXcode VR ใช้แบตเตอรี่มากกว่า", "ไม่มีอะไรต่างกันเลย"] },
+        { q: "ถ้าโจทย์ให้เดินหก เหลี่ยม เราต้อง repeat กี่รอบ และเลี้ยวกี่องศา?", ans: "repeat 6 รอบ เลี้ยว 60°", choices: ["repeat 6 รอบ เลี้ยว 60°", "repeat 6 รอบ เลี้ยว 90°", "repeat 4 รอบ เลี้ยว 90°", "repeat 8 รอบ เลี้ยว 45°"] },
+        { q: "บล็อกเซ็นเซอร์ใดที่อ่านค่าเป็น 'สี' ไม่ใช่ 'ระยะ'?", ans: "Eye Sensor", choices: ["Distance Sensor", "Eye Sensor", "Bumper Sensor", "GPS Sensor"] },
+        { q: "ในภารกิจ Disco การใช้ if-else if (หลายเงื่อนไข) มีประโยชน์อย่างไร?", ans: "ตรวจสีหลายๆ สีในโปรแกรมเดียวได้ และทำงานต่างกัน", choices: ["ทำให้โปรแกรมรันเร็วขึ้น", "ตรวจสีหลายๆ สีในโปรแกรมเดียวได้ และทำงานต่างกัน", "ลดการใช้พลังงาน", "ป้องกันไวรัส"] },
+        { q: "ในภารกิจ Castle Crasher Bumper Sensor มีไว้เพื่ออะไร?", ans: "ตรวจจับว่าหุ่นยนต์ชนกำแพงหรือปราสาทแล้วหรือยัง", choices: ["วัดความเร็วของหุ่นยนต์", "ตรวจจับว่าหุ่นยนต์ชนกำแพงหรือปราสาทแล้วหรือยัง", "ตรวจสีของพื้น", "วัดระยะห่างจากกำแพง"] },
+        { q: "ข้อใดต่อไปนี้ NOT ใช่ Loop?", ans: "if-else", choices: ["repeat 5 times", "forever", "if-else", "repeat until"] },
+        { q: "ทำไมการเขียนโปรแกรมหุ่นยนต์ต้องใช้ Loop?", ans: "เพื่อทำคำสั่งซ้ำหลายๆ รอบโดยไม่ต้องเขียนซ้ำ และให้เซ็นเซอร์ทำงานต่อเนื่อง", choices: ["เพื่อให้โปรแกรมยาวขึ้น", "เพื่อทำคำสั่งซ้ำหลายๆ รอบโดยไม่ต้องเขียนซ้ำ และให้เซ็นเซอร์ทำงานต่อเนื่อง", "เพื่อให้แบตเตอรี่หมดเร็วขึ้น", "เพื่อความสวยงาม"] },
+        { q: "ถ้านักเรียนเขียน 'drive forward' (ไม่มี mm) ในลูป forever จะเกิดอะไรขึ้น?", ans: "หุ่นยนต์เดินหน้าตลอดไปไม่หยุด — เซ็นเซอร์ทำงานต่อเนื่อง เหมาะกับ Wall Maze", choices: ["หุ่นยนต์หยุดทันที", "หุ่นยนต์เดินหน้าตลอดไปไม่หยุด — เซ็นเซอร์ทำงานต่อเนื่อง เหมาะกับ Wall Maze", "เกิด error ใน VEXcode VR", "หุ่นยนต์ถอยหลังแทน"] },
+        { q: "เกณฑ์ที่ได้คะแนนสูงสุดในใบงานหน่วย 1 คือข้อใด?", ans: "ผลลัพธ์ทำงานครบ — 3 คะแนน", choices: ["การใช้ Loop — 2 คะแนน", "ผลลัพธ์ทำงานครบ — 3 คะแนน", "ความคิดสร้างสรรค์ — 1 คะแนน", "การใช้เซ็นเซอร์ — 2 คะแนน"] },
+        { q: "สัปดาห์ที่ 4 (หลังจบหน่วย VEXcode VR) เราจะเริ่มเรียนเรื่องอะไรต่อ?", ans: "micro:bit (บอร์ดจริง)", choices: ["RP2040", "micro:bit (บอร์ดจริง)", "Arduino", "Python"] }
+    ];
+
+    let currentQIndex = 0; let score = 0; let gameStarted = false; let selectedQuestions = [];
+
+    function shuffle(array) {
+        let curId = array.length;
+        while (0 !== curId) {
+            let randId = Math.floor(Math.random() * curId);
+            curId -= 1;
+            let tmp = array[curId]; array[curId] = array[randId]; array[randId] = tmp;
+        }
+        return array;
+    }
+
+    function initGame() {
+        gameStarted = true; score = 0; currentQIndex = 0;
+        selectedQuestions = shuffle([...quizBank]).slice(0, 5);
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        const qData = selectedQuestions[currentQIndex];
+        document.getElementById('question-counter').innerText = `คำถาม: ${currentQIndex + 1} / 5`;
+        document.getElementById('score-counter').innerText = `คะแนน: ${score}`;
+        document.getElementById('question-text').innerText = qData.q;
+        const optionsGrid = document.getElementById('options-grid');
+        optionsGrid.innerHTML = "";
+        const shuffledChoices = shuffle([...qData.choices]);
+        shuffledChoices.forEach(choice => {
+            const btn = document.createElement('button');
+            btn.className = 'quiz-option';
+            btn.innerText = choice;
+            btn.onclick = () => checkAnswer(btn, choice, qData.ans);
+            optionsGrid.appendChild(btn);
+        });
+    }
+
+    function checkAnswer(selectedBtn, selectedText, correctText) {
+        const allBtns = document.querySelectorAll('.quiz-option');
+        allBtns.forEach(b => b.style.pointerEvents = 'none');
+        if (selectedText === correctText) {
+            selectedBtn.classList.add('correct');
+            score++; document.getElementById('score-counter').innerText = `คะแนน: ${score}`;
+            confetti({ particleCount: 50, spread: 60, origin: { y: 0.8 }, colors: ['#fbbf24'] });
+        } else {
+            selectedBtn.classList.add('wrong');
+            allBtns.forEach(b => { if(b.innerText === correctText) b.classList.add('correct'); });
+        }
+        setTimeout(() => {
+            currentQIndex++;
+            if (currentQIndex < 5) loadQuestion();
+            else showResult();
+        }, 2200);
+    }
+
+    function showResult() {
+        document.getElementById('game-area').style.display = 'none';
+        document.getElementById('game-result').style.display = 'block';
+        document.getElementById('final-score').innerText = score;
+        document.getElementById('footer-controls').style.display = 'none';
+    }
+</script>
+
+</body>
+</html>

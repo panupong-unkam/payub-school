@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>หุ่นยนต์ ม.2 | Hr 1-2: VEXcode VR ปฐมนิเทศ + Drivetrain + Loop</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Noto+Serif+Thai:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --bg-dark: #0f172a; --surface-dark: #1e293b; --cyber-blue: #0ea5e9;
+            --cyber-blue-glow: rgba(14, 165, 233, 0.4); --neon-green: #10b981;
+            --neon-orange: #f59e0b; --neon-pink: #ec4899; --neon-purple: #a855f7;
+            --text-main: #f8fafc; --text-muted: #94a3b8; --border-line: #334155;
+        }
+        body {
+            display: flex; justify-content: center; align-items: center; min-height: 100vh;
+            background: radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 100%);
+            color: var(--text-main); font-family: 'Sarabun', sans-serif;
+            padding: 20px; margin: 0; overflow-x: hidden;
+        }
+        body::before {
+            content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 30px 30px; z-index: -1;
+        }
+        .lesson-container {
+            width: 100%; max-width: 1100px; background: var(--surface-dark);
+            border-radius: 24px; box-shadow: 0 0 40px rgba(0,0,0,0.5), 0 0 15px var(--cyber-blue-glow);
+            overflow: hidden; border: 1px solid var(--border-line);
+            display: flex; flex-direction: column; min-height: 80vh;
+        }
+        .lesson-header {
+            background: rgba(15, 23, 42, 0.9); padding: 20px 30px;
+            border-bottom: 1px solid var(--cyber-blue);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .progress-track { height: 5px; background: var(--border-line); width: 100%; display: none; }
+        #progress-bar { height: 100%; background: var(--cyber-blue); width: 0%; box-shadow: 0 0 10px var(--cyber-blue); transition: width 0.6s ease; }
+        .lesson-body { padding: 40px; position: relative; flex-grow: 1; display: flex; flex-direction: column; }
+        .step { display: none; animation: glitchFadeIn 0.5s ease-out forwards; flex-grow: 1; }
+        .step.active { display: block; }
+        @keyframes glitchFadeIn { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 1; transform: translateY(0); } }
+        h3 {
+            color: var(--cyber-blue); font-family: 'Noto Serif Thai', serif; font-size: 28px;
+            margin-top: 0; text-shadow: 0 0 10px var(--cyber-blue-glow);
+            border-bottom: 1px dashed var(--border-line); padding-bottom: 15px;
+        }
+        p, li { line-height: 1.8; font-size: 17px; color: #cbd5e1; }
+        .btn {
+            padding: 14px 28px; border: none; border-radius: 10px; font-family: 'Sarabun'; font-weight: bold;
+            font-size: 16px; cursor: pointer; transition: 0.3s; display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        .btn-primary { background: var(--cyber-blue); color: white; box-shadow: 0 4px 15px var(--cyber-blue-glow); }
+        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 8px 25px var(--cyber-blue-glow); background: #0284c7; }
+        .btn-outline { background: transparent; color: var(--text-muted); border: 1px solid var(--border-line); }
+        .btn-outline:hover { color: white; border-color: white; }
+        .footer-nav {
+            padding: 25px 40px; background: rgba(15, 23, 42, 0.95); border-top: 1px solid var(--border-line);
+            display: none; justify-content: space-between; align-items: center; margin-top: auto;
+        }
+        .video-container {
+            width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 15px;
+            overflow: hidden; border: 2px solid var(--border-line); margin: 20px 0;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+        }
+        .block-card {
+            background: rgba(0,0,0,0.3); border-left: 4px solid var(--cyber-blue);
+            padding: 15px 20px; border-radius: 10px; margin: 12px 0;
+            display: flex; align-items: center; gap: 15px;
+        }
+        .block-pill {
+            display: inline-block; padding: 8px 16px; border-radius: 20px;
+            font-family: 'Courier New', monospace; font-weight: bold; color: white;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+        }
+        .grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-top: 20px; }
+        .info-card {
+            background: rgba(0,0,0,0.2); border: 1px solid var(--border-line);
+            border-radius: 15px; padding: 20px;
+        }
+        .quiz-option {
+            background: rgba(255,255,255,0.05); border: 2px solid var(--border-line);
+            padding: 15px 20px; border-radius: 12px; margin-bottom: 15px; cursor: pointer;
+            transition: 0.2s; font-size: 16px; color: var(--text-main); text-align: left; width: 100%;
+        }
+        .quiz-option:hover { background: rgba(14, 165, 233, 0.1); border-color: var(--cyber-blue); }
+        .quiz-option.correct { background: rgba(16, 185, 129, 0.2); border-color: var(--neon-green); color: var(--neon-green); font-weight: bold; }
+        .quiz-option.wrong { background: rgba(239, 68, 68, 0.2); border-color: #ef4444; color: #ef4444; }
+        .tag {
+            display: inline-block; padding: 4px 12px; border-radius: 12px;
+            font-size: 12px; font-weight: bold; margin-right: 8px;
+        }
+        .tag-vex { background: rgba(14, 165, 233, 0.2); color: var(--cyber-blue); border: 1px solid var(--cyber-blue); }
+        .tag-time { background: rgba(245, 158, 11, 0.2); color: var(--neon-orange); border: 1px solid var(--neon-orange); }
+        @media (max-width: 900px) {
+            .lesson-body { padding: 20px; }
+            .grid-2col { grid-template-columns: 1fr !important; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="lesson-container">
+    <div class="lesson-header">
+        <h2 style="margin: 0; font-size: 20px; letter-spacing: 1px; color: var(--text-main);">🤖 ROBOTICS M.2 | Hr 1-2</h2>
+        <div id="header-guest-info" style="display: none; align-items: center; gap: 12px;">
+            <span style="background: rgba(14, 165, 233, 0.15); color: var(--cyber-blue); padding: 6px 18px; border-radius: 20px; font-size: 14px; font-weight: bold; border: 1px solid var(--cyber-blue);" id="display-header-name">Student</span>
+            <button class="btn btn-outline" style="padding: 6px 15px; font-size: 12px;" onclick="location.reload()">EXIT</button>
+        </div>
+    </div>
+
+    <div class="progress-track" id="progress-container"><div id="progress-bar"></div></div>
+
+    <div class="lesson-body">
+
+        <!-- STEP 0: SIGN IN -->
+        <div class="step active" id="step-0">
+            <div style="text-align: center; padding: 50px 20px;">
+                <div style="font-size: 80px; margin-bottom: 20px; filter: drop-shadow(0 0 15px var(--cyber-blue));">🤖</div>
+                <h2 style="color: white; font-size: 32px; margin-bottom: 10px;">หุ่นยนต์ ม.2 | ชั่วโมงที่ 1-2</h2>
+                <p style="color: var(--cyber-blue); font-size: 20px; margin-bottom: 5px; font-weight: bold;">ปฐมนิเทศ + VEXcode VR ทบทวน</p>
+                <p style="color: var(--text-muted); font-size: 16px; margin-bottom: 30px;">Drivetrain & Loop</p>
+                <p style="color: var(--text-muted); font-size: 16px; margin-bottom: 20px;">📝 กรุณาลงชื่อเข้าเรียน</p>
+                <input type="text" id="guest-name-input" placeholder="ชื่อ-นามสกุล เลขที่ ห้อง (เช่น สมชาย ใจดี เลขที่12 ม.2/1)" style="width:100%; max-width:500px; padding:15px 20px; background:rgba(0,0,0,0.3); border:2px solid var(--cyber-blue); border-radius:12px; color:white; font-size:18px; text-align:center; outline:none;" onkeypress="if(event.key === 'Enter') startLesson()">
+                <div style="margin-top: 35px;">
+                    <button class="btn btn-primary" style="padding: 16px 50px; font-size: 18px;" onclick="startLesson()">🚀 เริ่มเรียน</button>
+                </div>
+                <div style="margin-top: 30px; color: var(--text-muted); font-size: 13px;">
+                    <span class="tag tag-vex">VEXcode VR</span>
+                    <span class="tag tag-time">2 ชั่วโมง</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 1: WELCOME + COURSE OVERVIEW -->
+        <div class="step" id="step-1">
+            <h3>🎯 ด่านที่ 1: ภาพรวมหลักสูตรหุ่นยนต์ ม.2</h3>
+            <p>ยินดีต้อนรับสู่วิชาหุ่นยนต์ <b class="student-name-inject" style="color: var(--neon-green);"></b>! <br>เทอมนี้เราจะเดินทางผ่าน <b>3 หน่วย</b> และ <b>40 ชั่วโมง</b> เพื่อสร้างหุ่นยนต์จริงด้วยมือของเรา</p>
+
+            <div style="margin-top: 25px;">
+                <div style="background: linear-gradient(90deg, rgba(14,165,233,0.15), transparent); border-left: 5px solid var(--cyber-blue); padding: 20px; border-radius: 12px; margin-bottom: 15px;">
+                    <h4 style="margin: 0 0 5px 0; color: var(--cyber-blue);">หน่วย 1: VEXcode VR (ทบทวน) — 6 ชม.</h4>
+                    <p style="margin: 0; font-size: 15px;">ฝึกคิดเชิงคำนวณกับหุ่นยนต์เสมือนบนเว็บ ก่อนจับฮาร์ดแวร์จริง</p>
+                </div>
+                <div style="background: linear-gradient(90deg, rgba(16,185,129,0.15), transparent); border-left: 5px solid var(--neon-green); padding: 20px; border-radius: 12px; margin-bottom: 15px;">
+                    <h4 style="margin: 0 0 5px 0; color: var(--neon-green);">หน่วย 2: micro:bit (ล้วน ไม่มีอุปกรณ์เสริม) — 12 ชม.</h4>
+                    <p style="margin: 0; font-size: 15px;">จับบอร์ดจริง! ใช้เซ็นเซอร์ในตัว: จอ LED, ปุ่ม, Accelerometer, Compass, Radio</p>
+                </div>
+                <div style="background: linear-gradient(90deg, rgba(245,158,11,0.15), transparent); border-left: 5px solid var(--neon-orange); padding: 20px; border-radius: 12px; margin-bottom: 15px;">
+                    <h4 style="margin: 0 0 5px 0; color: var(--neon-orange);">หน่วย 3: Cytron Maker Pi RP2040 + เว็บจำลอง — 18 ชม. ⭐</h4>
+                    <p style="margin: 0; font-size: 15px;">หุ่นยนต์จริง! Servo + HC-SR04 + IR + DC Motor → สร้างหุ่นยนต์อัจฉริยะ</p>
+                </div>
+                <div style="background: rgba(168, 85, 247, 0.1); border: 2px dashed var(--neon-purple); padding: 15px; border-radius: 12px; text-align: center;">
+                    <b style="color: var(--neon-purple);">📝 สอบกลางภาค (2 ชม.) + สอบไฟนอล (2 ชม.) = 40 ชม.</b>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 2: REVIEW VEXcode VR INTERFACE -->
+        <div class="step" id="step-2">
+            <h3>🖥️ ด่านที่ 2: ทบทวน VEXcode VR คืออะไร?</h3>
+            <p><b>VEXcode VR</b> คือเว็บไซต์จำลองหุ่นยนต์ ที่เราใช้ฝึกเขียนโปรแกรมโดยไม่ต้องมีหุ่นยนต์จริง <span style="color: var(--neon-green);">→ เหมาะกับการฝึก "วิธีคิด"</span></p>
+
+            <div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 15px; margin-top: 20px; border: 1px solid var(--border-line);">
+                <p style="margin: 0 0 10px 0;"><b style="color: var(--cyber-blue);">🌐 เข้าใช้งานที่:</b></p>
+                <a href="https://vr.vex.com" target="_blank" style="color: var(--neon-green); font-size: 22px; font-weight: bold; text-decoration: none; font-family: monospace;">https://vr.vex.com</a>
+            </div>
+
+            <div class="grid-2col" style="margin-top: 25px;">
+                <div class="info-card" style="border-color: var(--cyber-blue);">
+                    <h4 style="color: var(--cyber-blue); margin-top: 0;">🎮 ส่วนประกอบหลัก</h4>
+                    <ul style="padding-left: 20px;">
+                        <li><b>Playground</b> — สนามจำลอง</li>
+                        <li><b>Block Workspace</b> — พื้นที่ลากบล็อก</li>
+                        <li><b>Toolbox</b> — หมวดบล็อกต่าง ๆ</li>
+                        <li><b>Start ▶</b> — สั่งให้หุ่นยนต์รัน</li>
+                    </ul>
+                </div>
+                <div class="info-card" style="border-color: var(--neon-orange);">
+                    <h4 style="color: var(--neon-orange); margin-top: 0;">🤖 หุ่นยนต์ในเกม</h4>
+                    <ul style="padding-left: 20px;">
+                        <li>2 ล้อ ด้านซ้าย-ขวา</li>
+                        <li>มี <b>Distance Sensor</b> ด้านหน้า</li>
+                        <li>มี <b>Eye Sensor</b> ตรวจสี</li>
+                        <li>มี <b>Bumper</b> ตรวจชน</li>
+                        <li>มี <b>Down Eye</b> ตรวจเส้น</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div style="background: rgba(245,158,11,0.1); border-left: 4px solid var(--neon-orange); padding: 15px; border-radius: 10px; margin-top: 20px;">
+                <b style="color: var(--neon-orange);">💡 ฝึกใช้:</b> ลองเปิดเว็บ vr.vex.com แล้วเลือก Playground "Wall Maze" หรือ "Disk Mover" ดูครับ
+            </div>
+        </div>
+
+        <!-- STEP 3: DRIVETRAIN BLOCKS -->
+        <div class="step" id="step-3">
+            <h3>🛞 ด่านที่ 3: ทบทวนคำสั่ง Drivetrain (เคลื่อนที่)</h3>
+            <p>คำสั่งที่ใช้บ่อยที่สุดในการขับหุ่นยนต์ มาดู 5 บล็อกหลักที่ต้องรู้</p>
+
+            <div class="block-card">
+                <span class="block-pill" style="background: #16a34a;">drive forward 200 mm</span>
+                <span>→ เดินหน้า 200 มิลลิเมตร แล้วหยุดเอง</span>
+            </div>
+            <div class="block-card">
+                <span class="block-pill" style="background: #dc2626;">drive reverse 200 mm</span>
+                <span>→ ถอยหลัง 200 มิลลิเมตร</span>
+            </div>
+            <div class="block-card">
+                <span class="block-pill" style="background: #2563eb;">turn right 90 degrees</span>
+                <span>→ หมุนขวา 90 องศา (อยู่กับที่)</span>
+            </div>
+            <div class="block-card">
+                <span class="block-pill" style="background: #7c3aed;">turn left 90 degrees</span>
+                <span>→ หมุนซ้าย 90 องศา</span>
+            </div>
+            <div class="block-card">
+                <span class="block-pill" style="background: #475569;">stop driving</span>
+                <span>→ หยุดทันที</span>
+            </div>
+
+            <div style="background: rgba(16,185,129,0.1); border: 2px solid var(--neon-green); padding: 20px; border-radius: 15px; margin-top: 25px;">
+                <b style="color: var(--neon-green); font-size: 18px;">🧠 จดจำ:</b>
+                <p style="margin: 8px 0 0 0;">หน่วยระยะทางคือ <b>mm (มิลลิเมตร)</b> | หน่วยมุมคือ <b>degrees (องศา)</b> | หุ่นยนต์เริ่มต้นที่ความเร็ว 50%</p>
+            </div>
+        </div>
+
+        <!-- STEP 4: LOOP -->
+        <div class="step" id="step-4">
+            <h3>🔁 ด่านที่ 4: ทบทวน Loop (วนซ้ำ)</h3>
+            <p>ถ้าต้องเดินสี่เหลี่ยม 4 ด้าน เราจะเขียนคำสั่งเดิม 4 ครั้งไหม? <b style="color: var(--neon-orange);">ไม่!</b> ใช้ <b>Loop</b> ดีกว่า</p>
+
+            <div class="grid-2col">
+                <div class="info-card" style="border-color: var(--cyber-blue);">
+                    <h4 style="color: var(--cyber-blue); margin-top: 0;">❌ แบบไม่ใช้ Loop</h4>
+                    <pre style="background: rgba(0,0,0,0.5); padding: 15px; border-radius: 10px; color: #cbd5e1; font-size: 14px; overflow-x: auto;">drive forward 200mm
+turn right 90°
+drive forward 200mm
+turn right 90°
+drive forward 200mm
+turn right 90°
+drive forward 200mm
+turn right 90°</pre>
+                    <p style="font-size: 14px; color: var(--text-muted);">8 บรรทัด — ยาว ซ้ำซาก</p>
+                </div>
+                <div class="info-card" style="border-color: var(--neon-green);">
+                    <h4 style="color: var(--neon-green); margin-top: 0;">✅ แบบใช้ Loop</h4>
+                    <pre style="background: rgba(0,0,0,0.5); padding: 15px; border-radius: 10px; color: #cbd5e1; font-size: 14px; overflow-x: auto;">repeat 4 times {
+   drive forward 200mm
+   turn right 90°
+}</pre>
+                    <p style="font-size: 14px; color: var(--text-muted);">4 บรรทัด — สั้น สวย!</p>
+                </div>
+            </div>
+
+            <div style="background: rgba(168, 85, 247, 0.1); border-left: 4px solid var(--neon-purple); padding: 18px; border-radius: 10px; margin-top: 20px;">
+                <b style="color: var(--neon-purple);">📌 Loop ที่ใช้บ่อยใน VEXcode VR:</b>
+                <ul style="margin: 10px 0 0 20px;">
+                    <li><b>repeat [N] times</b> — ทำซ้ำ N รอบ</li>
+                    <li><b>forever</b> — วนตลอดไป (ใช้กับเซ็นเซอร์)</li>
+                    <li><b>repeat until [condition]</b> — วนจนกว่า...</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- STEP 5: WORKSHEET -->
+        <div class="step" id="step-5">
+            <h3>📝 ด่านที่ 5: ใบงานที่ 1 — "หุ่นยนต์เดินสี่เหลี่ยม"</h3>
+
+            <div style="background: rgba(14, 165, 233, 0.08); border: 2px solid var(--cyber-blue); padding: 30px; border-radius: 20px;">
+                <h4 style="color: white; margin-top: 0; font-size: 22px;">🎯 โจทย์ภารกิจ</h4>
+                <p style="font-size: 17px; color: var(--text-main);">
+                    เปิดเว็บ <a href="https://vr.vex.com" target="_blank" style="color: var(--neon-green); font-weight: bold;">vr.vex.com</a>
+                    → เลือก Playground <b>"Art Canvas"</b> → เขียนโปรแกรมให้หุ่นยนต์
+                    <b style="color: var(--neon-orange);">เดินเป็นรูปสี่เหลี่ยมจัตุรัส</b> ขนาดด้านละ <b>250 mm</b>
+                </p>
+
+                <div style="background: rgba(0,0,0,0.4); padding: 20px; border-radius: 12px; margin-top: 20px;">
+                    <b style="color: var(--neon-green);">✅ เกณฑ์ที่ต้องทำให้ได้:</b>
+                    <ol style="margin-top: 10px; line-height: 2;">
+                        <li>ใช้บล็อก <b>repeat</b> เท่านั้น (ห้ามเขียนคำสั่งซ้ำ)</li>
+                        <li>หุ่นยนต์ต้องกลับมาที่จุดเริ่มต้นและหันหน้าทิศเดิม</li>
+                        <li>ใช้ปากกา <b>set pen to down</b> ก่อนเริ่มเดิน เพื่อให้วาดเส้นบนสนาม</li>
+                        <li>เปลี่ยนสีปากกาเป็นสีโปรดของคุณ</li>
+                    </ol>
+                </div>
+
+                <div style="background: rgba(245, 158, 11, 0.1); border-left: 4px solid var(--neon-orange); padding: 18px; border-radius: 10px; margin-top: 20px;">
+                    <b style="color: var(--neon-orange);">📤 วิธีส่งงาน:</b>
+                    <ol style="margin: 10px 0 0 20px;">
+                        <li>กดปุ่ม <b>Share</b> ใน VEXcode VR → คัดลอกลิงก์</li>
+                        <li>แคปหน้าจอ Playground ที่เห็นรูปสี่เหลี่ยมวาดเสร็จ</li>
+                        <li>กลับมาที่เว็บ <b>โรงครูเจมส์</b> → เมนู "ระบบส่งงาน" → ส่งใบงาน "หุ่นยนต์เดินสี่เหลี่ยม"</li>
+                    </ol>
+                </div>
+
+                <div style="background: rgba(236, 72, 153, 0.1); border-left: 4px solid var(--neon-pink); padding: 15px; border-radius: 10px; margin-top: 15px;">
+                    <b style="color: var(--neon-pink);">🌟 โบนัส (+1 คะแนน):</b> ลองเปลี่ยนเป็นรูป <b>สามเหลี่ยมด้านเท่า</b> หรือ <b>ห้าเหลี่ยม</b> — สูตรมุมหันคืออะไร?
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 6: QUIZ -->
+        <div class="step" id="step-6">
+            <h3>🎮 ด่านที่ 6: แบบทดสอบท้ายชั่วโมง (5 ข้อ)</h3>
+            <p>ระบบจะสุ่ม 5 ข้อ จากคลังคำถาม และสลับตัวเลือกทุกครั้ง <b style="color: var(--neon-orange);">กันลอกเพื่อนข้างๆ!</b></p>
+
+            <div id="game-area" style="background: rgba(0,0,0,0.2); border: 2px solid var(--cyber-blue); border-radius: 20px; padding: 30px; text-align: center; max-width: 750px; margin: 0 auto; box-shadow: 0 10px 30px rgba(14,165,233,0.1);">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 20px; font-weight: bold; color: var(--cyber-blue);">
+                    <span id="question-counter">คำถาม: 1 / 5</span>
+                    <span id="score-counter">คะแนน: 0</span>
+                </div>
+                <h4 id="question-text" style="font-size: 22px; color: white; margin-bottom: 30px; line-height: 1.5;">กำลังโหลด...</h4>
+                <div id="options-grid" style="display: flex; flex-direction: column; gap: 12px;"></div>
+            </div>
+
+            <div id="game-result" style="display: none; text-align: center; padding: 40px; background: rgba(0,0,0,0.2); border-radius: 20px; border: 2px solid var(--neon-green);">
+                <div style="font-size: 70px; margin-bottom: 10px;">🏆</div>
+                <h3 style="border: none; text-shadow: none; font-size: 32px; color: var(--neon-green); margin-bottom: 10px;">จบชั่วโมงที่ 1-2!</h3>
+                <p style="font-size: 20px; color: white;">นักเรียน: <span class="student-name-inject" style="color:var(--cyber-blue);"></span></p>
+                <p style="font-size: 20px; color: white;">คะแนน: <b id="final-score" style="color: var(--neon-orange); font-size: 36px;"></b> / 5</p>
+                <div style="margin-top: 30px;">
+                    <button class="btn btn-primary" style="padding: 16px 40px; font-size: 18px;" onclick="finishMission()">📥 ยืนยันส่งคะแนน</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="footer-nav" id="footer-controls">
+        <button class="btn btn-outline" id="prevBtn" onclick="moveStep(-1)">⬅️ ถอยกลับ</button>
+        <div style="color: var(--cyber-blue); font-family: monospace; font-size: 16px; font-weight: bold;" id="step-counter">LOADING...</div>
+        <button class="btn btn-primary" id="nextBtn" onclick="moveStep(1)">เดินหน้า ➔</button>
+    </div>
+</div>
+
+<script>
+    let currentStep = 0;
+    const totalSteps = 6;
+    let studentName = "";
+
+    function startLesson() {
+        const input = document.getElementById('guest-name-input').value.trim();
+        if (!input) { alert('⚠️ กรุณาลงชื่อก่อนเริ่มเรียนครับ'); return; }
+        studentName = input;
+        try { localStorage.setItem('robotm2_student', studentName); } catch(e){}
+
+        document.querySelectorAll('.student-name-inject').forEach(el => el.innerText = studentName);
+        document.getElementById('display-header-name').innerText = "👨‍💻 " + studentName;
+        document.getElementById('header-guest-info').style.display = 'flex';
+        document.getElementById('footer-controls').style.display = 'flex';
+        document.getElementById('progress-container').style.display = 'block';
+
+        currentStep = 1; updateUI();
+    }
+
+    function updateUI() {
+        document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+        document.getElementById('step-' + currentStep).classList.add('active');
+        const progress = (currentStep / totalSteps) * 100;
+        document.getElementById('progress-bar').style.width = progress + '%';
+        document.getElementById('step-counter').innerText = `STEP: 0${currentStep}/0${totalSteps}`;
+        document.getElementById('prevBtn').style.visibility = currentStep === 1 ? 'hidden' : 'visible';
+        if (currentStep === totalSteps) {
+            document.getElementById('nextBtn').style.display = 'none';
+            if (!gameStarted) initGame();
+        } else {
+            document.getElementById('nextBtn').style.display = 'inline-flex';
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function moveStep(n) { currentStep += n; updateUI(); }
+
+    function finishMission() {
+        confetti({ particleCount: 200, spread: 100, origin: { y: 0.5 }, colors: ['#0ea5e9', '#10b981', '#f59e0b'] });
+        setTimeout(() => {
+            alert(`🎉 ${studentName} ทำคะแนนได้ ${score}/5 คะแนน\nอย่าลืมส่งใบงาน "หุ่นยนต์เดินสี่เหลี่ยม" ในระบบส่งงานนะครับ!`);
+            window.location.href = "index.html";
+        }, 2000);
+    }
+
+    // QUIZ BANK
+    const quizBank = [
+        { q: "VEXcode VR เปิดใช้งานที่เว็บไซต์ใด?", ans: "vr.vex.com", choices: ["vex.com/robot", "vr.vex.com", "vexcode.com/vr", "vr-vex.org"] },
+        { q: "บล็อก 'drive forward 200 mm' หมายความว่าอย่างไร?", ans: "หุ่นยนต์เดินหน้า 200 มิลลิเมตรแล้วหยุดเอง", choices: ["หุ่นยนต์เดินหน้าตลอดไป", "หุ่นยนต์เดินหน้า 200 เมตร", "หุ่นยนต์เดินหน้า 200 มิลลิเมตรแล้วหยุดเอง", "หุ่นยนต์รอ 200 วินาทีแล้วเดิน"] },
+        { q: "หน่วยที่ใช้กับบล็อก turn ใน VEXcode VR คืออะไร?", ans: "degrees (องศา)", choices: ["meters (เมตร)", "degrees (องศา)", "seconds (วินาที)", "millimeters (มิลลิเมตร)"] },
+        { q: "ถ้าอยากให้หุ่นยนต์เดินสี่เหลี่ยมจัตุรัส เราใช้ Loop กี่รอบ?", ans: "4 รอบ", choices: ["2 รอบ", "3 รอบ", "4 รอบ", "8 รอบ"] },
+        { q: "บล็อกใดที่ทำให้หุ่นยนต์วาดเส้นบนสนาม Art Canvas?", ans: "set pen to down", choices: ["draw line", "set pen to down", "start drawing", "pen on"] },
+        { q: "ข้อใดคือข้อดีของการใช้ Loop?", ans: "เขียนคำสั่งสั้นลง อ่านง่ายขึ้น แก้ไขทีเดียวมีผลทุกรอบ", choices: ["ทำให้หุ่นยนต์เร็วขึ้น 2 เท่า", "เขียนคำสั่งสั้นลง อ่านง่ายขึ้น แก้ไขทีเดียวมีผลทุกรอบ", "ทำให้หุ่นยนต์มีแบตเตอรี่นานขึ้น", "ทำให้หน้าจอ VEXcode VR สวยงามขึ้น"] },
+        { q: "ในการเดินสี่เหลี่ยมจัตุรัส มุมที่หันแต่ละครั้งคือกี่องศา?", ans: "90 องศา", choices: ["45 องศา", "60 องศา", "90 องศา", "180 องศา"] },
+        { q: "ถ้าหุ่นยนต์เดินสามเหลี่ยมด้านเท่า มุมที่หันคือกี่องศา?", ans: "120 องศา", choices: ["60 องศา", "90 องศา", "120 องศา", "150 องศา"] },
+        { q: "ในวิชาหุ่นยนต์ ม.2 หน่วยที่เน้นมากที่สุดคือหน่วยใด?", ans: "หน่วย 3: Cytron Maker Pi RP2040", choices: ["หน่วย 1: VEXcode VR", "หน่วย 2: micro:bit", "หน่วย 3: Cytron Maker Pi RP2040", "เน้นเท่ากันทั้ง 3 หน่วย"] },
+        { q: "คำสั่ง 'forever' ใน VEXcode VR ใช้ทำอะไร?", ans: "วนทำคำสั่งภายในตลอดไป จนกว่าจะกดหยุด", choices: ["รัน 1 ครั้งแล้วจบ", "วนทำคำสั่งภายในตลอดไป จนกว่าจะกดหยุด", "หยุดหุ่นยนต์ทันที", "บันทึกโปรแกรมลงไฟล์"] }
+    ];
+
+    let currentQIndex = 0; let score = 0; let gameStarted = false; let selectedQuestions = [];
+
+    function shuffle(array) {
+        let curId = array.length;
+        while (0 !== curId) {
+            let randId = Math.floor(Math.random() * curId);
+            curId -= 1;
+            let tmp = array[curId]; array[curId] = array[randId]; array[randId] = tmp;
+        }
+        return array;
+    }
+
+    function initGame() {
+        gameStarted = true; score = 0; currentQIndex = 0;
+        selectedQuestions = shuffle([...quizBank]).slice(0, 5);
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        const qData = selectedQuestions[currentQIndex];
+        document.getElementById('question-counter').innerText = `คำถาม: ${currentQIndex + 1} / 5`;
+        document.getElementById('score-counter').innerText = `คะแนน: ${score}`;
+        document.getElementById('question-text').innerText = qData.q;
+        const optionsGrid = document.getElementById('options-grid');
+        optionsGrid.innerHTML = "";
+        const shuffledChoices = shuffle([...qData.choices]);
+        shuffledChoices.forEach(choice => {
+            const btn = document.createElement('button');
+            btn.className = 'quiz-option';
+            btn.innerText = choice;
+            btn.onclick = () => checkAnswer(btn, choice, qData.ans);
+            optionsGrid.appendChild(btn);
+        });
+    }
+
+    function checkAnswer(selectedBtn, selectedText, correctText) {
+        const allBtns = document.querySelectorAll('.quiz-option');
+        allBtns.forEach(b => b.style.pointerEvents = 'none');
+        if (selectedText === correctText) {
+            selectedBtn.classList.add('correct');
+            score++; document.getElementById('score-counter').innerText = `คะแนน: ${score}`;
+            confetti({ particleCount: 50, spread: 60, origin: { y: 0.8 }, colors: ['#10b981'] });
+        } else {
+            selectedBtn.classList.add('wrong');
+            allBtns.forEach(b => { if(b.innerText === correctText) b.classList.add('correct'); });
+        }
+        setTimeout(() => {
+            currentQIndex++;
+            if (currentQIndex < 5) loadQuestion();
+            else showResult();
+        }, 2200);
+    }
+
+    function showResult() {
+        document.getElementById('game-area').style.display = 'none';
+        document.getElementById('game-result').style.display = 'block';
+        document.getElementById('final-score').innerText = score;
+        document.getElementById('footer-controls').style.display = 'none';
+    }
+</script>
+
+</body>
+</html>

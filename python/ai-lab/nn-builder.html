@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🧠 Neural Network Builder — AI Lab</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Noto+Serif+Thai:wght@400;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="ai-lab.css">
+<style>
+  .nn-shell {
+    display: grid;
+    grid-template-columns: 300px 1fr 320px;
+    gap: 16px;
+    align-items: start;
+  }
+  @media (max-width: 1200px) {
+    .nn-shell { grid-template-columns: 1fr; }
+  }
+  .nn-canvas-wrap {
+    background: var(--ai-card);
+    border: 1px solid var(--ai-border);
+    border-radius: var(--ai-radius);
+    padding: 16px;
+  }
+  canvas.nn-chart {
+    width: 100%;
+    height: 220px;
+    background: var(--ai-bg-soft);
+    border-radius: var(--ai-radius-sm);
+    border: 1px solid var(--ai-border);
+  }
+  canvas.nn-vis {
+    width: 100%;
+    height: 280px;
+    background: var(--ai-bg-soft);
+    border-radius: var(--ai-radius-sm);
+    border: 1px solid var(--ai-border);
+  }
+  .nn-arch-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 12px;
+    background: var(--ai-card-2);
+    border: 1px solid var(--ai-border);
+    border-radius: var(--ai-radius-sm);
+    overflow-x: auto;
+    min-height: 120px;
+    flex-wrap: wrap;
+  }
+  .nn-layer-vis {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 6px 10px;
+    min-width: 60px;
+  }
+  .nn-neuron {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--ai-purple-light);
+  }
+  .nn-arrow {
+    color: var(--ai-text-muted);
+    font-size: 20px;
+  }
+  .nn-layer-label {
+    font-size: 10px;
+    color: var(--ai-text-muted);
+    margin-top: 4px;
+    text-align: center;
+  }
+  .ds-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+  .nn-metrics {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="ai-topbar">
+  <div class="ai-topbar-left">
+    <a href="index.html" class="ai-btn ai-btn-sm">⬅️ AI Lab</a>
+    <div class="ai-brand"><span class="ai-brand-icon">🧠</span><span>NN Builder</span></div>
+  </div>
+  <div class="ai-flex">
+    <span id="tfjs-status" class="ai-status ai-status-loading">
+      <span class="ai-status-dot"></span><span id="tfjs-status-text">โหลด TensorFlow.js...</span>
+    </span>
+  </div>
+</div>
+
+<div class="ai-container-wide">
+
+  <div class="nn-shell">
+
+    <!-- LEFT: Dataset + Layers -->
+    <aside>
+      <div class="ai-panel">
+        <div class="ai-panel-title">📊 เลือก Dataset</div>
+        <div id="ds-list"></div>
+      </div>
+
+      <div class="ai-panel ai-mt-2">
+        <div class="ai-panel-title">🧱 Layers ของโมเดล</div>
+        <div id="layer-list"></div>
+        <div class="ai-flex" style="margin-top:10px;">
+          <button class="ai-btn ai-btn-sm" onclick="addLayer('dense')">➕ Dense</button>
+          <button class="ai-btn ai-btn-sm" onclick="resetLayers()">↺ Reset</button>
+        </div>
+      </div>
+
+      <div class="ai-panel ai-mt-2">
+        <div class="ai-panel-title">⚙️ Hyperparameters</div>
+        <label class="ai-label">Learning Rate: <span id="lr-val">0.01</span></label>
+        <input type="range" class="ai-range" id="lr-slider" min="0.001" max="0.5" step="0.001" value="0.01" oninput="document.getElementById('lr-val').textContent=this.value">
+
+        <label class="ai-label" style="margin-top:10px;">Epochs: <span id="ep-val">100</span></label>
+        <input type="range" class="ai-range" id="ep-slider" min="10" max="500" step="10" value="100" oninput="document.getElementById('ep-val').textContent=this.value">
+
+        <label class="ai-label" style="margin-top:10px;">Batch Size: <span id="bs-val">16</span></label>
+        <input type="range" class="ai-range" id="bs-slider" min="4" max="64" step="4" value="16" oninput="document.getElementById('bs-val').textContent=this.value">
+
+        <label class="ai-label" style="margin-top:10px;">Optimizer</label>
+        <select class="ai-select" id="opt-select">
+          <option value="adam">Adam</option>
+          <option value="sgd">SGD</option>
+          <option value="rmsprop">RMSProp</option>
+        </select>
+      </div>
+    </aside>
+
+    <!-- MIDDLE: Visualization + Train -->
+    <main>
+      <div class="nn-canvas-wrap">
+        <h3 style="font-family:'Noto Serif Thai',serif; margin-bottom:10px;">🧠 สถาปัตยกรรมโมเดล</h3>
+        <div class="nn-arch-box" id="arch-vis"></div>
+
+        <div class="ai-flex" style="margin-top:14px; flex-wrap:wrap;">
+          <button class="ai-btn ai-btn-primary" id="train-btn" onclick="trainModel()">▶️ เริ่มเทรน</button>
+          <button class="ai-btn" id="stop-btn" onclick="stopTraining()" disabled>⏸️ หยุด</button>
+          <button class="ai-btn" onclick="resetTraining()">↺ Reset</button>
+          <button class="ai-btn" onclick="downloadModel()" id="dl-btn" disabled>💾 ดาวน์โหลดโมเดล</button>
+        </div>
+
+        <div class="nn-metrics ai-mt-2">
+          <div class="ai-metric">
+            <div class="ai-metric-value" id="m-epoch">0</div>
+            <div class="ai-metric-label">Epoch</div>
+          </div>
+          <div class="ai-metric">
+            <div class="ai-metric-value" id="m-loss">—</div>
+            <div class="ai-metric-label">Loss</div>
+          </div>
+          <div class="ai-metric">
+            <div class="ai-metric-value" id="m-acc">—</div>
+            <div class="ai-metric-label">Accuracy</div>
+          </div>
+          <div class="ai-metric">
+            <div class="ai-metric-value" id="m-time">0s</div>
+            <div class="ai-metric-label">เวลา</div>
+          </div>
+        </div>
+
+        <h4 style="font-family:'Noto Serif Thai',serif; margin: 14px 0 8px;">📉 Loss</h4>
+        <canvas class="nn-chart" id="chart-loss"></canvas>
+
+        <h4 style="font-family:'Noto Serif Thai',serif; margin: 14px 0 8px;">📈 Accuracy</h4>
+        <canvas class="nn-chart" id="chart-acc"></canvas>
+      </div>
+
+    </main>
+
+    <!-- RIGHT: Test + Data Vis -->
+    <aside>
+      <div class="ai-panel">
+        <div class="ai-panel-title">👁️ มองข้อมูล</div>
+        <canvas class="nn-vis" id="data-vis"></canvas>
+        <div style="font-size:11px; color:var(--ai-text-muted); margin-top:6px; text-align:center;" id="ds-info">—</div>
+      </div>
+
+      <div class="ai-panel ai-mt-2">
+        <div class="ai-panel-title">🧪 ทดสอบโมเดล</div>
+        <p style="font-size:12px; color:var(--ai-text-muted); margin-bottom:8px;">
+          ใส่ค่า input แล้วดูคำทำนาย
+        </p>
+        <div id="test-inputs"></div>
+        <button class="ai-btn ai-btn-cyan ai-btn-sm" onclick="predict()" style="width:100%; margin-top:8px;" id="predict-btn" disabled>🔮 ทำนาย</button>
+        <div id="predict-result" style="margin-top:10px; padding:10px; background:var(--ai-card-2); border-radius:8px; font-family:'Fira Code',monospace; font-size:13px; min-height:36px;">
+          —
+        </div>
+      </div>
+
+      <div class="ai-panel ai-mt-2">
+        <div class="ai-panel-title">💡 Log</div>
+        <div id="log" style="font-family:'Fira Code',monospace; font-size:11px; color:var(--ai-text-muted); max-height:200px; overflow-y:auto; background:var(--ai-bg-soft); padding:8px; border-radius:6px;">
+          พร้อมเทรน...
+        </div>
+      </div>
+    </aside>
+
+  </div>
+</div>
+
+<!-- TensorFlow.js -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.20.0/dist/tf.min.js"></script>
+
+<script>
+// ============================================
+//   STATE
+// ============================================
+const NN = {
+  model: null,
+  training: false,
+  stopRequested: false,
+  layers: [
+    { units: 8, activation: 'relu' },
+    { units: 1, activation: 'sigmoid' }, // output
+  ],
+  currentDataset: 'xor',
+  data: null, // { X, y, Xtest, ytest, numClasses, inputDim, isRegression }
+  history: { loss: [], acc: [], valLoss: [], valAcc: [] },
+};
+
+// ============================================
+//   DATASETS
+// ============================================
+const DATASETS = [
+  { key: 'xor', name: 'XOR (ง่าย)', desc: '2 input → 1 output (binary)', inputDim: 2, numClasses: 2 },
+  { key: 'circle', name: 'วงกลม', desc: 'จุดในวงกลม vs นอกวงกลม', inputDim: 2, numClasses: 2 },
+  { key: 'spiral', name: 'Spiral (ยาก)', desc: 'จุด 2 เกลียวพันกัน', inputDim: 2, numClasses: 2 },
+  { key: 'iris', name: 'Iris', desc: 'จำแนกดอกไม้ 3 ชนิด', inputDim: 4, numClasses: 3 },
+  { key: 'moons', name: 'พระจันทร์เสี้ยว', desc: '2 รูปพระจันทร์', inputDim: 2, numClasses: 2 },
+];
+
+function genXOR(n = 200) {
+  const X = [], y = [];
+  for (let i = 0; i < n; i++) {
+    const x1 = Math.random() < 0.5 ? 0 : 1;
+    const x2 = Math.random() < 0.5 ? 0 : 1;
+    const noise1 = x1 + (Math.random() - 0.5) * 0.2;
+    const noise2 = x2 + (Math.random() - 0.5) * 0.2;
+    X.push([noise1, noise2]);
+    y.push([x1 ^ x2]);
+  }
+  return { X, y };
+}
+
+function genCircle(n = 300) {
+  const X = [], y = [];
+  for (let i = 0; i < n; i++) {
+    const x1 = Math.random() * 2 - 1;
+    const x2 = Math.random() * 2 - 1;
+    const inside = (x1 * x1 + x2 * x2) < 0.36 ? 1 : 0;
+    X.push([x1, x2]);
+    y.push([inside]);
+  }
+  return { X, y };
+}
+
+function genSpiral(n = 300) {
+  const X = [], y = [];
+  const halfN = n / 2;
+  for (let cls = 0; cls < 2; cls++) {
+    for (let i = 0; i < halfN; i++) {
+      const r = i / halfN * 1;
+      const t = 1.75 * i / halfN * 2 * Math.PI + cls * Math.PI;
+      const noise = 0.1;
+      X.push([
+        r * Math.sin(t) + (Math.random() - 0.5) * noise,
+        r * Math.cos(t) + (Math.random() - 0.5) * noise,
+      ]);
+      y.push([cls]);
+    }
+  }
+  return { X, y };
+}
+
+function genMoons(n = 300) {
+  const X = [], y = [];
+  const halfN = n / 2;
+  for (let i = 0; i < halfN; i++) {
+    const angle = Math.PI * i / halfN;
+    X.push([
+      Math.cos(angle) + (Math.random() - 0.5) * 0.2,
+      Math.sin(angle) + (Math.random() - 0.5) * 0.2,
+    ]);
+    y.push([0]);
+    X.push([
+      1 - Math.cos(angle) + (Math.random() - 0.5) * 0.2,
+      0.5 - Math.sin(angle) + (Math.random() - 0.5) * 0.2,
+    ]);
+    y.push([1]);
+  }
+  return { X, y };
+}
+
+// Iris: ใช้ค่าจำลอง (น้อย ๆ พอ)
+const IRIS_DATA = (() => {
+  const base = [
+    // setosa (0)
+    [5.1,3.5,1.4,0.2],[4.9,3.0,1.4,0.2],[4.7,3.2,1.3,0.2],[4.6,3.1,1.5,0.2],[5.0,3.6,1.4,0.2],
+    [5.4,3.9,1.7,0.4],[4.6,3.4,1.4,0.3],[5.0,3.4,1.5,0.2],[4.4,2.9,1.4,0.2],[4.9,3.1,1.5,0.1],
+    [5.4,3.7,1.5,0.2],[4.8,3.4,1.6,0.2],[4.8,3.0,1.4,0.1],[4.3,3.0,1.1,0.1],[5.8,4.0,1.2,0.2],
+    // versicolor (1)
+    [7.0,3.2,4.7,1.4],[6.4,3.2,4.5,1.5],[6.9,3.1,4.9,1.5],[5.5,2.3,4.0,1.3],[6.5,2.8,4.6,1.5],
+    [5.7,2.8,4.5,1.3],[6.3,3.3,4.7,1.6],[4.9,2.4,3.3,1.0],[6.6,2.9,4.6,1.3],[5.2,2.7,3.9,1.4],
+    [5.0,2.0,3.5,1.0],[5.9,3.0,4.2,1.5],[6.0,2.2,4.0,1.0],[6.1,2.9,4.7,1.4],[5.6,2.9,3.6,1.3],
+    // virginica (2)
+    [6.3,3.3,6.0,2.5],[5.8,2.7,5.1,1.9],[7.1,3.0,5.9,2.1],[6.3,2.9,5.6,1.8],[6.5,3.0,5.8,2.2],
+    [7.6,3.0,6.6,2.1],[4.9,2.5,4.5,1.7],[7.3,2.9,6.3,1.8],[6.7,2.5,5.8,1.8],[7.2,3.6,6.1,2.5],
+    [6.5,3.2,5.1,2.0],[6.4,2.7,5.3,1.9],[6.8,3.0,5.5,2.1],[5.7,2.5,5.0,2.0],[5.8,2.8,5.1,2.4],
+  ];
+  const labels = [];
+  for (let i = 0; i < 15; i++) labels.push(0);
+  for (let i = 0; i < 15; i++) labels.push(1);
+  for (let i = 0; i < 15; i++) labels.push(2);
+  return { X: base, y: labels.map(l => [l]) };
+})();
+
+function loadDataset(key) {
+  NN.currentDataset = key;
+  let data;
+  switch (key) {
+    case 'xor': data = genXOR(); break;
+    case 'circle': data = genCircle(); break;
+    case 'spiral': data = genSpiral(); break;
+    case 'moons': data = genMoons(); break;
+    case 'iris': data = IRIS_DATA; break;
+    default: data = genXOR();
+  }
+  const ds = DATASETS.find(d => d.key === key);
+
+  // Shuffle
+  const indices = data.X.map((_, i) => i);
+  for (let i = indices.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [indices[i], indices[j]] = [indices[j], indices[i]];
+  }
+  const X = indices.map(i => data.X[i]);
+  const y = indices.map(i => data.y[i]);
+
+  // 80/20 split
+  const splitIdx = Math.floor(X.length * 0.8);
+  NN.data = {
+    X: X.slice(0, splitIdx),
+    y: y.slice(0, splitIdx),
+    Xtest: X.slice(splitIdx),
+    ytest: y.slice(splitIdx),
+    numClasses: ds.numClasses,
+    inputDim: ds.inputDim,
+  };
+
+  // Update output layer
+  const lastLayer = NN.layers[NN.layers.length - 1];
+  if (ds.numClasses === 2) {
+    lastLayer.units = 1;
+    lastLayer.activation = 'sigmoid';
+  } else {
+    lastLayer.units = ds.numClasses;
+    lastLayer.activation = 'softmax';
+  }
+
+  renderDatasets();
+  renderLayers();
+  renderArch();
+  drawDataVis();
+  renderTestInputs();
+
+  document.getElementById('ds-info').textContent =
+    `${X.length} ตัวอย่าง (Train ${NN.data.X.length} / Test ${NN.data.Xtest.length})`;
+}
+
+function renderDatasets() {
+  const wrap = document.getElementById('ds-list');
+  wrap.innerHTML = DATASETS.map(d => `
+    <div class="ai-ds-btn ${NN.currentDataset === d.key ? 'active' : ''}"
+         onclick="loadDataset('${d.key}')">
+      <div class="ai-ds-name">${d.name}</div>
+      <div class="ai-ds-info">${d.desc} · ${d.inputDim}→${d.numClasses}</div>
+    </div>
+  `).join('');
+}
+
+// ============================================
+//   LAYERS
+// ============================================
+function addLayer(type) {
+  // Insert before output layer
+  NN.layers.splice(NN.layers.length - 1, 0, { units: 8, activation: 'relu' });
+  renderLayers();
+  renderArch();
+}
+
+function deleteLayer(idx) {
+  if (NN.layers.length <= 2) {
+    log('⚠️ ต้องมีอย่างน้อย 2 layers');
+    return;
+  }
+  if (idx === NN.layers.length - 1) {
+    log('⚠️ ลบ output layer ไม่ได้');
+    return;
+  }
+  NN.layers.splice(idx, 1);
+  renderLayers();
+  renderArch();
+}
+
+function updateLayer(idx, key, val) {
+  NN.layers[idx][key] = key === 'units' ? parseInt(val) : val;
+  renderArch();
+}
+
+function resetLayers() {
+  NN.layers = [
+    { units: 8, activation: 'relu' },
+    { units: NN.data?.numClasses === 2 ? 1 : (NN.data?.numClasses || 1),
+      activation: NN.data?.numClasses === 2 ? 'sigmoid' : 'softmax' },
+  ];
+  renderLayers();
+  renderArch();
+}
+
+function renderLayers() {
+  const wrap = document.getElementById('layer-list');
+  wrap.innerHTML = NN.layers.map((l, i) => {
+    const isOutput = i === NN.layers.length - 1;
+    return `
+      <div class="ai-layer">
+        <div class="ai-layer-head">
+          <span>${isOutput ? '🎯 Output' : `Layer ${i + 1}`}</span>
+          ${!isOutput ? `<button class="ai-layer-x" onclick="deleteLayer(${i})">✕</button>` : ''}
+        </div>
+        <div class="ai-layer-row">
+          <label>Units</label>
+          <input type="number" value="${l.units}" min="1" max="128" ${isOutput ? 'disabled' : ''}
+                 onchange="updateLayer(${i}, 'units', this.value)">
+        </div>
+        <div class="ai-layer-row">
+          <label>Activation</label>
+          <select onchange="updateLayer(${i}, 'activation', this.value)">
+            ${['relu', 'tanh', 'sigmoid', 'softmax', 'linear'].map(a =>
+              `<option value="${a}" ${l.activation === a ? 'selected' : ''}>${a}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderArch() {
+  const wrap = document.getElementById('arch-vis');
+  if (!NN.data) { wrap.innerHTML = '<div class="ai-text-muted">เลือก Dataset ก่อน</div>'; return; }
+
+  let html = `<div class="nn-layer-vis">${
+    Array(Math.min(NN.data.inputDim, 8)).fill('<div class="nn-neuron"></div>').join('')
+  }<div class="nn-layer-label">Input<br>${NN.data.inputDim}</div></div>`;
+
+  for (let i = 0; i < NN.layers.length; i++) {
+    html += `<span class="nn-arrow">→</span>`;
+    const l = NN.layers[i];
+    const isOut = i === NN.layers.length - 1;
+    const showUnits = Math.min(l.units, 8);
+    html += `<div class="nn-layer-vis">${
+      Array(showUnits).fill(`<div class="nn-neuron" style="background:${isOut ? 'var(--ai-pink)' : 'var(--ai-cyan)'}"></div>`).join('')
+    }<div class="nn-layer-label">${isOut ? 'Output' : `Hidden ${i+1}`}<br>${l.units} · ${l.activation}</div></div>`;
+  }
+  wrap.innerHTML = html;
+}
+
+// ============================================
+//   TRAIN
+// ============================================
+async function trainModel() {
+  if (NN.training) return;
+  if (!NN.data) { log('⚠️ เลือก Dataset ก่อน'); return; }
+  if (typeof tf === 'undefined') { log('⚠️ TensorFlow.js ยังไม่พร้อม'); return; }
+
+  NN.training = true;
+  NN.stopRequested = false;
+  NN.history = { loss: [], acc: [], valLoss: [], valAcc: [] };
+
+  document.getElementById('train-btn').disabled = true;
+  document.getElementById('stop-btn').disabled = false;
+  document.getElementById('dl-btn').disabled = true;
+
+  const lr = parseFloat(document.getElementById('lr-slider').value);
+  const epochs = parseInt(document.getElementById('ep-slider').value);
+  const batchSize = parseInt(document.getElementById('bs-slider').value);
+  const optName = document.getElementById('opt-select').value;
+
+  log(`🚀 เริ่มเทรน — LR=${lr}, Epochs=${epochs}, Batch=${batchSize}`);
+
+  // Build model
+  if (NN.model) { NN.model.dispose(); NN.model = null; }
+  NN.model = tf.sequential();
+  NN.layers.forEach((l, i) => {
+    const cfg = { units: l.units, activation: l.activation };
+    if (i === 0) cfg.inputShape = [NN.data.inputDim];
+    NN.model.add(tf.layers.dense(cfg));
+  });
+
+  const isMultiClass = NN.data.numClasses > 2;
+  const lossFn = isMultiClass ? 'sparseCategoricalCrossentropy' : 'binaryCrossentropy';
+  let optimizer;
+  if (optName === 'adam') optimizer = tf.train.adam(lr);
+  else if (optName === 'sgd') optimizer = tf.train.sgd(lr);
+  else optimizer = tf.train.rmsprop(lr);
+
+  NN.model.compile({ optimizer, loss: lossFn, metrics: ['accuracy'] });
+
+  // Prepare tensors
+  const xs = tf.tensor2d(NN.data.X);
+  const ys = isMultiClass
+    ? tf.tensor1d(NN.data.y.map(r => r[0]), 'int32')
+    : tf.tensor2d(NN.data.y);
+  const xs_val = tf.tensor2d(NN.data.Xtest);
+  const ys_val = isMultiClass
+    ? tf.tensor1d(NN.data.ytest.map(r => r[0]), 'int32')
+    : tf.tensor2d(NN.data.ytest);
+
+  const start = Date.now();
+  initCharts();
+
+  try {
+    await NN.model.fit(xs, ys, {
+      epochs,
+      batchSize,
+      validationData: [xs_val, ys_val],
+      shuffle: true,
+      callbacks: {
+        onEpochEnd: async (epoch, logs) => {
+          NN.history.loss.push(logs.loss);
+          NN.history.acc.push(logs.acc ?? logs.accuracy ?? 0);
+          NN.history.valLoss.push(logs.val_loss);
+          NN.history.valAcc.push(logs.val_acc ?? logs.val_accuracy ?? 0);
+
+          document.getElementById('m-epoch').textContent = epoch + 1;
+          document.getElementById('m-loss').textContent = logs.loss.toFixed(4);
+          document.getElementById('m-acc').textContent =
+            ((logs.acc ?? logs.accuracy ?? 0) * 100).toFixed(1) + '%';
+          document.getElementById('m-time').textContent =
+            ((Date.now() - start) / 1000).toFixed(1) + 's';
+
+          drawCharts();
+          if (epoch % 10 === 0) {
+            log(`Epoch ${epoch+1}: loss=${logs.loss.toFixed(4)} acc=${((logs.acc ?? logs.accuracy ?? 0)*100).toFixed(1)}%`);
+          }
+          if (NN.stopRequested) {
+            NN.model.stopTraining = true;
+            log('⏹️ หยุดเทรน');
+          }
+          await tf.nextFrame();
+        }
+      }
+    });
+    log('✅ เทรนเสร็จ!');
+    document.getElementById('dl-btn').disabled = false;
+    document.getElementById('predict-btn').disabled = false;
+  } catch (e) {
+    log('❌ Error: ' + e.message);
+    console.error(e);
+  } finally {
+    xs.dispose(); ys.dispose(); xs_val.dispose(); ys_val.dispose();
+    NN.training = false;
+    document.getElementById('train-btn').disabled = false;
+    document.getElementById('stop-btn').disabled = true;
+  }
+}
+
+function stopTraining() {
+  NN.stopRequested = true;
+}
+
+function resetTraining() {
+  if (NN.model) { NN.model.dispose(); NN.model = null; }
+  NN.history = { loss: [], acc: [], valLoss: [], valAcc: [] };
+  document.getElementById('m-epoch').textContent = '0';
+  document.getElementById('m-loss').textContent = '—';
+  document.getElementById('m-acc').textContent = '—';
+  document.getElementById('m-time').textContent = '0s';
+  document.getElementById('dl-btn').disabled = true;
+  document.getElementById('predict-btn').disabled = true;
+  initCharts();
+  log('↺ Reset');
+}
+
+async function downloadModel() {
+  if (!NN.model) return;
+  try {
+    await NN.model.save('downloads://nn-model-' + NN.currentDataset);
+    log('💾 บันทึกโมเดลแล้ว');
+  } catch (e) {
+    log('❌ บันทึกล้มเหลว: ' + e.message);
+  }
+}
+
+// ============================================
+//   PREDICT
+// ============================================
+function renderTestInputs() {
+  if (!NN.data) return;
+  const wrap = document.getElementById('test-inputs');
+  const labels = NN.currentDataset === 'iris'
+    ? ['sepal length', 'sepal width', 'petal length', 'petal width']
+    : Array(NN.data.inputDim).fill(0).map((_, i) => `Input ${i + 1}`);
+  wrap.innerHTML = labels.map((lbl, i) => `
+    <label class="ai-label" style="margin-top:6px;">${lbl}</label>
+    <input type="number" class="ai-input" id="pred-in-${i}" step="0.1" value="0.5">
+  `).join('');
+}
+
+function predict() {
+  if (!NN.model) return;
+  const inputs = [];
+  for (let i = 0; i < NN.data.inputDim; i++) {
+    const v = parseFloat(document.getElementById(`pred-in-${i}`).value) || 0;
+    inputs.push(v);
+  }
+  const t = tf.tensor2d([inputs]);
+  const result = NN.model.predict(t);
+  result.data().then(data => {
+    const out = document.getElementById('predict-result');
+    if (NN.data.numClasses > 2) {
+      let max = 0, maxI = 0;
+      for (let i = 0; i < data.length; i++) {
+        if (data[i] > max) { max = data[i]; maxI = i; }
+      }
+      const names = NN.currentDataset === 'iris'
+        ? ['setosa 🌸', 'versicolor 🌺', 'virginica 🌷']
+        : Array(data.length).fill(0).map((_, i) => `Class ${i}`);
+      out.innerHTML = `<b>Class ${maxI}: ${names[maxI]}</b><br>` +
+        Array.from(data).map((v, i) =>
+          `<span style="color:${i===maxI?'var(--ai-green)':'var(--ai-text-muted)'}">${names[i]}: ${(v*100).toFixed(1)}%</span>`
+        ).join('<br>');
+    } else {
+      const v = data[0];
+      const cls = v > 0.5 ? 1 : 0;
+      out.innerHTML = `<b>Class ${cls}</b> (confidence ${((v > 0.5 ? v : 1 - v) * 100).toFixed(1)}%)`;
+    }
+    t.dispose();
+    result.dispose();
+  });
+}
+
+// ============================================
+//   CHARTS
+// ============================================
+function initCharts() {
+  drawCharts();
+}
+
+function drawLineChart(canvas, series, color, label) {
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width = canvas.clientWidth * devicePixelRatio;
+  const H = canvas.height = canvas.clientHeight * devicePixelRatio;
+  ctx.scale(devicePixelRatio, devicePixelRatio);
+  const cw = canvas.clientWidth, ch = canvas.clientHeight;
+
+  ctx.fillStyle = getCss('--ai-bg-soft');
+  ctx.fillRect(0, 0, cw, ch);
+
+  // Grid
+  ctx.strokeStyle = getCss('--ai-border');
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= 4; i++) {
+    const y = (i / 4) * ch;
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(cw, y);
+    ctx.stroke();
+  }
+
+  if (!series.length) {
+    ctx.fillStyle = getCss('--ai-text-muted');
+    ctx.font = '12px Sarabun';
+    ctx.textAlign = 'center';
+    ctx.fillText('ยังไม่มีข้อมูล', cw / 2, ch / 2);
+    return;
+  }
+
+  // Find min/max
+  let max = -Infinity, min = Infinity;
+  for (const s of series) for (const v of s.data) {
+    if (v > max) max = v;
+    if (v < min) min = v;
+  }
+  if (max === min) { max += 1; min -= 1; }
+  const pad = (max - min) * 0.1;
+  max += pad; min -= pad;
+
+  // Draw lines
+  series.forEach(s => {
+    if (!s.data.length) return;
+    ctx.strokeStyle = s.color;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    s.data.forEach((v, i) => {
+      const x = (i / Math.max(s.data.length - 1, 1)) * cw;
+      const y = ch - ((v - min) / (max - min)) * ch;
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+  });
+
+  // Legend
+  ctx.font = '11px Sarabun';
+  ctx.textAlign = 'left';
+  let legX = 8;
+  series.forEach(s => {
+    ctx.fillStyle = s.color;
+    ctx.fillRect(legX, 6, 12, 3);
+    ctx.fillStyle = getCss('--ai-text');
+    ctx.fillText(s.label, legX + 16, 12);
+    legX += ctx.measureText(s.label).width + 28;
+  });
+
+  // Y-axis labels
+  ctx.fillStyle = getCss('--ai-text-muted');
+  ctx.font = '10px Fira Code';
+  ctx.textAlign = 'right';
+  ctx.fillText(max.toFixed(3), cw - 4, 12);
+  ctx.fillText(min.toFixed(3), cw - 4, ch - 4);
+}
+
+function drawCharts() {
+  drawLineChart(
+    document.getElementById('chart-loss'),
+    [
+      { data: NN.history.loss, color: getCss('--ai-purple-light'), label: 'Train Loss' },
+      { data: NN.history.valLoss, color: getCss('--ai-pink'), label: 'Val Loss' },
+    ]
+  );
+  drawLineChart(
+    document.getElementById('chart-acc'),
+    [
+      { data: NN.history.acc, color: getCss('--ai-cyan-light'), label: 'Train Acc' },
+      { data: NN.history.valAcc, color: getCss('--ai-green'), label: 'Val Acc' },
+    ]
+  );
+}
+
+function drawDataVis() {
+  if (!NN.data) return;
+  const canvas = document.getElementById('data-vis');
+  canvas.width = canvas.clientWidth * devicePixelRatio;
+  canvas.height = canvas.clientHeight * devicePixelRatio;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(devicePixelRatio, devicePixelRatio);
+  const cw = canvas.clientWidth, ch = canvas.clientHeight;
+
+  ctx.fillStyle = getCss('--ai-bg-soft');
+  ctx.fillRect(0, 0, cw, ch);
+
+  if (NN.data.inputDim > 2) {
+    // Show first 2 dims only
+    ctx.fillStyle = getCss('--ai-text-muted');
+    ctx.font = '11px Sarabun';
+    ctx.textAlign = 'center';
+    ctx.fillText('(แสดง 2 มิติแรกของ ' + NN.data.inputDim + ' มิติ)', cw / 2, 14);
+  }
+
+  // Find ranges
+  const all = [...NN.data.X, ...NN.data.Xtest];
+  let xMin = Infinity, xMax = -Infinity, yMin = Infinity, yMax = -Infinity;
+  for (const p of all) {
+    if (p[0] < xMin) xMin = p[0];
+    if (p[0] > xMax) xMax = p[0];
+    if (p[1] < yMin) yMin = p[1];
+    if (p[1] > yMax) yMax = p[1];
+  }
+  const xPad = (xMax - xMin) * 0.1, yPad = (yMax - yMin) * 0.1;
+  xMin -= xPad; xMax += xPad; yMin -= yPad; yMax += yPad;
+
+  const colors = ['#7C3AED', '#EC4899', '#06B6D4'];
+  const pts = NN.data.X.map((p, i) => ({ x: p[0], y: p[1], c: NN.data.y[i][0] }));
+
+  pts.forEach(p => {
+    const px = ((p.x - xMin) / (xMax - xMin)) * (cw - 20) + 10;
+    const py = ch - 10 - ((p.y - yMin) / (yMax - yMin)) * (ch - 20);
+    ctx.fillStyle = colors[p.c % colors.length];
+    ctx.beginPath();
+    ctx.arc(px, py, 3, 0, Math.PI * 2);
+    ctx.fill();
+  });
+}
+
+function getCss(name) {
+  return getComputedStyle(document.body).getPropertyValue(name).trim();
+}
+
+function log(msg) {
+  const el = document.getElementById('log');
+  const time = new Date().toLocaleTimeString('th-TH', { hour12: false });
+  el.innerHTML += `<div>[${time}] ${msg}</div>`;
+  el.scrollTop = el.scrollHeight;
+}
+
+// ============================================
+//   BOOT
+// ============================================
+function bootNN() {
+  if (typeof tf !== 'undefined') {
+    document.getElementById('tfjs-status').className = 'ai-status ai-status-ok';
+    document.getElementById('tfjs-status-text').textContent = 'TensorFlow.js พร้อม';
+    log('✅ TensorFlow.js v' + tf.version_core);
+    log('Backend: ' + tf.getBackend());
+    loadDataset('xor');
+    window.addEventListener('resize', () => {
+      drawCharts();
+      drawDataVis();
+    });
+  } else {
+    setTimeout(bootNN, 200);
+  }
+}
+bootNN();
+</script>
+
+</body>
+</html>

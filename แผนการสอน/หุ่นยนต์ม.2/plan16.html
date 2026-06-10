@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แผนการจัดการเรียนรู้ที่ 16 — หุ่นยนต์หลบสิ่งกีดขวาง</title>
+    <link rel="stylesheet" href="lesson-plan.css">
+</head>
+<body>
+<div class="nav-bar no-print"><a href="index.html">⬅ กลับ</a><div style="color:white;">แผนที่ 16 / 20 — Hr 31-32</div><button class="print-btn" onclick="window.print()">🖨️ พิมพ์</button></div>
+<div class="paper">
+
+    <h1 class="plan-title">แผนการจัดการเรียนรู้ที่ 16</h1>
+    <div class="plan-meta-row"><span>หน่วยที่ 3 เรื่อง Cytron Maker Pi RP2040 + เว็บ Simulator</span><span>จำนวน 18 ชั่วโมง</span></div>
+    <div class="plan-meta-row"><span>เรื่อง หุ่นยนต์หลบสิ่งกีดขวางอัตโนมัติ (Sense → Think → Act)</span><span>จำนวน 2 ชั่วโมง (ชั่วโมงที่ 31-32)</span></div>
+    <div class="plan-meta-row"><span>วิชา หุ่นยนต์</span><span>กลุ่มสาระการเรียนรู้ วิทยาศาสตร์และเทคโนโลยี</span></div>
+    <div class="plan-meta-row"><span>ชั้นมัธยมศึกษาปีที่ 2</span><span>ภาคเรียนที่ 1 ปีการศึกษา 2569</span></div>
+    <div class="plan-meta-row"><span>ผู้สอน นายภาณุพงศ์ อุ่นคำ</span><span>โรงเรียนบ้านป่ายุบ (บุ้นกีประชานุเคราะห์)</span></div>
+    <hr class="divider">
+
+    <div class="section">
+        <div class="section-title">1. มาตรฐานการเรียนรู้/ตัวชี้วัด</div>
+        <p class="indent"><b>มาตรฐาน ว 4.2</b> เข้าใจและใช้แนวคิดเชิงคำนวณในการแก้ปัญหา</p>
+        <p class="indent bold">ตัวชี้วัดระหว่างทาง</p>
+        <p class="indent2"><b>ว 4.2 ม.2/1</b> ออกแบบอัลกอริทึมที่ใช้แนวคิดเชิงคำนวณในการแก้ปัญหา</p>
+        <p class="indent2"><b>ว 4.2 ม.2/2</b> ออกแบบและเขียนโปรแกรมที่ใช้ตรรกะและฟังก์ชันในการแก้ปัญหา</p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">2. จุดประสงค์การเรียนรู้</div>
+        <ol>
+            <li>อธิบายหลักการ "Sense → Think → Act" ของหุ่นยนต์อัตโนมัติได้ <span class="kpa">K</span></li>
+            <li>ออกแบบ Flowchart หุ่นยนต์หลบสิ่งกีดขวางได้ <span class="kpa">P</span></li>
+            <li>เขียนโปรแกรมรวม HC-SR04 + Motor + LED ให้หุ่นยนต์ทำงานอัตโนมัติ <span class="kpa">P</span></li>
+            <li>ปรับ Threshold (SAFE_DIST, SPEED, BACK_TIME, TURN_TIME) ให้เหมาะกับสนามจริง <span class="kpa">P</span></li>
+            <li>ตระหนักว่านี่คือพื้นฐานของ AI และหุ่นยนต์ในชีวิตจริง (Roomba, Tesla) <span class="kpa">A</span></li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">3. คุณลักษณะอันพึงประสงค์</div>
+        <p class="indent">☐ 1. รักชาติฯ ☐ 2. ซื่อสัตย์ ☑ 3. มีวินัย ☑ 4. ใฝ่เรียนรู้ ☐ 5. พอเพียง ☑ 6. มุ่งมั่น ☐ 7. รักไทย ☐ 8. จิตสาธารณะ</p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">4. สมรรถนะสำคัญของผู้เรียน</div>
+        <ol><li>ความสามารถในการคิด (คิดสร้างสรรค์ + คิดเป็นระบบ)</li><li>ความสามารถในการแก้ปัญหา</li><li>ความสามารถในการใช้เทคโนโลยี</li></ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">5. สาระสำคัญ</div>
+        <p class="indent">หุ่นยนต์อัตโนมัติทำงานตามหลัก <b>"Sense → Think → Act"</b> = รับรู้ (เซ็นเซอร์) → คิด (เงื่อนไข) → ทำ (มอเตอร์/เซอร์โว) เป็นพื้นฐานของหุ่นยนต์ Roomba, รถยนต์ขับเอง Tesla, drone Algorithm หลบสิ่งกีดขวางอย่างง่าย: forever loop → วัดระยะ → ถ้าใกล้กำแพง (&lt; 20 cm) → หยุด + ถอย + เลี้ยว → ถ้าไกล → เดินหน้า ค่า Threshold ที่ปรับได้: SAFE_DIST 20-30 cm, SPEED 0.4-0.7, BACK_TIME 0.3-0.8 วินาที, TURN_TIME 0.3-0.6 วินาที — ปรับให้เหมาะกับขนาดหุ่นยนต์และสนาม</p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">6. ความรู้เดิมที่นักเรียนต้องมี</div>
+        <ol><li>HC-SR04 จากแผน 15</li><li>DC Motor + ฟังก์ชัน forward/backward/turn จากแผน 14</li><li>การออกแบบ Flowchart</li></ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">7. การจัดกิจกรรมการเรียนรู้</div>
+        <div class="hour-banner">▶ ชั่วโมงที่ 31 (60 นาที) : หลักการ Sense → Think → Act + Flowchart</div>
+
+        <p class="step-banner">ขั้นที่ 1: การวิเคราะห์และกำหนดรายละเอียดของปัญหา (15 นาที)</p>
+        <ol>
+            <li>ครูเปิดเว็บไซต์ <code>Robotm.2/Hr31-32RP.html</code></li>
+            <p class="teacher-q">หุ่นยนต์ดูดฝุ่น Roomba ที่ขายทั่วโลกใช้เซ็นเซอร์อะไรในการหลบโต๊ะ เก้าอี้?</p>
+            <p class="student-a">น่าจะใช้เซ็นเซอร์ระยะ + bumper + เซ็นเซอร์กันตกบันได ทำงานเป็นวงจร — ตรวจ → ตัดสิน → ขยับ ตลอดเวลา</p>
+        </ol>
+
+        <p class="step-banner">ขั้นที่ 2: การวางแผนการแก้ปัญหา (25 นาที)</p>
+        <ol start="2">
+            <li>ครูสาธิตหลัก Sense → Think → Act ผ่านภาพในเว็บไซต์</li>
+            <li>ครูสาธิต Simulation หุ่นยนต์หลบสิ่งกีดขวางในเว็บ (กด ▶ ดูทำงานเอง)</li>
+            <li>นักเรียนเขียน Flowchart ของหุ่นยนต์ลงในใบงาน:
+                <ul>
+                    <li>START → วัดระยะ → ระยะ &lt; 20? → ใช่: หยุด+ถอย+เลี้ยว / ไม่ใช่: เดินหน้าต่อ → วน</li>
+                </ul>
+            </li>
+        </ol>
+
+        <p class="step-banner">ขั้นที่ 3: การดำเนินการแก้ปัญหา (20 นาที)</p>
+        <ol start="5">
+            <li>นักเรียนรวมโค้ดของหน่วยที่ผ่านมา (HC-SR04 + Motor + LED) เข้าด้วยกัน</li>
+            <li>นักเรียนทดสอบในสนามที่ครูจัดให้ (กระดาษ A1 + กล่องกระดาษเป็นสิ่งกีดขวาง)</li>
+        </ol>
+
+        <div class="hour-banner">▶ ชั่วโมงที่ 32 (60 นาที) : ปรับ Threshold + LED แสดงสถานะ</div>
+
+        <p class="step-banner">ขั้นที่ 3 (ต่อ): การดำเนินการแก้ปัญหา (40 นาที)</p>
+        <ol start="7">
+            <li>ครูแนะนำตัวแปร Threshold ที่ปรับได้: SAFE_DIST, SPEED, BACK_TIME, TURN_TIME</li>
+            <li>นักเรียนเพิ่ม NeoPixel แสดงสถานะ:
+                <ul>
+                    <li>เขียว = เดินหน้า (ปลอดภัย)</li>
+                    <li>แดง = หยุด</li>
+                    <li>ส้ม = ถอย</li>
+                    <li>น้ำเงิน = เลี้ยว</li>
+                </ul>
+            </li>
+            <li>นักเรียนปรับและทดสอบจนหุ่นยนต์สำรวจห้องได้</li>
+        </ol>
+
+        <p class="step-banner">ขั้นที่ 4: การตรวจสอบและประเมินผล (20 นาที)</p>
+        <ol start="10">
+            <li>นักเรียนทำใบงานที่ 16.1 + วิดีโอ ≥1 นาที + ไฟล์ readme.txt</li>
+            <li>นักเรียนทำแบบทดสอบ 5 ข้อ</li>
+            <p class="teacher-q">ถ้าหุ่นยนต์ติดมุมห้องและวนเลี้ยวขวาตลอด จะแก้อย่างไร?</p>
+            <p class="student-a">เพิ่มตัวแปรนับการเลี้ยว ถ้าเลี้ยวขวา 3 ครั้งติด เปลี่ยนเป็นเลี้ยวซ้ายแทน หรือเพิ่มเวลาถอย</p>
+            <li>ครูสรุปบทเรียน</li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">8. ชิ้นงาน / ภาระงาน</div>
+        <ol><li>ใบงานที่ 16.1 "หุ่นยนต์สำรวจห้อง" + วิดีโอ ≥1 นาที + readme.txt</li><li>แบบทดสอบ 5 ข้อ</li></ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">9. การวัดและประเมินผล</div>
+        <table class="eval">
+            <thead><tr><th>รายการ</th><th>วิธีวัด</th><th>เครื่องมือ</th><th>เกณฑ์</th></tr></thead>
+            <tbody>
+                <tr><td><b>1. ความรู้ (K)</b></td><td>ตรวจใบงาน + ทดสอบ</td><td>1. ใบงาน 16.1<br>2. แบบทดสอบ 5 ข้อ</td><td>ร้อยละ 60</td></tr>
+                <tr><td><b>2. ทักษะกระบวนการ (P)</b><br>(ภารกิจสำคัญ — 15 คะแนน)</td><td>ตรวจชิ้นงาน</td><td>3. Rubric (15 คะแนน)</td><td>≥10 คะแนน</td></tr>
+                <tr><td><b>3. พฤติกรรม</b></td><td>สังเกต</td><td>4. แบบสังเกตพฤติกรรม</td><td>ระดับ "พอใช้"</td></tr>
+                <tr><td><b>4. คุณลักษณะ</b></td><td>สังเกต</td><td>5. แบบประเมินคุณลักษณะ</td><td>ระดับ "ผ่าน"</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <div class="section-title">10. สื่อและแหล่งการเรียนรู้</div>
+        <p class="indent"><b>สื่อ:</b> 1. <code>Robotm.2/Hr31-32RP.html</code> (AI Simulation) &nbsp; 2. หุ่นยนต์ครบชุด &nbsp; 3. สนามทดสอบ (A1 + กล่อง) &nbsp; 4. ใบงาน 16.1</p>
+        <p class="indent"><b>แหล่งการเรียนรู้:</b> 1. ห้องคอมพิวเตอร์ &nbsp; 2. อินเทอร์เน็ต</p>
+    </div>
+
+    <div class="page-break"></div>
+
+    <div class="appendix-banner">ภาคผนวก: เครื่องมือวัดและประเมินผล</div>
+
+    <div class="tool-title">เครื่องมือที่ 1: ใบงานที่ 16.1 และ Rubric ภารกิจ</div>
+
+    <div class="worksheet-header">
+        <h3>ใบงานที่ 16.1 "หุ่นยนต์สำรวจห้อง"</h3>
+        <p>ชื่อ-สกุล <span class="dots">..................................................................</span> ชั้น ม.2/<span class="dots">....</span> เลขที่ <span class="dots">....</span></p>
+    </div>
+
+    <p class="bold">ตอนที่ 1: Flowchart</p>
+    <div style="border: 1px solid #000; min-height: 7cm; padding: 8pt; margin: 6pt 0;">
+        <p style="color: #888; font-style: italic;">(วาด Flowchart ของหุ่นยนต์: START → วัดระยะ → เงื่อนไข → action → วน)</p>
+    </div>
+
+    <p class="bold">ตอนที่ 2: ตัวแปร Threshold</p>
+    <p class="indent">1. SAFE_DIST = <span class="dots">.....</span> cm (เพราะอะไร? <span class="dots">.........................................</span>)</p>
+    <p class="indent">2. SPEED = <span class="dots">.....</span> (0.0 - 1.0) (เพราะอะไร? <span class="dots">.........................................</span>)</p>
+    <p class="indent">3. BACK_TIME = <span class="dots">.....</span> วินาที</p>
+    <p class="indent">4. TURN_TIME = <span class="dots">.....</span> วินาที</p>
+
+    <p class="bold">ตอนที่ 3: ส่งงาน</p>
+    <p class="indent">☐ 1. แคปโค้ดเต็ม (function + main loop)</p>
+    <p class="indent">☐ 2. วิดีโอ ≥1 นาที (ถ่ายจากด้านบน) หุ่นยนต์หลบสิ่งกีดขวาง</p>
+    <p class="indent">☐ 3. แคป Sim ตอนเจอสิ่งกีดขวาง + LED แดง</p>
+    <p class="indent">☐ 4. แคป Sim ตอนผ่านได้ + LED เขียว</p>
+    <p class="indent">☐ 5. ไฟล์ readme.txt อธิบายการตั้งค่า Threshold</p>
+
+    <p class="bold">ตอนที่ 4: คำถามท้าทาย (โบนัส +5)</p>
+    <p class="indent">เพิ่ม "Mood System" - LED เปลี่ยนสีตามอารมณ์หุ่นยนต์ (สบาย=ฟ้า, เครียด=แดงกระพริบ)</p>
+    <p class="indent dots">.................................................................................................................</p>
+
+    <p class="bold" style="margin-top: 12pt;">Rubric ภารกิจ (15 คะแนน)</p>
+    <table>
+        <thead><tr><th>หัวข้อ</th><th>เกณฑ์</th><th>คะแนน</th></tr></thead>
+        <tbody>
+            <tr><td><b>1. ใช้ HC-SR04</b></td><td>วัดระยะตลอดเวลา + try/except</td><td class="text-center">2</td></tr>
+            <tr><td><b>2. ใช้ DC Motor 2 ตัว</b></td><td>เดินหน้า/ถอย/เลี้ยว ครบ</td><td class="text-center">3</td></tr>
+            <tr><td><b>3. หลบสิ่งกีดขวางสำเร็จ</b></td><td>ไม่ชนวัตถุที่ระยะ &lt; 20 cm</td><td class="text-center">4</td></tr>
+            <tr><td><b>4. LED แสดงสถานะ</b></td><td>เขียว/ส้ม/น้ำเงิน/แดง ครบ 4 สถานะ</td><td class="text-center">3</td></tr>
+            <tr><td><b>5. ไม่ติดมุมห้อง</b></td><td>วนสำรวจได้ ไม่ติดมุม</td><td class="text-center">3</td></tr>
+        </tbody>
+    </table>
+
+    <div class="page-break"></div>
+
+    <div class="tool-title">เครื่องมือที่ 2: แบบประเมินสมรรถนะการแก้ปัญหา</div>
+    <table>
+        <thead><tr><th style="width: 22%;">พฤติกรรม</th><th>ระดับ 3</th><th>ระดับ 2</th><th>ระดับ 1</th></tr></thead>
+        <tbody>
+            <tr><td><b>วิเคราะห์</b></td><td>เข้าใจ Sense-Think-Act ครบ</td><td>เข้าใจบางส่วน</td><td>ไม่เข้าใจ</td></tr>
+            <tr><td><b>วางแผน</b></td><td>Flowchart ครบและถูกต้อง</td><td>มีโครงสร้าง</td><td>ไม่มี</td></tr>
+            <tr><td><b>ดำเนินการ</b></td><td>หุ่นยนต์ทำงานครบทุกเงื่อนไข</td><td>ทำงานบางส่วน</td><td>ไม่ทำงาน</td></tr>
+            <tr><td><b>ตรวจสอบ</b></td><td>ปรับ Threshold + บันทึกใน readme</td><td>ปรับแต่ไม่บันทึก</td><td>ไม่ปรับ</td></tr>
+        </tbody>
+    </table>
+
+    <div class="tool-title">เครื่องมือที่ 3: แบบประเมินพฤติกรรมการทำงาน</div>
+    <table>
+        <thead><tr><th>ลำดับ</th><th>ชื่อ-สกุล</th><th>ตั้งใจ (3)</th><th>รับผิดชอบ (3)</th><th>ตรงเวลา (3)</th><th>รวม (9)</th></tr></thead>
+        <tbody>
+            <tr><td>1</td><td class="dots">...........................................................</td><td></td><td></td><td></td><td></td></tr>
+            <tr><td>2</td><td class="dots">...........................................................</td><td></td><td></td><td></td><td></td></tr>
+            <tr><td>...</td><td class="dots">...........................................................</td><td></td><td></td><td></td><td></td></tr>
+        </tbody>
+    </table>
+
+    <div class="tool-title">เครื่องมือที่ 4: แบบประเมินคุณลักษณะอันพึงประสงค์</div>
+    <table>
+        <thead><tr><th>คุณลักษณะ</th><th>ดีเยี่ยม (3)</th><th>ดี (2)</th><th>ผ่าน (1)</th></tr></thead>
+        <tbody>
+            <tr><td><b>มีวินัย</b></td><td>ทดสอบในพื้นที่กำหนด ไม่รบกวนเพื่อน</td><td>ปฏิบัติบางครั้ง</td><td>ไม่ปฏิบัติ</td></tr>
+            <tr><td><b>ใฝ่เรียนรู้</b></td><td>ทำ Mood System (โบนัส)</td><td>ทำพื้นฐาน</td><td>ทำเฉพาะที่จำเป็น</td></tr>
+            <tr><td><b>มุ่งมั่นทำงาน</b></td><td>ปรับ Threshold จนหุ่นยนต์สมบูรณ์</td><td>ขอความช่วยเหลือ</td><td>หยุดทำ</td></tr>
+        </tbody>
+    </table>
+
+    <div class="tool-title">บันทึกหลังการสอน</div>
+    <p><b>ผลที่เกิดกับผู้เรียน:</b></p><p class="dots">..........................................................................................................................</p>
+    <p><b>ปัญหา/อุปสรรค:</b></p><p class="dots">..........................................................................................................................</p>
+
+    <table class="signature" style="margin-top: 30pt;"><tr>
+        <td class="left" style="width: 50%;">ลงชื่อ <span class="dots">..............................................</span> ผู้สอน<br>(นายภาณุพงศ์ อุ่นคำ)<br>วันที่ <span class="dots">......./......./.........</span></td>
+        <td class="right">ลงชื่อ <span class="dots">..............................................</span><br>(<span class="dots">...........................................</span>)<br>ผู้อำนวยการโรงเรียนบ้านป่ายุบฯ</td>
+    </tr></table>
+</div>
+</body>
+</html>

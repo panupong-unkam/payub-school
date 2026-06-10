@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แผนการจัดการเรียนรู้ที่ 8 — เข็มทิศดิจิทัล Compass</title>
+    <link rel="stylesheet" href="lesson-plan.css">
+</head>
+<body>
+<div class="nav-bar no-print"><a href="index.html">⬅ กลับ</a><div style="color:white;">แผนที่ 8 / 20 — Hr 15-16</div><button class="print-btn" onclick="window.print()">🖨️ พิมพ์</button></div>
+<div class="paper">
+
+    <h1 class="plan-title">แผนการจัดการเรียนรู้ที่ 8</h1>
+    <div class="plan-meta-row"><span>หน่วยที่ 2 เรื่อง micro:bit (ล้วน ไม่มีอุปกรณ์เสริม)</span><span>จำนวน 12 ชั่วโมง</span></div>
+    <div class="plan-meta-row"><span>เรื่อง เข็มทิศดิจิทัล (Compass) + Magnetometer</span><span>จำนวน 2 ชั่วโมง (ชั่วโมงที่ 15-16)</span></div>
+    <div class="plan-meta-row"><span>วิชา หุ่นยนต์</span><span>กลุ่มสาระการเรียนรู้ วิทยาศาสตร์และเทคโนโลยี</span></div>
+    <div class="plan-meta-row"><span>ชั้นมัธยมศึกษาปีที่ 2</span><span>ภาคเรียนที่ 1 ปีการศึกษา 2569</span></div>
+    <div class="plan-meta-row"><span>ผู้สอน นายภาณุพงศ์ อุ่นคำ</span><span>โรงเรียนบ้านป่ายุบ (บุ้นกีประชานุเคราะห์)</span></div>
+    <hr class="divider">
+
+    <div class="section">
+        <div class="section-title">1. มาตรฐานการเรียนรู้/ตัวชี้วัด</div>
+        <p class="indent"><b>มาตรฐาน ว 4.2</b> เข้าใจและใช้แนวคิดเชิงคำนวณในการแก้ปัญหา</p>
+        <p class="indent bold">ตัวชี้วัดระหว่างทาง</p>
+        <p class="indent2"><b>ว 4.2 ม.2/2</b> ออกแบบและเขียนโปรแกรมที่ใช้ตรรกะและฟังก์ชันในการแก้ปัญหา</p>
+        <p class="indent2"><b>ว 4.2 ม.2/3</b> อภิปรายองค์ประกอบและหลักการทำงานของระบบคอมพิวเตอร์และเทคโนโลยีการสื่อสาร</p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">2. จุดประสงค์การเรียนรู้</div>
+        <ol>
+            <li>อธิบายหลักการของเซ็นเซอร์ Magnetometer และเข็มทิศดิจิทัลได้ <span class="kpa">K</span></li>
+            <li>Calibrate (ปรับเทียบ) เข็มทิศของ micro:bit ได้อย่างถูกต้อง <span class="kpa">P</span></li>
+            <li>ใช้บล็อก <code>compass heading</code> อ่านมุม 0-359° ได้ <span class="kpa">P</span></li>
+            <li>เขียนโปรแกรมลูกศรนำทาง 4 ทิศ (N, E, S, W) ด้วย if-else if <span class="kpa">P</span></li>
+            <li>ตระหนักถึงความสำคัญของการ Calibrate ก่อนใช้เครื่องมือวัด <span class="kpa">A</span></li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">3. คุณลักษณะอันพึงประสงค์</div>
+        <p class="indent">☐ 1. รักชาติฯ ☑ 2. ซื่อสัตย์ ☑ 3. มีวินัย ☑ 4. ใฝ่เรียนรู้ ☐ 5. พอเพียง ☑ 6. มุ่งมั่น ☐ 7. รักไทย ☐ 8. จิตสาธารณะ</p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">4. สมรรถนะสำคัญของผู้เรียน</div>
+        <ol>
+            <li>ความสามารถในการคิด (คิดเชิงตรรกะกับช่วงมุม)</li>
+            <li>ความสามารถในการแก้ปัญหา</li>
+            <li>ความสามารถในการใช้เทคโนโลยี</li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">5. สาระสำคัญ</div>
+        <p class="indent">เข็มทิศใน micro:bit ใช้ Magnetometer ชิปวัดสนามแม่เหล็กของโลก คืนค่ามุม 0-359° เทียบกับทิศเหนือ (0°=N, 90°=E, 180°=S, 270°=W) ก่อนใช้ต้อง <b>Calibrate</b> โดยเอียงบอร์ดให้ครบทุกทิศจนจอแสดงไฟครบ 25 ดวงและขึ้นหน้ายิ้ม การใช้เข็มทิศต้องห่างจากวัตถุที่มีแม่เหล็กหรือเหล็ก เพื่อความแม่นยำ — เทคโนโลยีเดียวกับเข็มทิศใน GPS, เครื่องบิน, มือถือ</p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">6. ความรู้เดิมที่นักเรียนต้องมี</div>
+        <ol>
+            <li>การคิดเป็นช่วงค่า (Range) เช่น 0-90°, 90-180°</li>
+            <li>การใช้ if-else if</li>
+            <li>ความรู้พื้นฐานเรื่อง 4 ทิศ (เหนือ ใต้ ตะวันออก ตะวันตก)</li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">7. การจัดกิจกรรมการเรียนรู้</div>
+
+        <div class="hour-banner">▶ ชั่วโมงที่ 15 (60 นาที) : เข็มทิศและการ Calibrate</div>
+
+        <p class="step-banner">ขั้นที่ 1: การวิเคราะห์และกำหนดรายละเอียดของปัญหา (15 นาที)</p>
+        <ol>
+            <li>ครูเปิดเว็บไซต์ <code>Robotm.2/Hr15-16MB.html</code></li>
+            <li>ครูตั้งคำถาม</li>
+            <p class="teacher-q">คนสมัยก่อนสำรวจป่าใช้เข็มทิศแม่เหล็กหาทิศเหนือ — เทคโนโลยีเดียวกันใน micro:bit จะแม่นยำเท่าเดิมไหม?</p>
+            <p class="student-a">น่าจะใกล้เคียง แต่ต้องห่างจากเหล็ก/แม่เหล็ก เพราะจะเพี้ยน</p>
+        </ol>
+
+        <p class="step-banner">ขั้นที่ 2: การวางแผนการแก้ปัญหา (20 นาที)</p>
+        <ol start="3">
+            <li>ครูสาธิตวิธี Calibrate (เรียก <code>calibrate compass</code> ใน on start, เอียงบอร์ดให้ไฟครบ 25 ดวง)</li>
+            <li>ครูแนะนำบล็อก <code>compass heading (°)</code></li>
+            <li>ครูเขียนตารางช่วงมุม → ทิศ:
+                <ul>
+                    <li>เหนือ (N): 315°-45° (คร่อม 0)</li>
+                    <li>ตะวันออก (E): 45°-135°</li>
+                    <li>ใต้ (S): 135°-225°</li>
+                    <li>ตะวันตก (W): 225°-315°</li>
+                </ul>
+            </li>
+        </ol>
+
+        <p class="step-banner">ขั้นที่ 3: การดำเนินการแก้ปัญหา (25 นาที)</p>
+        <ol start="6">
+            <li>นักเรียนเขียนโปรแกรมแสดงค่ามุมเมื่อกดปุ่ม A: <code>on button A: show number compass heading</code></li>
+            <li>นักเรียนทดสอบและบันทึกค่ามุมจริงเมื่อหันบอร์ดไปแต่ละทิศ</li>
+        </ol>
+
+        <div class="hour-banner">▶ ชั่วโมงที่ 16 (60 นาที) : ลูกศรนำทาง 4 ทิศ</div>
+
+        <p class="step-banner">ขั้นที่ 3 (ต่อ): การดำเนินการแก้ปัญหา (40 นาที)</p>
+        <ol start="8">
+            <li>นักเรียนเขียนโปรแกรมลูกศรนำทาง 4 ทิศโดยใช้ if-else if</li>
+            <li>นักเรียนทดสอบหมุนบอร์ดและดูลูกศรเปลี่ยนทิศตาม</li>
+        </ol>
+
+        <p class="step-banner">ขั้นที่ 4: การตรวจสอบและประเมินผล (20 นาที)</p>
+        <ol start="10">
+            <li>นักเรียนทำใบงานที่ 8.1</li>
+            <li>นักเรียนทำแบบทดสอบ 5 ข้อ</li>
+            <p class="teacher-q">ทำไมการเขียนเงื่อนไขทิศเหนือต้องใช้ <code>heading &lt; 45 OR heading &gt; 315</code>?</p>
+            <p class="student-a">เพราะมุมรอบทิศเหนือคร่อม 0° ทั้งฝั่งบวก (เช่น 30°) และฝั่งลบ (เช่น 350°) ต้องเช็คทั้งสองด้าน</p>
+            <li>ครูสรุปบทเรียน</li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">8. ชิ้นงาน / ภาระงาน</div>
+        <ol>
+            <li>ใบงานที่ 8.1 "เข็มทิศของฉัน" + วิดีโอหมุนบอร์ดให้เห็นลูกศรเปลี่ยน</li>
+            <li>แบบทดสอบท้ายชั่วโมง 5 ข้อ</li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">9. การวัดและประเมินผล</div>
+        <table class="eval">
+            <thead><tr><th>รายการ</th><th>วิธีวัด</th><th>เครื่องมือ</th><th>เกณฑ์</th></tr></thead>
+            <tbody>
+                <tr><td><b>1. ความรู้ (K)</b></td><td>ตรวจใบงาน + ทดสอบ</td><td>1. ใบงาน 8.1<br>2. แบบทดสอบ 5 ข้อ</td><td>ร้อยละ 60</td></tr>
+                <tr><td><b>2. ทักษะกระบวนการ (P)</b></td><td>ตรวจชิ้นงาน</td><td>3. แบบประเมินทักษะ</td><td>ระดับ "ดี"</td></tr>
+                <tr><td><b>3. พฤติกรรม</b></td><td>สังเกต</td><td>4. แบบสังเกตพฤติกรรม</td><td>ระดับ "พอใช้"</td></tr>
+                <tr><td><b>4. คุณลักษณะ</b></td><td>สังเกต</td><td>5. แบบประเมินคุณลักษณะ</td><td>ระดับ "ผ่าน"</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <div class="section-title">10. สื่อและแหล่งการเรียนรู้</div>
+        <p class="indent"><b>สื่อ:</b> 1. <code>Robotm.2/Hr15-16MB.html</code> &nbsp; 2. บอร์ด micro:bit &nbsp; 3. ใบงานที่ 8.1</p>
+        <p class="indent"><b>แหล่งการเรียนรู้:</b> 1. ห้องคอมพิวเตอร์ &nbsp; 2. อินเทอร์เน็ต</p>
+    </div>
+
+    <div class="page-break"></div>
+
+    <div class="appendix-banner">ภาคผนวก: เครื่องมือวัดและประเมินผล</div>
+
+    <div class="tool-title">เครื่องมือที่ 1: ใบงานที่ 8.1 และแบบประเมิน</div>
+
+    <div class="worksheet-header">
+        <h3>ใบงานที่ 8.1 "เข็มทิศของฉัน"</h3>
+        <p>ชื่อ-สกุล <span class="dots">..................................................................</span> ชั้น ม.2/<span class="dots">....</span> เลขที่ <span class="dots">....</span></p>
+    </div>
+
+    <p><b>โปรเจกต์ที่เลือก:</b> ☐ A: ลูกศร 4 ทิศ &nbsp;&nbsp; ☐ B: ตามล่าหาธง &nbsp;&nbsp; ☐ C: แสดงตัวอักษร N E S W</p>
+
+    <p class="bold">ตอนที่ 1: บันทึกค่ามุมจริงจากเข็มทิศ</p>
+    <p class="indent">หันบอร์ดไปแต่ละทิศ แล้วจดค่ามุมที่ได้</p>
+    <table>
+        <thead><tr><th>หันบอร์ดไป</th><th>ค่ามุม (°)</th><th>ทิศที่ควรเป็น</th></tr></thead>
+        <tbody>
+            <tr><td>ทิศเหนือ (ตามเข็มทิศจริง)</td><td class="dots">........</td><td>0°</td></tr>
+            <tr><td>ทิศตะวันออก</td><td class="dots">........</td><td>90°</td></tr>
+            <tr><td>ทิศใต้</td><td class="dots">........</td><td>180°</td></tr>
+            <tr><td>ทิศตะวันตก</td><td class="dots">........</td><td>270°</td></tr>
+        </tbody>
+    </table>
+
+    <p class="bold">ตอนที่ 2: Pseudo code</p>
+    <div style="border: 1px solid #000; min-height: 4cm; padding: 8pt; margin: 6pt 0;">
+        <p style="color: #888; font-style: italic;">(พื้นที่สำหรับเขียน Pseudo)</p>
+    </div>
+
+    <p class="bold">ตอนที่ 3: ผลทดสอบ</p>
+    <p class="indent">1. Calibrate ครั้งแรกใช้เวลาเท่าใด? <span class="dots">..............</span></p>
+    <p class="indent">2. ลูกศรเปลี่ยนทิศได้ครบ 4 ทิศ? <span class="dots">..............</span></p>
+    <p class="indent">3. มีจุดที่ลูกศรเพี้ยนไหม? เพราะอะไร? <span class="dots">...........................................</span></p>
+
+    <p class="bold">ตอนที่ 4: คำถามท้าทาย</p>
+    <p class="indent">เพิ่ม 4 ทิศย่อย (NE, SE, SW, NW) — รวมเป็น 8 ทิศ ต้องแบ่งช่วงมุมอย่างไร?</p>
+    <p class="indent dots">.................................................................................................................</p>
+
+    <div style="margin-top: 14pt; padding: 8pt; border: 1pt dashed #1e3a8a; background: #f0f9ff;">
+        <p class="bold" style="color: #1e3a8a;">เฉลย (สำหรับครู)</p>
+        <p><b>ภารกิจ A:</b></p>
+        <div class="code-box">on start: calibrate compass
+forever:
+    set h to compass heading
+    if h &lt; 45 or h &gt; 315: show arrow North
+    else if h &lt; 135: show arrow East
+    else if h &lt; 225: show arrow South
+    else: show arrow West</div>
+        <p><b>ตอนที่ 4:</b> 8 ทิศ ใช้ช่วง 45° แต่ละทิศ — N: 337.5-22.5, NE: 22.5-67.5, E: 67.5-112.5, ...</p>
+    </div>
+
+    <p class="bold" style="margin-top: 12pt;">แบบประเมินใบงาน 8.1</p>
+    <table>
+        <thead><tr><th style="width: 25%;">ประเด็น</th><th>ดีมาก (3)</th><th>ดี (2)</th><th>ปรับปรุง (1)</th></tr></thead>
+        <tbody>
+            <tr><td><b>Calibrate</b></td><td>ทำสำเร็จในครั้งแรก</td><td>ทำได้แต่ต้องทำซ้ำ</td><td>ทำไม่สำเร็จ</td></tr>
+            <tr><td><b>บันทึกค่าจริง</b></td><td>ครบ 4 ทิศ + ใกล้เคียงค่าจริง</td><td>ครบแต่เพี้ยนเล็กน้อย</td><td>ไม่ครบ</td></tr>
+            <tr><td><b>Pseudo + โค้ด</b></td><td>มี if-else if ครบ 4 ทิศ</td><td>มี 3 ทิศ</td><td>ไม่ครบ</td></tr>
+            <tr><td><b>คำถาม 8 ทิศ</b></td><td>คำนวณช่วงมุมถูก</td><td>ใกล้เคียง</td><td>ผิด</td></tr>
+        </tbody>
+    </table>
+
+    <div class="page-break"></div>
+
+    <div class="tool-title">เครื่องมือที่ 2: แบบประเมินสมรรถนะการแก้ปัญหา</div>
+    <table>
+        <thead><tr><th style="width: 22%;">พฤติกรรม</th><th>ระดับ 3</th><th>ระดับ 2</th><th>ระดับ 1</th></tr></thead>
+        <tbody>
+            <tr><td><b>วิเคราะห์</b></td><td>เข้าใจช่วงมุมและทิศ</td><td>เข้าใจบางส่วน</td><td>ไม่เข้าใจ</td></tr>
+            <tr><td><b>วางแผน</b></td><td>เขียนตารางช่วงก่อนเริ่ม</td><td>วางแผนคร่าวๆ</td><td>เริ่มเลย</td></tr>
+            <tr><td><b>ดำเนินการ</b></td><td>โปรแกรมแสดงทิศถูกครบ</td><td>ทิศถูกบางครั้ง</td><td>ไม่ทำงาน</td></tr>
+            <tr><td><b>ตรวจสอบ</b></td><td>ทดสอบทุกทิศและเปรียบเทียบ</td><td>ทดสอบบางทิศ</td><td>ไม่ทดสอบ</td></tr>
+        </tbody>
+    </table>
+
+    <div class="tool-title">เครื่องมือที่ 3: แบบประเมินพฤติกรรมการทำงาน</div>
+    <table>
+        <thead><tr><th>ลำดับ</th><th>ชื่อ-สกุล</th><th>ตั้งใจ (3)</th><th>รับผิดชอบ (3)</th><th>ตรงเวลา (3)</th><th>รวม (9)</th></tr></thead>
+        <tbody>
+            <tr><td>1</td><td class="dots">...........................................................</td><td></td><td></td><td></td><td></td></tr>
+            <tr><td>2</td><td class="dots">...........................................................</td><td></td><td></td><td></td><td></td></tr>
+            <tr><td>...</td><td class="dots">...........................................................</td><td></td><td></td><td></td><td></td></tr>
+        </tbody>
+    </table>
+
+    <div class="tool-title">เครื่องมือที่ 4: แบบประเมินคุณลักษณะอันพึงประสงค์</div>
+    <table>
+        <thead><tr><th>คุณลักษณะ</th><th>ดีเยี่ยม (3)</th><th>ดี (2)</th><th>ผ่าน (1)</th></tr></thead>
+        <tbody>
+            <tr><td><b>ซื่อสัตย์</b></td><td>บันทึกค่าจริงไม่แต่งเติม</td><td>บันทึกครบ</td><td>คัดลอกเพื่อน</td></tr>
+            <tr><td><b>มีวินัย</b></td><td>Calibrate ก่อนใช้เสมอ</td><td>Calibrate บางครั้ง</td><td>ไม่ Calibrate</td></tr>
+            <tr><td><b>ใฝ่เรียนรู้</b></td><td>ทดลอง 8 ทิศ</td><td>ทำ 4 ทิศ</td><td>ทำเฉพาะที่จำเป็น</td></tr>
+            <tr><td><b>มุ่งมั่นทำงาน</b></td><td>ทดสอบและแก้ไขจนสมบูรณ์</td><td>ขอช่วยเหลือ</td><td>หยุดทำ</td></tr>
+        </tbody>
+    </table>
+
+    <div class="tool-title">บันทึกหลังการสอน</div>
+    <p><b>ผลที่เกิดกับผู้เรียน:</b></p><p class="dots">..........................................................................................................................</p>
+    <p><b>ปัญหา/อุปสรรค:</b></p><p class="dots">..........................................................................................................................</p>
+
+    <table class="signature" style="margin-top: 30pt;"><tr>
+        <td class="left" style="width: 50%;">ลงชื่อ <span class="dots">..............................................</span> ผู้สอน<br>(นายภาณุพงศ์ อุ่นคำ)<br>วันที่ <span class="dots">......./......./.........</span></td>
+        <td class="right">ลงชื่อ <span class="dots">..............................................</span><br>(<span class="dots">...........................................</span>)<br>ผู้อำนวยการโรงเรียนบ้านป่ายุบฯ</td>
+    </tr></table>
+</div>
+</body>
+</html>

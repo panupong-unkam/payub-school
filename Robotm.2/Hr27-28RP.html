@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>หุ่นยนต์ ม.2 | Hr 27-28: DC Motor + เคลื่อนที่</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Noto+Serif+Thai:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --bg-dark: #0f172a; --surface-dark: #1e293b; --cyber-blue: #0ea5e9;
+            --neon-green: #10b981; --neon-orange: #f59e0b; --neon-pink: #ec4899;
+            --neon-purple: #a855f7; --neon-cyan: #06b6d4; --gold: #fbbf24;
+            --text-main: #f8fafc; --text-muted: #94a3b8; --border-line: #334155;
+        }
+        body { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 100%); color: var(--text-main); font-family: 'Sarabun', sans-serif; padding: 20px; margin: 0; overflow-x: hidden; }
+        body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px); background-size: 30px 30px; z-index: -1; }
+        .lesson-container { width: 100%; max-width: 1200px; background: var(--surface-dark); border-radius: 24px; box-shadow: 0 0 40px rgba(0,0,0,0.5), 0 0 30px rgba(16,185,129,0.3); overflow: hidden; border: 1px solid var(--border-line); display: flex; flex-direction: column; min-height: 80vh; }
+        .lesson-header { background: linear-gradient(90deg, rgba(16,185,129,0.15), rgba(15,23,42,0.95)); padding: 20px 30px; border-bottom: 1px solid var(--neon-green); display: flex; justify-content: space-between; align-items: center; }
+        .progress-track { height: 6px; background: var(--border-line); width: 100%; display: none; }
+        #progress-bar { height: 100%; background: linear-gradient(90deg, var(--neon-green), var(--neon-cyan)); width: 0%; box-shadow: 0 0 15px var(--neon-green); transition: width 0.6s ease; }
+        .lesson-body { padding: 40px; position: relative; flex-grow: 1; display: flex; flex-direction: column; }
+        .step { display: none; animation: glitchFadeIn 0.5s ease-out forwards; flex-grow: 1; }
+        .step.active { display: block; }
+        @keyframes glitchFadeIn { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 1; transform: translateY(0); } }
+        h3 { color: var(--neon-green); font-family: 'Noto Serif Thai', serif; font-size: 30px; margin-top: 0; text-shadow: 0 0 15px rgba(16,185,129,0.4); border-bottom: 1px dashed var(--border-line); padding-bottom: 15px; }
+        h4 { color: white; font-family: 'Noto Serif Thai', serif; font-size: 20px; margin: 20px 0 10px; }
+        p, li { line-height: 1.85; font-size: 17px; color: #cbd5e1; }
+        .btn { padding: 14px 28px; border: none; border-radius: 10px; font-family: 'Sarabun'; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.3s; display: inline-flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-primary { background: linear-gradient(135deg, var(--neon-green), #059669); color: white; box-shadow: 0 4px 20px rgba(16,185,129,0.5); }
+        .btn-primary:hover { transform: translateY(-3px); }
+        .btn-outline { background: transparent; color: var(--text-muted); border: 1px solid var(--border-line); }
+        .btn-outline:hover { color: white; border-color: white; }
+        .footer-nav { padding: 25px 40px; background: rgba(15,23,42,0.95); border-top: 1px solid var(--border-line); display: none; justify-content: space-between; align-items: center; margin-top: auto; }
+        .grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-top: 20px; }
+        .grid-3col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-top: 20px; }
+        .info-card { background: rgba(0,0,0,0.3); border: 1px solid var(--border-line); border-radius: 16px; padding: 22px; transition: 0.3s; }
+        .quiz-option { background: rgba(255,255,255,0.05); border: 2px solid var(--border-line); padding: 16px 22px; border-radius: 12px; margin-bottom: 12px; cursor: pointer; transition: 0.2s; font-size: 16px; color: var(--text-main); text-align: left; width: 100%; }
+        .quiz-option:hover { background: rgba(16,185,129,0.1); border-color: var(--neon-green); }
+        .quiz-option.correct { background: rgba(16,185,129,0.2); border-color: var(--neon-green); color: var(--neon-green); font-weight: bold; }
+        .quiz-option.wrong { background: rgba(239,68,68,0.2); border-color: #ef4444; color: #ef4444; }
+        .code-box { background: #0a0e1a; padding: 18px; border-radius: 10px; color: #e2e8f0; font-size: 14px; font-family: 'JetBrains Mono', monospace; white-space: pre; overflow-x: auto; line-height: 1.7; border-left: 4px solid var(--neon-green); margin: 10px 0; }
+        .code-box .kw { color: #c792ea; } .code-box .str { color: #a3e635; } .code-box .num { color: #f59e0b; } .code-box .com { color: #64748b; font-style: italic; } .code-box .fn { color: #06b6d4; }
+
+        /* Robot car demo */
+        .car-arena {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 2px solid #444; border-radius: 18px;
+            padding: 30px; margin: 20px 0; position: relative;
+            min-height: 400px; overflow: hidden;
+        }
+        .arena-grid {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background-image: linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+        .robot-car {
+            position: absolute; width: 80px; height: 100px;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%) rotate(0deg);
+            transition: all 0.3s ease;
+            z-index: 5;
+        }
+        .car-body {
+            width: 100%; height: 100%;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(251,191,36,0.5);
+            position: relative;
+            display: flex; align-items: flex-end; justify-content: center;
+            padding-bottom: 10px;
+        }
+        .car-body::before {
+            content: '🤖'; font-size: 28px;
+        }
+        .wheel {
+            position: absolute; width: 12px; height: 30px;
+            background: #1a1a1a; border-radius: 4px;
+            border: 2px solid #444;
+        }
+        .wheel-fl { top: 10px; left: -10px; }
+        .wheel-fr { top: 10px; right: -10px; }
+        .wheel-rl { bottom: 10px; left: -10px; }
+        .wheel-rr { bottom: 10px; right: -10px; }
+        .wheel.spinning { animation: spin 0.3s linear infinite; background: linear-gradient(180deg, #1a1a1a, #444); }
+        @keyframes spin { 0%, 100% { background: #1a1a1a; } 50% { background: linear-gradient(180deg, #1a1a1a 50%, #555 50%); } }
+
+        .arrow-indicator {
+            position: absolute; top: -5px; left: 50%; transform: translateX(-50%);
+            font-size: 18px; color: var(--neon-orange);
+            opacity: 0.8;
+        }
+
+        .car-controls {
+            display: grid;
+            grid-template-columns: 80px 80px 80px;
+            grid-template-rows: 80px 80px 80px;
+            gap: 8px;
+            margin: 20px auto;
+            justify-content: center;
+            max-width: 320px;
+        }
+        .ctrl-btn {
+            background: rgba(16,185,129,0.15); color: var(--neon-green);
+            border: 2px solid var(--neon-green); border-radius: 12px;
+            font-size: 28px; cursor: pointer; transition: 0.2s;
+            box-shadow: 0 4px 0 #064e3b;
+            font-weight: bold;
+        }
+        .ctrl-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #064e3b; background: var(--neon-green); color: white; }
+        .ctrl-stop {
+            background: rgba(239,68,68,0.15); color: #ef4444; border-color: #ef4444;
+            box-shadow: 0 4px 0 #7f1d1d;
+        }
+        .ctrl-stop:active { background: #ef4444; color: white; box-shadow: 0 2px 0 #7f1d1d; }
+        .ctrl-empty { visibility: hidden; }
+
+        .speed-control {
+            text-align: center; margin: 20px 0;
+            background: rgba(0,0,0,0.3); padding: 15px; border-radius: 12px;
+            border: 1px solid var(--border-line);
+        }
+        .speed-control input[type="range"] { width: 70%; max-width: 350px; }
+        .speed-display { font-family: monospace; font-size: 22px; color: var(--neon-orange); font-weight: bold; }
+
+        .status-bar {
+            background: rgba(0,0,0,0.4); padding: 12px 18px; border-radius: 8px;
+            font-family: monospace; font-size: 14px; color: var(--cyber-blue);
+            border: 1px solid var(--border-line);
+            display: flex; gap: 20px; flex-wrap: wrap; justify-content: center;
+        }
+
+        /* Motor diagram */
+        .motor-diagram {
+            display: flex; justify-content: space-around;
+            align-items: center; gap: 30px;
+            background: rgba(0,0,0,0.3); padding: 25px;
+            border-radius: 16px; margin: 20px 0;
+            border: 1px solid var(--border-line);
+            flex-wrap: wrap;
+        }
+        .motor-block {
+            text-align: center;
+        }
+        .motor-circle {
+            width: 100px; height: 100px; border-radius: 50%;
+            background: radial-gradient(circle, #444, #1a1a1a);
+            border: 4px solid #666;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 36px; margin: 10px auto;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            position: relative;
+        }
+        .motor-circle.fwd { animation: rotateFwd 1s linear infinite; }
+        .motor-circle.rev { animation: rotateRev 1s linear infinite; }
+        @keyframes rotateFwd { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes rotateRev { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
+
+        .tag { display: inline-block; padding: 5px 14px; border-radius: 14px; font-size: 12px; font-weight: bold; margin-right: 8px; }
+        .tag-rp { background: rgba(245,158,11,0.2); color: var(--neon-orange); border: 1px solid var(--neon-orange); }
+        .tag-time { background: rgba(16,185,129,0.2); color: var(--neon-green); border: 1px solid var(--neon-green); }
+
+        .callout { border-radius: 14px; padding: 18px 22px; margin: 18px 0; display: flex; gap: 15px; align-items: flex-start; }
+        .callout-icon { font-size: 28px; flex-shrink: 0; }
+        .callout-info { background: rgba(14,165,233,0.1); border-left: 4px solid var(--cyber-blue); }
+        .callout-warn { background: rgba(245,158,11,0.1); border-left: 4px solid var(--neon-orange); }
+        .callout-tip { background: rgba(16,185,129,0.1); border-left: 4px solid var(--neon-green); }
+        .callout-bonus { background: rgba(236,72,153,0.1); border-left: 4px solid var(--neon-pink); }
+        .callout-danger { background: rgba(239,68,68,0.1); border-left: 4px solid #ef4444; }
+        .callout b { color: white; }
+
+        .step-dots { display: flex; gap: 8px; justify-content: center; }
+        .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--border-line); transition: 0.3s; }
+        .dot.active { background: var(--neon-green); box-shadow: 0 0 10px var(--neon-green); }
+
+        .bigprint { font-size: 19px; line-height: 1.9; }
+
+        table.compare { width: 100%; border-collapse: collapse; margin-top: 15px; background: rgba(0,0,0,0.3); border-radius: 12px; overflow: hidden; }
+        table.compare th, table.compare td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border-line); font-size: 15px; }
+        table.compare th { background: rgba(16,185,129,0.15); color: var(--neon-green); }
+        table.compare td:first-child { font-weight: bold; color: white; }
+
+        @media (max-width: 900px) { .lesson-body { padding: 22px; } .grid-2col, .grid-3col { grid-template-columns: 1fr !important; } h3 { font-size: 24px; } }
+    </style>
+</head>
+<body>
+
+<div class="lesson-container">
+    <div class="lesson-header">
+        <h2 style="margin: 0; font-size: 20px; letter-spacing: 1px;">🚗 ROBOTICS M.2 | Hr 27-28</h2>
+        <div id="header-guest-info" style="display: none; align-items: center; gap: 12px;">
+            <span style="background: rgba(16,185,129,0.15); color: var(--neon-green); padding: 6px 18px; border-radius: 20px; font-size: 14px; font-weight: bold; border: 1px solid var(--neon-green);" id="display-header-name">Student</span>
+            <button class="btn btn-outline" style="padding: 6px 15px; font-size: 12px;" onclick="location.reload()">EXIT</button>
+        </div>
+    </div>
+
+    <div class="progress-track" id="progress-container"><div id="progress-bar"></div></div>
+
+    <div class="lesson-body">
+
+        <!-- STEP 0 -->
+        <div class="step active" id="step-0">
+            <div style="text-align: center; padding: 50px 20px;">
+                <div style="font-size: 90px; margin-bottom: 20px; filter: drop-shadow(0 0 20px var(--neon-green));">🚗</div>
+                <h2 style="color: white; font-size: 32px; margin-bottom: 10px;">หุ่นยนต์ ม.2 | ชั่วโมงที่ 27-28</h2>
+                <p style="color: var(--neon-green); font-size: 22px; margin-bottom: 5px; font-weight: bold;">DC Motor + เคลื่อนที่!</p>
+                <p style="color: var(--text-muted); font-size: 16px; margin-bottom: 30px;">วันนี้หุ่นยนต์ของเราจะเดินได้จริง!</p>
+                <p style="color: var(--text-muted); font-size: 16px; margin-bottom: 20px;">📝 ลงชื่อเข้าเรียน</p>
+                <input type="text" id="guest-name-input" placeholder="ชื่อ-นามสกุล เลขที่ ห้อง" style="width:100%; max-width:520px; padding:16px 22px; background:rgba(0,0,0,0.4); border:2px solid var(--neon-green); border-radius:12px; color:white; font-size:18px; text-align:center; outline:none;" onkeypress="if(event.key === 'Enter') startLesson()">
+                <div style="margin-top: 35px;">
+                    <button class="btn btn-primary" style="padding: 18px 60px; font-size: 19px;" onclick="startLesson()">🚀 เริ่มเรียน</button>
+                </div>
+                <div style="margin-top: 30px;"><span class="tag tag-rp">RP2040</span><span class="tag tag-time">2 ชั่วโมง</span></div>
+            </div>
+        </div>
+
+        <!-- STEP 1: DC Motor vs Servo -->
+        <div class="step" id="step-1">
+            <h3>🎯 ด่านที่ 1: DC Motor ต่างจาก Servo ยังไง?</h3>
+            <p class="bigprint">สวัสดี <b class="student-name-inject" style="color: var(--neon-orange);"></b>! สัปดาห์นี้เราจะใช้ <b>DC Motor</b> — มอเตอร์อีกแบบที่ "<b style="color: var(--neon-green);">หมุนตลอด</b>" ไม่หยุดที่มุม</p>
+
+            <table class="compare">
+                <thead><tr><th>คุณสมบัติ</th><th>Servo SG90</th><th>DC Motor</th></tr></thead>
+                <tbody>
+                    <tr><td>การหมุน</td><td>หมุนถึงมุมแล้วหยุด (0-180°)</td><td style="color: var(--neon-green);">หมุนต่อเนื่อง ไม่หยุด</td></tr>
+                    <tr><td>ความเร็ว</td><td>ช้า (ใช้เวลาเปลี่ยนมุม)</td><td style="color: var(--neon-green);">เร็วมาก (100+ รอบ/นาที)</td></tr>
+                    <tr><td>การควบคุม</td><td>กำหนดมุม (angle)</td><td style="color: var(--neon-green);">กำหนดความเร็ว (-1 ถึง +1)</td></tr>
+                    <tr><td>ทิศทาง</td><td>กำหนดผ่านมุม</td><td style="color: var(--neon-green);">+ = เดินหน้า, − = ถอยหลัง</td></tr>
+                    <tr><td>ใช้ทำ</td><td>แขนกล, กรงเล็บ, ก้านเข็ม</td><td style="color: var(--neon-green);">ล้อรถ, พัดลม, ปั๊ม</td></tr>
+                </tbody>
+            </table>
+
+            <h4>🔌 DC Motor ของเราต่อกับอะไร?</h4>
+            <p>Maker Pi RP2040 มี <b>Motor Driver ในตัว</b> (DRV8833) — ขับมอเตอร์ <b>2 ตัวพร้อมกัน</b> ที่:</p>
+
+            <div class="grid-2col">
+                <div class="info-card" style="border-color: var(--neon-orange);">
+                    <h4 style="color: var(--neon-orange); margin-top: 0;">🅼 MOTOR 1</h4>
+                    <ul>
+                        <li>ขั้ว <b>M1A</b> = ขา <b>GP8</b></li>
+                        <li>ขั้ว <b>M1B</b> = ขา <b>GP9</b></li>
+                        <li>ใช้กับ <b>ล้อขวา</b> ของหุ่นยนต์</li>
+                    </ul>
+                </div>
+                <div class="info-card" style="border-color: var(--neon-purple);">
+                    <h4 style="color: var(--neon-purple); margin-top: 0;">🅼 MOTOR 2</h4>
+                    <ul>
+                        <li>ขั้ว <b>M2A</b> = ขา <b>GP10</b></li>
+                        <li>ขั้ว <b>M2B</b> = ขา <b>GP11</b></li>
+                        <li>ใช้กับ <b>ล้อซ้าย</b> ของหุ่นยนต์</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="callout callout-tip">
+                <span class="callout-icon">✅</span>
+                <div><b>Motor Driver ทำอะไร?</b> ชิป DRV8833 ทำหน้าที่ "ขยายไฟ" จากสัญญาณ 3.3V ของ RP2040 ให้เป็น 5-6V ที่มอเตอร์ต้องการ + กลับขั้วไฟได้ ทำให้มอเตอร์หมุน <b>2 ทิศทาง</b></div>
+            </div>
+        </div>
+
+        <!-- STEP 2: How a DC Motor Spins -->
+        <div class="step" id="step-2">
+            <h3>⚙️ ด่านที่ 2: หมุนยังไง? เดินหน้า/ถอย/หยุด</h3>
+            <p>หลักการ: ส่งสัญญาณ PWM (0 ถึง 1) ให้ขา <b>A</b> หรือ <b>B</b> ของมอเตอร์</p>
+
+            <div class="motor-diagram">
+                <div class="motor-block">
+                    <div class="motor-circle" id="motor-fwd-demo">⚙️</div>
+                    <b style="color: var(--neon-green);">เดินหน้า (Forward)</b>
+                    <p style="font-size: 13px; margin: 5px 0;">M1A = 1.0 (เต็มกำลัง)<br>M1B = 0</p>
+                </div>
+                <div class="motor-block">
+                    <div class="motor-circle" id="motor-rev-demo">⚙️</div>
+                    <b style="color: var(--neon-pink);">ถอยหลัง (Reverse)</b>
+                    <p style="font-size: 13px; margin: 5px 0;">M1A = 0<br>M1B = 1.0 (เต็มกำลัง)</p>
+                </div>
+                <div class="motor-block">
+                    <div class="motor-circle">🛑</div>
+                    <b style="color: #ef4444;">หยุด (Brake)</b>
+                    <p style="font-size: 13px; margin: 5px 0;">M1A = 0<br>M1B = 0</p>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin: 15px 0;">
+                <button class="btn btn-primary" onclick="motorDemo('fwd')" style="padding: 10px 25px;">▶ เดินหน้า</button>
+                <button class="btn btn-primary" onclick="motorDemo('rev')" style="padding: 10px 25px; background: linear-gradient(135deg, var(--neon-pink), #be185d);">◀ ถอย</button>
+                <button class="btn btn-primary" onclick="motorDemo('stop')" style="padding: 10px 25px; background: linear-gradient(135deg, #ef4444, #b91c1c);">🛑 หยุด</button>
+            </div>
+
+            <h4>🐍 โค้ดควบคุม DC Motor ด้วย CircuitPython</h4>
+            <div class="code-box"><span class="kw">import</span> board
+<span class="kw">import</span> pwmio
+
+<span class="com"># Motor 1 = ขา GP8 (M1A) + GP9 (M1B)</span>
+m1a = pwmio.<span class="fn">PWMOut</span>(board.GP8, frequency=<span class="num">10000</span>)
+m1b = pwmio.<span class="fn">PWMOut</span>(board.GP9, frequency=<span class="num">10000</span>)
+
+<span class="com"># เดินหน้าเต็มกำลัง — duty 65535 = 100%</span>
+m1a.duty_cycle = <span class="num">65535</span>
+m1b.duty_cycle = <span class="num">0</span>
+
+<span class="com"># ถอยหลังเต็มกำลัง — สลับขั้ว</span>
+m1a.duty_cycle = <span class="num">0</span>
+m1b.duty_cycle = <span class="num">65535</span>
+
+<span class="com"># หยุด — ทั้งคู่ = 0</span>
+m1a.duty_cycle = <span class="num">0</span>
+m1b.duty_cycle = <span class="num">0</span></div>
+
+            <div class="callout callout-info">
+                <span class="callout-icon">🧠</span>
+                <div><b>ทำไม frequency=10000?</b> Motor Driver ชอบความถี่สูงเพื่อให้มอเตอร์หมุนเรียบ — ต่างจาก Servo ที่ใช้ 50 Hz</div>
+            </div>
+        </div>
+
+        <!-- STEP 3: Speed Control + Robot Movement -->
+        <div class="step" id="step-3">
+            <h3>🎮 ด่านที่ 3: ทดลองขับหุ่นยนต์</h3>
+            <p>คลิกปุ่ม → ดูหุ่นยนต์ขยับใน arena</p>
+
+            <div class="car-arena">
+                <div class="arena-grid"></div>
+                <div class="robot-car" id="robot-car">
+                    <div class="arrow-indicator">▲</div>
+                    <div class="car-body">
+                        <div class="wheel wheel-fl"></div>
+                        <div class="wheel wheel-fr"></div>
+                        <div class="wheel wheel-rl"></div>
+                        <div class="wheel wheel-rr"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="speed-control">
+                <b style="color: white;">⚡ ความเร็ว:</b>
+                <span class="speed-display" id="speed-display">50%</span>
+                <br>
+                <input type="range" min="20" max="100" value="50" id="speed-slider" oninput="document.getElementById('speed-display').innerText=this.value+'%'">
+            </div>
+
+            <div class="car-controls">
+                <div class="ctrl-empty"></div>
+                <button class="ctrl-btn" onclick="moveCar('F')">⬆</button>
+                <div class="ctrl-empty"></div>
+                <button class="ctrl-btn" onclick="moveCar('L')">⬅</button>
+                <button class="ctrl-btn ctrl-stop" onclick="moveCar('S')">⏹</button>
+                <button class="ctrl-btn" onclick="moveCar('R')">➡</button>
+                <div class="ctrl-empty"></div>
+                <button class="ctrl-btn" onclick="moveCar('B')">⬇</button>
+                <div class="ctrl-empty"></div>
+            </div>
+
+            <div class="status-bar" id="status-bar">
+                <span>🅼 M1: <b id="m1-status">หยุด</b></span>
+                <span>🅼 M2: <b id="m2-status">หยุด</b></span>
+                <span>🤖 ทิศทาง: <b id="dir-status">หยุด</b></span>
+            </div>
+        </div>
+
+        <!-- STEP 4: Movement Functions -->
+        <div class="step" id="step-4">
+            <h3>🐍 ด่านที่ 4: เขียนฟังก์ชันสำหรับเคลื่อนที่</h3>
+            <p>เขียนฟังก์ชัน <code>forward()</code>, <code>backward()</code>, <code>left()</code>, <code>right()</code>, <code>stop()</code> ครั้งเดียว ใช้ได้ตลอด</p>
+
+            <h4>📚 โค้ดเต็ม (Copy ไปใช้ได้เลย)</h4>
+            <div class="code-box"><span class="kw">import</span> board, pwmio, time
+
+<span class="com"># Setup มอเตอร์ทั้ง 2 ตัว</span>
+m1a = pwmio.<span class="fn">PWMOut</span>(board.GP8, frequency=<span class="num">10000</span>)
+m1b = pwmio.<span class="fn">PWMOut</span>(board.GP9, frequency=<span class="num">10000</span>)
+m2a = pwmio.<span class="fn">PWMOut</span>(board.GP10, frequency=<span class="num">10000</span>)
+m2b = pwmio.<span class="fn">PWMOut</span>(board.GP11, frequency=<span class="num">10000</span>)
+
+<span class="kw">def</span> <span class="fn">set_motor</span>(a, b, speed):
+    <span class="com">"""speed = -1.0 ถึง 1.0"""</span>
+    <span class="kw">if</span> speed &gt;= <span class="num">0</span>:
+        a.duty_cycle = <span class="fn">int</span>(speed * <span class="num">65535</span>)
+        b.duty_cycle = <span class="num">0</span>
+    <span class="kw">else</span>:
+        a.duty_cycle = <span class="num">0</span>
+        b.duty_cycle = <span class="fn">int</span>(<span class="fn">abs</span>(speed) * <span class="num">65535</span>)
+
+<span class="kw">def</span> <span class="fn">forward</span>(speed=<span class="num">0.7</span>):
+    <span class="fn">set_motor</span>(m1a, m1b, speed)   <span class="com"># ขวา เดินหน้า</span>
+    <span class="fn">set_motor</span>(m2a, m2b, speed)   <span class="com"># ซ้าย เดินหน้า</span>
+
+<span class="kw">def</span> <span class="fn">backward</span>(speed=<span class="num">0.7</span>):
+    <span class="fn">set_motor</span>(m1a, m1b, -speed)
+    <span class="fn">set_motor</span>(m2a, m2b, -speed)
+
+<span class="kw">def</span> <span class="fn">turn_left</span>(speed=<span class="num">0.7</span>):
+    <span class="fn">set_motor</span>(m1a, m1b, speed)    <span class="com"># ขวาเดินหน้า</span>
+    <span class="fn">set_motor</span>(m2a, m2b, -speed)   <span class="com"># ซ้ายถอย → หมุนซ้าย</span>
+
+<span class="kw">def</span> <span class="fn">turn_right</span>(speed=<span class="num">0.7</span>):
+    <span class="fn">set_motor</span>(m1a, m1b, -speed)   <span class="com"># ขวาถอย</span>
+    <span class="fn">set_motor</span>(m2a, m2b, speed)    <span class="com"># ซ้ายเดินหน้า → หมุนขวา</span>
+
+<span class="kw">def</span> <span class="fn">stop</span>():
+    <span class="fn">set_motor</span>(m1a, m1b, <span class="num">0</span>)
+    <span class="fn">set_motor</span>(m2a, m2b, <span class="num">0</span>)
+
+<span class="com"># ทดลอง: เดินหน้า 2 วินาที แล้วหยุด</span>
+<span class="fn">forward</span>(<span class="num">0.8</span>)
+time.<span class="fn">sleep</span>(<span class="num">2</span>)
+<span class="fn">stop</span>()</div>
+
+            <div class="callout callout-tip">
+                <span class="callout-icon">💡</span>
+                <div><b>เคล็ดลับการหมุน:</b> ให้ล้อ 2 ฝั่ง <b>หมุนคนละทิศ</b> → หุ่นยนต์จะหมุนอยู่กับที่ (Tank Turn) ถ้าหยุดล้อข้างนึง + ขับอีกข้าง = หมุนช้าๆ (Pivot Turn)</div>
+            </div>
+        </div>
+
+        <!-- STEP 5: Worksheet -->
+        <div class="step" id="step-5">
+            <h3>📝 ด่านที่ 5: ใบงานที่ 11 — "หุ่นยนต์เต้นรำ"</h3>
+
+            <div style="background: rgba(16,185,129,0.08); border: 2px solid var(--neon-green); padding: 30px; border-radius: 20px;">
+                <h4 style="color: white; margin-top: 0; font-size: 22px;">🎯 ภารกิจ: หุ่นยนต์เต้นรำ (10 คะแนน)</h4>
+                <p>เขียนโปรแกรมให้หุ่นยนต์ <b>เต้นรำตามคิว</b> 6 จังหวะติดต่อกัน:</p>
+
+                <div style="background: rgba(0,0,0,0.4); padding: 20px; border-radius: 12px;">
+                    <ol style="line-height: 2.2;">
+                        <li>เดินหน้า 1 วินาที</li>
+                        <li>ถอยหลัง 1 วินาที</li>
+                        <li>หมุนซ้าย 0.5 วินาที</li>
+                        <li>หมุนขวา 0.5 วินาที</li>
+                        <li>หมุน 360° (หาเองว่าใช้เวลากี่วินาที!)</li>
+                        <li>หยุด + LED 2 ดวง <b>กระพริบสีเขียว</b> 3 ครั้ง</li>
+                    </ol>
+                </div>
+
+                <h4 style="color: white;">🐍 โครงโค้ดให้เริ่ม</h4>
+                <div class="code-box"><span class="kw">import</span> board, pwmio, neopixel, time
+
+<span class="com"># --- Setup มอเตอร์ + LED ---</span>
+m1a = pwmio.<span class="fn">PWMOut</span>(board.GP8, frequency=<span class="num">10000</span>)
+m1b = pwmio.<span class="fn">PWMOut</span>(board.GP9, frequency=<span class="num">10000</span>)
+m2a = pwmio.<span class="fn">PWMOut</span>(board.GP10, frequency=<span class="num">10000</span>)
+m2b = pwmio.<span class="fn">PWMOut</span>(board.GP11, frequency=<span class="num">10000</span>)
+pixels = neopixel.<span class="fn">NeoPixel</span>(board.GP18, <span class="num">2</span>)
+
+<span class="kw">def</span> <span class="fn">set_motor</span>(a, b, speed):
+    <span class="kw">if</span> speed &gt;= <span class="num">0</span>:
+        a.duty_cycle = <span class="fn">int</span>(speed * <span class="num">65535</span>); b.duty_cycle = <span class="num">0</span>
+    <span class="kw">else</span>:
+        a.duty_cycle = <span class="num">0</span>; b.duty_cycle = <span class="fn">int</span>(<span class="fn">abs</span>(speed) * <span class="num">65535</span>)
+
+<span class="kw">def</span> <span class="fn">forward</span>():  <span class="fn">set_motor</span>(m1a, m1b, <span class="num">0.7</span>); <span class="fn">set_motor</span>(m2a, m2b, <span class="num">0.7</span>)
+<span class="kw">def</span> <span class="fn">backward</span>(): <span class="fn">set_motor</span>(m1a, m1b, -<span class="num">0.7</span>); <span class="fn">set_motor</span>(m2a, m2b, -<span class="num">0.7</span>)
+<span class="kw">def</span> <span class="fn">left</span>():     <span class="fn">set_motor</span>(m1a, m1b, <span class="num">0.7</span>); <span class="fn">set_motor</span>(m2a, m2b, -<span class="num">0.7</span>)
+<span class="kw">def</span> <span class="fn">right</span>():    <span class="fn">set_motor</span>(m1a, m1b, -<span class="num">0.7</span>); <span class="fn">set_motor</span>(m2a, m2b, <span class="num">0.7</span>)
+<span class="kw">def</span> <span class="fn">stop</span>():     <span class="fn">set_motor</span>(m1a, m1b, <span class="num">0</span>); <span class="fn">set_motor</span>(m2a, m2b, <span class="num">0</span>)
+
+<span class="com"># --- ลำดับการเต้น ---</span>
+<span class="fn">forward</span>(); time.<span class="fn">sleep</span>(<span class="num">1</span>)
+<span class="fn">backward</span>(); time.<span class="fn">sleep</span>(<span class="num">1</span>)
+<span class="com"># TODO: เพิ่ม turn left/right/360°/หยุด/กระพริบ LED</span>
+</div>
+
+                <div style="background: rgba(0,0,0,0.5); padding: 22px; border-radius: 12px; margin-top: 20px;">
+                    <b style="color: var(--neon-green);">📸 แคปหน้าจอ + วิดีโอส่งครู:</b>
+                    <ol style="margin-top: 12px; line-height: 2;">
+                        <li><b>แคปโค้ดเต็ม</b> ที่เขียนเสร็จ</li>
+                        <li><b>วิดีโอ ≥30 วินาที</b> หุ่นยนต์เต้นรำตามจังหวะ <b>(ถ่ายจริง หรือใน Simulator)</b></li>
+                        <li><b>แคปหน้า Simulator</b> ตอนหุ่นยนต์กำลังหมุน 360°</li>
+                    </ol>
+                </div>
+
+                <div class="callout callout-info">
+                    <span class="callout-icon">📤</span>
+                    <div><b>วิธีส่ง:</b> รวมไฟล์ทั้งหมดเป็น zip ตั้งชื่อ <b>"Hr27-28_ชื่อ_เลขที่.zip"</b> → เว็บโรงครูเจมส์ → ระบบส่งงาน → ใบงาน "หุ่นยนต์เต้นรำ"</div>
+                </div>
+
+                <div class="callout callout-bonus">
+                    <span class="callout-icon">🌟</span>
+                    <div><b>โบนัส +5 คะแนน:</b> ทำให้หุ่นยนต์เต้น <b>"เพลงของคุณเอง"</b> + เปลี่ยนสี LED ตามจังหวะ + เล่นบัซเซอร์ → เป็นการแสดงหุ่นยนต์เต็มรูปแบบ!</div>
+                </div>
+
+                <div class="callout callout-warn">
+                    <span class="callout-icon">⚠️</span>
+                    <div><b>ระวัง:</b> ตอนทดลองกับบอร์ดจริง — <b>ยกหุ่นยนต์ขึ้น</b> ก่อนเปิดมอเตอร์! ไม่งั้นมันอาจวิ่งหนี ตกโต๊ะ พัง!</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 6: Quiz -->
+        <div class="step" id="step-6">
+            <h3>🎮 ด่านที่ 6: แบบทดสอบท้ายชั่วโมง (5 ข้อ)</h3>
+            <p>สุ่ม + สลับ <b style="color: var(--neon-orange);">กันลอก!</b></p>
+
+            <div id="game-area" style="background: rgba(0,0,0,0.2); border: 2px solid var(--neon-green); border-radius: 20px; padding: 30px; text-align: center; max-width: 750px; margin: 0 auto;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 20px; font-weight: bold; color: var(--neon-green);">
+                    <span id="question-counter">คำถาม: 1 / 5</span>
+                    <span id="score-counter">คะแนน: 0</span>
+                </div>
+                <h4 id="question-text" style="font-size: 22px; color: white; margin-bottom: 30px; line-height: 1.5;">กำลังโหลด...</h4>
+                <div id="options-grid" style="display: flex; flex-direction: column; gap: 12px;"></div>
+            </div>
+
+            <div id="game-result" style="display: none; text-align: center; padding: 40px; background: rgba(0,0,0,0.2); border-radius: 20px; border: 2px solid var(--neon-orange);">
+                <div style="font-size: 70px;">🏆</div>
+                <h3 style="border: none; text-shadow: none; font-size: 32px; color: var(--neon-orange);">จบชั่วโมงที่ 27-28!</h3>
+                <p style="font-size: 20px; color: white;">นักเรียน: <span class="student-name-inject" style="color:var(--neon-green);"></span></p>
+                <p style="font-size: 20px; color: white;">คะแนน: <b id="final-score" style="color: var(--neon-orange); font-size: 36px;"></b> / 5</p>
+                <p style="color: var(--cyber-blue); margin-top: 10px;">สัปดาห์หน้า: HC-SR04 วัดระยะ → ใส่ "ตา" ให้หุ่นยนต์!</p>
+                <button class="btn btn-primary" style="padding: 16px 40px; font-size: 18px; margin-top: 20px;" onclick="finishMission()">📥 ยืนยันส่งคะแนน</button>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="footer-nav" id="footer-controls">
+        <button class="btn btn-outline" id="prevBtn" onclick="moveStep(-1)">⬅️ ถอยกลับ</button>
+        <div class="step-dots" id="step-dots"></div>
+        <button class="btn btn-primary" id="nextBtn" onclick="moveStep(1)">เดินหน้า ➔</button>
+    </div>
+</div>
+
+<script>
+    let currentStep = 0; const totalSteps = 6; let studentName = "";
+    let carX = 0, carY = 0, carRot = 0;
+
+    function startLesson() {
+        const input = document.getElementById('guest-name-input').value.trim();
+        if (!input) { alert('⚠️ กรุณาลงชื่อก่อนเริ่มเรียนครับ'); return; }
+        studentName = input;
+        try { localStorage.setItem('robotm2_student', studentName); } catch(e){}
+        document.querySelectorAll('.student-name-inject').forEach(el => el.innerText = studentName);
+        document.getElementById('display-header-name').innerText = "👨‍💻 " + studentName;
+        document.getElementById('header-guest-info').style.display = 'flex';
+        document.getElementById('footer-controls').style.display = 'flex';
+        document.getElementById('progress-container').style.display = 'block';
+        buildDots();
+        currentStep = 1; updateUI();
+    }
+    function buildDots() {
+        const dots = document.getElementById('step-dots'); dots.innerHTML = "";
+        for (let i = 1; i <= totalSteps; i++) { const d = document.createElement('div'); d.className = 'dot'; dots.appendChild(d); }
+    }
+    function updateUI() {
+        document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+        document.getElementById('step-' + currentStep).classList.add('active');
+        document.getElementById('progress-bar').style.width = (currentStep / totalSteps) * 100 + '%';
+        document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i < currentStep));
+        document.getElementById('prevBtn').style.visibility = currentStep === 1 ? 'hidden' : 'visible';
+        if (currentStep === totalSteps) { document.getElementById('nextBtn').style.display = 'none'; if (!gameStarted) initGame(); }
+        else { document.getElementById('nextBtn').style.display = 'inline-flex'; }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    function moveStep(n) { currentStep += n; updateUI(); }
+
+    function finishMission() {
+        confetti({ particleCount: 250, spread: 110, origin: { y: 0.5 }, colors: ['#10b981', '#fbbf24', '#06b6d4'] });
+        setTimeout(() => {
+            alert(`🎉 ${studentName} ทำคะแนนได้ ${score}/5\nอย่าลืมส่งใบงาน "หุ่นยนต์เต้นรำ" นะครับ!`);
+            window.location.href = "index.html";
+        }, 2200);
+    }
+
+    // Motor demo
+    function motorDemo(action) {
+        const fwd = document.getElementById('motor-fwd-demo');
+        const rev = document.getElementById('motor-rev-demo');
+        fwd.classList.remove('fwd', 'rev');
+        rev.classList.remove('fwd', 'rev');
+        if (action === 'fwd') { fwd.classList.add('fwd'); rev.classList.add('fwd'); }
+        else if (action === 'rev') { fwd.classList.add('rev'); rev.classList.add('rev'); }
+    }
+
+    // Car movement demo
+    function moveCar(dir) {
+        const car = document.getElementById('robot-car');
+        const speed = +document.getElementById('speed-slider').value;
+        const distance = speed * 0.6;
+        const m1 = document.getElementById('m1-status');
+        const m2 = document.getElementById('m2-status');
+        const dirEl = document.getElementById('dir-status');
+        const wheels = car.querySelectorAll('.wheel');
+        wheels.forEach(w => w.classList.add('spinning'));
+
+        if (dir === 'F') {
+            carY -= distance;
+            m1.innerText = `+${speed}%`; m1.style.color = 'var(--neon-green)';
+            m2.innerText = `+${speed}%`; m2.style.color = 'var(--neon-green)';
+            dirEl.innerText = '⬆ เดินหน้า'; dirEl.style.color = 'var(--neon-green)';
+        } else if (dir === 'B') {
+            carY += distance;
+            m1.innerText = `-${speed}%`; m1.style.color = 'var(--neon-pink)';
+            m2.innerText = `-${speed}%`; m2.style.color = 'var(--neon-pink)';
+            dirEl.innerText = '⬇ ถอยหลัง'; dirEl.style.color = 'var(--neon-pink)';
+        } else if (dir === 'L') {
+            carRot -= 30;
+            m1.innerText = `+${speed}%`; m1.style.color = 'var(--neon-green)';
+            m2.innerText = `-${speed}%`; m2.style.color = 'var(--neon-pink)';
+            dirEl.innerText = '⬅ หมุนซ้าย'; dirEl.style.color = 'var(--neon-cyan)';
+        } else if (dir === 'R') {
+            carRot += 30;
+            m1.innerText = `-${speed}%`; m1.style.color = 'var(--neon-pink)';
+            m2.innerText = `+${speed}%`; m2.style.color = 'var(--neon-green)';
+            dirEl.innerText = '➡ หมุนขวา'; dirEl.style.color = 'var(--neon-cyan)';
+        } else {
+            carX = 0; carY = 0; carRot = 0;
+            m1.innerText = 'หยุด'; m1.style.color = '#ef4444';
+            m2.innerText = 'หยุด'; m2.style.color = '#ef4444';
+            dirEl.innerText = '⏹ หยุด'; dirEl.style.color = '#ef4444';
+            wheels.forEach(w => w.classList.remove('spinning'));
+        }
+
+        car.style.transform = `translate(calc(-50% + ${carX}px), calc(-50% + ${carY}px)) rotate(${carRot}deg)`;
+    }
+
+    const quizBank = [
+        { q: "DC Motor แตกต่างจาก Servo อย่างไร?", ans: "DC Motor หมุนต่อเนื่อง ไม่หยุดที่มุม", choices: ["DC Motor ราคาแพงกว่า", "DC Motor หมุนต่อเนื่อง ไม่หยุดที่มุม", "DC Motor ใช้ไฟ AC", "DC Motor มี 3 สาย"] },
+        { q: "Maker Pi RP2040 ขับ DC Motor ได้กี่ตัวพร้อมกัน?", ans: "2 ตัว", choices: ["1 ตัว", "2 ตัว", "4 ตัว", "8 ตัว"] },
+        { q: "Motor 1 บน Maker Pi ใช้ขาใด?", ans: "GP8 (M1A) และ GP9 (M1B)", choices: ["GP12 และ GP13", "GP18 และ GP22", "GP8 (M1A) และ GP9 (M1B)", "GP20 และ GP21"] },
+        { q: "ถ้า M1A = 65535, M1B = 0 มอเตอร์จะทำอะไร?", ans: "หมุนไปข้างหน้าเต็มกำลัง", choices: ["หยุด", "ถอยหลังเต็มกำลัง", "หมุนไปข้างหน้าเต็มกำลัง", "หมุนสลับไปมา"] },
+        { q: "ถ้า M1A = 0, M1B = 0 มอเตอร์จะทำอะไร?", ans: "หยุด (Brake)", choices: ["หยุด (Brake)", "หมุนเต็มกำลัง", "หมุนช้าๆ", "กระพริบ"] },
+        { q: "จะให้หุ่นยนต์หมุนซ้ายแบบ Tank Turn ต้องทำอย่างไร?", ans: "ล้อขวาเดินหน้า + ล้อซ้ายถอยหลัง", choices: ["ปิดล้อซ้าย", "ล้อขวาเดินหน้า + ล้อซ้ายถอยหลัง", "ล้อทั้ง 2 หมุนเร็ว", "ล้อทั้ง 2 ถอยหลัง"] },
+        { q: "ความถี่ PWM ที่เหมาะกับ DC Motor คือ?", ans: "10,000 Hz (10 kHz)", choices: ["50 Hz", "440 Hz", "10,000 Hz (10 kHz)", "1,000,000 Hz"] },
+        { q: "ก่อนทดลองมอเตอร์กับบอร์ดจริง ควรทำอะไรเพื่อความปลอดภัย?", ans: "ยกหุ่นยนต์ขึ้นจากโต๊ะก่อน", choices: ["ปิดไฟห้อง", "ยกหุ่นยนต์ขึ้นจากโต๊ะก่อน", "ใส่หูฟัง", "ปิดหน้าต่าง"] },
+        { q: "duty_cycle = 32768 เท่ากับกี่เปอร์เซ็นต์?", ans: "ประมาณ 50%", choices: ["10%", "ประมาณ 50%", "75%", "100%"] },
+        { q: "ชิป Motor Driver บน Maker Pi RP2040 ชื่ออะไร?", ans: "DRV8833", choices: ["L298N", "DRV8833", "TB6612", "A4988"] },
+        { q: "หากต้องการให้หุ่นยนต์เดินหน้าช้า ๆ ตั้ง speed เท่าไร?", ans: "0.3 ถึง 0.5", choices: ["0.0", "0.3 ถึง 0.5", "1.0", "10.0"] },
+        { q: "ทำไมต้องเขียนฟังก์ชัน forward() backward() ฯลฯ?", ans: "ใช้ซ้ำได้ง่าย อ่านโค้ดเข้าใจง่ายขึ้น", choices: ["บังคับให้ต้องเขียน", "ใช้ซ้ำได้ง่าย อ่านโค้ดเข้าใจง่ายขึ้น", "เพื่อให้โปรแกรมยาวขึ้น", "เพื่อความสวยงาม"] }
+    ];
+
+    let currentQIndex = 0; let score = 0; let gameStarted = false; let selectedQuestions = [];
+    function shuffle(array) { let curId = array.length; while (0 !== curId) { let randId = Math.floor(Math.random() * curId); curId -= 1; let tmp = array[curId]; array[curId] = array[randId]; array[randId] = tmp; } return array; }
+    function initGame() { gameStarted = true; score = 0; currentQIndex = 0; selectedQuestions = shuffle([...quizBank]).slice(0, 5); loadQuestion(); }
+    function loadQuestion() {
+        const qData = selectedQuestions[currentQIndex];
+        document.getElementById('question-counter').innerText = `คำถาม: ${currentQIndex + 1} / 5`;
+        document.getElementById('score-counter').innerText = `คะแนน: ${score}`;
+        document.getElementById('question-text').innerText = qData.q;
+        const optionsGrid = document.getElementById('options-grid'); optionsGrid.innerHTML = "";
+        shuffle([...qData.choices]).forEach(choice => {
+            const btn = document.createElement('button'); btn.className = 'quiz-option'; btn.innerText = choice;
+            btn.onclick = () => checkAnswer(btn, choice, qData.ans); optionsGrid.appendChild(btn);
+        });
+    }
+    function checkAnswer(selectedBtn, selectedText, correctText) {
+        document.querySelectorAll('.quiz-option').forEach(b => b.style.pointerEvents = 'none');
+        if (selectedText === correctText) { selectedBtn.classList.add('correct'); score++; document.getElementById('score-counter').innerText = `คะแนน: ${score}`; confetti({ particleCount: 50, spread: 60, origin: { y: 0.8 }, colors: ['#10b981'] }); }
+        else { selectedBtn.classList.add('wrong'); document.querySelectorAll('.quiz-option').forEach(b => { if(b.innerText === correctText) b.classList.add('correct'); }); }
+        setTimeout(() => { currentQIndex++; if (currentQIndex < 5) loadQuestion(); else showResult(); }, 2200);
+    }
+    function showResult() {
+        document.getElementById('game-area').style.display = 'none';
+        document.getElementById('game-result').style.display = 'block';
+        document.getElementById('final-score').innerText = score;
+        document.getElementById('footer-controls').style.display = 'none';
+    }
+</script>
+
+</body>
+</html>

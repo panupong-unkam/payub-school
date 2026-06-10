@@ -1,0 +1,20 @@
+{
+  "name": "Computer Science By ครูภาณุพงศ์ อุ่นคำ",
+  "short_name": "ครูเจมส์ CS",
+  "description": "ห้องเรียนวิทยาการคำนวณ Python หุ่นยนต์ IoT โดยครูภาณุพงศ์ อุ่นคำ",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#1a5f3f",
+  "background_color": "#0e1814",
+  "lang": "th",
+  "icons": [
+    {
+      "src": "logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education", "school"]
+}

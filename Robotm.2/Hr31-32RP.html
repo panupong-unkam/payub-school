@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>หุ่นยนต์ ม.2 | Hr 31-32: หุ่นยนต์หลบสิ่งกีดขวาง</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Noto+Serif+Thai:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --bg-dark: #0f172a; --surface-dark: #1e293b; --cyber-blue: #0ea5e9;
+            --neon-green: #10b981; --neon-orange: #f59e0b; --neon-pink: #ec4899;
+            --neon-purple: #a855f7; --neon-cyan: #06b6d4; --gold: #fbbf24;
+            --text-main: #f8fafc; --text-muted: #94a3b8; --border-line: #334155;
+        }
+        body { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 100%); color: var(--text-main); font-family: 'Sarabun', sans-serif; padding: 20px; margin: 0; overflow-x: hidden; }
+        body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px); background-size: 30px 30px; z-index: -1; }
+        .lesson-container { width: 100%; max-width: 1200px; background: var(--surface-dark); border-radius: 24px; box-shadow: 0 0 40px rgba(0,0,0,0.5), 0 0 30px rgba(236,72,153,0.3); overflow: hidden; border: 1px solid var(--border-line); display: flex; flex-direction: column; min-height: 80vh; }
+        .lesson-header { background: linear-gradient(90deg, rgba(236,72,153,0.15), rgba(15,23,42,0.95)); padding: 20px 30px; border-bottom: 1px solid var(--neon-pink); display: flex; justify-content: space-between; align-items: center; }
+        .progress-track { height: 6px; background: var(--border-line); width: 100%; display: none; }
+        #progress-bar { height: 100%; background: linear-gradient(90deg, var(--neon-pink), var(--neon-purple)); width: 0%; box-shadow: 0 0 15px var(--neon-pink); transition: width 0.6s ease; }
+        .lesson-body { padding: 40px; position: relative; flex-grow: 1; display: flex; flex-direction: column; }
+        .step { display: none; animation: glitchFadeIn 0.5s ease-out forwards; flex-grow: 1; }
+        .step.active { display: block; }
+        @keyframes glitchFadeIn { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 1; transform: translateY(0); } }
+        h3 { color: var(--neon-pink); font-family: 'Noto Serif Thai', serif; font-size: 30px; margin-top: 0; text-shadow: 0 0 15px rgba(236,72,153,0.4); border-bottom: 1px dashed var(--border-line); padding-bottom: 15px; }
+        h4 { color: white; font-family: 'Noto Serif Thai', serif; font-size: 20px; margin: 20px 0 10px; }
+        p, li { line-height: 1.85; font-size: 17px; color: #cbd5e1; }
+        .btn { padding: 14px 28px; border: none; border-radius: 10px; font-family: 'Sarabun'; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.3s; display: inline-flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-primary { background: linear-gradient(135deg, var(--neon-pink), #be185d); color: white; box-shadow: 0 4px 20px rgba(236,72,153,0.5); }
+        .btn-primary:hover { transform: translateY(-3px); }
+        .btn-outline { background: transparent; color: var(--text-muted); border: 1px solid var(--border-line); }
+        .btn-outline:hover { color: white; border-color: white; }
+        .footer-nav { padding: 25px 40px; background: rgba(15,23,42,0.95); border-top: 1px solid var(--border-line); display: none; justify-content: space-between; align-items: center; margin-top: auto; }
+        .grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-top: 20px; }
+        .grid-3col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-top: 20px; }
+        .info-card { background: rgba(0,0,0,0.3); border: 1px solid var(--border-line); border-radius: 16px; padding: 22px; }
+        .quiz-option { background: rgba(255,255,255,0.05); border: 2px solid var(--border-line); padding: 16px 22px; border-radius: 12px; margin-bottom: 12px; cursor: pointer; transition: 0.2s; font-size: 16px; color: var(--text-main); text-align: left; width: 100%; }
+        .quiz-option:hover { background: rgba(236,72,153,0.1); border-color: var(--neon-pink); }
+        .quiz-option.correct { background: rgba(16,185,129,0.2); border-color: var(--neon-green); color: var(--neon-green); font-weight: bold; }
+        .quiz-option.wrong { background: rgba(239,68,68,0.2); border-color: #ef4444; color: #ef4444; }
+        .code-box { background: #0a0e1a; padding: 18px; border-radius: 10px; color: #e2e8f0; font-size: 14px; font-family: 'JetBrains Mono', monospace; white-space: pre; overflow-x: auto; line-height: 1.7; border-left: 4px solid var(--neon-pink); margin: 10px 0; }
+        .code-box .kw { color: #c792ea; } .code-box .str { color: #a3e635; } .code-box .num { color: #f59e0b; } .code-box .com { color: #64748b; font-style: italic; } .code-box .fn { color: #06b6d4; }
+
+        /* Robot simulation arena */
+        .simulation-arena {
+            background: linear-gradient(135deg, #0f172a, #1a1a2e);
+            border: 2px solid #444; border-radius: 18px;
+            margin: 20px 0; position: relative;
+            width: 100%; height: 400px;
+            overflow: hidden;
+        }
+        .sim-grid {
+            position: absolute; inset: 0;
+            background-image: linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+        .sim-robot {
+            position: absolute; width: 50px; height: 50px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #ec4899, #be185d);
+            box-shadow: 0 0 25px rgba(236,72,153,0.6);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px;
+            transition: none;
+            z-index: 5;
+        }
+        .sim-robot::before {
+            content: ''; position: absolute; top: -10px; left: 50%;
+            transform: translateX(-50%);
+            border-left: 8px solid transparent; border-right: 8px solid transparent;
+            border-bottom: 12px solid var(--neon-orange);
+        }
+        .sim-obstacle {
+            position: absolute; width: 30px; height: 30px;
+            background: linear-gradient(135deg, #fbbf24, #d97706);
+            border-radius: 4px; box-shadow: 0 0 15px rgba(251,191,36,0.4);
+        }
+        .sim-sensor-beam {
+            position: absolute; height: 2px;
+            background: linear-gradient(90deg, var(--cyber-blue) 0%, transparent 100%);
+            transform-origin: left center;
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        .sim-controls {
+            display: flex; justify-content: center; gap: 12px;
+            margin: 15px 0; flex-wrap: wrap;
+        }
+        .sim-stats {
+            background: rgba(0,0,0,0.5); padding: 12px;
+            border-radius: 10px; font-family: monospace;
+            color: var(--cyber-blue); font-size: 14px;
+            display: flex; gap: 15px; justify-content: center;
+            flex-wrap: wrap;
+            border: 1px solid var(--border-line);
+        }
+
+        /* Flowchart */
+        .flow-container {
+            display: flex; flex-direction: column; align-items: center;
+            gap: 15px; padding: 20px;
+            background: rgba(0,0,0,0.3); border-radius: 16px;
+            margin: 20px 0;
+        }
+        .flow-box {
+            padding: 14px 30px; border-radius: 10px;
+            font-weight: bold; min-width: 220px; text-align: center;
+            font-family: monospace;
+        }
+        .flow-start { background: rgba(16,185,129,0.2); border: 2px solid var(--neon-green); color: var(--neon-green); border-radius: 30px; }
+        .flow-process { background: rgba(14,165,233,0.2); border: 2px solid var(--cyber-blue); color: var(--cyber-blue); }
+        .flow-decision { background: rgba(245,158,11,0.2); border: 2px solid var(--neon-orange); color: var(--neon-orange); transform: rotate(45deg); padding: 30px 40px; }
+        .flow-decision span { display: inline-block; transform: rotate(-45deg); }
+        .flow-arrow { color: #64748b; font-size: 24px; }
+
+        .tag { display: inline-block; padding: 5px 14px; border-radius: 14px; font-size: 12px; font-weight: bold; margin-right: 8px; }
+        .tag-rp { background: rgba(245,158,11,0.2); color: var(--neon-orange); border: 1px solid var(--neon-orange); }
+        .tag-time { background: rgba(236,72,153,0.2); color: var(--neon-pink); border: 1px solid var(--neon-pink); }
+
+        .callout { border-radius: 14px; padding: 18px 22px; margin: 18px 0; display: flex; gap: 15px; align-items: flex-start; }
+        .callout-icon { font-size: 28px; flex-shrink: 0; }
+        .callout-info { background: rgba(14,165,233,0.1); border-left: 4px solid var(--cyber-blue); }
+        .callout-warn { background: rgba(245,158,11,0.1); border-left: 4px solid var(--neon-orange); }
+        .callout-tip { background: rgba(16,185,129,0.1); border-left: 4px solid var(--neon-green); }
+        .callout-bonus { background: rgba(236,72,153,0.1); border-left: 4px solid var(--neon-pink); }
+        .callout b { color: white; }
+
+        .step-dots { display: flex; gap: 8px; justify-content: center; }
+        .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--border-line); transition: 0.3s; }
+        .dot.active { background: var(--neon-pink); box-shadow: 0 0 10px var(--neon-pink); }
+
+        .bigprint { font-size: 19px; line-height: 1.9; }
+
+        @media (max-width: 900px) { .lesson-body { padding: 22px; } .grid-2col, .grid-3col { grid-template-columns: 1fr !important; } h3 { font-size: 24px; } }
+    </style>
+</head>
+<body>
+
+<div class="lesson-container">
+    <div class="lesson-header">
+        <h2 style="margin: 0; font-size: 20px; letter-spacing: 1px;">🤖 ROBOTICS M.2 | Hr 31-32</h2>
+        <div id="header-guest-info" style="display: none; align-items: center; gap: 12px;">
+            <span style="background: rgba(236,72,153,0.15); color: var(--neon-pink); padding: 6px 18px; border-radius: 20px; font-size: 14px; font-weight: bold; border: 1px solid var(--neon-pink);" id="display-header-name">Student</span>
+            <button class="btn btn-outline" style="padding: 6px 15px; font-size: 12px;" onclick="location.reload()">EXIT</button>
+        </div>
+    </div>
+
+    <div class="progress-track" id="progress-container"><div id="progress-bar"></div></div>
+
+    <div class="lesson-body">
+
+        <!-- STEP 0 -->
+        <div class="step active" id="step-0">
+            <div style="text-align: center; padding: 50px 20px;">
+                <div style="font-size: 90px; margin-bottom: 20px; filter: drop-shadow(0 0 20px var(--neon-pink));">🤖</div>
+                <h2 style="color: white; font-size: 32px; margin-bottom: 10px;">หุ่นยนต์ ม.2 | ชั่วโมงที่ 31-32</h2>
+                <p style="color: var(--neon-pink); font-size: 22px; margin-bottom: 5px; font-weight: bold;">หุ่นยนต์หลบสิ่งกีดขวางอัตโนมัติ</p>
+                <p style="color: var(--text-muted); font-size: 16px; margin-bottom: 30px;">รวม HC-SR04 + Motor — หุ่นยนต์ "คิดเอง" ได้!</p>
+                <p style="color: var(--text-muted); font-size: 16px; margin-bottom: 20px;">📝 ลงชื่อเข้าเรียน</p>
+                <input type="text" id="guest-name-input" placeholder="ชื่อ-นามสกุล เลขที่ ห้อง" style="width:100%; max-width:520px; padding:16px 22px; background:rgba(0,0,0,0.4); border:2px solid var(--neon-pink); border-radius:12px; color:white; font-size:18px; text-align:center; outline:none;" onkeypress="if(event.key === 'Enter') startLesson()">
+                <div style="margin-top: 35px;">
+                    <button class="btn btn-primary" style="padding: 18px 60px; font-size: 19px;" onclick="startLesson()">🚀 เริ่มเรียน</button>
+                </div>
+                <div style="margin-top: 30px;"><span class="tag tag-rp">RP2040</span><span class="tag tag-time">2 ชั่วโมง</span></div>
+            </div>
+        </div>
+
+        <!-- STEP 1: Concept -->
+        <div class="step" id="step-1">
+            <h3>🎯 ด่านที่ 1: หุ่นยนต์อัตโนมัติคืออะไร?</h3>
+            <p class="bigprint">สวัสดี <b class="student-name-inject" style="color: var(--neon-green);"></b>! หุ่นยนต์ที่ "<b>คิดเองได้</b>" คือเป้าหมายของวันนี้ — ใส่สมองให้มัน รวม HC-SR04 + Motor</p>
+
+            <h4>🧠 หลักการ "Sense → Think → Act"</h4>
+            <div class="grid-3col">
+                <div class="info-card" style="border-color: var(--cyber-blue);">
+                    <div style="font-size: 40px; text-align: center;">👁️</div>
+                    <h4 style="color: var(--cyber-blue); text-align: center; margin: 5px 0;">1. Sense (รู้)</h4>
+                    <p style="font-size: 14px; text-align: center;">วัดระยะข้างหน้าด้วย HC-SR04</p>
+                </div>
+                <div class="info-card" style="border-color: var(--neon-orange);">
+                    <div style="font-size: 40px; text-align: center;">🧠</div>
+                    <h4 style="color: var(--neon-orange); text-align: center; margin: 5px 0;">2. Think (คิด)</h4>
+                    <p style="font-size: 14px; text-align: center;">ใกล้สิ่งกีดขวางไหม? ถ้าใกล้ → ต้องเลี้ยว</p>
+                </div>
+                <div class="info-card" style="border-color: var(--neon-green);">
+                    <div style="font-size: 40px; text-align: center;">⚙️</div>
+                    <h4 style="color: var(--neon-green); text-align: center; margin: 5px 0;">3. Act (ทำ)</h4>
+                    <p style="font-size: 14px; text-align: center;">สั่งมอเตอร์เดิน/ถอย/เลี้ยว</p>
+                </div>
+            </div>
+
+            <div class="callout callout-tip">
+                <span class="callout-icon">🧠</span>
+                <div><b>นี่คือพื้นฐานของ AI!</b> หุ่นยนต์ Tesla Self-driving Car, Roomba ดูดฝุ่น, drone อัตโนมัติ ใช้หลักการเดียวกันแต่ซับซ้อนกว่า</div>
+            </div>
+
+            <h4>🔄 Flowchart ของหุ่นยนต์</h4>
+            <div class="flow-container">
+                <div class="flow-box flow-start">START</div>
+                <div class="flow-arrow">⬇</div>
+                <div class="flow-box flow-process">วัดระยะข้างหน้า</div>
+                <div class="flow-arrow">⬇</div>
+                <div class="flow-box flow-decision"><span>ระยะ &lt; 20?</span></div>
+                <div style="display: flex; gap: 60px; align-items: flex-start;">
+                    <div style="text-align: center;">
+                        <div style="color: var(--neon-orange);">ใช่ ⬇</div>
+                        <div class="flow-box flow-process" style="background: rgba(239,68,68,0.2); border-color: #ef4444; color: #ef4444;">หยุด + ถอย + เลี้ยว</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="color: var(--neon-green);">ไม่ใช่ ⬇</div>
+                        <div class="flow-box flow-process">เดินหน้าต่อ</div>
+                    </div>
+                </div>
+                <div class="flow-arrow">⬇ (วน)</div>
+            </div>
+        </div>
+
+        <!-- STEP 2: Simulation -->
+        <div class="step" id="step-2">
+            <h3>🎮 ด่านที่ 2: ทดลอง! หุ่นยนต์หลบของจริงๆ</h3>
+            <p>กด ▶ เริ่ม → หุ่นยนต์จะวิ่งและหลบสิ่งกีดขวางเอง!</p>
+
+            <div class="simulation-arena" id="sim-arena">
+                <div class="sim-grid"></div>
+                <div class="sim-sensor-beam" id="sim-beam"></div>
+                <div class="sim-robot" id="sim-robot" style="left: 50%; top: 50%;">🤖</div>
+                <!-- Obstacles added by JS -->
+            </div>
+
+            <div class="sim-controls">
+                <button class="btn btn-primary" id="sim-start-btn" onclick="toggleSim()">▶ เริ่ม</button>
+                <button class="btn btn-outline" onclick="resetSim()" style="padding: 14px 24px;">🔄 รีเซ็ต</button>
+                <button class="btn btn-outline" onclick="addObstacle()" style="padding: 14px 24px;">➕ เพิ่มสิ่งกีดขวาง</button>
+            </div>
+
+            <div class="sim-stats" id="sim-stats">
+                <span>📡 ระยะ: <b id="stat-dist">-</b> cm</span>
+                <span>🎮 สถานะ: <b id="stat-state">หยุด</b></span>
+                <span>📊 หลบไปแล้ว: <b id="stat-dodges">0</b> ครั้ง</span>
+            </div>
+
+            <div class="callout callout-info">
+                <span class="callout-icon">💡</span>
+                <div><b>สังเกต:</b> หุ่นยนต์ (สีชมพู) เดินไปจนเจอวัตถุ (สีเหลือง) ในระยะ 60 px → หยุด → ถอย → เลี้ยว → เดินต่อ. ลำแสง (สีฟ้า) คือ "เซ็นเซอร์มอง"</div>
+            </div>
+        </div>
+
+        <!-- STEP 3: Code -->
+        <div class="step" id="step-3">
+            <h3>🐍 ด่านที่ 3: โค้ดหุ่นยนต์หลบสิ่งกีดขวาง</h3>
+            <p>โค้ดเต็มที่นำไปลงบอร์ดจริงได้</p>
+
+            <h4>📚 Setup + Motor Functions</h4>
+            <div class="code-box"><span class="kw">import</span> board, pwmio, adafruit_hcsr04, time
+
+<span class="com"># --- Setup มอเตอร์ 2 ตัว ---</span>
+m1a = pwmio.<span class="fn">PWMOut</span>(board.GP8, frequency=<span class="num">10000</span>)
+m1b = pwmio.<span class="fn">PWMOut</span>(board.GP9, frequency=<span class="num">10000</span>)
+m2a = pwmio.<span class="fn">PWMOut</span>(board.GP10, frequency=<span class="num">10000</span>)
+m2b = pwmio.<span class="fn">PWMOut</span>(board.GP11, frequency=<span class="num">10000</span>)
+
+<span class="com"># --- Setup HC-SR04 ---</span>
+sonar = adafruit_hcsr04.<span class="fn">HCSR04</span>(trigger_pin=board.GP3, echo_pin=board.GP2)
+
+SPEED = <span class="num">0.6</span>   <span class="com"># ความเร็ว 60%</span>
+
+<span class="kw">def</span> <span class="fn">set_motor</span>(a, b, s):
+    <span class="kw">if</span> s &gt;= <span class="num">0</span>:
+        a.duty_cycle = <span class="fn">int</span>(s * <span class="num">65535</span>); b.duty_cycle = <span class="num">0</span>
+    <span class="kw">else</span>:
+        a.duty_cycle = <span class="num">0</span>; b.duty_cycle = <span class="fn">int</span>(<span class="fn">abs</span>(s) * <span class="num">65535</span>)
+
+<span class="kw">def</span> <span class="fn">forward</span>():    <span class="fn">set_motor</span>(m1a, m1b, SPEED);  <span class="fn">set_motor</span>(m2a, m2b, SPEED)
+<span class="kw">def</span> <span class="fn">backward</span>():   <span class="fn">set_motor</span>(m1a, m1b, -SPEED); <span class="fn">set_motor</span>(m2a, m2b, -SPEED)
+<span class="kw">def</span> <span class="fn">turn_right</span>(): <span class="fn">set_motor</span>(m1a, m1b, -SPEED); <span class="fn">set_motor</span>(m2a, m2b, SPEED)
+<span class="kw">def</span> <span class="fn">turn_left</span>():  <span class="fn">set_motor</span>(m1a, m1b, SPEED);  <span class="fn">set_motor</span>(m2a, m2b, -SPEED)
+<span class="kw">def</span> <span class="fn">stop</span>():        <span class="fn">set_motor</span>(m1a, m1b, <span class="num">0</span>);      <span class="fn">set_motor</span>(m2a, m2b, <span class="num">0</span>)</div>
+
+            <h4>📚 Main Loop — หลบสิ่งกีดขวาง</h4>
+            <div class="code-box"><span class="kw">while</span> <span class="num">True</span>:
+    <span class="kw">try</span>:
+        d = sonar.distance
+        <span class="fn">print</span>(d, <span class="str">"cm"</span>)
+
+        <span class="kw">if</span> d &lt; <span class="num">20</span>:
+            <span class="com"># เจอสิ่งกีดขวาง — หยุดก่อน</span>
+            <span class="fn">stop</span>()
+            time.<span class="fn">sleep</span>(<span class="num">0.2</span>)
+            <span class="com"># ถอย 0.5 วินาที</span>
+            <span class="fn">backward</span>()
+            time.<span class="fn">sleep</span>(<span class="num">0.5</span>)
+            <span class="com"># เลี้ยวขวา 0.5 วินาที</span>
+            <span class="fn">turn_right</span>()
+            time.<span class="fn">sleep</span>(<span class="num">0.5</span>)
+        <span class="kw">else</span>:
+            <span class="com"># ไม่มีอะไรขวาง — เดินต่อ</span>
+            <span class="fn">forward</span>()
+    <span class="kw">except</span> RuntimeError:
+        <span class="fn">forward</span>()  <span class="com"># ถ้าเซ็นเซอร์เพี้ยน — เดินต่อ</span>
+
+    time.<span class="fn">sleep</span>(<span class="num">0.05</span>)</div>
+
+            <div class="callout callout-tip">
+                <span class="callout-icon">💡</span>
+                <div><b>คิดเชิงวิศวกร:</b> ทำไมต้องถอยก่อนเลี้ยว? เพราะถ้าใกล้กำแพงมาก ๆ การเลี้ยวอาจทำให้ชนข้างได้ → ถอยก่อน เพื่อให้มีพื้นที่หมุนตัว</div>
+            </div>
+        </div>
+
+        <!-- STEP 4: Tuning + LED indicators -->
+        <div class="step" id="step-4">
+            <h3>🔧 ด่านที่ 4: ปรับแต่ง + แสดงสถานะด้วย LED</h3>
+
+            <h4>🎯 ตัวแปรปรับแต่ง</h4>
+            <div class="info-card" style="border-color: var(--neon-orange);">
+                <table style="width: 100%; font-size: 15px;">
+                    <tr><td style="padding: 8px; color: var(--neon-orange);"><b>SAFE_DIST</b></td><td>20-30 cm — ระยะที่ "ปลอดภัย"</td></tr>
+                    <tr><td style="padding: 8px; color: var(--neon-orange);"><b>SPEED</b></td><td>0.4-0.7 — เร็วเกินจะชนก่อนเซ็นเซอร์ทัน</td></tr>
+                    <tr><td style="padding: 8px; color: var(--neon-orange);"><b>BACK_TIME</b></td><td>0.3-0.8 วินาที — เวลาถอย</td></tr>
+                    <tr><td style="padding: 8px; color: var(--neon-orange);"><b>TURN_TIME</b></td><td>0.3-0.6 วินาที — มากเกินจะหมุนเกิน</td></tr>
+                </table>
+            </div>
+
+            <h4>🎨 เพิ่ม LED แสดงสถานะ</h4>
+            <div class="code-box"><span class="kw">import</span> board, neopixel, pwmio, adafruit_hcsr04, time
+
+pixels = neopixel.<span class="fn">NeoPixel</span>(board.GP18, <span class="num">2</span>)
+<span class="com"># ... motor setup เหมือนเดิม ...</span>
+
+<span class="kw">while</span> <span class="num">True</span>:
+    <span class="kw">try</span>:
+        d = sonar.distance
+
+        <span class="kw">if</span> d &lt; <span class="num">20</span>:
+            pixels.fill((<span class="num">255</span>, <span class="num">0</span>, <span class="num">0</span>))   <span class="com"># แดง = หยุด</span>
+            <span class="fn">stop</span>(); time.<span class="fn">sleep</span>(<span class="num">0.2</span>)
+
+            pixels.fill((<span class="num">255</span>, <span class="num">100</span>, <span class="num">0</span>)) <span class="com"># ส้ม = ถอย</span>
+            <span class="fn">backward</span>(); time.<span class="fn">sleep</span>(<span class="num">0.5</span>)
+
+            pixels.fill((<span class="num">0</span>, <span class="num">0</span>, <span class="num">255</span>))   <span class="com"># น้ำเงิน = เลี้ยว</span>
+            <span class="fn">turn_right</span>(); time.<span class="fn">sleep</span>(<span class="num">0.5</span>)
+        <span class="kw">else</span>:
+            pixels.fill((<span class="num">0</span>, <span class="num">255</span>, <span class="num">0</span>))   <span class="com"># เขียว = ปลอดภัย เดินหน้า</span>
+            <span class="fn">forward</span>()
+    <span class="kw">except</span> RuntimeError:
+        <span class="kw">pass</span>
+    time.<span class="fn">sleep</span>(<span class="num">0.05</span>)</div>
+
+            <div class="callout callout-bonus">
+                <span class="callout-icon">🌟</span>
+                <div><b>เคล็ดลับ Pro:</b> ถ้าเลี้ยวขวาแล้วเจอกำแพงอีก → ลองเลี้ยวซ้ายแทน! เพิ่มตัวแปรนับ "เลี้ยวขวากี่ครั้งแล้ว" — ถ้า ≥ 3 ครั้ง สลับเป็นเลี้ยวซ้าย</div>
+            </div>
+        </div>
+
+        <!-- STEP 5: Worksheet -->
+        <div class="step" id="step-5">
+            <h3>📝 ด่านที่ 5: ใบงานที่ 13 — "หุ่นยนต์สำรวจห้อง"</h3>
+
+            <div style="background: rgba(236,72,153,0.08); border: 2px solid var(--neon-pink); padding: 30px; border-radius: 20px;">
+                <h4 style="color: white; margin-top: 0; font-size: 22px;">🎯 ภารกิจ (15 คะแนน — งานใหญ่!)</h4>
+                <p>สร้างหุ่นยนต์ที่สำรวจห้องเองโดยไม่ชนอะไร</p>
+
+                <div style="background: rgba(0,0,0,0.4); padding: 22px; border-radius: 12px;">
+                    <b style="color: var(--neon-pink);">✅ เกณฑ์ที่ต้องมี:</b>
+                    <ol style="line-height: 2.2;">
+                        <li>ใช้ <b>HC-SR04</b> วัดระยะตลอดเวลา (2 คะแนน)</li>
+                        <li>ใช้ <b>DC Motor</b> 2 ตัว เคลื่อนที่ได้ครบ (เดินหน้า/ถอย/เลี้ยว) (3 คะแนน)</li>
+                        <li>เจอสิ่งกีดขวาง &lt; 20 cm → หลบได้สำเร็จ (4 คะแนน)</li>
+                        <li>มี <b>NeoPixel แสดงสถานะ</b> (เขียว=ไป, ส้ม=ถอย, น้ำเงิน=เลี้ยว, แดง=หยุด) (3 คะแนน)</li>
+                        <li>หุ่นยนต์ <b>ไม่ติดอยู่ในมุม</b> ห้องได้ (วนหลบสำเร็จ) (3 คะแนน)</li>
+                    </ol>
+                </div>
+
+                <h4 style="color: white;">🐍 โครงโค้ดที่แนะนำ</h4>
+                <div class="code-box"><span class="com"># รวมโค้ดจากด่าน 4 มาใช้</span>
+<span class="com"># ปรับ SAFE_DIST, SPEED, BACK_TIME, TURN_TIME ให้เหมาะกับสนามจริงของคุณ</span>
+<span class="com"># เพิ่มเงื่อนไข "ถ้าเลี้ยวขวา 3 ครั้งติดแล้วยังเจอกำแพง — ลองเลี้ยวซ้าย"</span>
+
+SAFE_DIST = <span class="num">20</span>
+SPEED = <span class="num">0.6</span>
+BACK_TIME = <span class="num">0.5</span>
+TURN_TIME = <span class="num">0.4</span>
+right_count = <span class="num">0</span>
+
+<span class="kw">while</span> <span class="num">True</span>:
+    <span class="com"># TODO: เพิ่มโลจิคนับการเลี้ยว</span>
+    <span class="kw">pass</span></div>
+
+                <div style="background: rgba(0,0,0,0.5); padding: 22px; border-radius: 12px; margin-top: 20px;">
+                    <b style="color: var(--neon-pink);">📸 แคปหน้าจอ + วิดีโอส่งครู:</b>
+                    <ol style="margin-top: 12px; line-height: 2;">
+                        <li><b>แคปโค้ดเต็ม</b> (ทุก function + main loop)</li>
+                        <li><b>วิดีโอ ≥1 นาที</b> หุ่นยนต์เดินสำรวจห้องและหลบสิ่งกีดขวางได้ (ถ่ายจากด้านบน)</li>
+                        <li><b>แคป Simulator</b> ตอนหุ่นยนต์เจอสิ่งกีดขวาง + LED แดง</li>
+                        <li><b>แคป Simulator</b> ตอนหุ่นยนต์เดินผ่านไปได้ + LED เขียว</li>
+                        <li><b>เขียนสรุป 3-5 บรรทัด</b> ในไฟล์ <b>readme.txt</b> ว่าคุณตั้งค่า SAFE_DIST, SPEED, etc. เท่าไร และทำไม</li>
+                    </ol>
+                </div>
+
+                <div class="callout callout-info">
+                    <span class="callout-icon">📤</span>
+                    <div><b>วิธีส่ง:</b> รวมไฟล์เป็น zip ตั้งชื่อ <b>"Hr31-32_ชื่อ_เลขที่.zip"</b> → เว็บโรงครูเจมส์ → ใบงาน "หุ่นยนต์สำรวจห้อง"</div>
+                </div>
+
+                <div class="callout callout-bonus">
+                    <span class="callout-icon">🌟</span>
+                    <div><b>โบนัส +5 คะแนน:</b> เพิ่ม "Mood System" — ถ้าหุ่นยนต์เดินสบาย ๆ LED สีฟ้า, ถ้าวิ่งเร็ว LED สีน้ำเงิน, ถ้าเจอกำแพงบ่อย ๆ "เครียด" → LED สีแดงกระพริบ + บัซเซอร์</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 6: Quiz -->
+        <div class="step" id="step-6">
+            <h3>🎮 ด่านที่ 6: แบบทดสอบท้ายชั่วโมง (5 ข้อ)</h3>
+            <p>สุ่ม + สลับ <b style="color: var(--neon-orange);">กันลอก!</b></p>
+
+            <div id="game-area" style="background: rgba(0,0,0,0.2); border: 2px solid var(--neon-pink); border-radius: 20px; padding: 30px; text-align: center; max-width: 750px; margin: 0 auto;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 20px; font-weight: bold; color: var(--neon-pink);">
+                    <span id="question-counter">คำถาม: 1 / 5</span>
+                    <span id="score-counter">คะแนน: 0</span>
+                </div>
+                <h4 id="question-text" style="font-size: 22px; color: white; margin-bottom: 30px; line-height: 1.5;">กำลังโหลด...</h4>
+                <div id="options-grid" style="display: flex; flex-direction: column; gap: 12px;"></div>
+            </div>
+
+            <div id="game-result" style="display: none; text-align: center; padding: 40px; background: rgba(0,0,0,0.2); border-radius: 20px; border: 2px solid var(--neon-green);">
+                <div style="font-size: 70px;">🏆</div>
+                <h3 style="border: none; text-shadow: none; font-size: 32px; color: var(--neon-green);">จบชั่วโมงที่ 31-32!</h3>
+                <p style="font-size: 20px; color: white;">นักเรียน: <span class="student-name-inject" style="color:var(--neon-pink);"></span></p>
+                <p style="font-size: 20px; color: white;">คะแนน: <b id="final-score" style="color: var(--neon-orange); font-size: 36px;"></b> / 5</p>
+                <p style="color: var(--cyber-blue); margin-top: 10px;">สัปดาห์หน้า: IR Sensor → Line Follower!</p>
+                <button class="btn btn-primary" style="padding: 16px 40px; font-size: 18px; margin-top: 20px;" onclick="finishMission()">📥 ยืนยันส่งคะแนน</button>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="footer-nav" id="footer-controls">
+        <button class="btn btn-outline" id="prevBtn" onclick="moveStep(-1)">⬅️ ถอยกลับ</button>
+        <div class="step-dots" id="step-dots"></div>
+        <button class="btn btn-primary" id="nextBtn" onclick="moveStep(1)">เดินหน้า ➔</button>
+    </div>
+</div>
+
+<script>
+    let currentStep = 0; const totalSteps = 6; let studentName = "";
+
+    function startLesson() {
+        const input = document.getElementById('guest-name-input').value.trim();
+        if (!input) { alert('⚠️ กรุณาลงชื่อก่อนเริ่มเรียนครับ'); return; }
+        studentName = input;
+        try { localStorage.setItem('robotm2_student', studentName); } catch(e){}
+        document.querySelectorAll('.student-name-inject').forEach(el => el.innerText = studentName);
+        document.getElementById('display-header-name').innerText = "👨‍💻 " + studentName;
+        document.getElementById('header-guest-info').style.display = 'flex';
+        document.getElementById('footer-controls').style.display = 'flex';
+        document.getElementById('progress-container').style.display = 'block';
+        buildDots();
+        currentStep = 1; updateUI();
+    }
+    function buildDots() {
+        const dots = document.getElementById('step-dots'); dots.innerHTML = "";
+        for (let i = 1; i <= totalSteps; i++) { const d = document.createElement('div'); d.className = 'dot'; dots.appendChild(d); }
+    }
+    function updateUI() {
+        document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+        document.getElementById('step-' + currentStep).classList.add('active');
+        document.getElementById('progress-bar').style.width = (currentStep / totalSteps) * 100 + '%';
+        document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i < currentStep));
+        document.getElementById('prevBtn').style.visibility = currentStep === 1 ? 'hidden' : 'visible';
+        if (currentStep === 2) { initSim(); }
+        if (currentStep === totalSteps) { document.getElementById('nextBtn').style.display = 'none'; if (!gameStarted) initGame(); }
+        else { document.getElementById('nextBtn').style.display = 'inline-flex'; }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    function moveStep(n) { currentStep += n; updateUI(); }
+
+    function finishMission() {
+        confetti({ particleCount: 250, spread: 110, origin: { y: 0.5 }, colors: ['#ec4899', '#10b981', '#fbbf24'] });
+        setTimeout(() => {
+            alert(`🎉 ${studentName} ทำคะแนนได้ ${score}/5\nอย่าลืมส่งใบงาน "หุ่นยนต์สำรวจห้อง" นะครับ!`);
+            window.location.href = "index.html";
+        }, 2200);
+    }
+
+    // Robot simulation
+    let simRunning = false;
+    let simRobot = { x: 300, y: 200, angle: 0, state: 'หยุด' };
+    let simObstacles = [];
+    let simDodges = 0;
+    let simInterval = null;
+    let simInitialized = false;
+
+    function initSim() {
+        if (simInitialized) return;
+        simInitialized = true;
+        resetSim();
+    }
+
+    function resetSim() {
+        const arena = document.getElementById('sim-arena');
+        // Clear existing obstacles
+        arena.querySelectorAll('.sim-obstacle').forEach(o => o.remove());
+        simObstacles = [];
+        simRobot = { x: 100, y: 200, angle: 0, state: 'หยุด' };
+        simDodges = 0;
+        // Default obstacles
+        addObstacleAt(400, 150);
+        addObstacleAt(500, 250);
+        addObstacleAt(700, 200);
+        addObstacleAt(850, 150);
+        addObstacleAt(300, 80);
+        addObstacleAt(600, 320);
+        updateRobotPosition();
+        updateStats();
+        if (simRunning) toggleSim();
+    }
+
+    function addObstacle() {
+        const arena = document.getElementById('sim-arena');
+        const w = arena.clientWidth;
+        const h = arena.clientHeight;
+        addObstacleAt(50 + Math.random() * (w - 100), 50 + Math.random() * (h - 100));
+    }
+    function addObstacleAt(x, y) {
+        const arena = document.getElementById('sim-arena');
+        const obs = document.createElement('div');
+        obs.className = 'sim-obstacle';
+        obs.style.left = x + 'px';
+        obs.style.top = y + 'px';
+        arena.appendChild(obs);
+        simObstacles.push({ x: x, y: y, w: 30, h: 30, el: obs });
+    }
+
+    function toggleSim() {
+        const btn = document.getElementById('sim-start-btn');
+        if (!simRunning) {
+            simRunning = true;
+            btn.innerText = '⏸ หยุด';
+            simInterval = setInterval(stepSim, 50);
+        } else {
+            simRunning = false;
+            btn.innerText = '▶ เริ่ม';
+            clearInterval(simInterval);
+            simRobot.state = 'หยุด';
+            updateStats();
+        }
+    }
+
+    function measureDistance() {
+        // Ray cast in front of robot
+        const arena = document.getElementById('sim-arena');
+        const aw = arena.clientWidth, ah = arena.clientHeight;
+        const rad = simRobot.angle * Math.PI / 180;
+        const dx = Math.cos(rad), dy = Math.sin(rad);
+        const maxDist = 200;
+        for (let dist = 25; dist < maxDist; dist += 2) {
+            const px = simRobot.x + dx * dist;
+            const py = simRobot.y + dy * dist;
+            if (px < 0 || px > aw || py < 0 || py > ah) return dist;
+            for (const o of simObstacles) {
+                if (px > o.x - 5 && px < o.x + o.w + 5 && py > o.y - 5 && py < o.y + o.h + 5) {
+                    return dist;
+                }
+            }
+        }
+        return maxDist;
+    }
+
+    function stepSim() {
+        const d = measureDistance();
+        if (d < 60) {
+            // Avoid
+            if (simRobot.state !== 'ถอย+เลี้ยว') {
+                simDodges++;
+                simRobot.state = 'ถอย+เลี้ยว';
+            }
+            simRobot.angle += 8;  // turn right
+            const rad = simRobot.angle * Math.PI / 180;
+            simRobot.x -= Math.cos(rad) * 2;
+            simRobot.y -= Math.sin(rad) * 2;
+        } else {
+            simRobot.state = 'เดินหน้า';
+            const rad = simRobot.angle * Math.PI / 180;
+            simRobot.x += Math.cos(rad) * 3;
+            simRobot.y += Math.sin(rad) * 3;
+        }
+        // Bound check
+        const arena = document.getElementById('sim-arena');
+        const aw = arena.clientWidth, ah = arena.clientHeight;
+        if (simRobot.x < 30) { simRobot.x = 30; simRobot.angle += 90; }
+        if (simRobot.x > aw - 30) { simRobot.x = aw - 30; simRobot.angle += 90; }
+        if (simRobot.y < 30) { simRobot.y = 30; simRobot.angle += 90; }
+        if (simRobot.y > ah - 30) { simRobot.y = ah - 30; simRobot.angle += 90; }
+        document.getElementById('stat-dist').innerText = Math.round(d / 4); // px → cm scale
+        updateRobotPosition();
+        updateStats();
+    }
+
+    function updateRobotPosition() {
+        const robot = document.getElementById('sim-robot');
+        robot.style.left = (simRobot.x - 25) + 'px';
+        robot.style.top = (simRobot.y - 25) + 'px';
+        robot.style.transform = `rotate(${simRobot.angle - 90}deg)`;
+
+        // Update sensor beam
+        const beam = document.getElementById('sim-beam');
+        const d = measureDistance();
+        beam.style.left = simRobot.x + 'px';
+        beam.style.top = simRobot.y + 'px';
+        beam.style.width = d + 'px';
+        beam.style.transform = `rotate(${simRobot.angle}deg)`;
+    }
+
+    function updateStats() {
+        document.getElementById('stat-state').innerText = simRobot.state;
+        document.getElementById('stat-dodges').innerText = simDodges;
+    }
+
+    const quizBank = [
+        { q: "หลักการ 'Sense → Think → Act' ของหุ่นยนต์อัตโนมัติคือ?", ans: "รับรู้ → คิด → ตัดสินใจสั่งงาน", choices: ["เซ็นเซอร์ → CPU → มอเตอร์", "รับรู้ → คิด → ตัดสินใจสั่งงาน", "Setup → Loop → Reset", "Input → Output → Power"] },
+        { q: "ในหุ่นยนต์หลบสิ่งกีดขวาง ทำไมต้องถอยก่อนเลี้ยว?", ans: "เพื่อให้มีพื้นที่หมุนตัว ไม่ชนข้างกำแพง", choices: ["เพื่อโชว์", "เพื่อให้มีพื้นที่หมุนตัว ไม่ชนข้างกำแพง", "ทำให้แบตหมดเร็ว", "ตามหลักการ"] },
+        { q: "ค่า SAFE_DIST ที่เหมาะกับหุ่นยนต์ของเรา?", ans: "20-30 cm", choices: ["5 cm", "20-30 cm", "100 cm", "1 เมตร"] },
+        { q: "ถ้าตั้ง SPEED = 1.0 (100%) จะเกิดอะไรขึ้น?", ans: "หุ่นยนต์เร็วมาก อาจชนก่อนเซ็นเซอร์ทันตรวจ", choices: ["หุ่นยนต์ทำงานดี", "หุ่นยนต์เร็วมาก อาจชนก่อนเซ็นเซอร์ทันตรวจ", "เซ็นเซอร์แม่นยำขึ้น", "ไม่ต่างจาก 0.5"] },
+        { q: "ทำไมหุ่นยนต์ควรมี LED แสดงสถานะ?", ans: "ดูง่ายว่าหุ่นยนต์กำลังคิดอะไรอยู่ — debug ง่ายขึ้น", choices: ["เพื่อสวยงาม", "ดูง่ายว่าหุ่นยนต์กำลังคิดอะไรอยู่ — debug ง่ายขึ้น", "ป้องกันแบตหมด", "บังคับใช้"] },
+        { q: "ปัญหาที่อาจเกิดถ้าหุ่นยนต์เลี้ยวขวาเสมอ?", ans: "อาจติดอยู่ในมุมห้องเดิม วนเป็นวงกลม", choices: ["มอเตอร์ขวาเสีย", "อาจติดอยู่ในมุมห้องเดิม วนเป็นวงกลม", "ใช้พลังงานน้อย", "ไม่มีปัญหา"] },
+        { q: "ในโค้ดหุ่นยนต์ ทำไมต้องใส่ try/except?", ans: "ป้องกัน RuntimeError จาก HC-SR04 ทำให้โปรแกรมพัง", choices: ["เพื่อความสวยงาม", "ป้องกัน RuntimeError จาก HC-SR04 ทำให้โปรแกรมพัง", "ตามมารยาท", "บังคับโดย Python"] },
+        { q: "หุ่นยนต์ใดในโลกจริงใช้หลักการเดียวกับที่เราเรียน?", ans: "Roomba (หุ่นยนต์ดูดฝุ่น)", choices: ["รถบรรทุก", "เครื่องซักผ้า", "Roomba (หุ่นยนต์ดูดฝุ่น)", "พัดลม"] },
+        { q: "ถ้าหุ่นยนต์ติดอยู่ในมุมห้อง วิธีแก้ที่ดีคือ?", ans: "เพิ่มเงื่อนไข: ถ้าเลี้ยวขวา 3 ครั้งติด ลองเลี้ยวซ้ายแทน", choices: ["ลดความเร็วลง", "เพิ่มเงื่อนไข: ถ้าเลี้ยวขวา 3 ครั้งติด ลองเลี้ยวซ้ายแทน", "ปิดเซ็นเซอร์", "เพิ่มแบตเตอรี่"] },
+        { q: "ในโค้ด เมื่อเจอสิ่งกีดขวาง ลำดับที่ถูกคือ?", ans: "หยุด → ถอย → เลี้ยว → เดินหน้า", choices: ["เลี้ยว → ถอย → หยุด → เดินหน้า", "หยุด → ถอย → เลี้ยว → เดินหน้า", "เลี้ยว → หยุด → ถอย → เดินหน้า", "เดินหน้า → หยุด → เลี้ยว → ถอย"] }
+    ];
+
+    let currentQIndex = 0; let score = 0; let gameStarted = false; let selectedQuestions = [];
+    function shuffle(array) { let curId = array.length; while (0 !== curId) { let randId = Math.floor(Math.random() * curId); curId -= 1; let tmp = array[curId]; array[curId] = array[randId]; array[randId] = tmp; } return array; }
+    function initGame() { gameStarted = true; score = 0; currentQIndex = 0; selectedQuestions = shuffle([...quizBank]).slice(0, 5); loadQuestion(); }
+    function loadQuestion() {
+        const qData = selectedQuestions[currentQIndex];
+        document.getElementById('question-counter').innerText = `คำถาม: ${currentQIndex + 1} / 5`;
+        document.getElementById('score-counter').innerText = `คะแนน: ${score}`;
+        document.getElementById('question-text').innerText = qData.q;
+        const optionsGrid = document.getElementById('options-grid'); optionsGrid.innerHTML = "";
+        shuffle([...qData.choices]).forEach(choice => {
+            const btn = document.createElement('button'); btn.className = 'quiz-option'; btn.innerText = choice;
+            btn.onclick = () => checkAnswer(btn, choice, qData.ans); optionsGrid.appendChild(btn);
+        });
+    }
+    function checkAnswer(selectedBtn, selectedText, correctText) {
+        document.querySelectorAll('.quiz-option').forEach(b => b.style.pointerEvents = 'none');
+        if (selectedText === correctText) { selectedBtn.classList.add('correct'); score++; document.getElementById('score-counter').innerText = `คะแนน: ${score}`; confetti({ particleCount: 50, spread: 60, origin: { y: 0.8 }, colors: ['#ec4899'] }); }
+        else { selectedBtn.classList.add('wrong'); document.querySelectorAll('.quiz-option').forEach(b => { if(b.innerText === correctText) b.classList.add('correct'); }); }
+        setTimeout(() => { currentQIndex++; if (currentQIndex < 5) loadQuestion(); else showResult(); }, 2200);
+    }
+    function showResult() {
+        document.getElementById('game-area').style.display = 'none';
+        document.getElementById('game-result').style.display = 'block';
+        document.getElementById('final-score').innerText = score;
+        document.getElementById('footer-controls').style.display = 'none';
+    }
+</script>
+
+</body>
+</html>

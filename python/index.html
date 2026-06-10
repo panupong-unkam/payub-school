@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🐍 Python Lab — โรงเรียนครูเจมส์</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Noto+Serif+Thai:wght@400;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<link rel="stylesheet" href="python-style.css">
+<style>
+  .py-week-section { margin-bottom: 40px; }
+  .py-tab-bar {
+    display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap;
+    background: var(--py-card); padding: 6px; border-radius: 14px;
+    border: 1px solid var(--py-border);
+  }
+  .py-tab {
+    padding: 10px 20px; border-radius: 10px; border: none;
+    background: transparent; color: var(--py-text-muted); cursor: pointer;
+    font-family: inherit; font-weight: 600; transition: .2s;
+  }
+  .py-tab:hover { color: var(--py-blue); }
+  .py-tab.active {
+    background: linear-gradient(135deg, var(--py-blue), var(--py-blue-light));
+    color: white; box-shadow: 0 4px 12px rgba(48,105,152,0.3);
+  }
+  .py-exam-card {
+    background: linear-gradient(135deg, #DC2626, #F59E0B);
+    color: white;
+    border-radius: var(--py-radius);
+    padding: 20px;
+    cursor: pointer;
+    transition: all .3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .py-exam-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(220,38,38,0.4);
+  }
+  .py-exam-card::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(circle at 80% 50%, rgba(255,255,255,0.15), transparent);
+  }
+  .py-week-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.25);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .py-curriculum-table {
+    width: 100%; border-collapse: collapse;
+    background: var(--py-card); border-radius: 12px; overflow: hidden;
+    box-shadow: var(--py-shadow);
+    font-size: 14px;
+  }
+  .py-curriculum-table th {
+    background: linear-gradient(135deg, var(--py-blue), var(--py-blue-light));
+    color: white; padding: 14px 12px; text-align: left;
+  }
+  .py-curriculum-table td {
+    padding: 12px; border-bottom: 1px solid var(--py-border);
+  }
+  .py-curriculum-table tr:hover td { background: var(--py-bg); }
+  .py-row-exam td { background: linear-gradient(90deg, rgba(220,38,38,0.05), transparent); }
+  .py-row-done td { background: rgba(16,185,129,0.05); }
+  .py-status-pill {
+    display: inline-block; padding: 4px 10px; border-radius: 20px;
+    font-size: 12px; font-weight: 600;
+  }
+  .py-status-done { background: #D1FAE5; color: #065F46; }
+  .py-status-progress { background: #FEF3C7; color: #92400E; }
+  .py-status-todo { background: #E5E7EB; color: #4B5563; }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="py-topbar">
+  <div class="py-topbar-left">
+    <a href="../index.html" class="py-btn-back">⬅️ กลับหน้าหลัก</a>
+    <div class="py-brand">
+      <span class="py-brand-icon">🐍</span>
+      <span>Python Lab</span>
+    </div>
+  </div>
+  <div style="display:flex; gap:10px;">
+    <a href="playground.html" class="py-btn-back">⚡ Playground</a>
+    <button class="py-btn-theme" onclick="pyToggleTheme()">🌓</button>
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="py-hero">
+  <div class="py-hero-snake">🐍</div>
+  <h1>หลักสูตร Python 1 เทอม</h1>
+  <p>20 สัปดาห์ × 1 ชั่วโมง — เรียน 18 บท + สอบกลาง + สอบปลาย (บทละ 10 คะแนน)</p>
+  <div class="py-hero-stats">
+    <div class="py-hero-stat">
+      <div class="py-hero-stat-num" id="stat-total">20</div>
+      <div class="py-hero-stat-label">สัปดาห์</div>
+    </div>
+    <div class="py-hero-stat">
+      <div class="py-hero-stat-num" id="stat-completed">0</div>
+      <div class="py-hero-stat-label">เรียนจบ</div>
+    </div>
+    <div class="py-hero-stat">
+      <div class="py-hero-stat-num" id="stat-score">0</div>
+      <div class="py-hero-stat-label">คะแนนรวม</div>
+    </div>
+    <div class="py-hero-stat">
+      <div class="py-hero-stat-num" id="stat-xp">0</div>
+      <div class="py-hero-stat-label">XP</div>
+    </div>
+  </div>
+</div>
+
+<div class="py-container">
+
+  <!-- TABS -->
+  <div class="py-tab-bar">
+    <button class="py-tab active" data-view="curriculum" onclick="setView('curriculum')">📅 หลักสูตร 20 สัปดาห์</button>
+    <button class="py-tab" data-view="cards" onclick="setView('cards')">🎴 แสดงเป็นการ์ด</button>
+    <button class="py-tab" data-view="extra" onclick="setView('extra')">⭐ บทเสริม (Advanced)</button>
+  </div>
+
+  <!-- VIEW 1: CURRICULUM TABLE -->
+  <div id="view-curriculum">
+    <h2 style="color:var(--py-blue); margin-bottom:16px; font-family:'Noto Serif Thai',serif;">
+      📅 ตารางเรียน 20 สัปดาห์
+    </h2>
+    <div style="display:flex; gap:12px; margin-bottom:16px; flex-wrap:wrap; font-size:13px;">
+      <span style="background:#DBEAFE; color:#1E40AF; padding:6px 12px; border-radius:20px; font-weight:600;">🧠 Quiz 5 คะแนน (auto)</span>
+      <span style="background:#FEF3C7; color:#92400E; padding:6px 12px; border-radius:20px; font-weight:600;">💻 งาน 5 คะแนน (ครูตรวจ)</span>
+      <span style="background:#F3F4F6; color:#374151; padding:6px 12px; border-radius:20px;">📸 แคปหน้าจอ = หลักฐาน (ไม่มีคะแนน)</span>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="py-curriculum-table" id="curriculum-table">
+        <thead>
+          <tr>
+            <th>สัปดาห์</th>
+            <th>บทเรียน</th>
+            <th>หัวข้อ</th>
+            <th>🧠 Quiz</th>
+            <th>💻 งาน</th>
+            <th>รวม</th>
+            <th>สถานะ</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="curriculum-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- VIEW 2: CARDS -->
+  <div id="view-cards" style="display:none;">
+    <div class="py-level-section">
+      <div class="py-level-header py-level-1">
+        <div class="py-level-icon">🌱</div>
+        <div class="py-level-info">
+          <div class="py-level-title">Level 1: เริ่มต้น (W1-W8)</div>
+          <div class="py-level-desc">8 บทพื้นฐาน → สอบกลางภาค W9</div>
+        </div>
+        <div class="py-level-progress">
+          <div class="py-level-progress-num" id="lvl1-prog">0/8</div>
+          <div class="py-level-progress-label">บทที่จบ</div>
+        </div>
+      </div>
+      <div class="py-lesson-grid" id="grid-level1"></div>
+    </div>
+
+    <div class="py-level-section">
+      <div class="py-level-header py-level-2">
+        <div class="py-level-icon">🚀</div>
+        <div class="py-level-info">
+          <div class="py-level-title">Level 2: กลาง (W10-W17)</div>
+          <div class="py-level-desc">8 บทระดับกลาง</div>
+        </div>
+        <div class="py-level-progress">
+          <div class="py-level-progress-num" id="lvl2-prog">0/8</div>
+          <div class="py-level-progress-label">บทที่จบ</div>
+        </div>
+      </div>
+      <div class="py-lesson-grid" id="grid-level2"></div>
+    </div>
+
+    <div class="py-level-section">
+      <div class="py-level-header py-level-3">
+        <div class="py-level-icon">⭐</div>
+        <div class="py-level-info">
+          <div class="py-level-title">Level 3: สูง (W18-W19)</div>
+          <div class="py-level-desc">2 บท OOP → สอบปลายภาค W20</div>
+        </div>
+        <div class="py-level-progress">
+          <div class="py-level-progress-num" id="lvl3-prog">0/2</div>
+          <div class="py-level-progress-label">บทที่จบ</div>
+        </div>
+      </div>
+      <div class="py-lesson-grid" id="grid-level3"></div>
+    </div>
+  </div>
+
+  <!-- VIEW 3: EXTRA -->
+  <div id="view-extra" style="display:none;">
+    <h2 style="color:var(--py-blue); margin-bottom:8px; font-family:'Noto Serif Thai',serif;">
+      ⭐ บทเสริม (Advanced) - 6 บทพิเศษ
+    </h2>
+    <p style="color:var(--py-text-muted); margin-bottom:24px;">
+      บทที่ 19-24 เป็นบทเสริมสำหรับนักเรียนที่อยากเรียนรู้เพิ่มเติม นอกหลักสูตร 20 สัปดาห์
+      <br>เนื้อหาเข้มข้น เช่น Magic Methods, Generators, Regex, NumPy, Matplotlib, OOP Final Project
+    </p>
+    <div class="py-lesson-grid" id="grid-extra"></div>
+  </div>
+
+  <!-- QUICK ACTION -->
+  <div style="margin-top:50px; text-align:center; padding:40px 20px; background:linear-gradient(135deg, #306998, #4B8BBE); border-radius:20px; color:white;">
+    <h2 style="font-family:'Noto Serif Thai',serif; margin-bottom:12px;">⚡ อยากเขียนโค้ดอิสระ?</h2>
+    <p style="margin-bottom:20px; opacity:0.95;">ไปที่ Python Playground เขียนโค้ดอะไรก็ได้ ไม่ผูกบทเรียน</p>
+    <a href="playground.html" style="display:inline-block; background:#FFD43B; color:#1A2233; padding:14px 32px; border-radius:50px; font-weight:700; text-decoration:none; box-shadow:0 6px 20px rgba(255,212,59,0.4);">⚡ เปิด Playground →</a>
+  </div>
+
+</div>
+
+<script src="lessons-data.js"></script>
+<script src="python-engine.js"></script>
+<script>
+function getStatusPill(prog) {
+  if (!prog) return '<span class="py-status-pill py-status-todo">⚪ ยังไม่เรียน</span>';
+  if (prog.completed) return '<span class="py-status-pill py-status-done">✅ จบแล้ว</span>';
+  if (prog.runs > 0) return '<span class="py-status-pill py-status-progress">📝 กำลังเรียน</span>';
+  return '<span class="py-status-pill py-status-todo">⚪ ยังไม่เรียน</span>';
+}
+
+// 📊 คะแนน 10 คะแนน = Quiz 5 + งาน 5 (ไม่มีคะแนนแคปหน้าจอ)
+function getQuizScore(lesson_id) {
+  // ดึงจาก localStorage ของ Quiz รายข้อ (5 ข้อ)
+  let answers = {};
+  try { answers = JSON.parse(localStorage.getItem('py_quiz_' + lesson_id) || '{}'); } catch (e) {}
+  const correctCount = Object.values(answers).filter(v => v === true).length;
+  return Math.min(correctCount, 5);  // เต็ม 5 คะแนน
+}
+
+function getCodeScore(lesson_id) {
+  // คะแนนงาน — ครูใส่ใน submissions (จะ sync ทีหลัง)
+  // ตอนนี้: ถ้านักเรียนรันโค้ดสำเร็จ ให้ก่อน 3 คะแนน
+  // เมื่อครูตรวจในระบบส่งงานเดิม จะแก้ให้เต็ม 5
+  const prog = pyGetProgress(lesson_id);
+  if (!prog) return 0;
+
+  // เช็ค override จากครู (sync จาก submissions)
+  try {
+    const override = JSON.parse(localStorage.getItem('py_teacher_score_' + lesson_id) || 'null');
+    if (override !== null && !isNaN(override)) return Math.min(parseInt(override), 5);
+  } catch (e) {}
+
+  // ค่าเริ่มต้นจากการรัน
+  if (prog.runs >= 3) return 3;  // รัน 3 ครั้ง+ ให้ 3 (รอครูตรวจ)
+  if (prog.runs >= 1) return 2;  // รันแล้ว 1-2 ครั้ง ให้ 2
+  return 0;
+}
+
+function getScoreFromProgress(lesson_id) {
+  return getQuizScore(lesson_id) + getCodeScore(lesson_id);  // เต็ม 10
+}
+
+function renderCurriculum() {
+  const tbody = document.getElementById('curriculum-tbody');
+  let totalScore = 0;
+  let completedCount = 0;
+
+  tbody.innerHTML = PYTHON_CURRICULUM.schedule.map(item => {
+    if (item.type === 'midterm' || item.type === 'final') {
+      const examType = item.type === 'midterm' ? 'midterm' : 'final';
+      const examDone = localStorage.getItem('py_exam_' + examType + '_score');
+      const score = examDone ? parseInt(examDone) : 0;
+      const maxScore = item.type === 'midterm' ? 20 : 20;
+      totalScore += score;
+      if (examDone) completedCount++;
+      return `
+        <tr class="py-row-exam">
+          <td><b>W${item.week}</b></td>
+          <td colspan="2"><b style="color:#DC2626;">${item.title}</b><br><small style="color:var(--py-text-muted);">${item.desc}</small></td>
+          <td colspan="2" style="text-align:center;">—</td>
+          <td><b>${examDone ? score : '-'}</b>/${maxScore}</td>
+          <td>${examDone ? '<span class="py-status-pill py-status-done">✅ สอบแล้ว</span>' : '<span class="py-status-pill py-status-todo">⚪ ยังไม่สอบ</span>'}</td>
+          <td><a href="exam.html?type=${examType}" class="py-btn-back" style="text-decoration:none; padding:6px 14px; font-size:13px;">${examDone ? '🔄 ทำใหม่' : '📝 เริ่มสอบ'}</a></td>
+        </tr>
+      `;
+    }
+
+    const lesson = PYTHON_LESSONS.find(l => l.id === item.lesson_id);
+    if (!lesson) return '';
+    const prog = pyGetProgress(lesson.id);
+    const quizScore = getQuizScore(lesson.id);
+    const codeScore = getCodeScore(lesson.id);
+    const total = quizScore + codeScore;
+    totalScore += total;
+    if (total >= 7) completedCount++;
+    const rowClass = total >= 7 ? 'py-row-done' : '';
+    return `
+      <tr class="${rowClass}">
+        <td><b>W${item.week}</b></td>
+        <td>${lesson.icon} <b>บทที่ ${lesson.id}</b></td>
+        <td>${lesson.title}<br><small style="color:var(--py-text-muted);">⏱️ ${lesson.minutes} นาที</small></td>
+        <td style="text-align:center;"><b style="color:#1E40AF;">${quizScore}</b>/5</td>
+        <td style="text-align:center;"><b style="color:#92400E;">${codeScore}</b>/5</td>
+        <td style="text-align:center;"><b style="color:var(--py-blue);">${total}</b>/10</td>
+        <td>${getStatusPill(prog)}</td>
+        <td><a href="lesson.html?id=${lesson.id}" class="py-btn-back" style="text-decoration:none; padding:6px 14px; font-size:13px;">📖 เปิด</a></td>
+      </tr>
+    `;
+  }).join('');
+
+  // Update stats
+  document.getElementById('stat-completed').textContent = completedCount;
+  document.getElementById('stat-score').textContent = totalScore;
+  document.getElementById('stat-xp').textContent = totalScore * 10;
+}
+
+function renderCards() {
+  const progress = pyGetAllProgress();
+  const levelCount = { 1: 0, 2: 0, 3: 0 };
+
+  for (const lesson of PYTHON_LESSONS) {
+    if (progress[lesson.id]?.completed) levelCount[lesson.level]++;
+  }
+
+  document.getElementById('lvl1-prog').textContent = `${levelCount[1]}/8`;
+  document.getElementById('lvl2-prog').textContent = `${levelCount[2]}/8`;
+  document.getElementById('lvl3-prog').textContent = `${Math.min(levelCount[3], 2)}/2`;
+
+  // Level 1 & 2: บท 1-16
+  for (let lv = 1; lv <= 2; lv++) {
+    renderGrid(`grid-level${lv}`, PYTHON_LESSONS.filter(l => l.level === lv));
+  }
+  // Level 3: เฉพาะบท 17, 18 (ในหลักสูตร)
+  renderGrid('grid-level3', PYTHON_LESSONS.filter(l => l.id === 17 || l.id === 18));
+}
+
+function renderExtra() {
+  const extra = PYTHON_LESSONS.filter(l => PYTHON_CURRICULUM.extraLessons.includes(l.id));
+  renderGrid('grid-extra', extra);
+}
+
+function renderGrid(gridId, lessons) {
+  const grid = document.getElementById(gridId);
+  if (!grid) return;
+  const progress = pyGetAllProgress();
+  grid.innerHTML = lessons.map(l => {
+    const prog = progress[l.id];
+    const quizScore = getQuizScore(l.id);
+    const codeScore = getCodeScore(l.id);
+    const total = quizScore + codeScore;
+    const pct = total * 10;
+    const tagDone = total >= 7 ? '<span class="py-lesson-tag tag-done">✅ จบแล้ว</span>' : '';
+    return `
+      <div class="py-lesson-card" onclick="openLesson(${l.id})">
+        <div class="py-lesson-card-header">
+          <div class="py-lesson-number">${l.id}</div>
+          <div style="font-weight:700; color:var(--py-blue); font-size:18px;">${total}/10</div>
+        </div>
+        <div style="font-size:32px; margin-bottom:8px;">${l.icon}</div>
+        <div class="py-lesson-title">${l.title}</div>
+        <div class="py-lesson-desc">${l.desc}</div>
+        <div class="py-lesson-meta">
+          <span class="py-lesson-tag" style="background:#DBEAFE; color:#1E40AF;">🧠 ${quizScore}/5</span>
+          <span class="py-lesson-tag" style="background:#FEF3C7; color:#92400E;">💻 ${codeScore}/5</span>
+          ${tagDone}
+        </div>
+        <div class="py-progress-bar">
+          <div class="py-progress-fill" style="width:${pct}%"></div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function openLesson(id) {
+  window.location.href = `lesson.html?id=${id}`;
+}
+
+function setView(view) {
+  document.querySelectorAll('.py-tab').forEach(t => t.classList.remove('active'));
+  document.querySelector(`.py-tab[data-view="${view}"]`).classList.add('active');
+  document.getElementById('view-curriculum').style.display = view === 'curriculum' ? 'block' : 'none';
+  document.getElementById('view-cards').style.display = view === 'cards' ? 'block' : 'none';
+  document.getElementById('view-extra').style.display = view === 'extra' ? 'block' : 'none';
+
+  if (view === 'cards') renderCards();
+  if (view === 'extra') renderExtra();
+}
+
+// Boot
+window.addEventListener('DOMContentLoaded', () => {
+  renderCurriculum();
+});
+</script>
+
+</body>
+</html>

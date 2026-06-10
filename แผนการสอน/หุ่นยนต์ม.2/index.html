@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แผนการจัดการเรียนรู้ — หุ่นยนต์ ม.2 (40 ชั่วโมง)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Noto+Serif+Thai:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --cyber-blue: #0ea5e9; --neon-green: #10b981; --neon-orange: #f59e0b;
+            --neon-purple: #a855f7; --gold: #fbbf24; --bg-dark: #0f172a;
+            --surface-dark: #1e293b; --text-main: #f8fafc; --text-muted: #94a3b8;
+            --border-line: #334155;
+        }
+        body {
+            background: radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 100%);
+            color: var(--text-main); font-family: 'Sarabun', sans-serif;
+            margin: 0; padding: 0; min-height: 100vh;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
+        .hero {
+            text-align: center; padding: 40px 20px 30px;
+            background: rgba(15,23,42,0.6); border-radius: 24px;
+            border: 1px solid var(--border-line);
+            box-shadow: 0 0 30px rgba(14,165,233,0.3);
+            margin-bottom: 30px;
+        }
+        .hero h1 {
+            font-family: 'Noto Serif Thai', serif;
+            font-size: 38px; margin: 10px 0;
+            background: linear-gradient(90deg, var(--cyber-blue), var(--neon-green), var(--gold));
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .hero p { font-size: 17px; color: var(--text-muted); margin: 5px 0; }
+        .school-info {
+            background: rgba(0,0,0,0.3); padding: 15px 20px;
+            border-radius: 12px; margin-top: 18px;
+            display: inline-block; border: 1px solid var(--border-line);
+        }
+        .school-info b { color: var(--gold); }
+
+        .back-home {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(0,0,0,0.3); border: 1px solid var(--border-line);
+            color: var(--text-muted); padding: 8px 18px; border-radius: 12px;
+            text-decoration: none; font-size: 14px; transition: 0.2s;
+        }
+        .back-home:hover { color: white; border-color: var(--cyber-blue); }
+
+        h2.unit-title {
+            font-family: 'Noto Serif Thai', serif; font-size: 26px;
+            color: white; margin: 40px 0 16px; padding-left: 15px;
+            border-left: 5px solid var(--cyber-blue);
+        }
+        h2.unit-title.u2 { border-left-color: var(--neon-green); }
+        h2.unit-title.u3 { border-left-color: var(--neon-orange); }
+        h2.unit-title.exam { border-left-color: var(--neon-purple); }
+
+        .plan-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px; margin-top: 12px;
+        }
+        .plan-card {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border-line);
+            border-radius: 14px; padding: 20px;
+            text-decoration: none; color: var(--text-main);
+            transition: 0.3s; display: flex; flex-direction: column;
+        }
+        .plan-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(14,165,233,0.2);
+        }
+        .plan-card.u1 { border-top: 3px solid var(--cyber-blue); }
+        .plan-card.u1:hover { border-color: var(--cyber-blue); }
+        .plan-card.u2 { border-top: 3px solid var(--neon-green); }
+        .plan-card.u2:hover { border-color: var(--neon-green); }
+        .plan-card.u3 { border-top: 3px solid var(--neon-orange); }
+        .plan-card.u3:hover { border-color: var(--neon-orange); }
+        .plan-card.exam { border-top: 3px solid var(--neon-purple); background: rgba(168,85,247,0.08); }
+        .plan-card.exam:hover { border-color: var(--neon-purple); }
+
+        .plan-num {
+            font-family: monospace; font-size: 13px;
+            color: var(--text-muted); letter-spacing: 1px; margin-bottom: 4px;
+        }
+        .plan-hours {
+            background: rgba(251,191,36,0.15); color: var(--gold);
+            padding: 2px 8px; border-radius: 6px;
+            font-size: 12px; font-weight: bold; display: inline-block;
+            margin-left: 6px;
+        }
+        .plan-title-thai {
+            font-size: 17px; font-weight: bold; color: white;
+            margin: 8px 0; line-height: 1.4;
+            font-family: 'Noto Serif Thai', serif;
+        }
+        .plan-desc { font-size: 14px; color: var(--text-muted); line-height: 1.5; flex-grow: 1; }
+        .plan-arrow {
+            color: var(--cyber-blue); font-weight: bold;
+            margin-top: 12px; font-size: 14px;
+        }
+        .plan-card.u2 .plan-arrow { color: var(--neon-green); }
+        .plan-card.u3 .plan-arrow { color: var(--neon-orange); }
+        .plan-card.exam .plan-arrow { color: var(--neon-purple); }
+
+        .stats-bar {
+            display: grid; grid-template-columns: repeat(4, 1fr);
+            gap: 15px; margin: 25px 0;
+        }
+        .stat-box {
+            background: rgba(0,0,0,0.3); border: 1px solid var(--border-line);
+            border-radius: 12px; padding: 16px; text-align: center;
+        }
+        .stat-num {
+            font-size: 32px; font-weight: bold; font-family: monospace;
+        }
+        .stat-label { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
+
+        .footer {
+            text-align: center; padding: 30px 20px; color: var(--text-muted);
+            font-size: 14px; border-top: 1px solid var(--border-line); margin-top: 50px;
+        }
+
+        @media (max-width: 700px) {
+            .hero h1 { font-size: 28px; }
+            h2.unit-title { font-size: 20px; }
+            .stats-bar { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <a href="../../index.html" class="back-home">⬅ กลับเว็บหลัก</a>
+
+    <div class="hero">
+        <div style="font-size: 60px;">📋</div>
+        <h1>แผนการจัดการเรียนรู้</h1>
+        <p>วิชาหุ่นยนต์ ชั้นมัธยมศึกษาปีที่ 2</p>
+        <p>40 ชั่วโมง / 20 แผน (2 ชั่วโมง/แผน)</p>
+
+        <div class="school-info">
+            <p style="margin: 0;">👨‍🏫 <b>ครูภาณุพงศ์ อุ่นคำ</b></p>
+            <p style="margin: 4px 0; font-size: 14px;">กลุ่มสาระการเรียนรู้ <b>วิทยาศาสตร์และเทคโนโลยี</b></p>
+            <p style="margin: 0; font-size: 14px;">โรงเรียนบ้านป่ายุบ (บุ้นกีประชานุเคราะห์) สพป.ชลบุรี เขต 1</p>
+        </div>
+    </div>
+
+    <div class="stats-bar">
+        <div class="stat-box"><div class="stat-num" style="color: var(--cyber-blue);">20</div><div class="stat-label">แผนการสอน</div></div>
+        <div class="stat-box"><div class="stat-num" style="color: var(--neon-green);">40</div><div class="stat-label">ชั่วโมง/ภาคเรียน</div></div>
+        <div class="stat-box"><div class="stat-num" style="color: var(--neon-orange);">16</div><div class="stat-label">ใบงาน</div></div>
+        <div class="stat-box"><div class="stat-num" style="color: var(--gold);">3</div><div class="stat-label">หน่วยการเรียน</div></div>
+    </div>
+
+    <h2 class="unit-title">📘 หน่วยที่ 1: VEXcode VR (ทบทวน) — 6 ชั่วโมง</h2>
+    <div class="plan-grid">
+        <a href="plan01.html" class="plan-card u1">
+            <div class="plan-num">แผนที่ 1 <span class="plan-hours">2 ชม.</span></div>
+            <div class="plan-title-thai">ปฐมนิเทศ + Drivetrain + Loop</div>
+            <div class="plan-desc">ชั่วโมงที่ 1-2 · ทบทวนคำสั่งเคลื่อนที่ + การวนซ้ำ + วาดสี่เหลี่ยม</div>
+            <div class="plan-arrow">เปิดแผน →</div>
+        </a>
+        <a href="plan02.html" class="plan-card u1">
+            <div class="plan-num">แผนที่ 2 <span class="plan-hours">2 ชม.</span></div>
+            <div class="plan-title-thai">เซ็นเซอร์ + เงื่อนไข + Wall Maze</div>
+            <div class="plan-desc">ชั่วโมงที่ 3-4 · เซ็นเซอร์ 5 ตัว + if/else + ภารกิจเขาวงกต</div>
+            <div class="plan-arrow">เปิดแผน →</div>
+        </a>
+        <a href="plan03.html" class="plan-card u1">
+            <div class="plan-num">แผนที่ 3 <span class="plan-hours">2 ชม.</span></div>
+            <div class="plan-title-thai">ภารกิจสรุปหน่วย (Disco/Castle)</div>
+            <div class="plan-desc">ชั่วโมงที่ 5-6 · เลือกภารกิจ + Rubric ประเมินจบหน่วย VEXcode VR</div>
+            <div class="plan-arrow">เปิดแผน →</div>
+        </a>
+    </div>
+
+    <h2 class="unit-title u2">📗 หน่วยที่ 2: micro:bit (ล้วน ไม่มีอุปกรณ์เสริม) — 12 ชั่วโมง</h2>
+    <div class="plan-grid">
+        <a href="plan04.html" class="plan-card u2">
+            <div class="plan-num">แผนที่ 4 <span class="plan-hours">2 ชม.</span></div>
+            <div class="plan-title-thai">รู้จัก micro:bit + จอ LED 5×5</div>
+            <div class="plan-desc">ชั่วโมงที่ 7-8 · เริ่มจับบอร์ดจริง + MakeCode + แสดงข้อความ</div>
+            <div class="plan-arrow">เปิดแผน →</div>
+        </a>
+        <a href="plan05.html" class="plan-card u2">
+            <div class="plan-num">แผนที่ 5 <span class="plan-hours">2 ชม.</span></div>
+            <div class="plan-title-thai">ปุ่ม A/B + ตัวแปร + ตัวนับ</div>
+            <div class="plan-desc">ชั่วโมงที่ 9-10 · รับ input จากผู้ใช้ + เก็บค่าด้วยตัวแปร</div>
+            <div class="plan-arrow">เปิดแผน →</div>
+        </a>
+        <a href="plan06.html" class="plan-card u2">
+            <div class="plan-num">แผนที่ 6 <span class="plan-hours">2 ชม.</span></div>
+            <div class="plan-title-thai">Accelerometer (เอียง เขย่า)</div>
+            <div class="plan-desc">ชั่วโมงที่ 11-12 · เซ็นเซอร์การเคลื่อนไหว + เกมเขย่าลูกเต๋า</div>
+            <div class="plan-arrow">เปิดแผน →</div>
+        </a>
+        <a href="plan07.html" class="plan-card u2">
+            <div class="plan-num">แผนที่ 7 <span class="plan-hours">2 ชม.</span></div>
+            <div class="plan-title-thai">เซ็นเซอร์แสง + อุณหภูมิ</div>
+            <div class="plan-desc">ชั่วโมงที่ 13-14 · วัดสภาพห้องเรียน + Night Light</div>
+            <div class="plan-arrow">เปิดแผน →</div>
+        </a>
+        <a href="plan08.html" class="plan-card u2">
+            <div class="plan-num">แผนที่ 8 <span class="plan-hours">2 ชม.</span></div>
+            <div class="plan-title-thai">เข็มทิศดิจิทัล (Compass)</div>
+            <div class="plan-desc">ชั่วโมงที่ 15-16 · Magnetometer + ลูกศรนำทาง 4 ทิศ</div>
+            <div class="plan-arrow">เปิดแผน →</div>
+        </a>
+        <a href="plan09.html" class="plan-card u2">
+            <div class="plan-num">แผนที่ 9 <span class="plan-hours">2 ชม.</span></div>
+            <div class="plan-title-thai">Radio + มินิโปรเจกต์ปิดหน่วย</div>
+            <div class="plan-desc">ชั่วโมงที่ 17-18 · ส่งข้อความระหว่างบอร์ด + เป่ายิ้งฉุบไร้สาย</div>
+            <div class="plan-arrow">เปิดแผน →</div>
+        </a>
+    </div>
+
+    <h2 class="unit-title exam">🎯 สอบกลางภาค — 2 ชั่วโมง</h2>
+    <div class="plan-grid">
+        <a href="plan10.html" class="plan-card exam">
+            <div class="plan-num">แผนที่ 10 <span class="plan-hours">2 ชม.</span></div>
+            <div class="plan-title-thai">สอบกลางภาค (ทฤษฎี + ปฏิบัติ)</div>
+            <div class="plan-desc">ชั่วโมงที่ 19-20 · 20 ข้อทฤษฎี + เครื่องวัดอุณหภูมิอัจฉริยะ</div>
+            <div class="plan-arrow">เปิดแผน →</div>
+        </a>
+    </div>
+
+    <h2 class="unit-title u3">📙 หน่วยที่ 3: Cytron Maker Pi RP2040 ⭐ — 18 ชั่วโมง</h2>
+    <div class="plan-grid">
+        <a href="plan11.html" class="plan-card u3">
+            <div class="plan-num">แผนที่ 11 <span class="plan-hours">2 ชม.</span></div>
+            <div class="plan-title-thai">รู้จัก RP2040 + Simulator</div>
+            <div class="plan-desc">ชั่วโมงที่ 21-22 · บอร์ด Maker Pi + เปรียบเทียบกับ micro:bit</div>
+            <div class="plan-arrow">เปิดแผน →</div>
+        </a>
+        <a href="plan12.html" class="plan-card u3">
+            <div class="plan-num">แผนที่ 12 <span class="plan-hours">2 ชม.</span></div>
+            <div class="plan-title-thai">NeoPixel + ปุ่ม + บัซเซอร์</div>
+            <div class="plan-desc">ชั่วโมงที่ 23-24 · RGB LED 16 ล้านสี + เล่นเพลง</div>
+            <div class="plan-arrow">เปิดแผน →</div>
+        </a>
+        <a href="plan13.html" class="plan-card u3">
+            <div class="plan-num">แผนที่ 13 <span class="plan-hours">2 ชม.</span></div>
+            <div class="plan-title-thai">Servo SG90</div>
+            <div class="plan-desc">ชั่วโมงที่ 25-26 · ควบคุมมุม 0-180° + ที่กั้นไม้ไผ่</div>
+            <div class="plan-arrow">เปิดแผน →</div>
+        </a>
+        <a href="plan14.html" class="plan-card u3">
+            <div class="plan-num">แผนที่ 14 <span class="plan-hours">2 ชม.</span></div>
+            <div class="plan-title-thai">DC Motor + เคลื่อนที่</div>
+            <div class="plan-desc">ชั่วโมงที่ 27-28 · ขับล้อหุ่นยนต์ + เดินหน้า/ถอย/เลี้ยว</div>
+            <div class="plan-arrow">เปิดแผน →</div>
+        </a>
+        <a href="plan15.html" class="plan-card u3">
+            <div class="plan-num">แผนที่ 15 <span class="plan-hours">2 ชม.</span></div>
+            <div class="plan-title-thai">HC-SR04 วัดระยะ</div>
+            <div class="plan-desc">ชั่วโมงที่ 29-30 · เซ็นเซอร์อัลตราโซนิก + Parking Sensor</div>
+            <div class="plan-arrow">เปิดแผน →</div>
+        </a>
+        <a href="plan16.html" class="plan-card u3">
+            <div class="plan-num">แผนที่ 16 <span class="plan-hours">2 ชม.</span></div>
+            <div class="plan-title-thai">หุ่นยนต์หลบสิ่งกีดขวาง</div>
+            <div class="plan-desc">ชั่วโมงที่ 31-32 · Sense → Think → Act + AI พื้นฐาน</div>
+            <div class="plan-arrow">เปิดแผน →</div>
+        </a>
+        <a href="plan17.html" class="plan-card u3">
+            <div class="plan-num">แผนที่ 17 <span class="plan-hours">2 ชม.</span></div>
+            <div class="plan-title-thai">IR Sensor + Line Follower</div>
+            <div class="plan-desc">ชั่วโมงที่ 33-34 · หุ่นยนต์เดินตามเส้น + เทคโนโลยีในการแข่งขัน</div>
+            <div class="plan-arrow">เปิดแผน →</div>
+        </a>
+        <a href="plan18.html" class="plan-card u3">
+            <div class="plan-num">แผนที่ 18 <span class="plan-hours">2 ชม.</span></div>
+            <div class="plan-title-thai">โปรเจกต์จบ — ออกแบบ + โค้ด</div>
+            <div class="plan-desc">ชั่วโมงที่ 35-36 · Planning Canvas + เลือก 1 ใน 6 โปรเจกต์</div>
+            <div class="plan-arrow">เปิดแผน →</div>
+        </a>
+        <a href="plan19.html" class="plan-card u3">
+            <div class="plan-num">แผนที่ 19 <span class="plan-hours">2 ชม.</span></div>
+            <div class="plan-title-thai">ทำต่อ + เตรียมนำเสนอ</div>
+            <div class="plan-desc">ชั่วโมงที่ 37-38 · Debug + ซ้อมพูด + Self-evaluation</div>
+            <div class="plan-arrow">เปิดแผน →</div>
+        </a>
+    </div>
+
+    <h2 class="unit-title exam">🏆 สอบไฟนอล — 2 ชั่วโมง</h2>
+    <div class="plan-grid">
+        <a href="plan20.html" class="plan-card exam">
+            <div class="plan-num">แผนที่ 20 <span class="plan-hours">2 ชม.</span></div>
+            <div class="plan-title-thai">สอบไฟนอล + นำเสนอโปรเจกต์</div>
+            <div class="plan-desc">ชั่วโมงที่ 39-40 · 20 ข้อทฤษฎี + Demo สด 30 คะแนน</div>
+            <div class="plan-arrow">เปิดแผน →</div>
+        </a>
+    </div>
+
+    <div class="footer">
+        💡 <b>วิธีใช้:</b> คลิกแต่ละแผนเพื่อเปิด — กด <b>Ctrl+P</b> เพื่อพิมพ์ หรือ Save as PDF<br>
+        ถ้าต้องการ Word document: เปิดไฟล์ HTML ใน Word → File → Save As → docx<br>
+        <br>
+        © โรงเรียนบ้านป่ายุบ (บุ้นกีประชานุเคราะห์) สพป.ชลบุรี เขต 1<br>
+        ครูภาณุพงศ์ อุ่นคำ • กลุ่มสาระการเรียนรู้วิทยาศาสตร์และเทคโนโลยี
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แผนการจัดการเรียนรู้ที่ 11 — รู้จัก RP2040 + Maker Pi + Simulator</title>
+    <link rel="stylesheet" href="lesson-plan.css">
+</head>
+<body>
+<div class="nav-bar no-print"><a href="index.html">⬅ กลับ</a><div style="color:white;">แผนที่ 11 / 20 — Hr 21-22 (RP2040)</div><button class="print-btn" onclick="window.print()">🖨️ พิมพ์</button></div>
+<div class="paper">
+
+    <h1 class="plan-title">แผนการจัดการเรียนรู้ที่ 11</h1>
+    <div class="plan-meta-row"><span>หน่วยที่ 3 เรื่อง Cytron Maker Pi RP2040 + เว็บ Simulator</span><span>จำนวน 18 ชั่วโมง</span></div>
+    <div class="plan-meta-row"><span>เรื่อง รู้จัก RP2040 + บอร์ด Maker Pi + เว็บ Simulator</span><span>จำนวน 2 ชั่วโมง (ชั่วโมงที่ 21-22)</span></div>
+    <div class="plan-meta-row"><span>วิชา หุ่นยนต์</span><span>กลุ่มสาระการเรียนรู้ วิทยาศาสตร์และเทคโนโลยี</span></div>
+    <div class="plan-meta-row"><span>ชั้นมัธยมศึกษาปีที่ 2</span><span>ภาคเรียนที่ 1 ปีการศึกษา 2569</span></div>
+    <div class="plan-meta-row"><span>ผู้สอน นายภาณุพงศ์ อุ่นคำ</span><span>โรงเรียนบ้านป่ายุบ (บุ้นกีประชานุเคราะห์)</span></div>
+    <hr class="divider">
+
+    <div class="section">
+        <div class="section-title">1. มาตรฐานการเรียนรู้/ตัวชี้วัด</div>
+        <p class="indent"><b>มาตรฐาน ว 4.2</b> เข้าใจและใช้แนวคิดเชิงคำนวณในการแก้ปัญหา</p>
+        <p class="indent bold">ตัวชี้วัดระหว่างทาง</p>
+        <p class="indent2"><b>ว 4.2 ม.2/2</b> ออกแบบและเขียนโปรแกรมที่ใช้ตรรกะและฟังก์ชันในการแก้ปัญหา</p>
+        <p class="indent2"><b>ว 4.2 ม.2/3</b> อภิปรายองค์ประกอบและหลักการทำงานของระบบคอมพิวเตอร์และเทคโนโลยีการสื่อสาร</p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">2. จุดประสงค์การเรียนรู้</div>
+        <ol>
+            <li>อธิบายส่วนประกอบของบอร์ด Cytron Maker Pi RP2040 และอุปกรณ์ในตัวบอร์ดได้ <span class="kpa">K</span></li>
+            <li>เปรียบเทียบ RP2040 กับ micro:bit ในแง่ฮาร์ดแวร์และการเขียนโปรแกรมได้ <span class="kpa">K</span></li>
+            <li>ใช้งานเว็บ Simulator เขียนโปรแกรม CircuitPython ครั้งแรกได้ <span class="kpa">P</span></li>
+            <li>เปลี่ยนสี NeoPixel ผ่านโค้ด Python ในเว็บจำลองได้ <span class="kpa">P</span></li>
+            <li>ตื่นเต้นและพร้อมเรียนรู้ Python ภาษาใหม่ <span class="kpa">A</span></li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">3. คุณลักษณะอันพึงประสงค์</div>
+        <p class="indent">☐ 1. รักชาติฯ ☐ 2. ซื่อสัตย์ ☑ 3. มีวินัย ☑ 4. ใฝ่เรียนรู้ ☐ 5. พอเพียง ☑ 6. มุ่งมั่น ☐ 7. รักไทย ☐ 8. จิตสาธารณะ</p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">4. สมรรถนะสำคัญของผู้เรียน</div>
+        <ol>
+            <li>ความสามารถในการคิด (เปรียบเทียบและเชื่อมโยง)</li>
+            <li>ความสามารถในการแก้ปัญหา</li>
+            <li>ความสามารถในการใช้เทคโนโลยี</li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">5. สาระสำคัญ</div>
+        <p class="indent">RP2040 เป็นชิปประมวลผลออกแบบโดย Raspberry Pi Foundation ประเทศอังกฤษ มี CPU 2 cores 133 MHz, RAM 264 KB, GPIO 26 ขา บอร์ด Cytron Maker Pi RP2040 นำชิปนี้มาประกอบกับอุปกรณ์ในตัว: NeoPixel RGB ×2, ปุ่ม GP20/GP21, บัซเซอร์ Piezo (GP22), Motor Driver ×2, Servo Ports ×4, Grove Ports ×7 ทำให้สร้างหุ่นยนต์ได้ง่าย ใช้ภาษา <b>CircuitPython</b> เขียนโค้ดผ่าน Simulator บนเว็บก่อนลงบอร์ดจริง ลดความเสี่ยงเสียอุปกรณ์</p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">6. ความรู้เดิมที่นักเรียนต้องมี</div>
+        <ol>
+            <li>ความรู้พื้นฐานเรื่องบอร์ดและเซ็นเซอร์จากหน่วย 2 micro:bit</li>
+            <li>การคิดเป็นลำดับขั้นตอน</li>
+            <li>การคัดลอกและพิมพ์ข้อความถูกต้องตามตัวพิมพ์</li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">7. การจัดกิจกรรมการเรียนรู้</div>
+
+        <div class="hour-banner">▶ ชั่วโมงที่ 21 (60 นาที) : ทำความรู้จัก RP2040 และ Maker Pi</div>
+
+        <p class="step-banner">ขั้นที่ 1: การวิเคราะห์และกำหนดรายละเอียดของปัญหา (15 นาที)</p>
+        <ol>
+            <li>ครูเปิดเว็บไซต์ <code>Robotm.2/Hr21-22RP.html</code></li>
+            <li>ครูแสดงผลคะแนนสอบกลางภาคและสรุปสิ่งที่เรียนใน 18 ชั่วโมงแรก</li>
+            <li>ครูแนะนำเป้าหมายหน่วย 3: "<b>หุ่นยนต์ของตัวเอง</b> ที่นำเสนอท้ายภาคเรียน"</li>
+            <p class="teacher-q">หลังจากที่เคยใช้ micro:bit แล้ว นักเรียนคิดว่าจะนำมาทำหุ่นยนต์ที่เคลื่อนที่เองได้ไหม? ทำไมจึงต้องเปลี่ยนบอร์ด?</p>
+            <p class="student-a">น่าจะยากเพราะ micro:bit ไม่มี Motor Driver ในตัว ต้องใช้บอร์ดที่ขับมอเตอร์ได้ในตัวจะง่ายกว่า</p>
+        </ol>
+
+        <p class="step-banner">ขั้นที่ 2: การวางแผนการแก้ปัญหา (25 นาที)</p>
+        <ol start="4">
+            <li>ครูแนะนำชิป RP2040 (Raspberry Pi Foundation) — 2 cores, 133 MHz</li>
+            <li>ครูแสดงรูป Cytron Maker Pi RP2040 พร้อมระบุอุปกรณ์ในตัวทุกชิ้น</li>
+            <li>ครูแสดงตารางเปรียบเทียบ micro:bit vs RP2040 (CPU, GPIO, Motor, ภาษา)</li>
+            <li>ครูประกาศใช้ภาษา <b>CircuitPython</b> (เลิกใช้ Block แล้ว!)</li>
+        </ol>
+
+        <p class="step-banner">ขั้นที่ 3: การดำเนินการแก้ปัญหา (20 นาที)</p>
+        <ol start="8">
+            <li>ครูพานักเรียนเข้าเว็บ Simulator (URL ที่ครูจะส่งให้)</li>
+            <li>ครูสาธิตหน้าจอ Simulator: บอร์ดจำลอง (ซ้าย) + Code editor (ขวา)</li>
+            <li>ครูเขียนโค้ดแรก: เปลี่ยน NeoPixel ดวงแรกเป็นสีแดง</li>
+        </ol>
+
+        <div class="hour-banner">▶ ชั่วโมงที่ 22 (60 นาที) : เขียน Python ครั้งแรกบน Simulator</div>
+
+        <p class="step-banner">ขั้นที่ 3 (ต่อ): การดำเนินการแก้ปัญหา (40 นาที)</p>
+        <ol start="11">
+            <li>ครูอธิบายโครงสร้างโค้ด Python:
+                <ul>
+                    <li><code>import board</code> — นำเข้าโมดูล</li>
+                    <li><code>import neopixel</code></li>
+                    <li><code>pixels = neopixel.NeoPixel(board.GP18, 2)</code></li>
+                    <li><code>pixels[0] = (255, 0, 0)</code></li>
+                </ul>
+            </li>
+            <li>นักเรียนพิมพ์โค้ดและเปลี่ยนสีตามที่ตนเองชอบ</li>
+            <li>นักเรียนทำใบงานที่ 11.1 + แคปหน้าจอ Simulator</li>
+        </ol>
+
+        <p class="step-banner">ขั้นที่ 4: การตรวจสอบและประเมินผล (20 นาที)</p>
+        <ol start="14">
+            <li>นักเรียนทำแบบทดสอบ 5 ข้อในเว็บไซต์</li>
+            <p class="teacher-q">ทำไม Python ถึงเข้มงวดเรื่องตัวพิมพ์ใหญ่-เล็ก ในขณะที่ MakeCode Block ไม่ต้องระวัง?</p>
+            <p class="student-a">เพราะ Python อ่าน "ข้อความ" ที่เราพิมพ์ตรงตัว board กับ Board เป็นคนละสิ่ง — Block ใช้กราฟิก ไม่มีปัญหานี้</p>
+            <li>ครูสรุปบทเรียนและแจ้งว่าสัปดาห์หน้าจะเล่นกับ NeoPixel + บัซเซอร์</li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">8. ชิ้นงาน / ภาระงาน</div>
+        <ol>
+            <li>ใบงานที่ 11.1 "สำรวจ Maker Pi RP2040" — แคปหน้าจอ 5 รูป</li>
+            <li>แบบทดสอบท้ายชั่วโมง 5 ข้อ</li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">9. การวัดและประเมินผล</div>
+        <table class="eval">
+            <thead><tr><th>รายการ</th><th>วิธีวัด</th><th>เครื่องมือ</th><th>เกณฑ์</th></tr></thead>
+            <tbody>
+                <tr><td><b>1. ความรู้ (K)</b></td><td>ตรวจใบงาน + ทดสอบ</td><td>1. ใบงาน 11.1<br>2. แบบทดสอบ 5 ข้อ</td><td>ร้อยละ 60</td></tr>
+                <tr><td><b>2. ทักษะกระบวนการ (P)</b></td><td>ตรวจชิ้นงาน</td><td>3. แบบประเมินทักษะ</td><td>ระดับ "ดี"</td></tr>
+                <tr><td><b>3. พฤติกรรม</b></td><td>สังเกต</td><td>4. แบบสังเกตพฤติกรรม</td><td>ระดับ "พอใช้"</td></tr>
+                <tr><td><b>4. คุณลักษณะ</b></td><td>สังเกต</td><td>5. แบบประเมินคุณลักษณะ</td><td>ระดับ "ผ่าน"</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <div class="section-title">10. สื่อและแหล่งการเรียนรู้</div>
+        <p class="indent"><b>สื่อ:</b> 1. <code>Robotm.2/Hr21-22RP.html</code> &nbsp; 2. เว็บ Simulator RP2040 ของครู &nbsp; 3. บอร์ด Maker Pi RP2040 &nbsp; 4. ใบงานที่ 11.1</p>
+        <p class="indent"><b>แหล่งการเรียนรู้:</b> 1. ห้องคอมพิวเตอร์ &nbsp; 2. อินเทอร์เน็ต</p>
+    </div>
+
+    <div class="page-break"></div>
+
+    <div class="appendix-banner">ภาคผนวก: เครื่องมือวัดและประเมินผล</div>
+
+    <div class="tool-title">เครื่องมือที่ 1: ใบงานที่ 11.1 และแบบประเมิน</div>
+
+    <div class="worksheet-header">
+        <h3>ใบงานที่ 11.1 "สำรวจ Maker Pi RP2040"</h3>
+        <p>ชื่อ-สกุล <span class="dots">..................................................................</span> ชั้น ม.2/<span class="dots">....</span> เลขที่ <span class="dots">....</span></p>
+    </div>
+
+    <p class="bold">ตอนที่ 1: เปรียบเทียบ micro:bit กับ RP2040</p>
+    <table>
+        <thead><tr><th>หัวข้อ</th><th>micro:bit v2</th><th>RP2040 (Maker Pi)</th></tr></thead>
+        <tbody>
+            <tr><td>CPU</td><td class="dots">...........................</td><td class="dots">...........................</td></tr>
+            <tr><td>Motor Driver</td><td class="dots">...........................</td><td class="dots">...........................</td></tr>
+            <tr><td>ภาษาเขียนโปรแกรม</td><td class="dots">...........................</td><td class="dots">...........................</td></tr>
+            <tr><td>NeoPixel</td><td class="dots">...........................</td><td class="dots">...........................</td></tr>
+        </tbody>
+    </table>
+
+    <p class="bold">ตอนที่ 2: สำรวจเว็บ Simulator (แคป 3 รูป)</p>
+    <p class="indent">☐ รูปที่ 1: หน้าหลัก Simulator (แคปทั้งหน้า)</p>
+    <p class="indent">☐ รูปที่ 2: บอร์ด Maker Pi ใกล้ๆ (เห็นชิป RP2040 + อุปกรณ์)</p>
+    <p class="indent">☐ รูปที่ 3: Code editor ที่เปิดให้พิมพ์โค้ด</p>
+
+    <p class="bold">ตอนที่ 3: เขียนโค้ด NeoPixel ครั้งแรก (แคป 2 รูป)</p>
+    <div class="code-box">import board
+import neopixel
+
+pixels = neopixel.NeoPixel(board.GP18, 2)
+
+# TODO: เปลี่ยน 2 ดวงให้เป็นสีที่คุณชอบ
+pixels[0] = (___, ___, ___)
+pixels[1] = (___, ___, ___)</div>
+    <p class="indent">1. สีที่เลือกสำหรับดวงที่ 0: <span class="dots">.............</span> (R=<span class="dots">..</span>, G=<span class="dots">..</span>, B=<span class="dots">..</span>)</p>
+    <p class="indent">2. สีที่เลือกสำหรับดวงที่ 1: <span class="dots">.............</span> (R=<span class="dots">..</span>, G=<span class="dots">..</span>, B=<span class="dots">..</span>)</p>
+    <p class="indent">☐ แคปโค้ดที่เขียนเสร็จ (รูปที่ 4)</p>
+    <p class="indent">☐ แคปผลลัพธ์ LED 2 ดวงติด (รูปที่ 5)</p>
+
+    <p class="bold">ตอนที่ 4: คำถามท้าทาย (โบนัส +2)</p>
+    <p class="indent">ทำให้ LED "กระพริบสลับสี" โดยใช้ <code>time.sleep()</code> และ <code>while True:</code> — เขียน Pseudo</p>
+    <p class="indent dots">.................................................................................................................</p>
+
+    <div style="margin-top: 14pt; padding: 8pt; border: 1pt dashed #1e3a8a; background: #f0f9ff;">
+        <p class="bold" style="color: #1e3a8a;">เฉลย (สำหรับครู)</p>
+        <p><b>ตอนที่ 1:</b> micro:bit (nRF52833, 64MHz, ❌ Motor, Block) vs RP2040 (RP2040, 133MHz, ✅ Motor, Python)</p>
+        <p><b>ตอนที่ 4:</b></p>
+        <div class="code-box">import time
+while True:
+    pixels[0] = (255, 0, 0)
+    pixels[1] = (0, 0, 255)
+    time.sleep(0.5)
+    pixels[0] = (0, 0, 255)
+    pixels[1] = (255, 0, 0)
+    time.sleep(0.5)</div>
+    </div>
+
+    <p class="bold" style="margin-top: 12pt;">แบบประเมินใบงาน 11.1</p>
+    <table>
+        <thead><tr><th style="width: 25%;">ประเด็น</th><th>ดีมาก (3)</th><th>ดี (2)</th><th>ปรับปรุง (1)</th></tr></thead>
+        <tbody>
+            <tr><td><b>ตารางเปรียบเทียบ</b></td><td>ครบ 4 หัวข้อและถูก</td><td>ครบ 3 หัวข้อ</td><td>ครบ ≤2</td></tr>
+            <tr><td><b>แคปหน้าจอ</b></td><td>5 รูปครบและชัดเจน</td><td>4 รูป</td><td>≤3 รูป</td></tr>
+            <tr><td><b>โค้ด Python</b></td><td>ใส่ค่า RGB ถูกและทำงานได้</td><td>ทำงานบางส่วน</td><td>ไม่ทำงาน</td></tr>
+            <tr><td><b>คำถามท้าทาย</b></td><td>Pseudo ถูกต้อง</td><td>มีโครงสร้าง</td><td>ไม่ตอบ</td></tr>
+        </tbody>
+    </table>
+
+    <div class="page-break"></div>
+
+    <div class="tool-title">เครื่องมือที่ 2: แบบประเมินสมรรถนะการแก้ปัญหา</div>
+    <table>
+        <thead><tr><th style="width: 22%;">พฤติกรรม</th><th>ระดับ 3</th><th>ระดับ 2</th><th>ระดับ 1</th></tr></thead>
+        <tbody>
+            <tr><td><b>วิเคราะห์</b></td><td>เข้าใจความแตกต่างของบอร์ดและภาษา</td><td>เข้าใจบางส่วน</td><td>ไม่เข้าใจ</td></tr>
+            <tr><td><b>วางแผน</b></td><td>เลือกสีและคิดค่า RGB ก่อนเขียน</td><td>เริ่มเขียนแล้วลอง</td><td>คัดลอกเฉย</td></tr>
+            <tr><td><b>ดำเนินการ</b></td><td>โค้ดทำงานบน Simulator</td><td>มี error แต่แก้ได้</td><td>ไม่ทำงาน</td></tr>
+            <tr><td><b>ตรวจสอบ</b></td><td>แคปและตรวจผลครบ 5 รูป</td><td>แคปบางส่วน</td><td>ไม่แคป</td></tr>
+        </tbody>
+    </table>
+
+    <div class="tool-title">เครื่องมือที่ 3: แบบประเมินพฤติกรรมการทำงาน</div>
+    <table>
+        <thead><tr><th>ลำดับ</th><th>ชื่อ-สกุล</th><th>ตั้งใจ (3)</th><th>รับผิดชอบ (3)</th><th>ตรงเวลา (3)</th><th>รวม (9)</th></tr></thead>
+        <tbody>
+            <tr><td>1</td><td class="dots">...........................................................</td><td></td><td></td><td></td><td></td></tr>
+            <tr><td>2</td><td class="dots">...........................................................</td><td></td><td></td><td></td><td></td></tr>
+            <tr><td>...</td><td class="dots">...........................................................</td><td></td><td></td><td></td><td></td></tr>
+        </tbody>
+    </table>
+
+    <div class="tool-title">เครื่องมือที่ 4: แบบประเมินคุณลักษณะอันพึงประสงค์</div>
+    <table>
+        <thead><tr><th>คุณลักษณะ</th><th>ดีเยี่ยม (3)</th><th>ดี (2)</th><th>ผ่าน (1)</th></tr></thead>
+        <tbody>
+            <tr><td><b>มีวินัย</b></td><td>พิมพ์ Python ระวังตัวพิมพ์</td><td>ผิดบางครั้ง</td><td>ไม่ระวัง</td></tr>
+            <tr><td><b>ใฝ่เรียนรู้</b></td><td>ลองโค้ดเพิ่มเองหลังภารกิจ</td><td>ทำตามที่บอก</td><td>ทำเฉพาะที่จำเป็น</td></tr>
+            <tr><td><b>มุ่งมั่นทำงาน</b></td><td>แก้ error ด้วยตัวเอง</td><td>ขอความช่วยเหลือ</td><td>หยุดทำ</td></tr>
+        </tbody>
+    </table>
+
+    <div class="tool-title">บันทึกหลังการสอน</div>
+    <p><b>ผลที่เกิดกับผู้เรียน:</b></p><p class="dots">..........................................................................................................................</p>
+    <p><b>ปัญหา/อุปสรรค:</b></p><p class="dots">..........................................................................................................................</p>
+
+    <table class="signature" style="margin-top: 30pt;"><tr>
+        <td class="left" style="width: 50%;">ลงชื่อ <span class="dots">..............................................</span> ผู้สอน<br>(นายภาณุพงศ์ อุ่นคำ)<br>วันที่ <span class="dots">......./......./.........</span></td>
+        <td class="right">ลงชื่อ <span class="dots">..............................................</span><br>(<span class="dots">...........................................</span>)<br>ผู้อำนวยการโรงเรียนบ้านป่ายุบฯ</td>
+    </tr></table>
+</div>
+</body>
+</html>

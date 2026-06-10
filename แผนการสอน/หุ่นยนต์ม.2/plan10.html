@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แผนการจัดการเรียนรู้ที่ 10 — สอบกลางภาค</title>
+    <link rel="stylesheet" href="lesson-plan.css">
+</head>
+<body>
+<div class="nav-bar no-print"><a href="index.html">⬅ กลับ</a><div style="color:white;">แผนที่ 10 / 20 — Hr 19-20 (สอบกลางภาค)</div><button class="print-btn" onclick="window.print()">🖨️ พิมพ์</button></div>
+<div class="paper">
+
+    <h1 class="plan-title">แผนการจัดการเรียนรู้ที่ 10</h1>
+    <div class="plan-meta-row"><span>สอบกลางภาค (ทฤษฎี + ปฏิบัติ)</span><span>จำนวน 2 ชั่วโมง</span></div>
+    <div class="plan-meta-row"><span>เรื่อง สอบประเมินผลสัมฤทธิ์ครึ่งภาค (VEXcode VR + micro:bit)</span><span>จำนวน 2 ชั่วโมง (ชั่วโมงที่ 19-20)</span></div>
+    <div class="plan-meta-row"><span>วิชา หุ่นยนต์</span><span>กลุ่มสาระการเรียนรู้ วิทยาศาสตร์และเทคโนโลยี</span></div>
+    <div class="plan-meta-row"><span>ชั้นมัธยมศึกษาปีที่ 2</span><span>ภาคเรียนที่ 1 ปีการศึกษา 2569</span></div>
+    <div class="plan-meta-row"><span>ผู้สอน นายภาณุพงศ์ อุ่นคำ</span><span>โรงเรียนบ้านป่ายุบ (บุ้นกีประชานุเคราะห์)</span></div>
+    <hr class="divider">
+
+    <div class="section">
+        <div class="section-title">1. มาตรฐานการเรียนรู้/ตัวชี้วัด</div>
+        <p class="indent"><b>มาตรฐาน ว 4.2</b> เข้าใจและใช้แนวคิดเชิงคำนวณในการแก้ปัญหา</p>
+        <p class="indent bold">ตัวชี้วัดปลายทาง (สรุปครึ่งภาค)</p>
+        <p class="indent2"><b>ว 4.2 ม.2/1</b> ออกแบบอัลกอริทึมที่ใช้แนวคิดเชิงคำนวณในการแก้ปัญหา</p>
+        <p class="indent2"><b>ว 4.2 ม.2/2</b> ออกแบบและเขียนโปรแกรมที่ใช้ตรรกะและฟังก์ชันในการแก้ปัญหา</p>
+        <p class="indent2"><b>ว 4.2 ม.2/3</b> อภิปรายองค์ประกอบและหลักการทำงานของระบบคอมพิวเตอร์</p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">2. จุดประสงค์การเรียนรู้ (สำหรับการสอบ)</div>
+        <ol>
+            <li>ตอบคำถามปรนัยเกี่ยวกับ VEXcode VR (Drivetrain, Loop, Sensor, If/Else) ได้ <span class="kpa">K</span></li>
+            <li>ตอบคำถามปรนัยเกี่ยวกับ micro:bit (LED, ปุ่ม, ตัวแปร, Accelerometer, แสง/อุณหภูมิ, Compass, Radio) ได้ <span class="kpa">K</span></li>
+            <li>เขียนโปรแกรม "เครื่องวัดอุณหภูมิอัจฉริยะ" บน MakeCode ได้ <span class="kpa">P</span></li>
+            <li>ปฏิบัติตามกฎการสอบอย่างเคร่งครัด (ไม่ลอกเพื่อน ไม่ใช้สื่อช่วย) <span class="kpa">A</span></li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">3. คุณลักษณะอันพึงประสงค์</div>
+        <p class="indent">☐ 1. รักชาติฯ ☑ 2. ซื่อสัตย์ ☑ 3. มีวินัย ☐ 4. ใฝ่เรียนรู้ ☐ 5. พอเพียง ☑ 6. มุ่งมั่น ☐ 7. รักไทย ☐ 8. จิตสาธารณะ</p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">4. สมรรถนะสำคัญของผู้เรียน</div>
+        <ol>
+            <li>ความสามารถในการคิด (สังเคราะห์ความรู้)</li>
+            <li>ความสามารถในการแก้ปัญหา</li>
+            <li>ความสามารถในการใช้เทคโนโลยี</li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">5. สาระสำคัญ</div>
+        <p class="indent">การสอบกลางภาคแบ่งเป็น 2 ส่วน: <b>ทฤษฎี 20 ข้อ (20 คะแนน)</b> สอบในชั่วโมงที่ 19 ผ่านเว็บไซต์ <code>Robotm.2/Hr19-20Exam.html</code> ที่มีระบบจับเวลาและสุ่มข้อ พร้อมประเมินเกรดอัตโนมัติ (A, B, C, D) และ <b>ปฏิบัติ "เครื่องวัดอุณหภูมิอัจฉริยะ" 10 คะแนน</b> สอบในชั่วโมงที่ 20 บน MakeCode เน้นการใช้ <code>on button A pressed</code> + <code>temperature</code> + <code>light level</code> + <code>if/else</code> + <code>forever loop</code></p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">6. ความรู้เดิมที่นักเรียนต้องมี</div>
+        <ol>
+            <li>เนื้อหาทุกแผนตั้งแต่แผนที่ 1-9 (Hr 1-18)</li>
+            <li>การใช้ MakeCode บน micro:bit</li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">7. การจัดกิจกรรมการเรียนรู้</div>
+
+        <div class="hour-banner">▶ ชั่วโมงที่ 19 (60 นาที) : สอบทฤษฎี — 20 ข้อ</div>
+
+        <p class="step-banner">ขั้นที่ 1: ชี้แจงและตรวจสอบความพร้อม (10 นาที)</p>
+        <ol>
+            <li>ครูแจกข้อตกลงการสอบ:
+                <ul>
+                    <li>เวลา 60 นาที (จับเวลาผ่านเว็บไซต์)</li>
+                    <li>20 ข้อ — VEXcode VR 10 + micro:bit 10</li>
+                    <li>ห้ามใช้หนังสือ มือถือ ลอกเพื่อน</li>
+                    <li>กดเริ่ม = ยอมรับและจับเวลาทันที</li>
+                </ul>
+            </li>
+            <li>ครูให้นักเรียนเปิดเว็บไซต์ <code>Robotm.2/Hr19-20Exam.html</code> และลงชื่อ</li>
+        </ol>
+
+        <p class="step-banner">ขั้นที่ 2: สอบทฤษฎี (45 นาที)</p>
+        <ol start="3">
+            <li>นักเรียนกด "เริ่มสอบ" และทำข้อสอบ 20 ข้อ</li>
+            <li>ระบบสุ่มลำดับข้อและสลับตัวเลือกป้องกันการลอก</li>
+            <li>ครูเดินดูควบคุมห้องสอบ ตรวจสอบไม่ให้ใช้ของต้องห้าม</li>
+        </ol>
+
+        <p class="step-banner">ขั้นที่ 3: ตรวจคะแนนและบันทึก (5 นาที)</p>
+        <ol start="6">
+            <li>ระบบประเมินคะแนนอัตโนมัติเมื่อนักเรียนกดส่ง</li>
+            <li>นักเรียนแคปหน้าจอผลคะแนน + ส่งครู (ระบบส่งงาน)</li>
+        </ol>
+
+        <div class="hour-banner">▶ ชั่วโมงที่ 20 (60 นาที) : สอบปฏิบัติ — เครื่องวัดอุณหภูมิอัจฉริยะ</div>
+
+        <p class="step-banner">ขั้นที่ 4: ชี้แจงโจทย์ปฏิบัติ (10 นาที)</p>
+        <ol start="8">
+            <li>ครูแสดงโจทย์ปฏิบัติ "เครื่องวัดอุณหภูมิอัจฉริยะ" บน MakeCode:
+                <ul>
+                    <li>ปุ่ม A → แสดงค่าอุณหภูมิ (°C)</li>
+                    <li>ปุ่ม B → แสดงค่าระดับแสง (light level)</li>
+                    <li>forever → ถ้า temperature &gt; 30 แสดง icon Sad + เล่นเสียง</li>
+                    <li>ถ้า ≤ 30 → clear screen</li>
+                </ul>
+            </li>
+            <li>ครูแจ้ง Rubric ประเมิน 5 หัวข้อ (10 คะแนน)</li>
+        </ol>
+
+        <p class="step-banner">ขั้นที่ 5: นักเรียนเขียนโปรแกรม (40 นาที)</p>
+        <ol start="10">
+            <li>นักเรียนเปิด <a href="https://makecode.microbit.org">makecode.microbit.org</a> และเขียนโปรแกรม</li>
+            <li>นักเรียนทดสอบบนบอร์ดจริงและแคปหน้าจอ</li>
+        </ol>
+
+        <p class="step-banner">ขั้นที่ 6: ส่งงานและสรุป (10 นาที)</p>
+        <ol start="12">
+            <li>นักเรียนกด Share ใน MakeCode → คัดลอกลิงก์</li>
+            <li>นักเรียนแคปหน้าจอโค้ด + แคปผลลัพธ์ + ส่งใน "สอบกลางภาค ปฏิบัติ"</li>
+            <li>ครูปิดการสอบและประกาศว่าสัปดาห์หน้าเริ่มหน่วย 3 RP2040</li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">8. ชิ้นงาน / ภาระงาน</div>
+        <ol>
+            <li>คะแนนทฤษฎี 20 ข้อ (แคปหน้าจอผลคะแนน)</li>
+            <li>โปรแกรม "เครื่องวัดอุณหภูมิอัจฉริยะ" (โค้ดบล็อก + ลิงก์ Share + แคปผลลัพธ์)</li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">9. การวัดและประเมินผล</div>
+        <table class="eval">
+            <thead><tr><th>รายการวัด</th><th>วิธีวัด</th><th>เครื่องมือ</th><th>เกณฑ์</th></tr></thead>
+            <tbody>
+                <tr><td><b>1. ด้านความรู้ (K)</b><br>VEX + micro:bit</td><td>สอบปรนัย 20 ข้อ</td><td>1. ข้อสอบกลางภาค (เว็บ)</td><td>ร้อยละ 60 ผ่านเกณฑ์</td></tr>
+                <tr><td><b>2. ด้านทักษะกระบวนการ (P)</b></td><td>ตรวจโปรแกรมตาม Rubric</td><td>2. Rubric ปฏิบัติ (10 คะแนน)</td><td>≥7 คะแนน ผ่านเกณฑ์</td></tr>
+                <tr><td><b>3. พฤติกรรมการสอบ</b><br>ซื่อสัตย์ + วินัย</td><td>สังเกตในห้องสอบ</td><td>3. แบบสังเกตพฤติกรรมการสอบ</td><td>ระดับ "ผ่าน"</td></tr>
+                <tr><td><b>4. คุณลักษณะ</b></td><td>สังเกต</td><td>4. แบบประเมินคุณลักษณะ</td><td>ระดับ "ผ่าน"</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <div class="section-title">10. สื่อและแหล่งการเรียนรู้</div>
+        <p class="indent"><b>สื่อ:</b> 1. <code>Robotm.2/Hr19-20Exam.html</code> (ข้อสอบ) &nbsp; 2. MakeCode + บอร์ด micro:bit (ปฏิบัติ) &nbsp; 3. กระดาษคำตอบ (สำรอง)</p>
+        <p class="indent"><b>แหล่งการเรียนรู้:</b> 1. ห้องคอมพิวเตอร์ &nbsp; 2. อินเทอร์เน็ต</p>
+    </div>
+
+    <div class="page-break"></div>
+
+    <div class="appendix-banner">ภาคผนวก: เครื่องมือวัดและประเมินผล</div>
+
+    <div class="tool-title">เครื่องมือที่ 1: ข้อสอบกลางภาค (ทฤษฎี) — 20 ข้อ 20 คะแนน</div>
+    <p class="indent"><b>คำชี้แจง:</b> ใช้ระบบในเว็บไซต์ <code>Hr19-20Exam.html</code> ที่สุ่ม 20 ข้อจาก 30 ข้อในคลังคำถาม</p>
+
+    <p class="bold">โครงสร้างข้อสอบ:</p>
+    <table>
+        <thead><tr><th>ส่วน</th><th>หัวข้อ</th><th>จำนวน</th><th>คะแนน</th></tr></thead>
+        <tbody>
+            <tr><td><b>1</b></td><td>VEXcode VR (Drivetrain, Loop, Sensor, If/Else)</td><td class="text-center">10 ข้อ</td><td class="text-center">10</td></tr>
+            <tr><td><b>2</b></td><td>micro:bit (LED, ปุ่ม, ตัวแปร, Accelerometer, แสง/อุณหภูมิ, Compass, Radio)</td><td class="text-center">10 ข้อ</td><td class="text-center">10</td></tr>
+            <tr style="background: #f3f4f6;"><td colspan="2" class="text-right bold">รวม</td><td class="text-center bold">20 ข้อ</td><td class="text-center bold">20</td></tr>
+        </tbody>
+    </table>
+
+    <p class="bold">เกณฑ์การประเมินทฤษฎี:</p>
+    <table>
+        <thead><tr><th>คะแนน</th><th>เกรด</th><th>ระดับคุณภาพ</th></tr></thead>
+        <tbody>
+            <tr><td class="text-center">17-20</td><td class="text-center">A</td><td>ดีมาก</td></tr>
+            <tr><td class="text-center">14-16</td><td class="text-center">B</td><td>ดี</td></tr>
+            <tr><td class="text-center">10-13</td><td class="text-center">C</td><td>พอใช้</td></tr>
+            <tr><td class="text-center">&lt;10</td><td class="text-center">D</td><td>ต้องปรับปรุง</td></tr>
+        </tbody>
+    </table>
+
+    <div class="tool-title">เครื่องมือที่ 2: Rubric ปฏิบัติ "เครื่องวัดอุณหภูมิอัจฉริยะ" — 10 คะแนน</div>
+    <table>
+        <thead><tr><th>หัวข้อ</th><th>เกณฑ์ดีเยี่ยม</th><th>คะแนน</th></tr></thead>
+        <tbody>
+            <tr><td><b>1. การใช้ on button</b></td><td>กด A/B ทำงานถูกตามที่กำหนด</td><td class="text-center">2</td></tr>
+            <tr><td><b>2. การอ่านเซ็นเซอร์</b></td><td>เรียก temperature + light level ถูก</td><td class="text-center">2</td></tr>
+            <tr><td><b>3. การใช้ if/else</b></td><td>เปรียบเทียบ temperature &gt; 30 และทำงานได้</td><td class="text-center">2</td></tr>
+            <tr><td><b>4. forever loop</b></td><td>วนตรวจอุณหภูมิตลอดเวลา</td><td class="text-center">2</td></tr>
+            <tr><td><b>5. ความสมบูรณ์</b></td><td>โค้ดทำงานครบทุกข้อ ไม่มี error</td><td class="text-center">2</td></tr>
+            <tr style="background: #f3f4f6;"><td colspan="2" class="text-right bold">รวม</td><td class="text-center bold">10</td></tr>
+        </tbody>
+    </table>
+
+    <div style="margin-top: 14pt; padding: 10pt; border: 1pt dashed #1e3a8a; background: #f0f9ff;">
+        <p class="bold" style="color: #1e3a8a;">เฉลย โปรแกรมเครื่องวัดอุณหภูมิอัจฉริยะ (สำหรับครู)</p>
+        <div class="code-box">on button A pressed:
+    show string "T:"
+    show number temperature
+
+on button B pressed:
+    show string "L:"
+    show number light level
+
+forever:
+    if temperature &gt; 30:
+        show icon Sad
+        play tone Middle C for 1 beat
+        pause 500
+        clear screen
+    else:
+        clear screen</div>
+    </div>
+
+    <div class="tool-title">เครื่องมือที่ 3: แบบสังเกตพฤติกรรมการสอบ</div>
+    <table>
+        <thead><tr><th>ลำดับ</th><th>ชื่อ-สกุล</th><th>ซื่อสัตย์ (3)</th><th>มีวินัย (3)</th><th>ตรงเวลา (3)</th><th>รวม (9)</th></tr></thead>
+        <tbody>
+            <tr><td>1</td><td class="dots">...........................................................</td><td></td><td></td><td></td><td></td></tr>
+            <tr><td>2</td><td class="dots">...........................................................</td><td></td><td></td><td></td><td></td></tr>
+            <tr><td>...</td><td class="dots">...........................................................</td><td></td><td></td><td></td><td></td></tr>
+        </tbody>
+    </table>
+    <p class="small"><b>เกณฑ์:</b> ปฏิบัติสม่ำเสมอ = 3, บ่อยครั้ง = 2, บางครั้ง = 1</p>
+
+    <div class="tool-title">เครื่องมือที่ 4: แบบประเมินคุณลักษณะอันพึงประสงค์</div>
+    <table>
+        <thead><tr><th>คุณลักษณะ</th><th>ดีเยี่ยม (3)</th><th>ดี (2)</th><th>ผ่าน (1)</th></tr></thead>
+        <tbody>
+            <tr><td><b>ซื่อสัตย์</b></td><td>ไม่ลอกเพื่อน ไม่ใช้สื่อช่วย</td><td>ปฏิบัติเป็นส่วนใหญ่</td><td>มีพฤติกรรมน่าสงสัย</td></tr>
+            <tr><td><b>มีวินัย</b></td><td>ปฏิบัติตามกฎการสอบทุกข้อ</td><td>ละเลยบางข้อ</td><td>ฝ่าฝืนกฎ</td></tr>
+            <tr><td><b>มุ่งมั่นทำงาน</b></td><td>ส่งงานครบทั้ง 2 ส่วน ใช้เวลาเต็มที่</td><td>ส่งงานครบแต่ไม่เต็มที่</td><td>ส่งงานไม่ครบ</td></tr>
+        </tbody>
+    </table>
+
+    <div class="tool-title">บันทึกหลังการสอน (ผลสอบกลางภาค)</div>
+    <p><b>คะแนนเฉลี่ยทฤษฎี:</b> <span class="dots">..........</span> / 20 &nbsp;&nbsp; <b>คะแนนเฉลี่ยปฏิบัติ:</b> <span class="dots">..........</span> / 10</p>
+    <p><b>จำนวนนักเรียนที่ผ่านเกณฑ์:</b> <span class="dots">..........</span> คน จาก <span class="dots">..........</span> คน</p>
+    <p><b>หัวข้อที่นักเรียนตอบผิดมาก (วิเคราะห์):</b></p>
+    <p class="dots">..........................................................................................................................</p>
+    <p><b>แนวทางการสอนซ่อมเสริม:</b></p>
+    <p class="dots">..........................................................................................................................</p>
+
+    <table class="signature" style="margin-top: 30pt;"><tr>
+        <td class="left" style="width: 50%;">ลงชื่อ <span class="dots">..............................................</span> ผู้สอน<br>(นายภาณุพงศ์ อุ่นคำ)<br>วันที่ <span class="dots">......./......./.........</span></td>
+        <td class="right">ลงชื่อ <span class="dots">..............................................</span><br>(<span class="dots">...........................................</span>)<br>ผู้อำนวยการโรงเรียนบ้านป่ายุบฯ</td>
+    </tr></table>
+</div>
+</body>
+</html>

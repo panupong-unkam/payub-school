@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ด่าน 1: เดินป่าครั้งแรก — Python 3D Adventure</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Noto+Serif+Thai:wght@400;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="game-style.css">
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.js"></script>
+</head>
+<body>
+
+<!-- 🧭 TOP BAR -->
+<header class="game-topbar">
+  <a href="index.html" class="back-btn">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+    แผนที่
+  </a>
+  <div class="topbar-title">
+    <span class="topbar-emoji">🌱</span>
+    <div>
+      <div class="topbar-name">ด่าน 1 · เดินป่าครั้งแรก</div>
+      <div class="topbar-sub">โลกที่ 1 · เริ่มต้นพื้นฐาน</div>
+    </div>
+  </div>
+  <div class="player-stats">
+    <div class="stat-pill"><span>🪙</span> <b id="coins-have">0</b>/<b id="coins-need">3</b></div>
+    <div class="stat-pill"><span>📜</span> <b id="line-count">0</b> บรรทัด</div>
+  </div>
+</header>
+
+<!-- 🎯 BRIEF -->
+<div class="brief-bar">
+  <div>
+    <div class="brief-title">🎯 ภารกิจ: เก็บเหรียญทอง 3 อันด้วยคำสั่ง Python</div>
+    <div class="brief-sub">เรียนรู้: การเรียกฟังก์ชัน · การเขียนทีละบรรทัด · for loop</div>
+  </div>
+  <ul class="brief-objectives">
+    <li id="ob-1">เก็บเหรียญทั้ง 3 อัน</li>
+    <li id="ob-2">ไม่ชนกำแพง</li>
+    <li id="ob-3">ใช้บรรทัด ≤ 8 บรรทัด</li>
+  </ul>
+</div>
+
+<!-- 🎮 MAIN SHELL -->
+<main class="level-shell">
+
+  <!-- LEFT: CODE EDITOR -->
+  <section class="level-side">
+    <div class="editor-wrap">
+      <div class="editor-toolbar">
+        <button class="tb-btn tb-run" onclick="runCode()">
+          ▶️ Run
+        </button>
+        <button class="tb-btn" onclick="stepThrough()">⏭️ Step</button>
+        <button class="tb-btn tb-reset" onclick="resetWorld()">🔄 Reset</button>
+        <div class="tb-spacer"></div>
+        <button class="tb-btn" onclick="showHint()">💡 Hint</button>
+        <button class="tb-btn" onclick="showDocs()">📖 คำสั่ง</button>
+      </div>
+      <textarea id="code-editor" spellcheck="false"># 🌱 ด่าน 1 — เก็บเหรียญทอง 3 อัน
+# เริ่มที่ (0,0) หันตะวันออก ➡️
+# เหรียญอยู่ที่: (1,0), (3,2), (2,4)
+#
+# คำสั่งที่ใช้ได้:
+#   robot.move_forward()  เดินไปข้างหน้า 1 ช่อง
+#   robot.turn_left()     เลี้ยวซ้าย
+#   robot.turn_right()    เลี้ยวขวา
+#   robot.pick_coin()     เก็บเหรียญที่ช่องปัจจุบัน
+#   print("ข้อความ")       แสดงข้อความ
+
+# ✏️ เก็บเหรียญอันแรก (ลองรันดูเลย!)
+robot.move_forward()
+robot.pick_coin()
+print("เก็บเหรียญที่ 1 แล้ว!")
+
+# ✏️ เก็บเหรียญที่เหลือ — ลองเขียนต่อเอง
+</textarea>
+      <div class="console-wrap">
+        <div class="console-head">
+          <span>📟 Console</span>
+          <span id="console-status">รอรันโค้ด...</span>
+        </div>
+        <div id="console-output">พิมพ์โค้ดแล้วกด <b>▶️ Run</b> เพื่อเริ่ม</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RIGHT: 3D SCENE -->
+  <section class="level-side">
+    <div class="canvas-wrap">
+      <canvas id="three-canvas"></canvas>
+      <div class="robot-speech" id="robot-speech"></div>
+      <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text" id="loading-text">กำลังโหลด Python runtime...</div>
+      </div>
+      <div class="hud">
+        <div class="hud-pill">🤖 ตำแหน่ง: <b id="pos-text">(0, 0)</b> หัน: <b id="dir-text">เหนือ</b></div>
+        <div class="hud-pill">⏱️ ความเร็ว: <b>1x</b></div>
+      </div>
+      <div class="hud-bottom">
+        <button class="cam-btn" onclick="cam.zoomIn()" title="ซูมเข้า">➕</button>
+        <button class="cam-btn" onclick="cam.zoomOut()" title="ซูมออก">➖</button>
+        <button class="cam-btn" onclick="cam.rotateL()" title="หมุนซ้าย">↺</button>
+        <button class="cam-btn" onclick="cam.rotateR()" title="หมุนขวา">↻</button>
+        <button class="cam-btn" onclick="cam.reset()" title="รีเซ็ตกล้อง">🎯</button>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- 🎉 WIN MODAL -->
+<div class="win-overlay" id="win-modal">
+  <div class="win-card">
+    <div class="win-emoji">🏆</div>
+    <h2>ภารกิจสำเร็จ!</h2>
+    <p>ยอดเยี่ยม! คุณเก็บเหรียญครบทุกอัน และผ่านด่านแรกแล้ว 🎉</p>
+    <div class="win-rewards">
+      <div class="win-reward">⭐ +30 XP</div>
+      <div class="win-reward">🥉 เหรียญทองแดง</div>
+    </div>
+    <div class="win-actions">
+      <button class="btn-hero btn-hero-ghost" onclick="closeWin()">เล่นอีกครั้ง</button>
+      <a href="index.html" class="btn-hero btn-hero-primary">▶️ ไปด่านถัดไป</a>
+    </div>
+  </div>
+</div>
+
+<script src="game-engine.js"></script>
+</body>
+</html>

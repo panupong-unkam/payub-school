@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>หุ่นยนต์ ม.2 | Hr 3-4: VEXcode VR เซ็นเซอร์ + เงื่อนไข + Maze</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Noto+Serif+Thai:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --bg-dark: #0f172a; --surface-dark: #1e293b; --cyber-blue: #0ea5e9;
+            --cyber-blue-glow: rgba(14, 165, 233, 0.4); --neon-green: #10b981;
+            --neon-orange: #f59e0b; --neon-pink: #ec4899; --neon-purple: #a855f7;
+            --text-main: #f8fafc; --text-muted: #94a3b8; --border-line: #334155;
+        }
+        body {
+            display: flex; justify-content: center; align-items: center; min-height: 100vh;
+            background: radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 100%);
+            color: var(--text-main); font-family: 'Sarabun', sans-serif;
+            padding: 20px; margin: 0; overflow-x: hidden;
+        }
+        body::before {
+            content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 30px 30px; z-index: -1;
+        }
+        .lesson-container {
+            width: 100%; max-width: 1100px; background: var(--surface-dark);
+            border-radius: 24px; box-shadow: 0 0 40px rgba(0,0,0,0.5), 0 0 15px var(--cyber-blue-glow);
+            overflow: hidden; border: 1px solid var(--border-line);
+            display: flex; flex-direction: column; min-height: 80vh;
+        }
+        .lesson-header {
+            background: rgba(15, 23, 42, 0.9); padding: 20px 30px;
+            border-bottom: 1px solid var(--neon-green);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .progress-track { height: 5px; background: var(--border-line); width: 100%; display: none; }
+        #progress-bar { height: 100%; background: var(--neon-green); width: 0%; box-shadow: 0 0 10px var(--neon-green); transition: width 0.6s ease; }
+        .lesson-body { padding: 40px; position: relative; flex-grow: 1; display: flex; flex-direction: column; }
+        .step { display: none; animation: glitchFadeIn 0.5s ease-out forwards; flex-grow: 1; }
+        .step.active { display: block; }
+        @keyframes glitchFadeIn { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 1; transform: translateY(0); } }
+        h3 {
+            color: var(--neon-green); font-family: 'Noto Serif Thai', serif; font-size: 28px;
+            margin-top: 0; text-shadow: 0 0 10px rgba(16,185,129,0.4);
+            border-bottom: 1px dashed var(--border-line); padding-bottom: 15px;
+        }
+        p, li { line-height: 1.8; font-size: 17px; color: #cbd5e1; }
+        .btn {
+            padding: 14px 28px; border: none; border-radius: 10px; font-family: 'Sarabun'; font-weight: bold;
+            font-size: 16px; cursor: pointer; transition: 0.3s; display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        .btn-primary { background: var(--neon-green); color: white; box-shadow: 0 4px 15px rgba(16,185,129,0.4); }
+        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(16,185,129,0.5); background: #059669; }
+        .btn-outline { background: transparent; color: var(--text-muted); border: 1px solid var(--border-line); }
+        .btn-outline:hover { color: white; border-color: white; }
+        .footer-nav {
+            padding: 25px 40px; background: rgba(15, 23, 42, 0.95); border-top: 1px solid var(--border-line);
+            display: none; justify-content: space-between; align-items: center; margin-top: auto;
+        }
+        .sensor-card {
+            background: rgba(0,0,0,0.3); border-radius: 15px; padding: 20px;
+            border: 1px solid var(--border-line); transition: 0.3s;
+        }
+        .sensor-card:hover { transform: translateY(-4px); border-color: var(--cyber-blue); }
+        .sensor-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin-top: 20px; }
+        .grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-top: 20px; }
+        .info-card {
+            background: rgba(0,0,0,0.2); border: 1px solid var(--border-line);
+            border-radius: 15px; padding: 20px;
+        }
+        .quiz-option {
+            background: rgba(255,255,255,0.05); border: 2px solid var(--border-line);
+            padding: 15px 20px; border-radius: 12px; margin-bottom: 15px; cursor: pointer;
+            transition: 0.2s; font-size: 16px; color: var(--text-main); text-align: left; width: 100%;
+        }
+        .quiz-option:hover { background: rgba(16,185,129,0.1); border-color: var(--neon-green); }
+        .quiz-option.correct { background: rgba(16,185,129,0.2); border-color: var(--neon-green); color: var(--neon-green); font-weight: bold; }
+        .quiz-option.wrong { background: rgba(239,68,68,0.2); border-color: #ef4444; color: #ef4444; }
+        .code-box {
+            background: rgba(0,0,0,0.5); padding: 15px; border-radius: 10px;
+            color: #cbd5e1; font-size: 14px; font-family: 'Courier New', monospace;
+            white-space: pre-wrap; overflow-x: auto; line-height: 1.6;
+            border-left: 4px solid var(--cyber-blue);
+        }
+        .tag {
+            display: inline-block; padding: 4px 12px; border-radius: 12px;
+            font-size: 12px; font-weight: bold; margin-right: 8px;
+        }
+        .tag-vex { background: rgba(14, 165, 233, 0.2); color: var(--cyber-blue); border: 1px solid var(--cyber-blue); }
+        .tag-time { background: rgba(245, 158, 11, 0.2); color: var(--neon-orange); border: 1px solid var(--neon-orange); }
+        @media (max-width: 900px) {
+            .lesson-body { padding: 20px; }
+            .grid-2col { grid-template-columns: 1fr !important; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="lesson-container">
+    <div class="lesson-header">
+        <h2 style="margin: 0; font-size: 20px; letter-spacing: 1px; color: var(--text-main);">🤖 ROBOTICS M.2 | Hr 3-4</h2>
+        <div id="header-guest-info" style="display: none; align-items: center; gap: 12px;">
+            <span style="background: rgba(16,185,129,0.15); color: var(--neon-green); padding: 6px 18px; border-radius: 20px; font-size: 14px; font-weight: bold; border: 1px solid var(--neon-green);" id="display-header-name">Student</span>
+            <button class="btn btn-outline" style="padding: 6px 15px; font-size: 12px;" onclick="location.reload()">EXIT</button>
+        </div>
+    </div>
+
+    <div class="progress-track" id="progress-container"><div id="progress-bar"></div></div>
+
+    <div class="lesson-body">
+
+        <!-- STEP 0: SIGN IN -->
+        <div class="step active" id="step-0">
+            <div style="text-align: center; padding: 50px 20px;">
+                <div style="font-size: 80px; margin-bottom: 20px; filter: drop-shadow(0 0 15px var(--neon-green));">📡</div>
+                <h2 style="color: white; font-size: 32px; margin-bottom: 10px;">หุ่นยนต์ ม.2 | ชั่วโมงที่ 3-4</h2>
+                <p style="color: var(--neon-green); font-size: 20px; margin-bottom: 5px; font-weight: bold;">เซ็นเซอร์ + เงื่อนไข + ภารกิจ Maze</p>
+                <p style="color: var(--text-muted); font-size: 16px; margin-bottom: 30px;">Sensors, If/Else & Maze Challenge</p>
+                <p style="color: var(--text-muted); font-size: 16px; margin-bottom: 20px;">📝 กรุณาลงชื่อเข้าเรียน</p>
+                <input type="text" id="guest-name-input" placeholder="ชื่อ-นามสกุล เลขที่ ห้อง" style="width:100%; max-width:500px; padding:15px 20px; background:rgba(0,0,0,0.3); border:2px solid var(--neon-green); border-radius:12px; color:white; font-size:18px; text-align:center; outline:none;" onkeypress="if(event.key === 'Enter') startLesson()">
+                <div style="margin-top: 35px;">
+                    <button class="btn btn-primary" style="padding: 16px 50px; font-size: 18px;" onclick="startLesson()">🚀 เริ่มเรียน</button>
+                </div>
+                <div style="margin-top: 30px; color: var(--text-muted); font-size: 13px;">
+                    <span class="tag tag-vex">VEXcode VR</span>
+                    <span class="tag tag-time">2 ชั่วโมง</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 1: RECAP + INTRO -->
+        <div class="step" id="step-1">
+            <h3>🔁 ด่านที่ 1: ทบทวนสัปดาห์ที่แล้ว + เป้าหมายวันนี้</h3>
+            <p>ยินดีต้อนรับ <b class="student-name-inject" style="color: var(--cyber-blue);"></b>! สัปดาห์ที่แล้วเราฝึก <b>Drivetrain</b> และ <b>Loop</b> มาแล้ว</p>
+
+            <div style="background: rgba(16,185,129,0.08); border: 2px solid var(--neon-green); padding: 25px; border-radius: 15px; margin-top: 20px;">
+                <h4 style="margin: 0 0 15px 0; color: var(--neon-green);">🎯 เป้าหมายวันนี้</h4>
+                <ol style="margin: 0; padding-left: 20px; line-height: 2;">
+                    <li>เข้าใจว่า <b>เซ็นเซอร์</b> ในหุ่นยนต์มีอะไรบ้าง</li>
+                    <li>ใช้บล็อก <b>if / if-else</b> เพื่อตัดสินใจ</li>
+                    <li>รวม Loop + เงื่อนไข + เซ็นเซอร์ ให้หุ่นยนต์ <b>หลบกำแพง</b></li>
+                    <li>ผ่านภารกิจ <b>Wall Maze</b> ใน VEXcode VR</li>
+                </ol>
+            </div>
+
+            <div style="background: rgba(245,158,11,0.08); border-left: 4px solid var(--neon-orange); padding: 15px; border-radius: 10px; margin-top: 20px;">
+                <b style="color: var(--neon-orange);">💭 คิดก่อนเรียน:</b> ถ้าหุ่นยนต์เดินตรงไปเรื่อย ๆ และเจอกำแพง มันจะรู้ได้ยังไงว่าต้องเลี้ยว?
+            </div>
+        </div>
+
+        <!-- STEP 2: SENSORS REVIEW -->
+        <div class="step" id="step-2">
+            <h3>📡 ด่านที่ 2: เซ็นเซอร์ใน VEXcode VR (5 ตัวหลัก)</h3>
+            <p>หุ่นยนต์เสมือนใน VEXcode VR ติดเซ็นเซอร์มาให้แล้ว 5 ตัว — แต่ละตัวมีหน้าที่ต่างกัน</p>
+
+            <div class="sensor-grid">
+                <div class="sensor-card" style="border-color: var(--cyber-blue);">
+                    <div style="font-size: 40px; text-align: center;">📏</div>
+                    <h4 style="color: var(--cyber-blue); text-align: center; margin: 10px 0;">Distance Sensor</h4>
+                    <p style="font-size: 14px; margin: 0;">วัดระยะข้างหน้า (mm) <br>ใช้ตอน: หลบกำแพง</p>
+                </div>
+                <div class="sensor-card" style="border-color: var(--neon-orange);">
+                    <div style="font-size: 40px; text-align: center;">👁️</div>
+                    <h4 style="color: var(--neon-orange); text-align: center; margin: 10px 0;">Front Eye Sensor</h4>
+                    <p style="font-size: 14px; margin: 0;">ตรวจ <b>สี</b> ที่อยู่ข้างหน้า <br>ใช้ตอน: เจอแผ่นสี</p>
+                </div>
+                <div class="sensor-card" style="border-color: var(--neon-purple);">
+                    <div style="font-size: 40px; text-align: center;">⬇️</div>
+                    <h4 style="color: var(--neon-purple); text-align: center; margin: 10px 0;">Down Eye Sensor</h4>
+                    <p style="font-size: 14px; margin: 0;">ตรวจสีที่ <b>พื้น</b> <br>ใช้ตอน: เดินตามเส้น</p>
+                </div>
+                <div class="sensor-card" style="border-color: var(--neon-pink);">
+                    <div style="font-size: 40px; text-align: center;">💥</div>
+                    <h4 style="color: var(--neon-pink); text-align: center; margin: 10px 0;">Bumper Sensor</h4>
+                    <p style="font-size: 14px; margin: 0;">ตรวจ <b>การชน</b> ด้านหน้า <br>(กด/ไม่กด)</p>
+                </div>
+                <div class="sensor-card" style="border-color: var(--neon-green);">
+                    <div style="font-size: 40px; text-align: center;">🧲</div>
+                    <h4 style="color: var(--neon-green); text-align: center; margin: 10px 0;">Electromagnet</h4>
+                    <p style="font-size: 14px; margin: 0;">เปิด/ปิด แม่เหล็ก <br>ใช้ตอน: เก็บแผ่นโลหะ</p>
+                </div>
+            </div>
+
+            <div style="background: rgba(14,165,233,0.1); border-left: 4px solid var(--cyber-blue); padding: 15px; border-radius: 10px; margin-top: 20px;">
+                <b style="color: var(--cyber-blue);">💡 จดจำ:</b> เซ็นเซอร์ "อ่านค่า" จากโลกภายนอก แต่หุ่นยนต์ <b>ไม่ตัดสินใจเอง</b> ต้องเราเขียน "เงื่อนไข" (if) ให้
+            </div>
+        </div>
+
+        <!-- STEP 3: IF/ELSE CONDITION -->
+        <div class="step" id="step-3">
+            <h3>🤔 ด่านที่ 3: ทบทวน If / If-Else (เงื่อนไข)</h3>
+            <p>เงื่อนไข = "ถ้า...แล้ว..." ใช้กับเซ็นเซอร์เพื่อให้หุ่นยนต์ตัดสินใจเอง</p>
+
+            <div class="grid-2col">
+                <div class="info-card" style="border-color: var(--cyber-blue);">
+                    <h4 style="color: var(--cyber-blue); margin-top: 0;">🔹 if (ถ้า)</h4>
+                    <p style="font-size: 14px; margin-bottom: 10px;">ทำเมื่อเงื่อนไขเป็นจริงเท่านั้น</p>
+                    <div class="code-box">if (distance &lt; 200) {
+   stop driving
+}</div>
+                    <p style="font-size: 13px; color: var(--text-muted); margin-top: 10px;">→ ถ้าระยะ &lt; 200 mm → หยุด</p>
+                </div>
+                <div class="info-card" style="border-color: var(--neon-orange);">
+                    <h4 style="color: var(--neon-orange); margin-top: 0;">🔹 if-else (ถ้า...ไม่งั้น...)</h4>
+                    <p style="font-size: 14px; margin-bottom: 10px;">มี 2 ทางเลือก ทำอย่างใดอย่างหนึ่ง</p>
+                    <div class="code-box">if (distance &lt; 200) {
+   turn right 90°
+} else {
+   drive forward
+}</div>
+                    <p style="font-size: 13px; color: var(--text-muted); margin-top: 10px;">→ ใกล้กำแพง → เลี้ยว<br>→ ไกล → เดินหน้า</p>
+                </div>
+            </div>
+
+            <div style="background: rgba(168,85,247,0.1); border-left: 4px solid var(--neon-purple); padding: 15px; border-radius: 10px; margin-top: 20px;">
+                <b style="color: var(--neon-purple);">🧠 เทียบกับชีวิตจริง:</b>
+                <p style="margin: 8px 0 0 0;">"<b>ถ้า</b>ฝนตก <b>แล้ว</b>กางร่ม <b>ไม่งั้น</b>ใส่แว่นกันแดด" — เป็น if-else โดยมีคน "อ่านค่า" สภาพอากาศก่อนตัดสินใจ</p>
+            </div>
+        </div>
+
+        <!-- STEP 4: COMBINE LOOP + IF + SENSOR -->
+        <div class="step" id="step-4">
+            <h3>🔗 ด่านที่ 4: รวม Loop + เงื่อนไข + เซ็นเซอร์</h3>
+            <p>หุ่นยนต์ที่ "ฉลาดจริง" ต้องตรวจเซ็นเซอร์ <b>ตลอดเวลา</b> ไม่ใช่แค่ครั้งเดียว → ต้องใส่ใน Loop</p>
+
+            <div style="background: rgba(0,0,0,0.4); padding: 25px; border-radius: 15px; border: 2px solid var(--neon-green); margin-top: 20px;">
+                <h4 style="margin-top: 0; color: var(--neon-green);">🤖 ตัวอย่าง: หุ่นยนต์หลบกำแพงอัตโนมัติ</h4>
+                <div class="code-box" style="border-left-color: var(--neon-green);">forever {
+   if (Distance Sensor &lt; 200 mm) {
+      stop driving
+      turn right 90 degrees
+   } else {
+      drive forward
+   }
+}</div>
+                <p style="font-size: 15px; color: var(--text-main); margin-top: 15px;">
+                    <b style="color: var(--neon-orange);">วิเคราะห์:</b> <br>
+                    → <b>forever</b> = ตรวจตลอด<br>
+                    → <b>if</b> = ถ้าใกล้กำแพง → หยุด + เลี้ยวขวา<br>
+                    → <b>else</b> = ไม่งั้นเดินหน้าต่อ
+                </p>
+            </div>
+
+            <div style="background: rgba(245,158,11,0.1); border-left: 4px solid var(--neon-orange); padding: 18px; border-radius: 10px; margin-top: 20px;">
+                <b style="color: var(--neon-orange);">⚠️ ระวัง 3 ข้อ:</b>
+                <ul style="margin: 8px 0 0 20px;">
+                    <li>ลืม <b>forever</b> → หุ่นยนต์ตรวจครั้งเดียวแล้วหยุด</li>
+                    <li>ใส่ <b>drive forward 200mm</b> (มีระยะ) → หุ่นยนต์เดินจบก่อนเช็คเซ็นเซอร์</li>
+                    <li>ตั้งระยะใกล้เกินไป (เช่น 50mm) → หุ่นยนต์ชนกำแพงก่อนเลี้ยว</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- STEP 5: WORKSHEET -->
+        <div class="step" id="step-5">
+            <h3>📝 ด่านที่ 5: ใบงานที่ 2 — "ตะลุย Wall Maze"</h3>
+
+            <div style="background: rgba(16,185,129,0.08); border: 2px solid var(--neon-green); padding: 30px; border-radius: 20px;">
+                <h4 style="color: white; margin-top: 0; font-size: 22px;">🎯 ภารกิจเขาวงกต</h4>
+                <p style="font-size: 17px; color: var(--text-main);">
+                    เปิดเว็บ <a href="https://vr.vex.com" target="_blank" style="color: var(--cyber-blue); font-weight: bold;">vr.vex.com</a>
+                    → เลือก Playground <b>"Wall Maze"</b> → เขียนโปรแกรมให้หุ่นยนต์
+                    <b style="color: var(--neon-orange);">เดินออกจากเขาวงกตได้สำเร็จ</b>
+                </p>
+
+                <div style="background: rgba(0,0,0,0.4); padding: 20px; border-radius: 12px; margin-top: 20px;">
+                    <b style="color: var(--neon-green);">✅ เกณฑ์การให้คะแนน:</b>
+                    <ol style="margin-top: 10px; line-height: 2;">
+                        <li>ใช้ <b>forever</b> ครอบโปรแกรม (1 คะแนน)</li>
+                        <li>ใช้ <b>Distance Sensor</b> ตรวจระยะ (1 คะแนน)</li>
+                        <li>ใช้ <b>if / if-else</b> ตัดสินใจ (1 คะแนน)</li>
+                        <li>หุ่นยนต์ออกจากเขาวงกตได้สำเร็จ (2 คะแนน)</li>
+                    </ol>
+                    <p style="margin: 15px 0 0 0; color: var(--neon-orange);"><b>เต็ม 5 คะแนน</b></p>
+                </div>
+
+                <div style="background: rgba(14,165,233,0.1); border-left: 4px solid var(--cyber-blue); padding: 15px; border-radius: 10px; margin-top: 20px;">
+                    <b style="color: var(--cyber-blue);">💡 คำใบ้:</b> ลองใช้วิธี <b>"Right-Hand Rule"</b> — เลี้ยวขวาทุกครั้งที่เจอกำแพง! เป็นเทคนิคออกเขาวงกตคลาสสิก
+                </div>
+
+                <div style="background: rgba(245,158,11,0.1); border-left: 4px solid var(--neon-orange); padding: 18px; border-radius: 10px; margin-top: 15px;">
+                    <b style="color: var(--neon-orange);">📤 วิธีส่งงาน:</b>
+                    <ol style="margin: 10px 0 0 20px;">
+                        <li>กด <b>Share</b> ใน VEXcode VR → คัดลอกลิงก์โค้ด</li>
+                        <li>อัดวิดีโอหน้าจอตอนหุ่นยนต์เดินออกจาก Maze (Win+G บน Windows)</li>
+                        <li>เข้าเว็บ <b>โรงครูเจมส์</b> → ระบบส่งงาน → ส่งใบงาน "Wall Maze"</li>
+                    </ol>
+                </div>
+
+                <div style="background: rgba(236,72,153,0.1); border-left: 4px solid var(--neon-pink); padding: 15px; border-radius: 10px; margin-top: 15px;">
+                    <b style="color: var(--neon-pink);">🌟 โบนัส (+2 คะแนน):</b> ใช้เซ็นเซอร์ <b>Bumper</b> เพิ่มเติม เพื่อตรวจการชนกำแพงด้านข้าง — หุ่นยนต์ของคุณจะฉลาดขึ้นมาก!
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 6: QUIZ -->
+        <div class="step" id="step-6">
+            <h3>🎮 ด่านที่ 6: แบบทดสอบท้ายชั่วโมง (5 ข้อ)</h3>
+            <p>ระบบสุ่ม 5 ข้อ + สลับตัวเลือก <b style="color: var(--neon-orange);">กันลอก!</b></p>
+
+            <div id="game-area" style="background: rgba(0,0,0,0.2); border: 2px solid var(--neon-green); border-radius: 20px; padding: 30px; text-align: center; max-width: 750px; margin: 0 auto; box-shadow: 0 10px 30px rgba(16,185,129,0.1);">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 20px; font-weight: bold; color: var(--neon-green);">
+                    <span id="question-counter">คำถาม: 1 / 5</span>
+                    <span id="score-counter">คะแนน: 0</span>
+                </div>
+                <h4 id="question-text" style="font-size: 22px; color: white; margin-bottom: 30px; line-height: 1.5;">กำลังโหลด...</h4>
+                <div id="options-grid" style="display: flex; flex-direction: column; gap: 12px;"></div>
+            </div>
+
+            <div id="game-result" style="display: none; text-align: center; padding: 40px; background: rgba(0,0,0,0.2); border-radius: 20px; border: 2px solid var(--cyber-blue);">
+                <div style="font-size: 70px; margin-bottom: 10px;">🏆</div>
+                <h3 style="border: none; text-shadow: none; font-size: 32px; color: var(--cyber-blue); margin-bottom: 10px;">จบชั่วโมงที่ 3-4!</h3>
+                <p style="font-size: 20px; color: white;">นักเรียน: <span class="student-name-inject" style="color:var(--neon-green);"></span></p>
+                <p style="font-size: 20px; color: white;">คะแนน: <b id="final-score" style="color: var(--neon-orange); font-size: 36px;"></b> / 5</p>
+                <div style="margin-top: 30px;">
+                    <button class="btn btn-primary" style="padding: 16px 40px; font-size: 18px;" onclick="finishMission()">📥 ยืนยันส่งคะแนน</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="footer-nav" id="footer-controls">
+        <button class="btn btn-outline" id="prevBtn" onclick="moveStep(-1)">⬅️ ถอยกลับ</button>
+        <div style="color: var(--neon-green); font-family: monospace; font-size: 16px; font-weight: bold;" id="step-counter">LOADING...</div>
+        <button class="btn btn-primary" id="nextBtn" onclick="moveStep(1)">เดินหน้า ➔</button>
+    </div>
+</div>
+
+<script>
+    let currentStep = 0;
+    const totalSteps = 6;
+    let studentName = "";
+
+    function startLesson() {
+        const input = document.getElementById('guest-name-input').value.trim();
+        if (!input) { alert('⚠️ กรุณาลงชื่อก่อนเริ่มเรียนครับ'); return; }
+        studentName = input;
+        try { localStorage.setItem('robotm2_student', studentName); } catch(e){}
+
+        document.querySelectorAll('.student-name-inject').forEach(el => el.innerText = studentName);
+        document.getElementById('display-header-name').innerText = "👨‍💻 " + studentName;
+        document.getElementById('header-guest-info').style.display = 'flex';
+        document.getElementById('footer-controls').style.display = 'flex';
+        document.getElementById('progress-container').style.display = 'block';
+
+        currentStep = 1; updateUI();
+    }
+
+    function updateUI() {
+        document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+        document.getElementById('step-' + currentStep).classList.add('active');
+        const progress = (currentStep / totalSteps) * 100;
+        document.getElementById('progress-bar').style.width = progress + '%';
+        document.getElementById('step-counter').innerText = `STEP: 0${currentStep}/0${totalSteps}`;
+        document.getElementById('prevBtn').style.visibility = currentStep === 1 ? 'hidden' : 'visible';
+        if (currentStep === totalSteps) {
+            document.getElementById('nextBtn').style.display = 'none';
+            if (!gameStarted) initGame();
+        } else {
+            document.getElementById('nextBtn').style.display = 'inline-flex';
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function moveStep(n) { currentStep += n; updateUI(); }
+
+    function finishMission() {
+        confetti({ particleCount: 200, spread: 100, origin: { y: 0.5 }, colors: ['#0ea5e9', '#10b981', '#f59e0b'] });
+        setTimeout(() => {
+            alert(`🎉 ${studentName} ทำคะแนนได้ ${score}/5 คะแนน\nอย่าลืมส่งใบงาน "Wall Maze" ในระบบส่งงานนะครับ!`);
+            window.location.href = "index.html";
+        }, 2000);
+    }
+
+    const quizBank = [
+        { q: "เซ็นเซอร์ใดของหุ่นยนต์ VEXcode VR ใช้วัด 'ระยะข้างหน้า'?", ans: "Distance Sensor", choices: ["Bumper Sensor", "Distance Sensor", "Eye Sensor", "Electromagnet"] },
+        { q: "ถ้าต้องการให้หุ่นยนต์ตรวจจับ 'สีพื้น' เพื่อเดินตามเส้น ต้องใช้เซ็นเซอร์ใด?", ans: "Down Eye Sensor", choices: ["Front Eye Sensor", "Down Eye Sensor", "Distance Sensor", "Bumper Sensor"] },
+        { q: "Bumper Sensor ใช้ตรวจอะไร?", ans: "การชนด้านหน้า", choices: ["ระยะข้างหน้า", "สีของวัตถุ", "การชนด้านหน้า", "อุณหภูมิอากาศ"] },
+        { q: "บล็อก if-else แตกต่างจาก if อย่างไร?", ans: "if-else มีทางเลือก 2 ทาง (จริง/เท็จ) แต่ if มีแค่ทางเลือกเดียว", choices: ["ทำงานเร็วกว่า if 2 เท่า", "if-else มีทางเลือก 2 ทาง (จริง/เท็จ) แต่ if มีแค่ทางเลือกเดียว", "ใช้พลังงานน้อยกว่า", "ไม่ต่างกันเลย"] },
+        { q: "ทำไมโปรแกรมหุ่นยนต์หลบกำแพงต้องใส่ใน 'forever loop'?", ans: "เพื่อให้หุ่นยนต์ตรวจระยะตลอดเวลา ไม่ใช่แค่ครั้งเดียว", choices: ["เพื่อความสวยงามของโค้ด", "เพื่อให้หุ่นยนต์ตรวจระยะตลอดเวลา ไม่ใช่แค่ครั้งเดียว", "เพื่อให้แบตเตอรี่หมดเร็วขึ้น", "เพื่อให้หุ่นยนต์เดินเร็วขึ้น"] },
+        { q: "หากตั้งระยะใน if เป็น 50 mm (ใกล้เกินไป) จะเกิดอะไรขึ้น?", ans: "หุ่นยนต์ชนกำแพงก่อนที่จะเลี้ยว", choices: ["หุ่นยนต์เลี้ยวเร็วเกินไป", "หุ่นยนต์ชนกำแพงก่อนที่จะเลี้ยว", "เซ็นเซอร์เสียทันที", "โปรแกรมทำงานเร็วขึ้น"] },
+        { q: "เทคนิค 'Right-Hand Rule' ในการเดินเขาวงกตคืออะไร?", ans: "เลี้ยวขวาเสมอเมื่อเจอกำแพง", choices: ["เลี้ยวซ้ายเสมอ", "เลี้ยวขวาเสมอเมื่อเจอกำแพง", "เลี้ยวสลับซ้ายขวา", "ใช้มือขวาวาดแผนที่"] },
+        { q: "ถ้าหุ่นยนต์ใช้ 'drive forward 200mm' (มีระยะ) แทน 'drive forward' (ไม่มีระยะ) ในลูป forever จะเกิดอะไรขึ้น?", ans: "หุ่นยนต์เดินจบ 200mm ก่อนแล้วถึงเช็คเซ็นเซอร์ — อาจชนกำแพง", choices: ["หุ่นยนต์เดินเร็วขึ้น", "หุ่นยนต์เดินจบ 200mm ก่อนแล้วถึงเช็คเซ็นเซอร์ — อาจชนกำแพง", "ลูปจะหยุดทำงาน", "ไม่มีผลใดๆ"] },
+        { q: "ในหุ่นยนต์ เซ็นเซอร์มีหน้าที่อะไร?", ans: "อ่านค่าจากโลกภายนอกเข้ามาให้โปรแกรมประมวลผล", choices: ["สั่งงานหุ่นยนต์โดยตรง", "อ่านค่าจากโลกภายนอกเข้ามาให้โปรแกรมประมวลผล", "แสดงผลที่หน้าจอ", "เก็บไฟล์โปรแกรม"] },
+        { q: "ถ้าจะให้หุ่นยนต์ตรวจสีของจานสี (Disk) ที่อยู่ข้างหน้า ใช้เซ็นเซอร์ใด?", ans: "Front Eye Sensor", choices: ["Front Eye Sensor", "Down Eye Sensor", "Distance Sensor", "Bumper Sensor"] }
+    ];
+
+    let currentQIndex = 0; let score = 0; let gameStarted = false; let selectedQuestions = [];
+
+    function shuffle(array) {
+        let curId = array.length;
+        while (0 !== curId) {
+            let randId = Math.floor(Math.random() * curId);
+            curId -= 1;
+            let tmp = array[curId]; array[curId] = array[randId]; array[randId] = tmp;
+        }
+        return array;
+    }
+
+    function initGame() {
+        gameStarted = true; score = 0; currentQIndex = 0;
+        selectedQuestions = shuffle([...quizBank]).slice(0, 5);
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        const qData = selectedQuestions[currentQIndex];
+        document.getElementById('question-counter').innerText = `คำถาม: ${currentQIndex + 1} / 5`;
+        document.getElementById('score-counter').innerText = `คะแนน: ${score}`;
+        document.getElementById('question-text').innerText = qData.q;
+        const optionsGrid = document.getElementById('options-grid');
+        optionsGrid.innerHTML = "";
+        const shuffledChoices = shuffle([...qData.choices]);
+        shuffledChoices.forEach(choice => {
+            const btn = document.createElement('button');
+            btn.className = 'quiz-option';
+            btn.innerText = choice;
+            btn.onclick = () => checkAnswer(btn, choice, qData.ans);
+            optionsGrid.appendChild(btn);
+        });
+    }
+
+    function checkAnswer(selectedBtn, selectedText, correctText) {
+        const allBtns = document.querySelectorAll('.quiz-option');
+        allBtns.forEach(b => b.style.pointerEvents = 'none');
+        if (selectedText === correctText) {
+            selectedBtn.classList.add('correct');
+            score++; document.getElementById('score-counter').innerText = `คะแนน: ${score}`;
+            confetti({ particleCount: 50, spread: 60, origin: { y: 0.8 }, colors: ['#10b981'] });
+        } else {
+            selectedBtn.classList.add('wrong');
+            allBtns.forEach(b => { if(b.innerText === correctText) b.classList.add('correct'); });
+        }
+        setTimeout(() => {
+            currentQIndex++;
+            if (currentQIndex < 5) loadQuestion();
+            else showResult();
+        }, 2200);
+    }
+
+    function showResult() {
+        document.getElementById('game-area').style.display = 'none';
+        document.getElementById('game-result').style.display = 'block';
+        document.getElementById('final-score').innerText = score;
+        document.getElementById('footer-controls').style.display = 'none';
+    }
+</script>
+
+</body>
+</html>

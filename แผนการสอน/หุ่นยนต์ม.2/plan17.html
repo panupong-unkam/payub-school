@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แผนการจัดการเรียนรู้ที่ 17 — IR Sensor + Line Follower</title>
+    <link rel="stylesheet" href="lesson-plan.css">
+</head>
+<body>
+<div class="nav-bar no-print"><a href="index.html">⬅ กลับ</a><div style="color:white;">แผนที่ 17 / 20 — Hr 33-34</div><button class="print-btn" onclick="window.print()">🖨️ พิมพ์</button></div>
+<div class="paper">
+
+    <h1 class="plan-title">แผนการจัดการเรียนรู้ที่ 17</h1>
+    <div class="plan-meta-row"><span>หน่วยที่ 3 เรื่อง Cytron Maker Pi RP2040 + เว็บ Simulator</span><span>จำนวน 18 ชั่วโมง</span></div>
+    <div class="plan-meta-row"><span>เรื่อง IR Sensor + Line Follower (หุ่นยนต์เดินตามเส้น)</span><span>จำนวน 2 ชั่วโมง (ชั่วโมงที่ 33-34)</span></div>
+    <div class="plan-meta-row"><span>วิชา หุ่นยนต์</span><span>กลุ่มสาระการเรียนรู้ วิทยาศาสตร์และเทคโนโลยี</span></div>
+    <div class="plan-meta-row"><span>ชั้นมัธยมศึกษาปีที่ 2</span><span>ภาคเรียนที่ 1 ปีการศึกษา 2569</span></div>
+    <div class="plan-meta-row"><span>ผู้สอน นายภาณุพงศ์ อุ่นคำ</span><span>โรงเรียนบ้านป่ายุบ (บุ้นกีประชานุเคราะห์)</span></div>
+    <hr class="divider">
+
+    <div class="section">
+        <div class="section-title">1. มาตรฐานการเรียนรู้/ตัวชี้วัด</div>
+        <p class="indent"><b>มาตรฐาน ว 4.2</b> เข้าใจและใช้แนวคิดเชิงคำนวณในการแก้ปัญหา</p>
+        <p class="indent bold">ตัวชี้วัดระหว่างทาง</p>
+        <p class="indent2"><b>ว 4.2 ม.2/1</b> ออกแบบอัลกอริทึมที่ใช้แนวคิดเชิงคำนวณในการแก้ปัญหา</p>
+        <p class="indent2"><b>ว 4.2 ม.2/2</b> ออกแบบและเขียนโปรแกรมที่ใช้ตรรกะและฟังก์ชันในการแก้ปัญหา</p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">2. จุดประสงค์การเรียนรู้</div>
+        <ol>
+            <li>อธิบายหลักการของ IR Sensor (แสงอินฟราเรด) ที่ตาคนไม่เห็นได้ <span class="kpa">K</span></li>
+            <li>อธิบายความแตกต่างระหว่างพื้นสีขาว (สะท้อนแสง) และพื้นสีดำ (ดูดซับ) <span class="kpa">K</span></li>
+            <li>ใช้ IR Sensor 3 ตัวที่ขา GP4, GP5, GP6 อ่านค่า L/M/R ได้ <span class="kpa">P</span></li>
+            <li>เขียนโปรแกรม Line Follower ที่เลี้ยวนุ่มนวลตามตำแหน่งเส้น <span class="kpa">P</span></li>
+            <li>เห็นคุณค่าของหุ่นยนต์ในการแข่งขัน (Line Following Race) <span class="kpa">A</span></li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">3. คุณลักษณะอันพึงประสงค์</div>
+        <p class="indent">☐ 1. รักชาติฯ ☐ 2. ซื่อสัตย์ ☑ 3. มีวินัย ☑ 4. ใฝ่เรียนรู้ ☐ 5. พอเพียง ☑ 6. มุ่งมั่น ☐ 7. รักไทย ☐ 8. จิตสาธารณะ</p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">4. สมรรถนะสำคัญของผู้เรียน</div>
+        <ol><li>ความสามารถในการคิด</li><li>ความสามารถในการแก้ปัญหา</li><li>ความสามารถในการใช้เทคโนโลยี</li></ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">5. สาระสำคัญ</div>
+        <p class="indent">IR Sensor (Infrared) ใช้แสงอินฟราเรดความถี่ที่ตาคนมองไม่เห็น (แต่กล้องมือถือเห็น) ส่ง LED IR + ตัวรับ Photodiode พื้นสีขาวสะท้อนแสง IR ดี → ตัวรับเห็นแสงเยอะ → ค่า 0 (LOW) พื้นสีดำดูดซับ → ตัวรับแทบไม่เห็น → ค่า 1 (HIGH) Maker Pi รองรับ IR Sensor 3 ตัว ต่อที่ขา GP4 (ซ้าย), GP5 (กลาง), GP6 (ขวา) เมื่อกลางเห็นเส้น (M=1) → เดินหน้า / ซ้ายเห็น (L=1) → เลี้ยวซ้ายนุ่ม / ขวาเห็น (R=1) → เลี้ยวขวานุ่ม / ทั้ง 3 ไม่เห็น (000) → หลุดเส้น → หยุด การ "เลี้ยวนุ่ม" ใช้ลดความเร็วล้อข้างหนึ่ง (เช่น <code>drive(SPEED*0.3, SPEED)</code>) แทนการหยุดล้อ</p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">6. ความรู้เดิมที่นักเรียนต้องมี</div>
+        <ol><li>DC Motor + ฟังก์ชัน drive จากแผน 14</li><li>เซ็นเซอร์ดิจิทัล (HIGH/LOW)</li><li>การใช้เงื่อนไข if-elif-else</li></ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">7. การจัดกิจกรรมการเรียนรู้</div>
+        <div class="hour-banner">▶ ชั่วโมงที่ 33 (60 นาที) : IR Sensor และ Truth Table</div>
+
+        <p class="step-banner">ขั้นที่ 1: การวิเคราะห์และกำหนดรายละเอียดของปัญหา (15 นาที)</p>
+        <ol>
+            <li>ครูเปิดเว็บไซต์ <code>Robotm.2/Hr33-34RP.html</code></li>
+            <p class="teacher-q">รีโมตทีวีส่งสัญญาณอย่างไรไปที่ทีวี? ใช้แสงแบบไหน?</p>
+            <p class="student-a">ใช้แสงอินฟราเรดที่ตาคนมองไม่เห็น — ถ้าเปิดกล้องมือถือถ่ายจะเห็นแสงสีม่วงเรืองออกมาจากปลายรีโมต</p>
+        </ol>
+
+        <p class="step-banner">ขั้นที่ 2: การวางแผนการแก้ปัญหา (25 นาที)</p>
+        <ol start="2">
+            <li>ครูแสดงกรณีพื้นขาว vs ดำ ในเว็บไซต์ (คลิกเลือกพื้น)</li>
+            <li>ครูแสดง Truth Table 3 เซ็นเซอร์ (L, M, R) → action</li>
+            <li>ครูเน้นความสำคัญของ "การเลี้ยวนุ่ม" — ไม่หยุดล้อ แค่ลดความเร็ว</li>
+        </ol>
+
+        <p class="step-banner">ขั้นที่ 3: การดำเนินการแก้ปัญหา (20 นาที)</p>
+        <ol start="5">
+            <li>นักเรียนต่อ IR Sensor 3 ตัวที่ GP4, GP5, GP6</li>
+            <li>นักเรียนเขียนโค้ดอ่านค่า L, M, R + print() เพื่อตรวจสอบ</li>
+        </ol>
+
+        <div class="hour-banner">▶ ชั่วโมงที่ 34 (60 นาที) : Line Follower Race</div>
+
+        <p class="step-banner">ขั้นที่ 3 (ต่อ): การดำเนินการแก้ปัญหา (40 นาที)</p>
+        <ol start="7">
+            <li>นักเรียนสร้างสนามทดสอบ: เทปกาวสีดำกว้าง 2-3 cm บนกระดาษ A3 ขาว ลากเป็นเส้นโค้ง</li>
+            <li>นักเรียนเขียนโปรแกรม Line Follower:
+                <ul>
+                    <li>M=1, L=R=0 → drive(SPEED, SPEED) เดินตรง</li>
+                    <li>L=1, R=0 → drive(SPEED*0.3, SPEED) เลี้ยวซ้ายนุ่ม</li>
+                    <li>R=1, L=0 → drive(SPEED, SPEED*0.3) เลี้ยวขวานุ่ม</li>
+                    <li>L=M=R=0 → drive(0,0) + บัซเซอร์ดัง (หลุดเส้น)</li>
+                </ul>
+            </li>
+            <li>นักเรียนเพิ่ม NeoPixel แสดงสถานะ: เขียว=ตรง, น้ำเงิน=ซ้าย, ส้ม=ขวา</li>
+            <li>นักเรียนทดสอบบนสนามจริง</li>
+        </ol>
+
+        <p class="step-banner">ขั้นที่ 4: การตรวจสอบและประเมินผล (20 นาที)</p>
+        <ol start="11">
+            <li>นักเรียนทำใบงานที่ 17.1 + วิดีโอ + ภาพสนาม</li>
+            <li>นักเรียนทำแบบทดสอบ 5 ข้อ</li>
+            <p class="teacher-q">เหตุใดต้อง time.sleep(0.02) สั้นๆ ใน Line Follower?</p>
+            <p class="student-a">เพื่อให้เซ็นเซอร์อ่านค่าถี่ๆ ทันการเลี้ยว ถ้านานเกินไป หุ่นยนต์จะออกนอกเส้นก่อนตอบสนอง</p>
+            <li>ครูสรุปบทเรียนและประกาศว่าสัปดาห์หน้าเริ่มโปรเจกต์จบ!</li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">8. ชิ้นงาน / ภาระงาน</div>
+        <ol><li>ใบงานที่ 17.1 "Line Follower" + วิดีโอ ≥1 นาที + ภาพสนาม</li><li>แบบทดสอบ 5 ข้อ</li></ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">9. การวัดและประเมินผล</div>
+        <table class="eval">
+            <thead><tr><th>รายการ</th><th>วิธีวัด</th><th>เครื่องมือ</th><th>เกณฑ์</th></tr></thead>
+            <tbody>
+                <tr><td><b>1. ความรู้ (K)</b></td><td>ตรวจใบงาน + ทดสอบ</td><td>1. ใบงาน 17.1<br>2. แบบทดสอบ 5 ข้อ</td><td>ร้อยละ 60</td></tr>
+                <tr><td><b>2. ทักษะกระบวนการ (P)</b><br>(15 คะแนน)</td><td>ตรวจชิ้นงาน</td><td>3. Rubric (15 คะแนน)</td><td>≥10 คะแนน</td></tr>
+                <tr><td><b>3. พฤติกรรม</b></td><td>สังเกต</td><td>4. แบบสังเกตพฤติกรรม</td><td>ระดับ "พอใช้"</td></tr>
+                <tr><td><b>4. คุณลักษณะ</b></td><td>สังเกต</td><td>5. แบบประเมินคุณลักษณะ</td><td>ระดับ "ผ่าน"</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <div class="section-title">10. สื่อและแหล่งการเรียนรู้</div>
+        <p class="indent"><b>สื่อ:</b> 1. <code>Robotm.2/Hr33-34RP.html</code> &nbsp; 2. IR Sensor 3 ตัว &nbsp; 3. เทปกาวสีดำ + กระดาษ A3 &nbsp; 4. ใบงาน 17.1</p>
+        <p class="indent"><b>แหล่งการเรียนรู้:</b> 1. ห้องคอมพิวเตอร์ &nbsp; 2. อินเทอร์เน็ต</p>
+    </div>
+
+    <div class="page-break"></div>
+
+    <div class="appendix-banner">ภาคผนวก: เครื่องมือวัดและประเมินผล</div>
+
+    <div class="tool-title">เครื่องมือที่ 1: ใบงานที่ 17.1 และ Rubric</div>
+
+    <div class="worksheet-header">
+        <h3>ใบงานที่ 17.1 "Line Follower"</h3>
+        <p>ชื่อ-สกุล <span class="dots">..................................................................</span> ชั้น ม.2/<span class="dots">....</span> เลขที่ <span class="dots">....</span></p>
+    </div>
+
+    <p class="bold">ตอนที่ 1: Truth Table</p>
+    <table>
+        <thead><tr><th>L</th><th>M</th><th>R</th><th>action ที่หุ่นยนต์ต้องทำ</th></tr></thead>
+        <tbody>
+            <tr><td>0</td><td>1</td><td>0</td><td class="dots">.........................................</td></tr>
+            <tr><td>1</td><td>0</td><td>0</td><td class="dots">.........................................</td></tr>
+            <tr><td>0</td><td>0</td><td>1</td><td class="dots">.........................................</td></tr>
+            <tr><td>0</td><td>0</td><td>0</td><td class="dots">.........................................</td></tr>
+        </tbody>
+    </table>
+
+    <p class="bold">ตอนที่ 2: สนามทดสอบ</p>
+    <p class="indent">1. ขนาดกระดาษ: <span class="dots">..............</span></p>
+    <p class="indent">2. ความกว้างของเส้นดำ: <span class="dots">..............</span> cm</p>
+    <p class="indent">3. ความยาวเส้นทั้งหมด: <span class="dots">..............</span> cm</p>
+    <p class="indent">4. รูปร่างเส้น: <span class="dots">......................................................</span></p>
+
+    <p class="bold">ตอนที่ 3: ผลการทดสอบ</p>
+    <p class="indent">1. ความเร็วที่ใช้ (SPEED): <span class="dots">..............</span></p>
+    <p class="indent">2. เวลาที่ใช้เดินตามเส้น: <span class="dots">..............</span> วินาที</p>
+    <p class="indent">3. หลุดเส้นกี่ครั้ง? <span class="dots">..............</span></p>
+
+    <p class="bold">ตอนที่ 4: คำถามท้าทาย (โบนัส +5)</p>
+    <p class="indent">ออกแบบสนาม "เขาวงกต" ใหม่ มีทางแยกอย่างน้อย 3 จุด + วัดเวลา</p>
+    <p class="indent dots">.................................................................................................................</p>
+
+    <div style="margin-top: 14pt; padding: 8pt; border: 1pt dashed #1e3a8a; background: #f0f9ff;">
+        <p class="bold" style="color: #1e3a8a;">เฉลย Truth Table (สำหรับครู)</p>
+        <p>L=0,M=1,R=0 → เดินตรง | L=1,M=0,R=0 → เลี้ยวซ้ายนุ่ม | L=0,M=0,R=1 → เลี้ยวขวานุ่ม | L=0,M=0,R=0 → หลุดเส้น (หยุด+บัซเซอร์)</p>
+    </div>
+
+    <p class="bold" style="margin-top: 12pt;">Rubric ภารกิจ Line Follower (15 คะแนน)</p>
+    <table>
+        <thead><tr><th>หัวข้อ</th><th>เกณฑ์</th><th>คะแนน</th></tr></thead>
+        <tbody>
+            <tr><td><b>1. ใช้ IR 3 ตัว</b></td><td>ต่อและอ่านค่าครบ GP4/5/6</td><td class="text-center">3</td></tr>
+            <tr><td><b>2. เดินตามเส้นไม่ออก</b></td><td>เดินครบเส้นทาง</td><td class="text-center">5</td></tr>
+            <tr><td><b>3. เลี้ยวนุ่ม</b></td><td>ไม่กระชาก smooth turn</td><td class="text-center">3</td></tr>
+            <tr><td><b>4. NeoPixel แสดงทิศ</b></td><td>เขียว/น้ำเงิน/ส้ม ตามทิศ</td><td class="text-center">2</td></tr>
+            <tr><td><b>5. หลุดเส้น → หยุด</b></td><td>หยุด + บัซเซอร์ดัง</td><td class="text-center">2</td></tr>
+        </tbody>
+    </table>
+
+    <div class="page-break"></div>
+
+    <div class="tool-title">เครื่องมือที่ 2: แบบประเมินสมรรถนะการแก้ปัญหา</div>
+    <table>
+        <thead><tr><th style="width: 22%;">พฤติกรรม</th><th>ระดับ 3</th><th>ระดับ 2</th><th>ระดับ 1</th></tr></thead>
+        <tbody>
+            <tr><td><b>วิเคราะห์</b></td><td>Truth Table ครบและถูก</td><td>ครบบางส่วน</td><td>ผิด</td></tr>
+            <tr><td><b>วางแผน</b></td><td>ออกแบบสนามและโค้ดก่อน</td><td>วางแผนคร่าวๆ</td><td>เริ่มเลย</td></tr>
+            <tr><td><b>ดำเนินการ</b></td><td>เดินตามเส้นได้ครบ + smooth</td><td>เดินได้แต่กระชาก</td><td>เดินไม่ได้</td></tr>
+            <tr><td><b>ตรวจสอบ</b></td><td>บันทึกเวลาและหลุดเส้น</td><td>บันทึกบางส่วน</td><td>ไม่บันทึก</td></tr>
+        </tbody>
+    </table>
+
+    <div class="tool-title">เครื่องมือที่ 3: แบบประเมินพฤติกรรมการทำงาน</div>
+    <table>
+        <thead><tr><th>ลำดับ</th><th>ชื่อ-สกุล</th><th>ตั้งใจ (3)</th><th>รับผิดชอบ (3)</th><th>ตรงเวลา (3)</th><th>รวม (9)</th></tr></thead>
+        <tbody>
+            <tr><td>1</td><td class="dots">...........................................................</td><td></td><td></td><td></td><td></td></tr>
+            <tr><td>2</td><td class="dots">...........................................................</td><td></td><td></td><td></td><td></td></tr>
+            <tr><td>...</td><td class="dots">...........................................................</td><td></td><td></td><td></td><td></td></tr>
+        </tbody>
+    </table>
+
+    <div class="tool-title">เครื่องมือที่ 4: แบบประเมินคุณลักษณะอันพึงประสงค์</div>
+    <table>
+        <thead><tr><th>คุณลักษณะ</th><th>ดีเยี่ยม (3)</th><th>ดี (2)</th><th>ผ่าน (1)</th></tr></thead>
+        <tbody>
+            <tr><td><b>มีวินัย</b></td><td>เก็บเทปกาว/กระดาษหลังใช้</td><td>เก็บบางส่วน</td><td>ไม่เก็บ</td></tr>
+            <tr><td><b>ใฝ่เรียนรู้</b></td><td>ออกแบบสนามเขาวงกตเอง</td><td>ใช้สนามตัวอย่าง</td><td>ทำเฉพาะที่จำเป็น</td></tr>
+            <tr><td><b>มุ่งมั่นทำงาน</b></td><td>ปรับ smooth turn จนได้ดี</td><td>ขอความช่วยเหลือ</td><td>หยุดทำ</td></tr>
+        </tbody>
+    </table>
+
+    <div class="tool-title">บันทึกหลังการสอน</div>
+    <p><b>ผลที่เกิดกับผู้เรียน:</b></p><p class="dots">..........................................................................................................................</p>
+    <p><b>ปัญหา/อุปสรรค:</b></p><p class="dots">..........................................................................................................................</p>
+
+    <table class="signature" style="margin-top: 30pt;"><tr>
+        <td class="left" style="width: 50%;">ลงชื่อ <span class="dots">..............................................</span> ผู้สอน<br>(นายภาณุพงศ์ อุ่นคำ)<br>วันที่ <span class="dots">......./......./.........</span></td>
+        <td class="right">ลงชื่อ <span class="dots">..............................................</span><br>(<span class="dots">...........................................</span>)<br>ผู้อำนวยการโรงเรียนบ้านป่ายุบฯ</td>
+    </tr></table>
+</div>
+</body>
+</html>

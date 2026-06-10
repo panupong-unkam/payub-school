@@ -1,0 +1,807 @@
+/* ============================================
+   🐍 PYTHON LAB — Stylesheet
+   ธีม: น้ำเงิน Python + เหลือง Python
+   ============================================ */
+
+:root {
+  --py-blue: #306998;
+  --py-blue-dark: #1E466F;
+  --py-blue-light: #4B8BBE;
+  --py-yellow: #FFD43B;
+  --py-yellow-dark: #FFC107;
+  --py-bg: #F0F4F8;
+  --py-card: #FFFFFF;
+  --py-text: #1A2233;
+  --py-text-muted: #6B7280;
+  --py-border: #E1E8ED;
+  --py-success: #10B981;
+  --py-danger: #EF4444;
+  --py-warning: #F59E0B;
+  --py-info: #3B82F6;
+  --py-code-bg: #1E1E2E;
+  --py-code-text: #F8F8F2;
+  --py-shadow: 0 4px 20px rgba(48,105,152,0.12);
+  --py-radius: 16px;
+}
+
+[data-theme="dark"] {
+  --py-bg: #0F1419;
+  --py-card: #1A1F2E;
+  --py-text: #E6E9F0;
+  --py-text-muted: #9CA3AF;
+  --py-border: #2D3748;
+  --py-shadow: 0 4px 20px rgba(0,0,0,0.5);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Sarabun', sans-serif;
+  background: var(--py-bg);
+  color: var(--py-text);
+  transition: background .3s, color .3s;
+  line-height: 1.6;
+}
+
+/* ============ TOP BAR ============ */
+.py-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 24px;
+  background: var(--py-card);
+  border-bottom: 1px solid var(--py-border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+}
+.py-topbar-left {
+  display: flex; align-items: center; gap: 12px;
+}
+.py-btn-back {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: 10px;
+  background: var(--py-bg); border: 1px solid var(--py-border);
+  color: var(--py-text); text-decoration: none; font-size: 14px; font-weight: 600;
+  transition: all .2s; font-family: inherit; cursor: pointer;
+}
+.py-btn-back:hover {
+  background: var(--py-blue); color: white; border-color: var(--py-blue);
+}
+.py-brand {
+  font-family: 'Noto Serif Thai', serif;
+  font-weight: 700; font-size: 18px; color: var(--py-blue);
+  display: flex; align-items: center; gap: 8px;
+}
+.py-brand-icon {
+  width: 32px; height: 32px;
+  background: linear-gradient(135deg, var(--py-blue), var(--py-yellow));
+  border-radius: 8px;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 18px;
+}
+.py-breadcrumb {
+  font-size: 13px; color: var(--py-text-muted);
+}
+.py-btn-theme {
+  background: var(--py-bg); border: 1px solid var(--py-border);
+  color: var(--py-text);
+  padding: 8px 14px; border-radius: 10px; cursor: pointer; font-size: 14px;
+  font-family: 'Sarabun', sans-serif; transition: all .2s;
+}
+.py-btn-theme:hover {
+  background: var(--py-blue); color: white;
+}
+
+/* ============ HERO ============ */
+.py-hero {
+  background: linear-gradient(135deg, #306998 0%, #4B8BBE 50%, #FFD43B 150%);
+  padding: 60px 24px 70px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.py-hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(255,212,59,0.15) 0%, transparent 40%),
+    radial-gradient(circle at 80% 70%, rgba(255,255,255,0.1) 0%, transparent 50%);
+  pointer-events: none;
+}
+.py-hero-snake {
+  font-size: 80px; margin-bottom: 16px; display: inline-block;
+  animation: pyBounce 2s ease-in-out infinite;
+}
+@keyframes pyBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+.py-hero h1 {
+  font-family: 'Noto Serif Thai', serif;
+  font-size: clamp(28px, 5vw, 44px);
+  color: white;
+  margin-bottom: 12px;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  position: relative;
+}
+.py-hero p {
+  color: rgba(255,255,255,0.95);
+  font-size: 18px;
+  max-width: 700px;
+  margin: 0 auto;
+  position: relative;
+}
+.py-hero-stats {
+  display: flex; justify-content: center; gap: 40px;
+  margin-top: 30px; flex-wrap: wrap;
+  position: relative;
+}
+.py-hero-stat {
+  text-align: center; color: white;
+}
+.py-hero-stat-num {
+  font-size: 36px; font-weight: 800;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+.py-hero-stat-label {
+  font-size: 14px; opacity: 0.9;
+}
+
+/* ============ CONTAINER ============ */
+.py-container {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 30px 24px;
+}
+
+/* ============ LEVEL SECTIONS ============ */
+.py-level-section { margin-bottom: 50px; }
+.py-level-header {
+  display: flex; align-items: center; gap: 16px;
+  margin-bottom: 24px;
+  padding: 18px 24px;
+  border-radius: var(--py-radius);
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+.py-level-header::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(circle at 80% 50%, rgba(255,255,255,0.15), transparent);
+}
+.py-level-1 { background: linear-gradient(135deg, #1976D2, #42A5F5); }
+.py-level-2 { background: linear-gradient(135deg, #F57C00, #FFB74D); }
+.py-level-3 { background: linear-gradient(135deg, #7B1FA2, #BA68C8); }
+
+.py-level-icon {
+  font-size: 48px;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+}
+.py-level-info { flex: 1; position: relative; }
+.py-level-title {
+  font-family: 'Noto Serif Thai', serif;
+  font-size: 24px; font-weight: 700;
+  margin-bottom: 4px;
+}
+.py-level-desc {
+  font-size: 14px; opacity: 0.95;
+}
+.py-level-progress {
+  text-align: right; position: relative;
+}
+.py-level-progress-num {
+  font-size: 28px; font-weight: 800;
+}
+.py-level-progress-label {
+  font-size: 12px; opacity: 0.9;
+}
+
+/* ============ LESSON GRID ============ */
+.py-lesson-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 18px;
+}
+.py-lesson-card {
+  background: var(--py-card);
+  border-radius: var(--py-radius);
+  padding: 20px;
+  box-shadow: var(--py-shadow);
+  border: 1px solid var(--py-border);
+  cursor: pointer;
+  transition: all .3s ease;
+  position: relative;
+  overflow: hidden;
+}
+.py-lesson-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(48,105,152,0.18);
+  border-color: var(--py-blue-light);
+}
+.py-lesson-card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 14px;
+}
+.py-lesson-number {
+  width: 40px; height: 40px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--py-blue), var(--py-blue-light));
+  color: white;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 18px;
+  box-shadow: 0 4px 10px rgba(48,105,152,0.3);
+}
+.py-lesson-status {
+  font-size: 22px;
+}
+.py-lesson-title {
+  font-weight: 700; font-size: 17px;
+  color: var(--py-text);
+  margin-bottom: 6px;
+  line-height: 1.4;
+}
+.py-lesson-desc {
+  font-size: 13px;
+  color: var(--py-text-muted);
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+.py-lesson-meta {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  font-size: 12px;
+}
+.py-lesson-tag {
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: var(--py-bg);
+  color: var(--py-text-muted);
+  font-weight: 500;
+}
+.py-lesson-tag.tag-time { background: #DBEAFE; color: #1E40AF; }
+.py-lesson-tag.tag-difficulty { background: #FEF3C7; color: #92400E; }
+.py-lesson-tag.tag-done { background: #D1FAE5; color: #065F46; }
+
+.py-progress-bar {
+  height: 4px;
+  background: var(--py-border);
+  border-radius: 2px;
+  margin-top: 12px;
+  overflow: hidden;
+}
+.py-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--py-blue), var(--py-yellow));
+  transition: width .5s ease;
+}
+
+/* ============ LESSON PAGE LAYOUT ============ */
+.py-lesson-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  padding: 24px;
+  max-width: 1600px;
+  margin: 0 auto;
+  min-height: calc(100vh - 80px);
+}
+@media (max-width: 1024px) {
+  .py-lesson-layout { grid-template-columns: 1fr; }
+}
+
+.py-lesson-content {
+  background: var(--py-card);
+  border-radius: var(--py-radius);
+  padding: 32px;
+  box-shadow: var(--py-shadow);
+  border: 1px solid var(--py-border);
+  max-height: calc(100vh - 110px);
+  overflow-y: auto;
+}
+.py-lesson-content h1 {
+  font-family: 'Noto Serif Thai', serif;
+  color: var(--py-blue);
+  font-size: 28px;
+  margin-bottom: 8px;
+}
+.py-lesson-content h2 {
+  font-family: 'Noto Serif Thai', serif;
+  color: var(--py-blue-dark);
+  font-size: 22px;
+  margin: 24px 0 12px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--py-yellow);
+}
+.py-lesson-content h3 {
+  color: var(--py-blue);
+  font-size: 18px;
+  margin: 20px 0 10px;
+}
+.py-lesson-content p {
+  margin-bottom: 12px;
+  color: var(--py-text);
+}
+.py-lesson-content ul, .py-lesson-content ol {
+  margin: 12px 0 12px 28px;
+}
+.py-lesson-content li { margin-bottom: 6px; }
+
+.py-lesson-content code {
+  background: var(--py-bg);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-family: 'Courier New', 'Fira Code', monospace;
+  color: var(--py-blue);
+  font-weight: 600;
+  font-size: 0.95em;
+}
+.py-lesson-content pre {
+  background: var(--py-code-bg);
+  color: var(--py-code-text);
+  padding: 16px;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 12px 0;
+  font-family: 'Courier New', 'Fira Code', monospace;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.py-lesson-content pre code {
+  background: none;
+  color: inherit;
+  padding: 0;
+  font-weight: normal;
+}
+
+/* Callout boxes */
+.py-callout {
+  border-radius: 12px;
+  padding: 16px 18px;
+  margin: 16px 0;
+  border-left: 5px solid;
+  position: relative;
+}
+.py-callout strong { display: block; margin-bottom: 6px; font-size: 15px; }
+.py-callout-tip { background: #ECFDF5; border-color: var(--py-success); color: #065F46; }
+.py-callout-warn { background: #FFFBEB; border-color: var(--py-warning); color: #92400E; }
+.py-callout-info { background: #EFF6FF; border-color: var(--py-info); color: #1E40AF; }
+.py-callout-danger { background: #FEF2F2; border-color: var(--py-danger); color: #991B1B; }
+
+[data-theme="dark"] .py-callout-tip { background: rgba(16,185,129,0.1); color: #6EE7B7; }
+[data-theme="dark"] .py-callout-warn { background: rgba(245,158,11,0.1); color: #FCD34D; }
+[data-theme="dark"] .py-callout-info { background: rgba(59,130,246,0.1); color: #93C5FD; }
+[data-theme="dark"] .py-callout-danger { background: rgba(239,68,68,0.1); color: #FCA5A5; }
+
+/* Tables */
+.py-lesson-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 14px 0;
+  font-size: 14px;
+}
+.py-lesson-content th {
+  background: var(--py-blue);
+  color: white;
+  padding: 10px 12px;
+  text-align: left;
+}
+.py-lesson-content td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--py-border);
+}
+.py-lesson-content tr:hover td { background: var(--py-bg); }
+
+/* ============ CODE EDITOR PANEL ============ */
+.py-editor-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: sticky;
+  top: 90px;
+  max-height: calc(100vh - 110px);
+}
+
+.py-editor-tabs {
+  display: flex;
+  background: var(--py-card);
+  border-radius: 12px 12px 0 0;
+  border: 1px solid var(--py-border);
+  border-bottom: none;
+  overflow: hidden;
+}
+.py-editor-tab {
+  padding: 12px 20px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--py-text-muted);
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  transition: all .2s;
+  font-family: inherit;
+}
+.py-editor-tab.active {
+  color: var(--py-blue);
+  border-bottom-color: var(--py-blue);
+  background: var(--py-bg);
+}
+
+.py-editor-box {
+  flex: 1;
+  background: var(--py-code-bg);
+  border-radius: 0 0 12px 12px;
+  border: 1px solid var(--py-border);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 280px;
+}
+.py-editor-toolbar {
+  background: #2A2D3E;
+  padding: 8px 12px;
+  display: flex; justify-content: space-between; align-items: center;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.py-editor-toolbar-left { display: flex; gap: 6px; align-items: center; }
+.py-dot { width: 12px; height: 12px; border-radius: 50%; }
+.py-dot-r { background: #FF5F56; }
+.py-dot-y { background: #FFBD2E; }
+.py-dot-g { background: #27C93F; }
+.py-editor-filename {
+  color: rgba(255,255,255,0.7);
+  font-size: 13px;
+  margin-left: 10px;
+  font-family: 'Fira Code', monospace;
+}
+.py-editor-toolbar-right { display: flex; gap: 6px; }
+.py-tool-btn {
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.85);
+  border: none;
+  padding: 5px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-family: inherit;
+  transition: .2s;
+}
+.py-tool-btn:hover {
+  background: rgba(255,255,255,0.18);
+}
+
+#py-code-editor, .py-code-area {
+  width: 100%; flex: 1;
+  background: var(--py-code-bg);
+  color: var(--py-code-text);
+  border: none; outline: none;
+  padding: 16px;
+  font-family: 'Fira Code', 'Courier New', monospace;
+  font-size: 15px;
+  line-height: 1.6;
+  resize: none;
+  tab-size: 4;
+  min-height: 280px;
+}
+
+/* ============ RUN BUTTON ============ */
+.py-run-bar {
+  background: var(--py-card);
+  border: 1px solid var(--py-border);
+  border-radius: 12px;
+  padding: 12px;
+  display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+}
+.py-btn-run {
+  background: linear-gradient(135deg, var(--py-success), #059669);
+  color: white;
+  border: none;
+  padding: 10px 22px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  display: inline-flex; align-items: center; gap: 8px;
+  box-shadow: 0 4px 12px rgba(16,185,129,0.3);
+  transition: all .2s;
+  font-family: inherit;
+}
+.py-btn-run:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(16,185,129,0.4); }
+.py-btn-run:disabled {
+  background: #94A3B8;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+.py-btn-stop {
+  background: var(--py-danger);
+  color: white; border: none;
+  padding: 10px 18px; border-radius: 10px;
+  font-weight: 600; cursor: pointer;
+  font-family: inherit;
+}
+.py-btn-clear {
+  background: var(--py-bg);
+  color: var(--py-text);
+  border: 1px solid var(--py-border);
+  padding: 10px 18px; border-radius: 10px;
+  cursor: pointer; font-family: inherit;
+}
+.py-pyodide-status {
+  margin-left: auto;
+  font-size: 13px;
+  color: var(--py-text-muted);
+  display: flex; align-items: center; gap: 6px;
+}
+.py-status-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--py-warning);
+  animation: pyPulse 1.5s infinite;
+}
+.py-status-dot.ready { background: var(--py-success); animation: none; }
+@keyframes pyPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* ============ CONSOLE OUTPUT ============ */
+.py-console {
+  background: #0F172A;
+  border-radius: 12px;
+  border: 1px solid var(--py-border);
+  overflow: hidden;
+  display: flex; flex-direction: column;
+  min-height: 200px;
+  max-height: 350px;
+}
+.py-console-header {
+  background: #1E293B;
+  padding: 10px 14px;
+  display: flex; justify-content: space-between; align-items: center;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.py-console-title {
+  color: rgba(255,255,255,0.9);
+  font-size: 13px; font-weight: 600;
+  display: flex; align-items: center; gap: 8px;
+}
+.py-console-output {
+  flex: 1;
+  padding: 14px;
+  color: #E2E8F0;
+  font-family: 'Fira Code', 'Courier New', monospace;
+  font-size: 14px;
+  line-height: 1.6;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.py-out-line { margin-bottom: 2px; }
+.py-out-error { color: #FCA5A5; }
+.py-out-success { color: #6EE7B7; }
+.py-out-info { color: #93C5FD; }
+.py-out-input {
+  color: #FBBF24;
+  font-weight: 600;
+}
+.py-out-prompt {
+  display: inline-block;
+  background: rgba(251,191,36,0.15);
+  border: 1px solid rgba(251,191,36,0.3);
+  border-radius: 6px;
+  padding: 6px 10px;
+  margin: 4px 0;
+}
+.py-out-prompt input {
+  background: transparent; border: none; outline: none;
+  color: #FBBF24; font-family: inherit; font-size: inherit;
+  margin-left: 8px; width: 200px;
+}
+
+/* ============ QUIZ ============ */
+.py-quiz-box {
+  background: linear-gradient(135deg, #FEF3C7, #FDE68A);
+  border-left: 5px solid var(--py-yellow-dark);
+  border-radius: 12px;
+  padding: 20px;
+  margin: 20px 0;
+}
+.py-quiz-question {
+  font-weight: 700; font-size: 16px;
+  color: #78350F;
+  margin-bottom: 12px;
+}
+.py-quiz-options { display: flex; flex-direction: column; gap: 8px; }
+.py-quiz-option {
+  background: white;
+  padding: 12px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all .2s;
+  color: var(--py-text);
+  font-family: inherit;
+  text-align: left;
+  font-size: 14px;
+}
+.py-quiz-option:hover {
+  border-color: var(--py-yellow-dark);
+  transform: translateX(4px);
+}
+.py-quiz-option.correct {
+  background: #D1FAE5;
+  border-color: var(--py-success);
+  color: #065F46;
+  font-weight: 600;
+}
+.py-quiz-option.wrong {
+  background: #FEE2E2;
+  border-color: var(--py-danger);
+  color: #991B1B;
+}
+.py-quiz-feedback {
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  display: none;
+}
+.py-quiz-feedback.show { display: block; }
+.py-quiz-feedback.success { background: #D1FAE5; color: #065F46; }
+.py-quiz-feedback.error { background: #FEE2E2; color: #991B1B; }
+
+/* ============ NAVIGATION (Prev/Next) ============ */
+.py-lesson-nav {
+  display: flex; justify-content: space-between;
+  margin-top: 30px;
+  gap: 12px;
+}
+.py-nav-btn {
+  flex: 1;
+  background: var(--py-card);
+  border: 2px solid var(--py-border);
+  padding: 14px 20px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-family: inherit;
+  color: var(--py-text);
+  font-weight: 600;
+  text-decoration: none;
+  display: flex; align-items: center; gap: 10px;
+  transition: all .2s;
+}
+.py-nav-btn:hover {
+  border-color: var(--py-blue);
+  background: var(--py-blue);
+  color: white;
+  transform: translateY(-2px);
+}
+.py-nav-btn.next { justify-content: flex-end; }
+.py-nav-btn.disabled {
+  opacity: 0.4; cursor: not-allowed;
+  pointer-events: none;
+}
+.py-nav-direction {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.7;
+}
+.py-nav-title { font-size: 14px; }
+
+/* ============ ACHIEVEMENT TOAST ============ */
+.py-toast {
+  position: fixed; top: 30px; right: 30px;
+  background: linear-gradient(135deg, var(--py-yellow), var(--py-yellow-dark));
+  color: #78350F;
+  padding: 16px 24px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(255,212,59,0.4);
+  display: flex; align-items: center; gap: 12px;
+  z-index: 9999;
+  transform: translateX(400px);
+  transition: transform .4s ease;
+  font-weight: 600;
+}
+.py-toast.show { transform: translateX(0); }
+.py-toast-icon { font-size: 28px; }
+
+/* ============ EMPTY STATES ============ */
+.py-empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--py-text-muted);
+}
+.py-empty-icon { font-size: 64px; margin-bottom: 16px; opacity: 0.6; }
+
+/* ============ LOADING OVERLAY ============ */
+.py-loading {
+  position: fixed; inset: 0;
+  background: rgba(15,23,42,0.85);
+  backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 99999;
+  color: white;
+  flex-direction: column; gap: 20px;
+}
+.py-loading.hide { display: none; }
+.py-spinner {
+  width: 60px; height: 60px;
+  border: 5px solid rgba(255,255,255,0.2);
+  border-top-color: var(--py-yellow);
+  border-radius: 50%;
+  animation: pySpin 1s linear infinite;
+}
+@keyframes pySpin { to { transform: rotate(360deg); } }
+.py-loading-text { font-size: 16px; font-weight: 600; }
+.py-loading-progress { font-size: 13px; opacity: 0.8; }
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 768px) {
+  .py-hero { padding: 40px 16px 50px; }
+  .py-hero-stats { gap: 20px; }
+  .py-container { padding: 20px 16px; }
+  .py-lesson-grid { grid-template-columns: 1fr; }
+  .py-lesson-layout { padding: 16px; gap: 16px; }
+  .py-lesson-content { padding: 20px; max-height: none; }
+  .py-editor-panel { position: relative; top: 0; max-height: none; }
+  .py-level-header { flex-wrap: wrap; }
+  .py-level-progress { margin-left: auto; }
+  .py-topbar { padding: 10px 14px; }
+  .py-brand { font-size: 15px; }
+}
+
+/* ============ SCROLLBAR ============ */
+.py-lesson-content::-webkit-scrollbar,
+.py-console-output::-webkit-scrollbar { width: 8px; }
+.py-lesson-content::-webkit-scrollbar-track,
+.py-console-output::-webkit-scrollbar-track { background: transparent; }
+.py-lesson-content::-webkit-scrollbar-thumb {
+  background: var(--py-border);
+  border-radius: 4px;
+}
+.py-console-output::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.2);
+  border-radius: 4px;
+}
+
+/* ============ FIX: Console output break long text ============ */
+.py-console-output {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+}
+.py-out-line {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+  min-height: 1.6em;
+}
+
+/* ============ FIX: ไม่ให้คลิก lesson tag/badge ลึกลงไปได้ ============ */
+.py-lesson-card * {
+  pointer-events: none;
+}
+.py-lesson-card {
+  pointer-events: auto;
+}
+
+/* ============ FIX: Editor ขั้นต่ำสูงเพื่อไม่หด ============ */
+#py-code-editor {
+  min-height: 320px;
+  font-feature-settings: 'liga' 0;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* ============ FIX: pre-wrap ใน lesson content ============ */
+.py-lesson-content pre {
+  white-space: pre;
+  word-wrap: normal;
+}
+.py-lesson-content pre code {
+  white-space: pre;
+}
+
+/* ============ Editor textarea ขั้นต่ำสูง ============ */
+.py-editor-box { min-height: 320px; }

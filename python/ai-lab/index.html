@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🤖 AI Lab — สร้าง AI ของคุณเอง บนเบราว์เซอร์</title>
+<meta name="description" content="ห้องปฏิบัติการ AI สำหรับนักเรียน — เรียน Python, สร้าง Neural Network, เล่นกับ LLM ทั้งหมดในเบราว์เซอร์ของคุณเอง">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Noto+Serif+Thai:wght@400;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="ai-lab.css">
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="ai-topbar">
+  <div class="ai-topbar-left">
+    <a href="../index.html" class="ai-btn ai-btn-sm">⬅️ Python Lab</a>
+    <div class="ai-brand">
+      <span class="ai-brand-icon">🤖</span>
+      <span>AI Lab</span>
+    </div>
+  </div>
+  <div class="ai-flex">
+    <span id="capability-pill" class="ai-status ai-status-loading">
+      <span class="ai-status-dot"></span>
+      <span id="capability-text">ตรวจสอบเครื่อง...</span>
+    </span>
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="ai-hero">
+  <span class="ai-pill">🚀 In-Browser AI Lab</span>
+  <h1>สร้าง AI ของคุณเอง<br>ใน Browser เดียว</h1>
+  <p class="ai-hero-sub">
+    ไม่ต้องลง Python • ไม่ต้องใช้ Server • รัน LLM ขนาดเล็กได้บนเครื่องตัวเอง<br>
+    เขียนโค้ด → เทรนโมเดล → ทดลองใช้ ครบจบในเว็บนี้
+  </p>
+  <div class="ai-flex" style="justify-content:center; flex-wrap:wrap;">
+    <a href="notebook.html" class="ai-btn ai-btn-primary ai-btn-lg">🐍 เริ่มเขียน Python →</a>
+    <a href="#tools" class="ai-btn ai-btn-lg">📚 ดูเครื่องมือทั้งหมด</a>
+  </div>
+</div>
+
+<div class="ai-container">
+
+  <!-- TOOLS -->
+  <h2 id="tools" style="font-family:'Noto Serif Thai',serif; margin-bottom:8px; font-size:28px;">
+    🧰 เครื่องมือทั้งหมด
+  </h2>
+  <p class="ai-text-muted ai-mb-3">เลือกห้องที่อยากเข้าได้เลย — ทุกห้องรันบนเบราว์เซอร์ของคุณ ไม่ส่งข้อมูลออกไปไหน</p>
+
+  <div class="ai-grid ai-grid-3">
+
+    <!-- Tool 1: Python Notebook -->
+    <a href="notebook.html" class="ai-tool-card">
+      <div class="ai-tool-icon ai-tool-icon-1">🐍</div>
+      <div class="ai-tool-title">Python AI Notebook</div>
+      <div class="ai-tool-desc">
+        Jupyter-style Notebook ที่รัน Python จริงในเบราว์เซอร์
+        มี <b>numpy, pandas, scikit-learn, matplotlib</b> ใช้ได้เลย
+      </div>
+      <div class="ai-tool-tags">
+        <span class="ai-tool-tag">🟢 พร้อมใช้</span>
+        <span class="ai-tool-tag">Pyodide</span>
+        <span class="ai-tool-tag">sklearn</span>
+        <span class="ai-tool-tag">~10MB</span>
+      </div>
+      <div class="ai-text-purple" style="font-weight:600; font-size:14px;">เปิด Notebook →</div>
+    </a>
+
+    <!-- Tool 2: NN Builder -->
+    <a href="nn-builder.html" class="ai-tool-card">
+      <div class="ai-tool-icon ai-tool-icon-2">🧠</div>
+      <div class="ai-tool-title">Neural Network Builder</div>
+      <div class="ai-tool-desc">
+        ออกแบบ Neural Network ด้วยการลากวาง Layer แล้วเทรนจริงด้วย
+        <b>TensorFlow.js</b> เห็นกราฟ Loss/Accuracy ขณะเทรน
+      </div>
+      <div class="ai-tool-tags">
+        <span class="ai-tool-tag">🟢 พร้อมใช้</span>
+        <span class="ai-tool-tag">TensorFlow.js</span>
+        <span class="ai-tool-tag">WebGL</span>
+        <span class="ai-tool-tag">~2MB</span>
+      </div>
+      <div class="ai-text-cyan" style="font-weight:600; font-size:14px;">เปิด NN Builder →</div>
+    </a>
+
+    <!-- Tool 3: LLM Playground -->
+    <a href="llm-playground.html" class="ai-tool-card">
+      <div class="ai-tool-icon ai-tool-icon-3">💬</div>
+      <div class="ai-tool-title">LLM Playground</div>
+      <div class="ai-tool-desc">
+        คุยกับ LLM ที่รันบนเครื่องคุณเอง! เลือกได้ระหว่าง
+        <b>TinyLlama, Phi-3 mini, Qwen</b> — ปรับ Prompt + Parameter ได้
+      </div>
+      <div class="ai-tool-tags">
+        <span class="ai-tool-tag" id="webgpu-tag">🟡 ต้องมี WebGPU</span>
+        <span class="ai-tool-tag">WebLLM</span>
+        <span class="ai-tool-tag">~500MB+</span>
+      </div>
+      <div style="font-weight:600; font-size:14px; color:#FBBF24;">เปิด LLM Playground →</div>
+    </a>
+
+  </div>
+
+  <!-- FEATURES -->
+  <h2 style="font-family:'Noto Serif Thai',serif; margin: 50px 0 8px; font-size:28px;">
+    ✨ จุดเด่น
+  </h2>
+  <p class="ai-text-muted ai-mb-3">ทำไม AI Lab ของเราถึงเจ๋ง</p>
+
+  <div class="ai-grid ai-grid-3">
+    <div class="ai-card ai-card-hover">
+      <div style="font-size:32px; margin-bottom:8px;">🔒</div>
+      <h3 style="margin-bottom:6px;">รันบนเครื่องคุณเอง</h3>
+      <p class="ai-text-muted" style="font-size:14px;">
+        ทุกอย่างประมวลผลในเบราว์เซอร์ — ไม่ส่งข้อมูลออกไปที่ไหน ปลอดภัย 100%
+      </p>
+    </div>
+    <div class="ai-card ai-card-hover">
+      <div style="font-size:32px; margin-bottom:8px;">⚡</div>
+      <h3 style="margin-bottom:6px;">ไม่ต้องติดตั้งอะไร</h3>
+      <p class="ai-text-muted" style="font-size:14px;">
+        ไม่ต้องลง Python, ไม่ต้องลง CUDA, ไม่ต้องตั้ง Server — เปิดเว็บเสร็จเลย
+      </p>
+    </div>
+    <div class="ai-card ai-card-hover">
+      <div style="font-size:32px; margin-bottom:8px;">💰</div>
+      <h3 style="margin-bottom:6px;">ฟรี ไม่มีค่าใช้จ่าย</h3>
+      <p class="ai-text-muted" style="font-size:14px;">
+        ใช้ทรัพยากร CPU/GPU ของเครื่องคุณ ไม่ต้องจ่ายค่า API call
+      </p>
+    </div>
+    <div class="ai-card ai-card-hover">
+      <div style="font-size:32px; margin-bottom:8px;">🎓</div>
+      <h3 style="margin-bottom:6px;">ออกแบบเพื่อการเรียน</h3>
+      <p class="ai-text-muted" style="font-size:14px;">
+        มีตัวอย่างพร้อมใช้ เรียงตามระดับความยาก เริ่มจาก Hello World ถึง Train AI
+      </p>
+    </div>
+    <div class="ai-card ai-card-hover">
+      <div style="font-size:32px; margin-bottom:8px;">📊</div>
+      <h3 style="margin-bottom:6px;">เห็นผลทันที</h3>
+      <p class="ai-text-muted" style="font-size:14px;">
+        เทรนโมเดลปุ๊บ เห็นกราฟ Loss/Accuracy ขึ้น real-time ทำให้เข้าใจง่าย
+      </p>
+    </div>
+    <div class="ai-card ai-card-hover">
+      <div style="font-size:32px; margin-bottom:8px;">💾</div>
+      <h3 style="margin-bottom:6px;">บันทึกงานอัตโนมัติ</h3>
+      <p class="ai-text-muted" style="font-size:14px;">
+        Notebook + โมเดลที่เทรนแล้ว เซฟไว้ใน Browser ของคุณ เปิดมาทำต่อได้
+      </p>
+    </div>
+  </div>
+
+  <!-- SYSTEM REQUIREMENTS -->
+  <h2 style="font-family:'Noto Serif Thai',serif; margin: 50px 0 8px; font-size:28px;">
+    🖥️ เครื่องคุณพร้อมแค่ไหน?
+  </h2>
+  <p class="ai-text-muted ai-mb-3">ตรวจสอบความสามารถของเบราว์เซอร์</p>
+
+  <div class="ai-grid ai-grid-4" id="capability-grid">
+    <!-- filled by JS -->
+  </div>
+
+  <div class="ai-alert ai-alert-info ai-mt-2">
+    <span style="font-size:20px;">💡</span>
+    <div>
+      <b>คำแนะนำ:</b> ใช้ <b>Chrome</b> หรือ <b>Edge</b> เวอร์ชันใหม่ (114+)
+      สำหรับการใช้ LLM Playground จะต้องเปิด WebGPU ที่ <code>chrome://flags/#enable-unsafe-webgpu</code>
+      หรือใช้ Chrome 121+ ที่เปิดมาให้แล้ว
+    </div>
+  </div>
+
+  <!-- TIPS -->
+  <h2 style="font-family:'Noto Serif Thai',serif; margin: 50px 0 8px; font-size:28px;">
+    📚 เริ่มต้นยังไงดี?
+  </h2>
+  <p class="ai-text-muted ai-mb-3">เส้นทางการเรียนแนะนำสำหรับมือใหม่</p>
+
+  <div class="ai-grid ai-grid-3">
+    <div class="ai-card">
+      <div style="display:flex; gap:12px; align-items:center; margin-bottom:12px;">
+        <div style="width:40px; height:40px; border-radius:50%; background:var(--ai-gradient-1); color:white; display:inline-flex; align-items:center; justify-content:center; font-weight:800;">1</div>
+        <h3 style="margin:0;">เรียน Python ก่อน</h3>
+      </div>
+      <p class="ai-text-muted" style="font-size:14px;">
+        ถ้ายังเขียน Python ไม่เป็น แนะนำให้ไปทำ
+        <a href="../index.html" style="color:var(--ai-cyan-light);">หลักสูตร Python 20 สัปดาห์</a> ก่อน
+        แล้วค่อยมาที่ AI Lab
+      </p>
+    </div>
+    <div class="ai-card">
+      <div style="display:flex; gap:12px; align-items:center; margin-bottom:12px;">
+        <div style="width:40px; height:40px; border-radius:50%; background:var(--ai-gradient-2); color:white; display:inline-flex; align-items:center; justify-content:center; font-weight:800;">2</div>
+        <h3 style="margin:0;">ทดลองใน Notebook</h3>
+      </div>
+      <p class="ai-text-muted" style="font-size:14px;">
+        เปิด <a href="notebook.html" style="color:var(--ai-cyan-light);">Python AI Notebook</a>
+        ลองรันตัวอย่างที่มีให้ จะเห็นว่า Machine Learning จริง ๆ ไม่ยากอย่างที่คิด
+      </p>
+    </div>
+    <div class="ai-card">
+      <div style="display:flex; gap:12px; align-items:center; margin-bottom:12px;">
+        <div style="width:40px; height:40px; border-radius:50%; background:var(--ai-gradient-3); color:white; display:inline-flex; align-items:center; justify-content:center; font-weight:800;">3</div>
+        <h3 style="margin:0;">สร้าง AI ตัวเอง</h3>
+      </div>
+      <p class="ai-text-muted" style="font-size:14px;">
+        เมื่อเข้าใจแล้ว ลอง <a href="nn-builder.html" style="color:var(--ai-cyan-light);">ออกแบบ Neural Network</a>
+        เอง หรือ <a href="llm-playground.html" style="color:var(--ai-cyan-light);">คุยกับ LLM</a> เพื่อทดลองพรอมต์
+      </p>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div style="margin: 60px 0 20px; text-align:center; color:var(--ai-text-muted); font-size:13px;">
+    AI Lab v1.0 · สร้างโดยครูเจมส์ · ใช้ Pyodide + TensorFlow.js + WebLLM
+  </div>
+
+</div>
+
+<script>
+// ============================================
+//  Capability Detection
+// ============================================
+async function detectCapabilities() {
+  const caps = {
+    wasm: typeof WebAssembly === 'object',
+    webgl: !!document.createElement('canvas').getContext('webgl2'),
+    webgpu: 'gpu' in navigator,
+    indexedDB: 'indexedDB' in window,
+    memory: navigator.deviceMemory || 'unknown',
+    cores: navigator.hardwareConcurrency || 'unknown',
+  };
+
+  // Test WebGPU availability
+  if (caps.webgpu) {
+    try {
+      const adapter = await navigator.gpu.requestAdapter();
+      caps.webgpu = !!adapter;
+    } catch (e) {
+      caps.webgpu = false;
+    }
+  }
+
+  return caps;
+}
+
+function renderCapabilities(caps) {
+  const grid = document.getElementById('capability-grid');
+  const items = [
+    {
+      icon: '🧮',
+      name: 'WebAssembly',
+      ok: caps.wasm,
+      use: 'Pyodide รัน Python',
+      okText: 'รองรับ',
+      noText: 'ไม่รองรับ',
+    },
+    {
+      icon: '🎨',
+      name: 'WebGL 2',
+      ok: caps.webgl,
+      use: 'TensorFlow.js เทรน NN',
+      okText: 'รองรับ',
+      noText: 'ไม่รองรับ',
+    },
+    {
+      icon: '⚡',
+      name: 'WebGPU',
+      ok: caps.webgpu,
+      use: 'WebLLM รัน LLM',
+      okText: 'รองรับ — เล่น LLM ได้!',
+      noText: 'ไม่รองรับ — LLM จะใช้ไม่ได้',
+    },
+    {
+      icon: '💾',
+      name: 'IndexedDB',
+      ok: caps.indexedDB,
+      use: 'Cache โมเดล',
+      okText: 'รองรับ',
+      noText: 'ไม่รองรับ',
+    },
+    {
+      icon: '🧠',
+      name: 'RAM',
+      ok: typeof caps.memory === 'number' ? caps.memory >= 4 : true,
+      use: 'ขั้นต่ำ 4GB สำหรับ LLM',
+      okText: typeof caps.memory === 'number' ? `${caps.memory} GB` : 'ตรวจไม่ได้ (อาจจะพอ)',
+      noText: typeof caps.memory === 'number' ? `${caps.memory} GB (แนะนำ ≥4GB)` : 'ตรวจไม่ได้',
+    },
+    {
+      icon: '🔢',
+      name: 'CPU Cores',
+      ok: typeof caps.cores === 'number' ? caps.cores >= 2 : true,
+      use: 'Workers ขนานกัน',
+      okText: typeof caps.cores === 'number' ? `${caps.cores} cores` : 'ตรวจไม่ได้',
+      noText: typeof caps.cores === 'number' ? `${caps.cores} cores` : 'ตรวจไม่ได้',
+    },
+  ];
+
+  grid.innerHTML = items.map(it => `
+    <div class="ai-card" style="text-align:center;">
+      <div style="font-size:28px; margin-bottom:4px;">${it.icon}</div>
+      <div style="font-weight:700; margin-bottom:2px;">${it.name}</div>
+      <div style="font-size:18px; color:${it.ok ? 'var(--ai-green)' : 'var(--ai-yellow)'}; font-weight:700; margin-bottom:4px;">
+        ${it.ok ? '✓' : '✗'} ${it.ok ? it.okText : it.noText}
+      </div>
+      <div style="font-size:12px; color:var(--ai-text-muted);">${it.use}</div>
+    </div>
+  `).join('');
+
+  // Update top bar pill
+  const pill = document.getElementById('capability-pill');
+  const text = document.getElementById('capability-text');
+  const okAll = caps.wasm && caps.webgl && caps.indexedDB;
+  if (okAll && caps.webgpu) {
+    pill.className = 'ai-status ai-status-ok';
+    text.textContent = 'เครื่องพร้อม + LLM ใช้ได้';
+  } else if (okAll) {
+    pill.className = 'ai-status ai-status-ok';
+    text.textContent = 'เครื่องพร้อม (LLM อาจช้า)';
+  } else {
+    pill.className = 'ai-status ai-status-error';
+    text.textContent = 'เครื่องไม่พร้อม';
+  }
+
+  // Update WebGPU tag
+  const wgTag = document.getElementById('webgpu-tag');
+  if (caps.webgpu) {
+    wgTag.textContent = '🟢 WebGPU พร้อม';
+    wgTag.style.color = 'var(--ai-green)';
+  } else {
+    wgTag.textContent = '🔴 ไม่มี WebGPU';
+    wgTag.style.color = 'var(--ai-red)';
+  }
+}
+
+(async () => {
+  const caps = await detectCapabilities();
+  renderCapabilities(caps);
+})();
+</script>
+
+</body>
+</html>

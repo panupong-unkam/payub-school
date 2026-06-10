@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🐍 Python AI Notebook — AI Lab</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Noto+Serif+Thai:wght@400;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="ai-lab.css">
+<style>
+  .nb-shell {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 16px;
+    align-items: start;
+  }
+  @media (max-width: 1024px) {
+    .nb-shell { grid-template-columns: 1fr; }
+  }
+  .nb-side {
+    position: sticky;
+    top: 80px;
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+  }
+  .nb-example {
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid var(--ai-border);
+    background: var(--ai-card-2);
+    margin-bottom: 8px;
+    font-size: 13px;
+    transition: all .15s;
+  }
+  .nb-example:hover {
+    border-color: var(--ai-purple);
+    transform: translateX(2px);
+  }
+  .nb-example-name {
+    font-weight: 700;
+    margin-bottom: 2px;
+    font-size: 13px;
+  }
+  .nb-example-desc {
+    font-size: 11px;
+    color: var(--ai-text-muted);
+  }
+  .nb-example-badge {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    margin-right: 4px;
+    background: var(--ai-purple);
+    color: white;
+    font-weight: 600;
+  }
+  .nb-add-cell {
+    display: flex; gap: 8px;
+    padding: 12px;
+    background: var(--ai-card);
+    border: 1px dashed var(--ai-border);
+    border-radius: var(--ai-radius-sm);
+    margin: 16px 0;
+    justify-content: center;
+  }
+  .nb-toolbar {
+    background: var(--ai-card);
+    border: 1px solid var(--ai-border);
+    border-radius: var(--ai-radius-sm);
+    padding: 10px 14px;
+    margin-bottom: 14px;
+    display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
+  }
+  .nb-pkg-loader {
+    text-align: center;
+    padding: 24px;
+    background: var(--ai-card);
+    border: 1px solid var(--ai-border);
+    border-radius: var(--ai-radius);
+    margin-bottom: 16px;
+  }
+  .nb-pkg-loader h3 {
+    font-family: 'Noto Serif Thai', serif;
+    margin-bottom: 6px;
+  }
+  .nb-pkg-progress {
+    font-family: 'Fira Code', monospace;
+    font-size: 12px;
+    color: var(--ai-text-muted);
+    margin-top: 8px;
+    min-height: 18px;
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="ai-topbar">
+  <div class="ai-topbar-left">
+    <a href="index.html" class="ai-btn ai-btn-sm">⬅️ AI Lab</a>
+    <div class="ai-brand"><span class="ai-brand-icon">🐍</span><span>Python AI Notebook</span></div>
+  </div>
+  <div class="ai-flex">
+    <span id="py-status" class="ai-status ai-status-loading">
+      <span class="ai-status-dot"></span><span id="py-status-text">โหลด Pyodide...</span>
+    </span>
+  </div>
+</div>
+
+<div class="ai-container-wide">
+
+  <div class="nb-shell">
+
+    <!-- SIDE: EXAMPLES -->
+    <aside class="nb-side">
+      <div class="ai-panel">
+        <div class="ai-panel-title">📚 ตัวอย่างพร้อมใช้</div>
+        <div id="example-list"></div>
+      </div>
+
+      <div class="ai-panel ai-mt-2">
+        <div class="ai-panel-title">🎁 แพ็กเกจที่โหลดได้</div>
+        <p style="font-size:12px; color:var(--ai-text-muted); margin-bottom:10px;">
+          คลิกเพื่อโหลดแพ็กเกจเพิ่ม (อาจใช้เวลาสักครู่)
+        </p>
+        <div id="pkg-buttons" style="display:flex; flex-direction:column; gap:6px;"></div>
+      </div>
+
+      <div class="ai-panel ai-mt-2">
+        <div class="ai-panel-title">💡 คำสั่งลัด</div>
+        <div style="font-size:12px; color:var(--ai-text-muted); line-height:1.8;">
+          <div><kbd>Shift+Enter</kbd> รัน Cell นี้</div>
+          <div><kbd>Ctrl+S</kbd> เซฟ Notebook</div>
+          <div><kbd>Ctrl+Enter</kbd> รัน + เพิ่ม cell ใหม่</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main>
+
+      <!-- Loader (shown initially) -->
+      <div id="loader" class="nb-pkg-loader">
+        <div class="ai-spinner" style="width:32px; height:32px;"></div>
+        <h3 style="margin-top:10px;">⚙️ กำลังโหลด Python Runtime...</h3>
+        <p class="ai-text-muted" style="font-size:13px;">
+          ครั้งแรกใช้เวลา ~20-30 วินาที (ขนาด ~10MB) ครั้งต่อไปจะเร็วขึ้นเพราะใช้ cache
+        </p>
+        <div class="ai-loader-bar" style="margin-top:14px;"></div>
+        <div class="nb-pkg-progress" id="loader-progress">เริ่มดาวน์โหลด...</div>
+      </div>
+
+      <!-- Toolbar (shown after ready) -->
+      <div id="toolbar" class="nb-toolbar" style="display:none;">
+        <button class="ai-btn ai-btn-primary ai-btn-sm" onclick="runAllCells()">▶️ รันทั้งหมด</button>
+        <button class="ai-btn ai-btn-sm" onclick="addCell('code')">➕ Code Cell</button>
+        <button class="ai-btn ai-btn-sm" onclick="addCell('md')">📝 Markdown</button>
+        <button class="ai-btn ai-btn-sm" onclick="clearAllOutputs()">🧹 เคลียร์ Output</button>
+        <button class="ai-btn ai-btn-sm" onclick="saveNotebook()">💾 เซฟ</button>
+        <button class="ai-btn ai-btn-sm" onclick="newNotebook()">📄 ใหม่</button>
+        <button class="ai-btn ai-btn-sm" onclick="downloadNotebook()">⬇️ Download .py</button>
+        <span style="margin-left:auto; font-size:12px; color:var(--ai-text-muted);" id="save-info">บันทึกอัตโนมัติ</span>
+      </div>
+
+      <!-- Cells -->
+      <div id="cells"></div>
+
+      <!-- Add cell area -->
+      <div id="add-cell-area" class="nb-add-cell" style="display:none;">
+        <button class="ai-btn ai-btn-sm" onclick="addCell('code')">➕ เพิ่ม Code Cell</button>
+        <button class="ai-btn ai-btn-sm" onclick="addCell('md')">➕ เพิ่ม Markdown</button>
+      </div>
+
+    </main>
+
+  </div>
+
+</div>
+
+<!-- Pyodide -->
+<script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
+
+<!-- Notebook data -->
+<script src="notebook-data.js"></script>
+
+<script>
+// ============================================
+//   GLOBAL STATE
+// ============================================
+const NB = {
+  pyodide: null,
+  ready: false,
+  cells: [],
+  cellCounter: 0,
+  loadedPackages: new Set(),
+  saveTimer: null,
+  currentExample: null,
+};
+
+// ============================================
+//   LOAD PYODIDE
+// ============================================
+async function loadPy() {
+  const progress = document.getElementById('loader-progress');
+  try {
+    progress.textContent = 'กำลังโหลด Pyodide core...';
+    NB.pyodide = await loadPyodide({
+      indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.26.4/full/',
+      stdout: (s) => appendOutput(NB._activeCellId, s + '\n', false),
+      stderr: (s) => appendOutput(NB._activeCellId, s + '\n', true),
+    });
+
+    progress.textContent = 'ติดตั้ง micropip, numpy, pandas...';
+    await NB.pyodide.loadPackage(['micropip', 'numpy', 'pandas']);
+    NB.loadedPackages.add('micropip');
+    NB.loadedPackages.add('numpy');
+    NB.loadedPackages.add('pandas');
+
+    progress.textContent = 'ติดตั้ง matplotlib...';
+    await NB.pyodide.loadPackage(['matplotlib']);
+    NB.loadedPackages.add('matplotlib');
+
+    progress.textContent = '✅ พร้อมใช้งาน!';
+    NB.ready = true;
+
+    // Setup matplotlib backend (silence AGG warning by overriding plt.show)
+    await NB.pyodide.runPythonAsync(`
+import matplotlib
+matplotlib.use('AGG')
+import matplotlib.pyplot as plt
+import io, base64, warnings
+warnings.filterwarnings('ignore')
+# Override plt.show — actual rendering done by __show_plot from JS
+plt.show = lambda *a, **k: None
+def __show_plot():
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png', dpi=80, bbox_inches='tight')
+    buf.seek(0)
+    img = base64.b64encode(buf.read()).decode('utf-8')
+    plt.close()
+    return img
+`);
+
+    document.getElementById('loader').style.display = 'none';
+    document.getElementById('toolbar').style.display = 'flex';
+    document.getElementById('add-cell-area').style.display = 'flex';
+
+    const status = document.getElementById('py-status');
+    status.className = 'ai-status ai-status-ok';
+    document.getElementById('py-status-text').textContent = 'Python พร้อม';
+
+    renderPackageButtons();
+    loadNotebook();
+  } catch (e) {
+    console.error(e);
+    progress.textContent = '❌ โหลดล้มเหลว: ' + e.message;
+    progress.style.color = 'var(--ai-red)';
+  }
+}
+
+// ============================================
+//   PACKAGE LOADER
+// ============================================
+const AVAILABLE_PKGS = [
+  { key: 'scikit-learn', label: 'scikit-learn (ML)', size: '~6MB' },
+  { key: 'scipy',        label: 'scipy',              size: '~4MB' },
+  { key: 'sympy',        label: 'sympy (คณิตศาสตร์)', size: '~3MB' },
+  { key: 'networkx',     label: 'networkx (กราฟ)',    size: '~2MB' },
+  { key: 'pillow',       label: 'Pillow (รูปภาพ)',   size: '~1MB' },
+];
+
+function renderPackageButtons() {
+  const wrap = document.getElementById('pkg-buttons');
+  wrap.innerHTML = AVAILABLE_PKGS.map(p => {
+    const loaded = NB.loadedPackages.has(p.key);
+    return `
+      <button class="ai-btn ai-btn-sm" style="justify-content:flex-start;"
+        data-pkg="${p.key}" onclick="loadPackage('${p.key}')"
+        ${loaded ? 'disabled' : ''}>
+        ${loaded ? '✓' : '📦'} ${p.label}
+        <span style="font-size:10px; color:var(--ai-text-muted); margin-left:auto;">${p.size}</span>
+      </button>
+    `;
+  }).join('');
+}
+
+async function loadPackage(key) {
+  if (!NB.ready) return;
+  const btn = document.querySelector(`[data-pkg="${key}"]`);
+  const orig = btn.innerHTML;
+  btn.innerHTML = '<span class="ai-spinner"></span> กำลังโหลด...';
+  btn.disabled = true;
+  try {
+    await NB.pyodide.loadPackage([key]);
+    NB.loadedPackages.add(key);
+    btn.innerHTML = `✓ ${AVAILABLE_PKGS.find(p=>p.key===key).label}`;
+    showToast(`✅ โหลด ${key} เรียบร้อย`, 'success');
+  } catch (e) {
+    btn.innerHTML = orig;
+    btn.disabled = false;
+    showToast(`❌ โหลด ${key} ล้มเหลว: ${e.message}`, 'error');
+  }
+}
+
+// ============================================
+//   CELLS
+// ============================================
+function addCell(type, code = '', focusAfter = true) {
+  const id = ++NB.cellCounter;
+  const cell = { id, type, code, output: '', outputHtml: '' };
+  NB.cells.push(cell);
+  renderCell(cell);
+  if (focusAfter) {
+    setTimeout(() => {
+      const ta = document.querySelector(`#cell-${id} .ai-cell-editor`);
+      if (ta) ta.focus();
+    }, 50);
+  }
+  scheduleSave();
+  return cell;
+}
+
+function renderCell(cell) {
+  const container = document.getElementById('cells');
+  const div = document.createElement('div');
+  div.className = 'ai-cell';
+  div.id = `cell-${cell.id}`;
+
+  const isCode = cell.type === 'code';
+  const editorHtml = isCode
+    ? `<textarea class="ai-cell-editor" placeholder="# เขียน Python ที่นี่..." spellcheck="false" oninput="onCellEdit(${cell.id}, this.value)" onkeydown="onCellKey(event, ${cell.id})">${escapeHtml(cell.code)}</textarea>`
+    : `<textarea class="ai-cell-editor" placeholder="# หัวข้อ\n**ตัวหนา** *เอียง*\n- ลิสต์" spellcheck="false" oninput="onMdEdit(${cell.id}, this.value)" data-md-edit>${escapeHtml(cell.code)}</textarea><div class="ai-cell-md" data-md-view onclick="editMd(${cell.id})">${renderMarkdown(cell.code)}</div>`;
+
+  div.innerHTML = `
+    <div class="ai-cell-header">
+      <span>${isCode ? '🐍 Code' : '📝 Markdown'} <span style="opacity:0.5;">#${cell.id}</span></span>
+      <div class="ai-cell-actions">
+        ${isCode ? `<button class="ai-cell-btn ai-cell-btn-run" onclick="runCell(${cell.id})" title="Shift+Enter">▶️ รัน</button>` : ''}
+        ${!isCode ? `<button class="ai-cell-btn" onclick="toggleMd(${cell.id})">👁️ พรีวิว</button>` : ''}
+        <button class="ai-cell-btn" onclick="moveCell(${cell.id}, -1)" title="ขึ้น">▲</button>
+        <button class="ai-cell-btn" onclick="moveCell(${cell.id}, 1)" title="ลง">▼</button>
+        <button class="ai-cell-btn" onclick="deleteCell(${cell.id})" title="ลบ">🗑️</button>
+      </div>
+    </div>
+    ${editorHtml}
+    <div class="ai-cell-output" id="out-${cell.id}"></div>
+  `;
+  container.appendChild(div);
+
+  // Markdown cell: hide editor by default if has content
+  if (!isCode && cell.code) {
+    const editor = div.querySelector('[data-md-edit]');
+    if (editor) editor.style.display = 'none';
+  } else if (!isCode) {
+    const view = div.querySelector('[data-md-view]');
+    if (view) view.style.display = 'none';
+  }
+}
+
+function onCellEdit(id, val) {
+  const cell = NB.cells.find(c => c.id === id);
+  if (cell) cell.code = val;
+  scheduleSave();
+}
+
+function onMdEdit(id, val) {
+  const cell = NB.cells.find(c => c.id === id);
+  if (cell) {
+    cell.code = val;
+    const view = document.querySelector(`#cell-${id} [data-md-view]`);
+    if (view) view.innerHTML = renderMarkdown(val);
+  }
+  scheduleSave();
+}
+
+function toggleMd(id) {
+  const cell = document.getElementById(`cell-${id}`);
+  const editor = cell.querySelector('[data-md-edit]');
+  const view = cell.querySelector('[data-md-view]');
+  if (editor.style.display === 'none') {
+    editor.style.display = '';
+    view.style.display = 'none';
+    editor.focus();
+  } else {
+    editor.style.display = 'none';
+    view.style.display = '';
+  }
+}
+
+function editMd(id) {
+  const cell = document.getElementById(`cell-${id}`);
+  const editor = cell.querySelector('[data-md-edit]');
+  const view = cell.querySelector('[data-md-view]');
+  editor.style.display = '';
+  view.style.display = 'none';
+  editor.focus();
+}
+
+function onCellKey(e, id) {
+  if (e.key === 'Enter' && e.shiftKey) {
+    e.preventDefault();
+    runCell(id);
+  } else if (e.key === 'Enter' && e.ctrlKey) {
+    e.preventDefault();
+    runCell(id);
+    addCell('code');
+  } else if (e.key === 'Tab') {
+    e.preventDefault();
+    const ta = e.target;
+    const start = ta.selectionStart;
+    const end = ta.selectionEnd;
+    ta.value = ta.value.substring(0, start) + '    ' + ta.value.substring(end);
+    ta.selectionStart = ta.selectionEnd = start + 4;
+    onCellEdit(id, ta.value);
+  }
+}
+
+function moveCell(id, dir) {
+  const idx = NB.cells.findIndex(c => c.id === id);
+  if (idx < 0) return;
+  const newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= NB.cells.length) return;
+  [NB.cells[idx], NB.cells[newIdx]] = [NB.cells[newIdx], NB.cells[idx]];
+  rerenderAll();
+  scheduleSave();
+}
+
+function deleteCell(id) {
+  NB.cells = NB.cells.filter(c => c.id !== id);
+  const el = document.getElementById(`cell-${id}`);
+  if (el) el.remove();
+  scheduleSave();
+}
+
+function rerenderAll() {
+  document.getElementById('cells').innerHTML = '';
+  for (const c of NB.cells) renderCell(c);
+}
+
+function clearAllOutputs() {
+  for (const c of NB.cells) {
+    c.output = '';
+    c.outputHtml = '';
+    const out = document.getElementById(`out-${c.id}`);
+    if (out) out.innerHTML = '';
+  }
+  scheduleSave();
+}
+
+// ============================================
+//   RUN CELL
+// ============================================
+async function runCell(id) {
+  if (!NB.ready) {
+    showToast('⏳ Python ยังโหลดไม่เสร็จ', 'info');
+    return;
+  }
+  const cell = NB.cells.find(c => c.id === id);
+  if (!cell || cell.type !== 'code') return;
+
+  const out = document.getElementById(`out-${id}`);
+  out.innerHTML = '';
+  cell.output = '';
+  cell.outputHtml = '';
+  NB._activeCellId = id;
+
+  try {
+    const code = cell.code;
+    // Detect implicit show() / fig display
+    let result;
+    try {
+      result = await NB.pyodide.runPythonAsync(code);
+    } catch (e) {
+      appendOutput(id, e.message, true);
+      cell.output = e.message;
+      scheduleSave();
+      return;
+    }
+
+    // If matplotlib has an active figure, render it
+    const hasFigure = await NB.pyodide.runPythonAsync(`
+import matplotlib.pyplot as _plt
+bool(_plt.get_fignums())
+`);
+    if (hasFigure) {
+      const img = await NB.pyodide.runPythonAsync('__show_plot()');
+      const html = `<div class="ai-cell-output-img"><img src="data:image/png;base64,${img}"></div>`;
+      out.innerHTML += html;
+      cell.outputHtml += html;
+    }
+
+    // Print result if non-None
+    if (result !== undefined && result !== null) {
+      const repr = String(result);
+      appendOutput(id, repr + '\n', false);
+    }
+
+  } catch (e) {
+    appendOutput(id, '❌ ' + e.message, true);
+  }
+  scheduleSave();
+}
+
+function appendOutput(id, text, isError) {
+  if (!id) return;
+  const out = document.getElementById(`out-${id}`);
+  const cell = NB.cells.find(c => c.id === id);
+  if (!out || !cell) return;
+  const span = document.createElement('span');
+  span.textContent = text;
+  if (isError) span.className = 'ai-cell-output-err';
+  out.appendChild(span);
+  cell.output += text;
+  out.scrollTop = out.scrollHeight;
+}
+
+async function runAllCells() {
+  for (const c of NB.cells) {
+    if (c.type === 'code') {
+      await runCell(c.id);
+    }
+  }
+}
+
+// ============================================
+//   MARKDOWN (simple)
+// ============================================
+function renderMarkdown(s) {
+  if (!s) return '<p style="color:var(--ai-text-muted); font-style:italic;">คลิกเพื่อแก้ไข Markdown</p>';
+  let html = escapeHtml(s);
+  // Code blocks
+  html = html.replace(/```([\s\S]*?)```/g, (_, code) => `<pre style="background:var(--ai-code-bg); padding:10px; border-radius:6px; overflow-x:auto;"><code>${code}</code></pre>`);
+  // Inline code
+  html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+  // Headings
+  html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+  html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+  html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
+  // Bold + italic
+  html = html.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+  html = html.replace(/\*(.+?)\*/g, '<i>$1</i>');
+  // Lists
+  html = html.replace(/^- (.+)$/gm, '<li>$1</li>');
+  html = html.replace(/(<li>.*<\/li>\n?)+/g, m => '<ul>' + m + '</ul>');
+  // Line breaks
+  html = html.replace(/\n\n/g, '</p><p>');
+  return '<p>' + html + '</p>';
+}
+
+function escapeHtml(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+// ============================================
+//   STORAGE (LocalStorage)
+// ============================================
+const STORAGE_KEY = 'ai-lab-notebook';
+const STORAGE_KEY_PKG = 'ai-lab-notebook-pkgs';
+
+function scheduleSave() {
+  if (NB.saveTimer) clearTimeout(NB.saveTimer);
+  NB.saveTimer = setTimeout(saveNotebook, 1500);
+}
+
+function saveNotebook() {
+  const data = {
+    cells: NB.cells.map(c => ({ id: c.id, type: c.type, code: c.code })),
+    counter: NB.cellCounter,
+    example: NB.currentExample,
+    savedAt: Date.now(),
+  };
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    const info = document.getElementById('save-info');
+    if (info) info.textContent = '✓ บันทึกแล้ว ' + new Date().toLocaleTimeString('th-TH');
+  } catch (e) {
+    console.warn('Save failed:', e);
+  }
+}
+
+function loadNotebook() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const data = JSON.parse(raw);
+      NB.cellCounter = data.counter || 0;
+      NB.currentExample = data.example || null;
+      NB.cells = (data.cells || []).map(c => ({ ...c, output: '', outputHtml: '' }));
+      rerenderAll();
+      return;
+    }
+  } catch (e) {
+    console.warn('Load failed:', e);
+  }
+  // Default: load welcome example
+  loadExample('welcome', true);
+}
+
+function newNotebook() {
+  if (!confirm('สร้าง Notebook ใหม่? งานปัจจุบันจะหายไป')) return;
+  NB.cells = [];
+  NB.cellCounter = 0;
+  NB.currentExample = null;
+  document.getElementById('cells').innerHTML = '';
+  addCell('code', '# เริ่มเขียนโค้ดที่นี่\nprint("Hello AI!")');
+}
+
+function downloadNotebook() {
+  let content = '# Generated from AI Lab Notebook\n\n';
+  for (const c of NB.cells) {
+    if (c.type === 'md') {
+      content += '# ' + c.code.split('\n').join('\n# ') + '\n\n';
+    } else {
+      content += c.code + '\n\n';
+    }
+  }
+  const blob = new Blob([content], { type: 'text/x-python' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'notebook.py';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ============================================
+//   EXAMPLES
+// ============================================
+function renderExamples() {
+  const wrap = document.getElementById('example-list');
+  wrap.innerHTML = NB_EXAMPLES.map(ex => `
+    <div class="nb-example" onclick="loadExample('${ex.key}')">
+      <div>
+        <span class="nb-example-badge">${ex.level}</span>
+        <span class="nb-example-name">${ex.icon} ${ex.name}</span>
+      </div>
+      <div class="nb-example-desc">${ex.desc}</div>
+    </div>
+  `).join('');
+}
+
+function loadExample(key, silent = false) {
+  const ex = NB_EXAMPLES.find(e => e.key === key);
+  if (!ex) return;
+  if (!silent && NB.cells.length > 0) {
+    if (!confirm(`โหลดตัวอย่าง "${ex.name}"? งานปัจจุบันจะถูกแทนที่`)) return;
+  }
+  NB.cells = [];
+  NB.cellCounter = 0;
+  NB.currentExample = key;
+  document.getElementById('cells').innerHTML = '';
+  for (const c of ex.cells) {
+    addCell(c.type, c.code, false);
+  }
+  scheduleSave();
+  if (!silent) showToast(`📚 โหลดตัวอย่าง "${ex.name}"`, 'success');
+}
+
+// ============================================
+//   TOAST
+// ============================================
+function showToast(msg, type = 'info') {
+  const t = document.createElement('div');
+  t.className = 'ai-toast';
+  const colors = { success: 'var(--ai-green)', error: 'var(--ai-red)', info: 'var(--ai-cyan)' };
+  t.style.borderLeft = `4px solid ${colors[type] || 'var(--ai-purple)'}`;
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+
+// ============================================
+//   KEYBOARD
+// ============================================
+document.addEventListener('keydown', (e) => {
+  if (e.ctrlKey && e.key === 's') {
+    e.preventDefault();
+    saveNotebook();
+    showToast('💾 บันทึกแล้ว', 'success');
+  }
+});
+
+// ============================================
+//   BOOT
+// ============================================
+renderExamples();
+loadPy();
+</script>
+
+</body>
+</html>

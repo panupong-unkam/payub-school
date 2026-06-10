@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แผนการจัดการเรียนรู้ที่ 19 — ทำต่อ + เตรียมนำเสนอ</title>
+    <link rel="stylesheet" href="lesson-plan.css">
+</head>
+<body>
+<div class="nav-bar no-print"><a href="index.html">⬅ กลับ</a><div style="color:white;">แผนที่ 19 / 20 — Hr 37-38</div><button class="print-btn" onclick="window.print()">🖨️ พิมพ์</button></div>
+<div class="paper">
+
+    <h1 class="plan-title">แผนการจัดการเรียนรู้ที่ 19</h1>
+    <div class="plan-meta-row"><span>หน่วยที่ 3 เรื่อง Cytron Maker Pi RP2040 + เว็บ Simulator</span><span>จำนวน 18 ชั่วโมง</span></div>
+    <div class="plan-meta-row"><span>เรื่อง ทำโปรเจกต์ต่อ + Debug + เตรียมนำเสนอ</span><span>จำนวน 2 ชั่วโมง (ชั่วโมงที่ 37-38)</span></div>
+    <div class="plan-meta-row"><span>วิชา หุ่นยนต์</span><span>กลุ่มสาระการเรียนรู้ วิทยาศาสตร์และเทคโนโลยี</span></div>
+    <div class="plan-meta-row"><span>ชั้นมัธยมศึกษาปีที่ 2</span><span>ภาคเรียนที่ 1 ปีการศึกษา 2569</span></div>
+    <div class="plan-meta-row"><span>ผู้สอน นายภาณุพงศ์ อุ่นคำ</span><span>โรงเรียนบ้านป่ายุบ (บุ้นกีประชานุเคราะห์)</span></div>
+    <hr class="divider">
+
+    <div class="section">
+        <div class="section-title">1. มาตรฐานการเรียนรู้/ตัวชี้วัด</div>
+        <p class="indent"><b>มาตรฐาน ว 4.1</b> เข้าใจแนวคิด หลักการของเทคโนโลยีเพื่อการดำรงชีวิต</p>
+        <p class="indent"><b>มาตรฐาน ว 4.2</b> เข้าใจและใช้แนวคิดเชิงคำนวณในการแก้ปัญหา</p>
+        <p class="indent bold">ตัวชี้วัดระหว่างทาง</p>
+        <p class="indent2"><b>ว 4.1 ม.2/4</b> ทดสอบ ประเมินผล และอธิบายปัญหาหรือข้อบกพร่อง</p>
+        <p class="indent2"><b>ว 4.2 ม.2/2</b> ออกแบบและเขียนโปรแกรมที่ใช้ตรรกะและฟังก์ชันในการแก้ปัญหา</p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">2. จุดประสงค์การเรียนรู้</div>
+        <ol>
+            <li>เขียนโค้ดส่วน MAIN LOOP ของโปรเจกต์จบให้ทำงานได้สมบูรณ์ <span class="kpa">P</span></li>
+            <li>วิเคราะห์และแก้ไขบั๊ก (Debug) ของโปรแกรมตนเองได้ <span class="kpa">K, P</span></li>
+            <li>เตรียมตัวนำเสนอตามลำดับ 6 ขั้น (Hook → Demo → Q&A) <span class="kpa">P</span></li>
+            <li>ซ้อมพูด 5-7 นาทีด้วย Timer ในเว็บไซต์ <span class="kpa">P</span></li>
+            <li>ประเมินตนเอง (Self-evaluation) อย่างซื่อสัตย์ <span class="kpa">A</span></li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">3. คุณลักษณะอันพึงประสงค์</div>
+        <p class="indent">☐ 1. รักชาติฯ ☑ 2. ซื่อสัตย์ ☑ 3. มีวินัย ☑ 4. ใฝ่เรียนรู้ ☐ 5. พอเพียง ☑ 6. มุ่งมั่น ☐ 7. รักไทย ☑ 8. จิตสาธารณะ</p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">4. สมรรถนะสำคัญของผู้เรียน</div>
+        <ol><li>ความสามารถในการคิด (วิเคราะห์ + แก้ปัญหา)</li><li>ความสามารถในการแก้ปัญหา</li><li>ความสามารถในการสื่อสาร</li><li>ความสามารถในการใช้เทคโนโลยี</li></ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">5. สาระสำคัญ</div>
+        <p class="indent">การสร้างโปรเจกต์ใหญ่ต้องผ่านขั้นตอน Debug หรือ "แก้บั๊ก" — Top 5 บั๊กที่พบ: (1) ImportError, (2) Motor ไม่หมุน (ลืมเปิด Power), (3) HC-SR04 เพี้ยน (VCC ผิด), (4) มอเตอร์ทิศกลับ, (5) Servo สั่น เทคนิคทอง: ใช้ <code>print()</code> ตรวจค่าตัวแปรทุกที่ การนำเสนอใช้รูปแบบ 6 ขั้น: (1) Hook ดึงดูดสนใจ → (2) ปัญหา + วิธีแก้ → (3) อุปกรณ์ + การทำงาน → (4) Demo สด (สำคัญที่สุด!) → (5) บทเรียนที่ได้ → (6) Q&A สำคัญที่สุดคือ "ถ้า Demo ไม่ขึ้น ให้เปิดวิดีโอสำรอง"</p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">6. ความรู้เดิมที่นักเรียนต้องมี</div>
+        <ol><li>Project Proposal จากแผน 18 (Planning + SETUP)</li><li>ความรู้ทุกบทใน RP2040</li><li>การพูดในที่สาธารณะ</li></ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">7. การจัดกิจกรรมการเรียนรู้</div>
+        <div class="hour-banner">▶ ชั่วโมงที่ 37 (60 นาที) : เขียนโค้ดต่อ + Debug</div>
+
+        <p class="step-banner">ขั้นที่ 1: ตรวจสอบสถานะ (10 นาที)</p>
+        <ol>
+            <li>ครูเปิดเว็บไซต์ <code>Robotm.2/Hr37-38RP.html</code> + Checklist ความพร้อม</li>
+            <li>นักเรียนทบทวน checklist (8 ข้อ) ของตนเอง</li>
+            <p class="teacher-q">โปรเจกต์ของนักเรียนตอนนี้ผ่าน checklist กี่ข้อจาก 8? ส่วนใดที่ยังไม่เสร็จ?</p>
+            <p class="student-a">(แต่ละคนจะมีคำตอบของตัวเอง — เช่น "ผมเสร็จ 5/8 ยังขาด Demo และซ้อมพูด")</p>
+        </ol>
+
+        <p class="step-banner">ขั้นที่ 2: เรียนรู้ Top 5 Bug Fixes (15 นาที)</p>
+        <ol start="3">
+            <li>ครูสอน Debug Tips 5 หัวข้อในเว็บไซต์:
+                <ul>
+                    <li>ImportError → คัดลอกโฟลเดอร์ adafruit_motor</li>
+                    <li>มอเตอร์ไม่หมุน → ตรวจสวิตช์ Power</li>
+                    <li>HC-SR04 Error → VCC = 5V</li>
+                    <li>มอเตอร์ทิศกลับ → สลับสาย M1A กับ M1B</li>
+                    <li>Servo สั่น → frequency = 50 + ใช้ถ่าน</li>
+                </ul>
+            </li>
+            <li>ครูเน้น: ใช้ <code>print()</code> เป็น Debug ที่ดีที่สุด</li>
+        </ol>
+
+        <p class="step-banner">ขั้นที่ 3: ดำเนินการเขียนโค้ด + Debug (35 นาที)</p>
+        <ol start="5">
+            <li>นักเรียนเขียนโค้ด MAIN LOOP ต่อจาก SETUP ในแผน 18</li>
+            <li>ครูเดินดูเป็นรายบุคคล ช่วย Debug บั๊กที่เจอ</li>
+            <li>นักเรียนบันทึกบั๊กที่พบและวิธีแก้ลงในใบงาน</li>
+        </ol>
+
+        <div class="hour-banner">▶ ชั่วโมงที่ 38 (60 นาที) : เตรียมนำเสนอ + ซ้อมพูด</div>
+
+        <p class="step-banner">ขั้นที่ 4: เรียนรู้รูปแบบการนำเสนอ (15 นาที)</p>
+        <ol start="8">
+            <li>ครูแสดงรูปแบบ 6 ขั้นในเว็บไซต์</li>
+            <li>ครูแนะนำ Script ตัวอย่างให้นักเรียนปรับเป็นของตน</li>
+            <li>ครูเน้น "เตรียมวิดีโอสำรองเผื่อ Demo ไม่ขึ้น"</li>
+        </ol>
+
+        <p class="step-banner">ขั้นที่ 5: ซ้อมพูดด้วย Timer (30 นาที)</p>
+        <ol start="11">
+            <li>นักเรียนใช้ Timer ในเว็บไซต์ฝึกพูด 5-7 นาที</li>
+            <li>นักเรียนจับคู่ ฝึกพูดให้เพื่อนฟัง + แลกเปลี่ยน feedback</li>
+            <p class="teacher-q">ในการนำเสนอ ส่วนใดที่ครูให้คะแนนมากที่สุด?</p>
+            <p class="student-a">Demo สดและการตอบคำถาม Q&A เพราะแสดงว่าทำเองเข้าใจจริง</p>
+        </ol>
+
+        <p class="step-banner">ขั้นที่ 6: Self-evaluation + ส่งงาน (15 นาที)</p>
+        <ol start="13">
+            <li>นักเรียนเขียน self_eval.txt ตอบ 4 คำถาม:
+                <ol style="margin-top: 6pt;">
+                    <li>โปรเจกต์ทำอะไรได้บ้าง? (คะแนนตัวเอง _/10)</li>
+                    <li>ส่วนที่ภูมิใจที่สุดคืออะไร?</li>
+                    <li>ปัญหาใหญ่ที่สุดที่เจอ + แก้ยังไง?</li>
+                    <li>ถ้ามีเวลาอีก 2 สัปดาห์ จะเพิ่มอะไร?</li>
+                </ol>
+            </li>
+            <li>นักเรียนส่ง zip ครบ 5 ไฟล์: main.py + demo.mp4 + screenshots/ + self_eval.txt + planning.txt</li>
+            <li>ครูสรุปและประกาศวันสอบไฟนอลในชั่วโมงถัดไป (Hr 39-40)</li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">8. ชิ้นงาน / ภาระงาน</div>
+        <ol>
+            <li>ใบงานที่ 19.1 "Project Final + Self-evaluation"</li>
+            <li>ส่ง zip ครบ: main.py + วิดีโอ Demo ≥2 นาที + แคป ≥5 รูป + self_eval.txt + planning.txt</li>
+            <li>แบบทดสอบสรุปหน่วย 3 (5 ข้อ)</li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">9. การวัดและประเมินผล</div>
+        <table class="eval">
+            <thead><tr><th>รายการ</th><th>วิธีวัด</th><th>เครื่องมือ</th><th>เกณฑ์</th></tr></thead>
+            <tbody>
+                <tr><td><b>1. ความรู้ (K)</b></td><td>ตรวจ Debug + Self-eval</td><td>1. ใบงาน 19.1<br>2. แบบทดสอบ 5 ข้อ</td><td>ร้อยละ 60</td></tr>
+                <tr><td><b>2. ทักษะกระบวนการ (P)</b><br>(15 คะแนน Final Project)</td><td>ตรวจชิ้นงาน</td><td>3. Rubric Final (15 คะแนน)</td><td>≥10 คะแนน</td></tr>
+                <tr><td><b>3. พฤติกรรม + การซ้อมพูด</b></td><td>สังเกต</td><td>4. แบบสังเกตพฤติกรรม</td><td>ระดับ "พอใช้"</td></tr>
+                <tr><td><b>4. คุณลักษณะ</b></td><td>สังเกต</td><td>5. แบบประเมินคุณลักษณะ</td><td>ระดับ "ผ่าน"</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <div class="section-title">10. สื่อและแหล่งการเรียนรู้</div>
+        <p class="indent"><b>สื่อ:</b> 1. <code>Robotm.2/Hr37-38RP.html</code> (Checklist + Timer ซ้อมพูด) &nbsp; 2. โปรเจกต์ของนักเรียน &nbsp; 3. ใบงาน 19.1</p>
+        <p class="indent"><b>แหล่งการเรียนรู้:</b> 1. ห้องคอมพิวเตอร์ &nbsp; 2. อินเทอร์เน็ต</p>
+    </div>
+
+    <div class="page-break"></div>
+
+    <div class="appendix-banner">ภาคผนวก: เครื่องมือวัดและประเมินผล</div>
+
+    <div class="tool-title">เครื่องมือที่ 1: ใบงานที่ 19.1 และ Rubric Final Project</div>
+
+    <div class="worksheet-header">
+        <h3>ใบงานที่ 19.1 "Project Final + Self-evaluation"</h3>
+        <p>ชื่อ-สกุล <span class="dots">..................................................................</span> ชั้น ม.2/<span class="dots">....</span> เลขที่ <span class="dots">....</span></p>
+        <p>ชื่อโปรเจกต์ <span class="dots">....................................................................................</span></p>
+    </div>
+
+    <p class="bold">ตอนที่ 1: Debug Log (บั๊กที่พบและวิธีแก้)</p>
+    <table>
+        <thead><tr><th>บั๊กที่พบ</th><th>วิธีแก้</th></tr></thead>
+        <tbody>
+            <tr><td class="dots">............................................</td><td class="dots">............................................</td></tr>
+            <tr><td class="dots">............................................</td><td class="dots">............................................</td></tr>
+            <tr><td class="dots">............................................</td><td class="dots">............................................</td></tr>
+        </tbody>
+    </table>
+
+    <p class="bold">ตอนที่ 2: ซ้อมพูด (Timer)</p>
+    <p class="indent">ครั้งที่ 1 ใช้เวลา: <span class="dots">..........</span> นาที <span class="dots">..........</span> วินาที (อยู่ในเป้า 5-7 นาที? <span class="dots">.....</span>)</p>
+    <p class="indent">ครั้งที่ 2 ใช้เวลา: <span class="dots">..........</span> นาที <span class="dots">..........</span> วินาที</p>
+
+    <p class="bold">ตอนที่ 3: Self-evaluation (4 คำถาม)</p>
+    <p class="indent">1. โปรเจกต์ของฉันทำอะไรได้บ้าง? (คะแนนตัวเอง <span class="dots">.....</span>/10)</p>
+    <p class="indent dots">..........................................................................................................................</p>
+    <p class="indent">2. ส่วนที่ภูมิใจที่สุดคืออะไร?</p>
+    <p class="indent dots">..........................................................................................................................</p>
+    <p class="indent">3. ปัญหาใหญ่ที่สุดที่เจอ + แก้ยังไง?</p>
+    <p class="indent dots">..........................................................................................................................</p>
+    <p class="indent">4. ถ้ามีเวลาอีก 2 สัปดาห์ จะเพิ่มอะไร?</p>
+    <p class="indent dots">..........................................................................................................................</p>
+
+    <p class="bold">ตอนที่ 4: Checklist ส่งงาน Final</p>
+    <p class="indent">☐ 1. main.py — โค้ดเต็ม</p>
+    <p class="indent">☐ 2. demo.mp4 — วิดีโอ ≥2 นาที</p>
+    <p class="indent">☐ 3. screenshots/ — แคปหน้าจอ ≥5 รูป</p>
+    <p class="indent">☐ 4. self_eval.txt — คำตอบ 4 คำถาม</p>
+    <p class="indent">☐ 5. planning.txt — Planning Canvas (จากแผน 18)</p>
+
+    <p class="bold" style="margin-top: 12pt;">Rubric Final Project (15 คะแนน) — นำมาตรวจประกอบในวันสอบไฟนอล</p>
+    <table>
+        <thead><tr><th>หัวข้อ</th><th>เกณฑ์</th><th>คะแนน</th></tr></thead>
+        <tbody>
+            <tr><td><b>1. การทำงานของหุ่นยนต์</b></td><td>ทำงานครบตามที่ออกแบบ ไม่มี error</td><td class="text-center">5</td></tr>
+            <tr><td><b>2. ความซับซ้อนของโค้ด</b></td><td>ใช้อุปกรณ์ ≥3 ตัว + ตรรกะ if/while ถูก</td><td class="text-center">3</td></tr>
+            <tr><td><b>3. ความคิดสร้างสรรค์</b></td><td>มีไอเดียน่าสนใจ ไม่ลอกตัวอย่าง</td><td class="text-center">2</td></tr>
+            <tr><td><b>4. Self-evaluation</b></td><td>ตอบครบ 4 คำถาม + สะท้อนตนเอง</td><td class="text-center">3</td></tr>
+            <tr><td><b>5. ความครบของเอกสาร</b></td><td>ส่งครบ 5 ไฟล์</td><td class="text-center">2</td></tr>
+        </tbody>
+    </table>
+
+    <div class="page-break"></div>
+
+    <div class="tool-title">เครื่องมือที่ 2: แบบประเมินสมรรถนะการแก้ปัญหา (สรุปหน่วย)</div>
+    <table>
+        <thead><tr><th style="width: 22%;">พฤติกรรม</th><th>ระดับ 3</th><th>ระดับ 2</th><th>ระดับ 1</th></tr></thead>
+        <tbody>
+            <tr><td><b>วิเคราะห์</b></td><td>Debug ได้ด้วยตัวเอง</td><td>Debug ได้บางส่วน</td><td>ต้องให้ครูแก้</td></tr>
+            <tr><td><b>วางแผน</b></td><td>เตรียมสคริปต์นำเสนอครบ</td><td>เตรียมบางส่วน</td><td>ไม่เตรียม</td></tr>
+            <tr><td><b>ดำเนินการ</b></td><td>โปรเจกต์ทำงานสมบูรณ์</td><td>ทำงานบางส่วน</td><td>ไม่ทำงาน</td></tr>
+            <tr><td><b>ตรวจสอบ</b></td><td>Self-eval ครบ 4 ข้อ + สะท้อนตนเอง</td><td>ครบบางส่วน</td><td>ไม่ครบ</td></tr>
+        </tbody>
+    </table>
+
+    <div class="tool-title">เครื่องมือที่ 3: แบบประเมินพฤติกรรมการทำงาน + การซ้อมพูด</div>
+    <table>
+        <thead><tr><th>ลำดับ</th><th>ชื่อ-สกุล</th><th>ตั้งใจ (3)</th><th>ซ้อมพูด (3)</th><th>ตรงเวลา (3)</th><th>รวม (9)</th></tr></thead>
+        <tbody>
+            <tr><td>1</td><td class="dots">...........................................................</td><td></td><td></td><td></td><td></td></tr>
+            <tr><td>2</td><td class="dots">...........................................................</td><td></td><td></td><td></td><td></td></tr>
+            <tr><td>...</td><td class="dots">...........................................................</td><td></td><td></td><td></td><td></td></tr>
+        </tbody>
+    </table>
+
+    <div class="tool-title">เครื่องมือที่ 4: แบบประเมินคุณลักษณะอันพึงประสงค์</div>
+    <table>
+        <thead><tr><th>คุณลักษณะ</th><th>ดีเยี่ยม (3)</th><th>ดี (2)</th><th>ผ่าน (1)</th></tr></thead>
+        <tbody>
+            <tr><td><b>ซื่อสัตย์</b></td><td>Self-eval ตามจริง</td><td>เกินจริงเล็กน้อย</td><td>เกินจริงมาก</td></tr>
+            <tr><td><b>มีวินัย</b></td><td>เตรียม Demo + วิดีโอสำรอง</td><td>เตรียมเฉพาะ Demo</td><td>ไม่เตรียม</td></tr>
+            <tr><td><b>ใฝ่เรียนรู้</b></td><td>เพิ่มฟีเจอร์โบนัส</td><td>ทำตามแผน</td><td>ทำพื้นฐาน</td></tr>
+            <tr><td><b>มุ่งมั่นทำงาน</b></td><td>Debug จนสำเร็จ</td><td>ขอความช่วยเหลือ</td><td>หยุดทำ</td></tr>
+            <tr><td><b>จิตสาธารณะ</b></td><td>ช่วยเพื่อนซ้อมพูด/Debug</td><td>ทำส่วนตัว</td><td>ไม่ช่วย</td></tr>
+        </tbody>
+    </table>
+
+    <div class="tool-title">บันทึกหลังการสอน</div>
+    <p><b>จำนวนนักเรียนที่พร้อมนำเสนอ:</b> <span class="dots">.....</span> / <span class="dots">.....</span> คน</p>
+    <p><b>โปรเจกต์ที่น่าสนใจที่สุด:</b></p>
+    <p class="dots">..........................................................................................................................</p>
+    <p><b>ปัญหา/อุปสรรค:</b></p>
+    <p class="dots">..........................................................................................................................</p>
+
+    <table class="signature" style="margin-top: 30pt;"><tr>
+        <td class="left" style="width: 50%;">ลงชื่อ <span class="dots">..............................................</span> ผู้สอน<br>(นายภาณุพงศ์ อุ่นคำ)<br>วันที่ <span class="dots">......./......./.........</span></td>
+        <td class="right">ลงชื่อ <span class="dots">..............................................</span><br>(<span class="dots">...........................................</span>)<br>ผู้อำนวยการโรงเรียนบ้านป่ายุบฯ</td>
+    </tr></table>
+</div>
+</body>
+</html>

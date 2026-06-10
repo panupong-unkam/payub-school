@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>👕 แต่งตัวละคร — Python 3D Adventure</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Noto+Serif+Thai:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../game-style.css">
+<link rel="stylesheet" href="avatar.css">
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../shared/supabase-client.js"></script>
+<script src="../shared/avatar-system.js"></script>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+
+<header class="game-topbar">
+  <a href="../index.html" class="back-btn">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+    กลับ
+  </a>
+  <div class="topbar-title">
+    <span class="topbar-emoji">👕</span>
+    <div>
+      <div class="topbar-name">แต่งตัวละคร</div>
+      <div class="topbar-sub" id="user-label">กำลังโหลดข้อมูล...</div>
+    </div>
+  </div>
+  <button class="btn-hero btn-hero-primary" id="btn-save" onclick="saveAvatar()">
+    💾 บันทึก
+  </button>
+</header>
+
+<main class="avatar-shell">
+  <!-- LEFT: 3D PREVIEW -->
+  <section class="avatar-preview-wrap">
+    <canvas id="preview-canvas"></canvas>
+    <div class="preview-controls">
+      <button class="cam-btn" onclick="rotatePreview(-1)" title="หมุนซ้าย">↺</button>
+      <button class="cam-btn" onclick="rotatePreview(1)" title="หมุนขวา">↻</button>
+      <button class="cam-btn" onclick="randomizeAvatar()" title="สุ่ม">🎲</button>
+      <button class="cam-btn" onclick="resetAvatar()" title="รีเซ็ตเป็นค่าเริ่มต้น">🔄</button>
+    </div>
+    <div class="preview-name" id="preview-name">ผู้เล่น</div>
+  </section>
+
+  <!-- RIGHT: CUSTOMIZE PANEL -->
+  <section class="customize-panel">
+    <div class="cat-tabs" id="cat-tabs">
+      <button class="cat-tab active" data-cat="skinTone">🎨 สี</button>
+      <button class="cat-tab" data-cat="hat">🎩 หมวก/ผม</button>
+      <button class="cat-tab" data-cat="face">😎 หน้า</button>
+      <button class="cat-tab" data-cat="shirt">👕 เสื้อ</button>
+      <button class="cat-tab" data-cat="shirtColor">🎨 สีเสื้อ</button>
+      <button class="cat-tab" data-cat="pants">👖 กางเกง</button>
+      <button class="cat-tab" data-cat="pantsColor">🎨 สีกางเกง</button>
+      <button class="cat-tab" data-cat="accessory">🎒 ของแถม</button>
+    </div>
+    <div class="items-grid" id="items-grid"></div>
+  </section>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script src="avatar.js"></script>
+</body>
+</html>

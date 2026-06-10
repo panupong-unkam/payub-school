@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แผนการจัดการเรียนรู้ที่ 12 — NeoPixel + ปุ่ม + บัซเซอร์</title>
+    <link rel="stylesheet" href="lesson-plan.css">
+</head>
+<body>
+<div class="nav-bar no-print"><a href="index.html">⬅ กลับ</a><div style="color:white;">แผนที่ 12 / 20 — Hr 23-24</div><button class="print-btn" onclick="window.print()">🖨️ พิมพ์</button></div>
+<div class="paper">
+
+    <h1 class="plan-title">แผนการจัดการเรียนรู้ที่ 12</h1>
+    <div class="plan-meta-row"><span>หน่วยที่ 3 เรื่อง Cytron Maker Pi RP2040 + เว็บ Simulator</span><span>จำนวน 18 ชั่วโมง</span></div>
+    <div class="plan-meta-row"><span>เรื่อง NeoPixel RGB + ปุ่ม GP20/GP21 + บัซเซอร์ Piezo</span><span>จำนวน 2 ชั่วโมง (ชั่วโมงที่ 23-24)</span></div>
+    <div class="plan-meta-row"><span>วิชา หุ่นยนต์</span><span>กลุ่มสาระการเรียนรู้ วิทยาศาสตร์และเทคโนโลยี</span></div>
+    <div class="plan-meta-row"><span>ชั้นมัธยมศึกษาปีที่ 2</span><span>ภาคเรียนที่ 1 ปีการศึกษา 2569</span></div>
+    <div class="plan-meta-row"><span>ผู้สอน นายภาณุพงศ์ อุ่นคำ</span><span>โรงเรียนบ้านป่ายุบ (บุ้นกีประชานุเคราะห์)</span></div>
+    <hr class="divider">
+
+    <div class="section">
+        <div class="section-title">1. มาตรฐานการเรียนรู้/ตัวชี้วัด</div>
+        <p class="indent"><b>มาตรฐาน ว 4.2</b> เข้าใจและใช้แนวคิดเชิงคำนวณในการแก้ปัญหา</p>
+        <p class="indent bold">ตัวชี้วัดระหว่างทาง</p>
+        <p class="indent2"><b>ว 4.2 ม.2/2</b> ออกแบบและเขียนโปรแกรมที่ใช้ตรรกะและฟังก์ชันในการแก้ปัญหา</p>
+        <p class="indent2"><b>ว 4.2 ม.2/3</b> อภิปรายองค์ประกอบและหลักการทำงานของระบบคอมพิวเตอร์</p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">2. จุดประสงค์การเรียนรู้</div>
+        <ol>
+            <li>อธิบายหลักการผสมสีแบบ RGB (Red, Green, Blue) ค่า 0-255 ได้ <span class="kpa">K</span></li>
+            <li>เขียนโค้ด CircuitPython ควบคุม NeoPixel เปลี่ยนสีและกระพริบได้ <span class="kpa">P</span></li>
+            <li>ใช้ <code>digitalio.DigitalInOut</code> อ่านค่าปุ่ม (Active Low) ได้ <span class="kpa">P</span></li>
+            <li>ใช้ <code>pwmio.PWMOut</code> ควบคุมบัซเซอร์ Piezo เล่นเสียงตามความถี่ได้ <span class="kpa">P</span></li>
+            <li>เห็นความเชื่อมโยงระหว่างเทคโนโลยีและศิลปะ (สี + เสียง) <span class="kpa">A</span></li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">3. คุณลักษณะอันพึงประสงค์</div>
+        <p class="indent">☐ 1. รักชาติฯ ☐ 2. ซื่อสัตย์ ☑ 3. มีวินัย ☑ 4. ใฝ่เรียนรู้ ☐ 5. พอเพียง ☑ 6. มุ่งมั่น ☑ 7. รักไทย ☐ 8. จิตสาธารณะ</p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">4. สมรรถนะสำคัญของผู้เรียน</div>
+        <ol>
+            <li>ความสามารถในการคิด</li>
+            <li>ความสามารถในการแก้ปัญหา</li>
+            <li>ความสามารถในการใช้เทคโนโลยี</li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">5. สาระสำคัญ</div>
+        <p class="indent">NeoPixel เป็น LED ที่ผสมแม่สี 3 สี (R, G, B) ในดวงเดียว แต่ละสีปรับได้ 0-255 ค่า ผสมได้ 16.7 ล้านสี (256³) บอร์ด Maker Pi RP2040 มี NeoPixel 2 ดวงที่ขา GP18 ส่วนปุ่ม A และ B อยู่ที่ GP20 และ GP21 ทำงานแบบ <b>Active Low</b> (กด=False, ไม่กด=True) ใช้ <code>digitalio.Pull.UP</code> ดึงค่าขึ้น บัซเซอร์ Piezo อยู่ที่ GP22 ใช้ <code>pwmio.PWMOut</code> ส่งสัญญาณความถี่ (Hz) — โน้ตดนตรีคือความถี่เฉพาะ (C=262, D=294, E=330, F=349, G=392, A=440, B=494)</p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">6. ความรู้เดิมที่นักเรียนต้องมี</div>
+        <ol>
+            <li>การใช้ Simulator + พิมพ์ Python จากแผนที่ 11</li>
+            <li>การใช้ตัวแปรและเงื่อนไข if/else</li>
+            <li>ความรู้พื้นฐานเรื่องโน้ตดนตรี (โด เร มี)</li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">7. การจัดกิจกรรมการเรียนรู้</div>
+
+        <div class="hour-banner">▶ ชั่วโมงที่ 23 (60 นาที) : NeoPixel RGB และ Color Mixer</div>
+
+        <p class="step-banner">ขั้นที่ 1: การวิเคราะห์และกำหนดรายละเอียดของปัญหา (10 นาที)</p>
+        <ol>
+            <li>ครูเปิดเว็บไซต์ <code>Robotm.2/Hr23-24RP.html</code></li>
+            <p class="teacher-q">หน้าจอมือถือ/คอมแสดงสีได้หลายล้านสี — ใช้แม่สีกี่สี? ทำไม?</p>
+            <p class="student-a">3 สี — แดง เขียว น้ำเงิน (RGB) เพราะตามนุษย์มีเซลล์รับ 3 ชนิด ผสมกันได้ทุกสี</p>
+        </ol>
+
+        <p class="step-banner">ขั้นที่ 2: การวางแผนการแก้ปัญหา (20 นาที)</p>
+        <ol start="2">
+            <li>ครูอธิบายการผสมสี RGB ค่า 0-255 พร้อมแสดง Color Mixer ในเว็บไซต์</li>
+            <li>ครูแสดงรหัสสีพื้นฐาน:
+                <ul>
+                    <li>(255,0,0) แดง, (0,255,0) เขียว, (0,0,255) น้ำเงิน</li>
+                    <li>(255,255,0) เหลือง, (255,0,255) ม่วง, (0,255,255) ฟ้า</li>
+                    <li>(255,255,255) ขาว, (0,0,0) ดับ</li>
+                </ul>
+            </li>
+        </ol>
+
+        <p class="step-banner">ขั้นที่ 3: การดำเนินการแก้ปัญหา (30 นาที)</p>
+        <ol start="4">
+            <li>นักเรียนเปิด Simulator และทดลองผสมสีผ่าน slider</li>
+            <li>นักเรียนเขียนโค้ดให้ NeoPixel ไล่สีรุ้ง: <code>for color in [...]: pixels.fill(color); time.sleep(0.5)</code></li>
+        </ol>
+
+        <div class="hour-banner">▶ ชั่วโมงที่ 24 (60 นาที) : ปุ่มและบัซเซอร์</div>
+
+        <p class="step-banner">ขั้นที่ 3 (ต่อ): การดำเนินการแก้ปัญหา (40 นาที)</p>
+        <ol start="6">
+            <li>ครูอธิบายปุ่ม Active Low: <code>btn = digitalio.DigitalInOut(board.GP20)</code> + <code>btn.pull = digitalio.Pull.UP</code> + <code>if not btn.value:</code></li>
+            <li>ครูสาธิตเปียโน 7 คีย์ในเว็บไซต์ (ลองกดดูเสียง C-B)</li>
+            <li>ครูอธิบาย <code>pwmio.PWMOut(board.GP22, frequency=440, duty_cycle=0)</code> + <code>buzzer.duty_cycle = 32768</code></li>
+            <li>นักเรียนทำใบงาน 12.1 "RGB Show + บัซเซอร์":
+                <ul>
+                    <li>กด A → NeoPixel เปลี่ยนสี + บัซเซอร์เล่น C (262Hz)</li>
+                    <li>กด B → NeoPixel ดับ + บัซเซอร์เล่น G (392Hz)</li>
+                    <li>ปล่อยมือ → เสียงหยุด</li>
+                </ul>
+            </li>
+        </ol>
+
+        <p class="step-banner">ขั้นที่ 4: การตรวจสอบและประเมินผล (20 นาที)</p>
+        <ol start="10">
+            <li>นักเรียนแคปหน้าจอ 4 รูป (โค้ด + 3 สถานะ)</li>
+            <li>นักเรียนทำแบบทดสอบ 5 ข้อ</li>
+            <p class="teacher-q">ทำไมต้องตั้ง duty_cycle = 0 ก่อน แล้วค่อยตั้ง 32768 ตอนต้องการเปิดเสียง?</p>
+            <p class="student-a">duty_cycle = 0 คือไม่มีสัญญาณออก (เงียบ), 32768 = 50% PWM (มีเสียง) — ใช้ตั้งค่าเริ่มต้นและเปิด-ปิดเสียงเมื่อต้องการ</p>
+            <li>ครูสรุปบทเรียน</li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">8. ชิ้นงาน / ภาระงาน</div>
+        <ol>
+            <li>ใบงานที่ 12.1 "RGB Show + บัซเซอร์" + แคปหน้าจอ 4 รูป</li>
+            <li>แบบทดสอบ 5 ข้อ</li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">9. การวัดและประเมินผล</div>
+        <table class="eval">
+            <thead><tr><th>รายการ</th><th>วิธีวัด</th><th>เครื่องมือ</th><th>เกณฑ์</th></tr></thead>
+            <tbody>
+                <tr><td><b>1. ความรู้ (K)</b></td><td>ตรวจใบงาน + ทดสอบ</td><td>1. ใบงาน 12.1<br>2. แบบทดสอบ 5 ข้อ</td><td>ร้อยละ 60</td></tr>
+                <tr><td><b>2. ทักษะกระบวนการ (P)</b></td><td>ตรวจชิ้นงาน</td><td>3. แบบประเมินทักษะ</td><td>ระดับ "ดี"</td></tr>
+                <tr><td><b>3. พฤติกรรม</b></td><td>สังเกต</td><td>4. แบบสังเกตพฤติกรรม</td><td>ระดับ "พอใช้"</td></tr>
+                <tr><td><b>4. คุณลักษณะ</b></td><td>สังเกต</td><td>5. แบบประเมินคุณลักษณะ</td><td>ระดับ "ผ่าน"</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <div class="section-title">10. สื่อและแหล่งการเรียนรู้</div>
+        <p class="indent"><b>สื่อ:</b> 1. <code>Robotm.2/Hr23-24RP.html</code> (Color Mixer + Piano เล่นได้) &nbsp; 2. Simulator &nbsp; 3. บอร์ด Maker Pi RP2040 &nbsp; 4. ใบงานที่ 12.1</p>
+        <p class="indent"><b>แหล่งการเรียนรู้:</b> 1. ห้องคอมพิวเตอร์ &nbsp; 2. อินเทอร์เน็ต</p>
+    </div>
+
+    <div class="page-break"></div>
+
+    <div class="appendix-banner">ภาคผนวก: เครื่องมือวัดและประเมินผล</div>
+
+    <div class="tool-title">เครื่องมือที่ 1: ใบงานที่ 12.1 และแบบประเมิน</div>
+
+    <div class="worksheet-header">
+        <h3>ใบงานที่ 12.1 "RGB Show + บัซเซอร์"</h3>
+        <p>ชื่อ-สกุล <span class="dots">..................................................................</span> ชั้น ม.2/<span class="dots">....</span> เลขที่ <span class="dots">....</span></p>
+    </div>
+
+    <p class="bold">ตอนที่ 1: รหัสสี RGB ที่เลือก</p>
+    <p class="indent">1. สีกด A: ชื่อสี <span class="dots">.............</span> ค่า (R=<span class="dots">..</span>, G=<span class="dots">..</span>, B=<span class="dots">..</span>)</p>
+    <p class="indent">2. ความถี่โน้ตที่ใช้: กด A = <span class="dots">.....</span> Hz, กด B = <span class="dots">.....</span> Hz</p>
+
+    <p class="bold">ตอนที่ 2: โค้ดเต็ม (เขียนหรือแคปแนบ)</p>
+    <div style="border: 1px solid #000; min-height: 5cm; padding: 8pt; margin: 6pt 0;">
+        <p style="color: #888; font-style: italic;">(พื้นที่สำหรับเขียนโค้ดหรือ Pseudo)</p>
+    </div>
+
+    <p class="bold">ตอนที่ 3: แคปหน้าจอ 4 รูป</p>
+    <p class="indent">☐ รูปที่ 1: โค้ดเต็ม &nbsp;&nbsp; ☐ รูปที่ 2: กด A → LED ติด + เสียงดัง</p>
+    <p class="indent">☐ รูปที่ 3: กด B → LED ดับ + เสียงต่ำ &nbsp;&nbsp; ☐ รูปที่ 4: ปล่อยมือ → เงียบ</p>
+
+    <p class="bold">ตอนที่ 4: คำถามท้าทาย (โบนัส +3)</p>
+    <p class="indent">เขียนโค้ดให้ NeoPixel "ไล่สีรุ้ง" เมื่อกดปุ่ม A ค้างไว้ — Pseudo:</p>
+    <p class="indent dots">.................................................................................................................</p>
+
+    <div style="margin-top: 14pt; padding: 8pt; border: 1pt dashed #1e3a8a; background: #f0f9ff;">
+        <p class="bold" style="color: #1e3a8a;">เฉลย (สำหรับครู)</p>
+        <div class="code-box">import board, neopixel, digitalio, pwmio, time
+pixels = neopixel.NeoPixel(board.GP18, 2)
+buzzer = pwmio.PWMOut(board.GP22, frequency=440, duty_cycle=0)
+btn_a = digitalio.DigitalInOut(board.GP20); btn_a.pull = digitalio.Pull.UP
+btn_b = digitalio.DigitalInOut(board.GP21); btn_b.pull = digitalio.Pull.UP
+
+while True:
+    if not btn_a.value:
+        pixels.fill((255, 100, 0))
+        buzzer.frequency = 262
+        buzzer.duty_cycle = 32768
+    elif not btn_b.value:
+        pixels.fill((0, 0, 0))
+        buzzer.frequency = 392
+        buzzer.duty_cycle = 32768
+    else:
+        buzzer.duty_cycle = 0</div>
+    </div>
+
+    <p class="bold" style="margin-top: 12pt;">แบบประเมินใบงาน 12.1</p>
+    <table>
+        <thead><tr><th style="width: 25%;">ประเด็น</th><th>ดีมาก (3)</th><th>ดี (2)</th><th>ปรับปรุง (1)</th></tr></thead>
+        <tbody>
+            <tr><td><b>การเลือกสี/ความถี่</b></td><td>เลือกครบและถูก</td><td>เลือกครบ</td><td>ไม่ครบ</td></tr>
+            <tr><td><b>โค้ด</b></td><td>มี if-elif-else + Active Low ถูก</td><td>มีโครงสร้าง</td><td>ขาดส่วนสำคัญ</td></tr>
+            <tr><td><b>แคป 4 รูป</b></td><td>ครบ 4 รูปและชัดเจน</td><td>ครบ 3 รูป</td><td>≤2 รูป</td></tr>
+            <tr><td><b>คำถามท้าทาย</b></td><td>Pseudo ไล่สีรุ้งถูก</td><td>ตอบบางส่วน</td><td>ไม่ตอบ</td></tr>
+        </tbody>
+    </table>
+
+    <div class="page-break"></div>
+
+    <div class="tool-title">เครื่องมือที่ 2: แบบประเมินสมรรถนะการแก้ปัญหา</div>
+    <table>
+        <thead><tr><th style="width: 22%;">พฤติกรรม</th><th>ระดับ 3</th><th>ระดับ 2</th><th>ระดับ 1</th></tr></thead>
+        <tbody>
+            <tr><td><b>วิเคราะห์</b></td><td>เข้าใจ RGB + Active Low + PWM</td><td>เข้าใจบางส่วน</td><td>ไม่เข้าใจ</td></tr>
+            <tr><td><b>วางแผน</b></td><td>เลือกสีและความถี่ก่อนเขียน</td><td>วางคร่าวๆ</td><td>เริ่มเลย</td></tr>
+            <tr><td><b>ดำเนินการ</b></td><td>โค้ดทำงานครบทุกเงื่อนไข</td><td>ทำได้บางส่วน</td><td>ไม่ทำงาน</td></tr>
+            <tr><td><b>ตรวจสอบ</b></td><td>แคปและตรวจครบ 4 สถานะ</td><td>ตรวจบางส่วน</td><td>ไม่ตรวจ</td></tr>
+        </tbody>
+    </table>
+
+    <div class="tool-title">เครื่องมือที่ 3: แบบประเมินพฤติกรรมการทำงาน</div>
+    <table>
+        <thead><tr><th>ลำดับ</th><th>ชื่อ-สกุล</th><th>ตั้งใจ (3)</th><th>รับผิดชอบ (3)</th><th>ตรงเวลา (3)</th><th>รวม (9)</th></tr></thead>
+        <tbody>
+            <tr><td>1</td><td class="dots">...........................................................</td><td></td><td></td><td></td><td></td></tr>
+            <tr><td>2</td><td class="dots">...........................................................</td><td></td><td></td><td></td><td></td></tr>
+            <tr><td>...</td><td class="dots">...........................................................</td><td></td><td></td><td></td><td></td></tr>
+        </tbody>
+    </table>
+
+    <div class="tool-title">เครื่องมือที่ 4: แบบประเมินคุณลักษณะอันพึงประสงค์</div>
+    <table>
+        <thead><tr><th>คุณลักษณะ</th><th>ดีเยี่ยม (3)</th><th>ดี (2)</th><th>ผ่าน (1)</th></tr></thead>
+        <tbody>
+            <tr><td><b>มีวินัย</b></td><td>ไม่เปิดเสียงรบกวนเพื่อน</td><td>ปฏิบัติบางครั้ง</td><td>เสียงดังรบกวน</td></tr>
+            <tr><td><b>ใฝ่เรียนรู้</b></td><td>ลองสีและโน้ตหลายแบบ</td><td>ทำตามที่บอก</td><td>ทำเฉพาะที่จำเป็น</td></tr>
+            <tr><td><b>มุ่งมั่นทำงาน</b></td><td>แก้บั๊กจนสำเร็จ</td><td>ขอความช่วยเหลือ</td><td>หยุดทำ</td></tr>
+        </tbody>
+    </table>
+
+    <div class="tool-title">บันทึกหลังการสอน</div>
+    <p><b>ผลที่เกิดกับผู้เรียน:</b></p><p class="dots">..........................................................................................................................</p>
+    <p><b>ปัญหา/อุปสรรค:</b></p><p class="dots">..........................................................................................................................</p>
+
+    <table class="signature" style="margin-top: 30pt;"><tr>
+        <td class="left" style="width: 50%;">ลงชื่อ <span class="dots">..............................................</span> ผู้สอน<br>(นายภาณุพงศ์ อุ่นคำ)<br>วันที่ <span class="dots">......./......./.........</span></td>
+        <td class="right">ลงชื่อ <span class="dots">..............................................</span><br>(<span class="dots">...........................................</span>)<br>ผู้อำนวยการโรงเรียนบ้านป่ายุบฯ</td>
+    </tr></table>
+</div>
+</body>
+</html>

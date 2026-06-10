@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แผนการจัดการเรียนรู้ที่ 6 — Accelerometer</title>
+    <link rel="stylesheet" href="lesson-plan.css">
+</head>
+<body>
+<div class="nav-bar no-print"><a href="index.html">⬅ กลับหน้ารวมแผน</a><div style="color:white;">แผนที่ 6 / 20 — Hr 11-12 (micro:bit)</div><button class="print-btn" onclick="window.print()">🖨️ พิมพ์</button></div>
+<div class="paper">
+
+    <h1 class="plan-title">แผนการจัดการเรียนรู้ที่ 6</h1>
+    <div class="plan-meta-row"><span>หน่วยที่ 2 เรื่อง micro:bit (ล้วน ไม่มีอุปกรณ์เสริม)</span><span>จำนวน 12 ชั่วโมง</span></div>
+    <div class="plan-meta-row"><span>เรื่อง Accelerometer (เซ็นเซอร์ความเร่ง — เอียง เขย่า ท่าทาง)</span><span>จำนวน 2 ชั่วโมง (ชั่วโมงที่ 11-12)</span></div>
+    <div class="plan-meta-row"><span>วิชา หุ่นยนต์</span><span>กลุ่มสาระการเรียนรู้ วิทยาศาสตร์และเทคโนโลยี</span></div>
+    <div class="plan-meta-row"><span>ชั้นมัธยมศึกษาปีที่ 2</span><span>ภาคเรียนที่ 1 ปีการศึกษา 2569</span></div>
+    <div class="plan-meta-row"><span>ผู้สอน นายภาณุพงศ์ อุ่นคำ</span><span>โรงเรียนบ้านป่ายุบ (บุ้นกีประชานุเคราะห์)</span></div>
+    <hr class="divider">
+
+    <div class="section">
+        <div class="section-title">1. มาตรฐานการเรียนรู้/ตัวชี้วัด</div>
+        <p class="indent"><b>มาตรฐาน ว 4.2</b> เข้าใจและใช้แนวคิดเชิงคำนวณในการแก้ปัญหา</p>
+        <p class="indent bold">ตัวชี้วัดระหว่างทาง</p>
+        <p class="indent2"><b>ว 4.2 ม.2/2</b> ออกแบบและเขียนโปรแกรมที่ใช้ตรรกะและฟังก์ชันในการแก้ปัญหา</p>
+        <p class="indent2"><b>ว 4.2 ม.2/3</b> อภิปรายองค์ประกอบและหลักการทำงานของระบบคอมพิวเตอร์และเทคโนโลยีการสื่อสาร เพื่อประยุกต์ใช้งานหรือแก้ปัญหาเบื้องต้น</p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">2. จุดประสงค์การเรียนรู้</div>
+        <ol>
+            <li>อธิบายหลักการของเซ็นเซอร์ Accelerometer และแกน X, Y, Z ได้ <span class="kpa">K</span></li>
+            <li>ใช้บล็อก <code>on shake</code>, <code>on tilt left/right</code>, <code>on logo up/down</code> ได้ <span class="kpa">P</span></li>
+            <li>เขียนโปรแกรมเกมลูกเต๋าหรือ Magic 8-Ball โดยใช้ <code>pick random</code> <span class="kpa">P</span></li>
+            <li>วิเคราะห์การใช้ Accelerometer ในอุปกรณ์รอบตัว (มือถือ, นาฬิกาอัจฉริยะ) <span class="kpa">K, A</span></li>
+            <li>ตระหนักถึงเทคโนโลยีเซ็นเซอร์ที่อยู่รอบตัว <span class="kpa">A</span></li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">3. คุณลักษณะอันพึงประสงค์</div>
+        <p class="indent">☐ 1. รักชาติฯ ☐ 2. ซื่อสัตย์ ☑ 3. มีวินัย ☑ 4. ใฝ่เรียนรู้ ☐ 5. พอเพียง ☑ 6. มุ่งมั่น ☐ 7. รักไทย ☐ 8. จิตสาธารณะ</p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">4. สมรรถนะสำคัญของผู้เรียน</div>
+        <ol>
+            <li>ความสามารถในการคิด (คิดเชื่อมโยง)</li>
+            <li>ความสามารถในการแก้ปัญหา</li>
+            <li>ความสามารถในการใช้เทคโนโลยี</li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">5. สาระสำคัญ</div>
+        <p class="indent">Accelerometer เป็นชิปจิ๋วที่อยู่หลังบอร์ด micro:bit ทำหน้าที่วัดความเอียง การสั่น และการเคลื่อนไหวในแกน X (ซ้าย-ขวา), Y (หน้า-หลัง), Z (บน-ล่าง) มีหน่วยเป็น mg (มิลลิ-g, 1000 mg = 1g แรงโน้มถ่วงโลก) MakeCode มีบล็อก <code>on gesture</code> ที่ดักท่าทางสำเร็จรูป 11 แบบ เช่น shake, tilt, logo up/down, free fall เมื่อรวมกับ <code>pick random 1 to 6</code> ก็สามารถสร้างเกมเขย่าทอยลูกเต๋าได้</p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">6. ความรู้เดิมที่นักเรียนต้องมี</div>
+        <ol>
+            <li>การใช้ MakeCode + จอ LED จากแผนที่ 4-5</li>
+            <li>การใช้ตัวแปรและบล็อก on จากแผนที่ 5</li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">7. การจัดกิจกรรมการเรียนรู้</div>
+
+        <div class="hour-banner">▶ ชั่วโมงที่ 11 (60 นาที) : Accelerometer และท่าทาง 11 แบบ</div>
+
+        <p class="step-banner">ขั้นที่ 1: การวิเคราะห์และกำหนดรายละเอียดของปัญหา (15 นาที)</p>
+        <ol>
+            <li>ครูเปิดเว็บไซต์ <code>Robotm.2/Hr11-12MB.html</code> + ให้นักเรียนลงชื่อ</li>
+            <li>ครูตั้งคำถามนำเข้า</li>
+            <p class="teacher-q">ทำไมหน้าจอมือถือถึงหมุนได้เองเมื่อเราเอียงเครื่อง?</p>
+            <p class="student-a">เพราะในมือถือมีเซ็นเซอร์วัดความเอียง เมื่อเราเอียงเครื่อง เซ็นเซอร์ตรวจจับแล้วบอกระบบให้หมุนหน้าจอตาม</p>
+            <li>ครูแนะนำว่า micro:bit มีเซ็นเซอร์แบบเดียวกัน ชื่อ Accelerometer</li>
+        </ol>
+
+        <p class="step-banner">ขั้นที่ 2: การวางแผนการแก้ปัญหา (25 นาที)</p>
+        <ol start="4">
+            <li>ครูอธิบายแกน X Y Z ผ่านภาพในเว็บไซต์</li>
+            <li>ครูแนะนำบล็อก gesture สำเร็จรูป 11 แบบ: shake, tilt left/right, logo up/down, screen up/down, free fall, 3g/6g/8g</li>
+            <li>ครูแนะนำ <code>acceleration (x/y/z)</code> สำหรับอ่านค่าตัวเลข</li>
+        </ol>
+
+        <p class="step-banner">ขั้นที่ 3: การดำเนินการแก้ปัญหา (20 นาที)</p>
+        <ol start="7">
+            <li>นักเรียนเขียนโปรแกรมแสดงไอคอนตามท่าทาง: เขย่าแสดงหัวใจ, เอียงซ้ายแสดงลูกศรซ้าย, เอียงขวาแสดงลูกศรขวา</li>
+            <li>นักเรียนทดสอบบนบอร์ดจริงและ Simulator</li>
+        </ol>
+
+        <div class="hour-banner">▶ ชั่วโมงที่ 12 (60 นาที) : ใบงาน — เลือก 1 ใน 3 โปรเจกต์</div>
+
+        <p class="step-banner">ขั้นที่ 3 (ต่อ): การดำเนินการแก้ปัญหา (40 นาที)</p>
+        <ol start="9">
+            <li>นักเรียนเลือกโปรเจกต์ 1 ใน 3:
+                <ul>
+                    <li>A: เกมเขย่าลูกเต๋า 1-6</li>
+                    <li>B: Magic 8-Ball (สุ่มคำตอบ ≥6 คำ)</li>
+                    <li>C: ลูกศรนำทาง (ตรวจการเอียง)</li>
+                </ul>
+            </li>
+            <li>นักเรียนเขียนโปรแกรมและทดสอบบนบอร์ดจริง</li>
+        </ol>
+
+        <p class="step-banner">ขั้นที่ 4: การตรวจสอบและประเมินผล (20 นาที)</p>
+        <ol start="11">
+            <li>นักเรียนทำใบงานที่ 6.1 + แคปวิดีโอ</li>
+            <li>นักเรียนทำแบบทดสอบ 5 ข้อในเว็บไซต์</li>
+            <p class="teacher-q">นอกจาก micro:bit แล้ว ในชีวิตประจำวันมีอุปกรณ์อะไรที่ใช้ Accelerometer บ้าง?</p>
+            <p class="student-a">มือถือ (หมุนหน้าจอ), นาฬิกานับก้าว, จอย Wii Remote, รถยนต์ (ตรวจการชน + เปิดถุงลม), ลำโพง JBL (เปลี่ยนเพลงเมื่อเขย่า)</p>
+            <li>ครูสรุปบทเรียน</li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">8. ชิ้นงาน / ภาระงาน</div>
+        <ol>
+            <li>ใบงานที่ 6.1 "Accelerometer Project" + วิดีโอบอร์ดเขย่า/เอียง</li>
+            <li>แบบทดสอบท้ายชั่วโมง 5 ข้อ</li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">9. การวัดและประเมินผล</div>
+        <table class="eval">
+            <thead><tr><th>รายการ</th><th>วิธีวัด</th><th>เครื่องมือ</th><th>เกณฑ์</th></tr></thead>
+            <tbody>
+                <tr><td><b>1. ความรู้ (K)</b></td><td>ตรวจใบงาน + ทดสอบ</td><td>1. ใบงาน 6.1<br>2. แบบทดสอบ 5 ข้อ</td><td>ร้อยละ 60</td></tr>
+                <tr><td><b>2. ทักษะกระบวนการ (P)</b></td><td>ตรวจชิ้นงาน</td><td>3. แบบประเมินทักษะ</td><td>ระดับ "ดี"</td></tr>
+                <tr><td><b>3. พฤติกรรม</b></td><td>สังเกต</td><td>4. แบบสังเกตพฤติกรรม</td><td>ระดับ "พอใช้"</td></tr>
+                <tr><td><b>4. คุณลักษณะ</b></td><td>สังเกต</td><td>5. แบบประเมินคุณลักษณะ</td><td>ระดับ "ผ่าน"</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <div class="section-title">10. สื่อและแหล่งการเรียนรู้</div>
+        <p class="indent"><b>สื่อ:</b> 1. <code>Robotm.2/Hr11-12MB.html</code> &nbsp; 2. บอร์ด micro:bit &nbsp; 3. ใบงานที่ 6.1</p>
+        <p class="indent"><b>แหล่งการเรียนรู้:</b> 1. ห้องคอมพิวเตอร์ &nbsp; 2. อินเทอร์เน็ต</p>
+    </div>
+
+    <div class="page-break"></div>
+
+    <div class="appendix-banner">ภาคผนวก: เครื่องมือวัดและประเมินผล</div>
+
+    <div class="tool-title">เครื่องมือที่ 1: ใบงานที่ 6.1 และแบบประเมิน</div>
+
+    <div class="worksheet-header">
+        <h3>ใบงานที่ 6.1 "Accelerometer Project"</h3>
+        <p>ชื่อ-สกุล <span class="dots">..................................................................</span> ชั้น ม.2/<span class="dots">....</span> เลขที่ <span class="dots">....</span></p>
+    </div>
+
+    <p><b>โปรเจกต์ที่เลือก:</b> ☐ A: ลูกเต๋า 1-6 &nbsp;&nbsp; ☐ B: Magic 8-Ball &nbsp;&nbsp; ☐ C: ลูกศรนำทาง</p>
+
+    <p class="bold">ตอนที่ 1: วางแผน</p>
+    <p class="indent">1. ใช้ Gesture อะไร? <span class="dots">.........................................</span></p>
+    <p class="indent">2. ผลลัพธ์ที่จะแสดง: <span class="dots">....................................................</span></p>
+    <p class="indent">3. ถ้าเป็น Magic 8-Ball เตรียม 6 คำตอบ:</p>
+    <p class="indent2 dots">1) .................................. &nbsp; 2) .................................. &nbsp; 3) ..................................</p>
+    <p class="indent2 dots">4) .................................. &nbsp; 5) .................................. &nbsp; 6) ..................................</p>
+
+    <p class="bold">ตอนที่ 2: Pseudo code</p>
+    <div style="border: 1px solid #000; min-height: 4cm; padding: 8pt; margin: 6pt 0;">
+        <p style="color: #888; font-style: italic;">(พื้นที่สำหรับเขียน Pseudo)</p>
+    </div>
+
+    <p class="bold">ตอนที่ 3: ผลการทดสอบ</p>
+    <p class="indent">1. ทดสอบบนบอร์ดจริง? <span class="dots">..........</span></p>
+    <p class="indent">2. เขย่าครั้งแรกได้ค่า: <span class="dots">..........</span> ครั้งที่ 2: <span class="dots">..........</span> ครั้งที่ 3: <span class="dots">..........</span></p>
+    <p class="indent">3. ค่าซ้ำกันไหม? เพราะอะไร? <span class="dots">..................................................</span></p>
+
+    <p class="bold">ตอนที่ 4: คำถามท้าทาย</p>
+    <p class="indent">เปิดกล้องมือถือถ่าย Selfie แล้วเปิด-ปิดดิวที่หมุนเครื่อง — เซ็นเซอร์ใดของมือถือกำลังทำงานอยู่?</p>
+    <p class="indent dots">.................................................................................................................</p>
+
+    <div style="margin-top: 14pt; padding: 8pt; border: 1pt dashed #1e3a8a; background: #f0f9ff;">
+        <p class="bold" style="color: #1e3a8a;">เฉลย (สำหรับครู)</p>
+        <p><b>ภารกิจ A — ลูกเต๋า:</b></p>
+        <div class="code-box">on shake:
+    set diceValue to pick random 1 to 6
+    show number diceValue</div>
+        <p><b>ตอนที่ 4:</b> Accelerometer ของมือถือ — ตรวจการหมุนและเอียงเพื่อรักษาทิศหน้าจอ</p>
+    </div>
+
+    <p class="bold" style="margin-top: 12pt;">แบบประเมินใบงาน 6.1</p>
+    <table>
+        <thead><tr><th style="width: 25%;">ประเด็น</th><th>ดีมาก (3)</th><th>ดี (2)</th><th>ปรับปรุง (1)</th></tr></thead>
+        <tbody>
+            <tr><td><b>วางแผน</b></td><td>ครบทุกข้อ + ตอบโปรเจกต์ B ครบ 6 คำตอบ</td><td>ครบหัวข้อ</td><td>ไม่ครบ</td></tr>
+            <tr><td><b>เขียนโค้ด</b></td><td>มี on gesture + pick random + แสดงผล</td><td>มี gesture แต่ไม่สุ่ม</td><td>ไม่มี gesture</td></tr>
+            <tr><td><b>ผลทดสอบ</b></td><td>ค่าสุ่มได้หลายค่าต่างกัน</td><td>ทำงานบน Sim</td><td>ไม่ทำงาน</td></tr>
+            <tr><td><b>คำถามท้าทาย</b></td><td>ตอบถูก + อธิบายได้</td><td>ตอบบางส่วน</td><td>ไม่ตอบ</td></tr>
+        </tbody>
+    </table>
+
+    <div class="page-break"></div>
+
+    <div class="tool-title">เครื่องมือที่ 2: แบบประเมินสมรรถนะการแก้ปัญหา</div>
+    <table>
+        <thead><tr><th style="width: 22%;">พฤติกรรม</th><th>ระดับ 3</th><th>ระดับ 2</th><th>ระดับ 1</th></tr></thead>
+        <tbody>
+            <tr><td><b>วิเคราะห์</b></td><td>เข้าใจ gesture และเลือกที่เหมาะ</td><td>เข้าใจบางส่วน</td><td>ไม่เข้าใจ</td></tr>
+            <tr><td><b>วางแผน</b></td><td>วางแผนคำตอบ Magic 8-Ball ครบ</td><td>วางคร่าวๆ</td><td>เริ่มเลย</td></tr>
+            <tr><td><b>ดำเนินการ</b></td><td>โปรแกรมทำงานบนบอร์ดจริง</td><td>ทำใน Sim</td><td>ไม่ทำงาน</td></tr>
+            <tr><td><b>ตรวจสอบ</b></td><td>ทดสอบ 3+ ครั้งและเปรียบเทียบ</td><td>ทดสอบครั้งเดียว</td><td>ไม่ทดสอบ</td></tr>
+        </tbody>
+    </table>
+
+    <div class="tool-title">เครื่องมือที่ 3: แบบประเมินพฤติกรรมการทำงาน</div>
+    <table>
+        <thead><tr><th>ลำดับ</th><th>ชื่อ-สกุล</th><th>ตั้งใจ (3)</th><th>รับผิดชอบ (3)</th><th>ตรงเวลา (3)</th><th>รวม (9)</th></tr></thead>
+        <tbody>
+            <tr><td>1</td><td class="dots">...........................................................</td><td></td><td></td><td></td><td></td></tr>
+            <tr><td>2</td><td class="dots">...........................................................</td><td></td><td></td><td></td><td></td></tr>
+            <tr><td>...</td><td class="dots">...........................................................</td><td></td><td></td><td></td><td></td></tr>
+        </tbody>
+    </table>
+
+    <div class="tool-title">เครื่องมือที่ 4: แบบประเมินคุณลักษณะอันพึงประสงค์</div>
+    <table>
+        <thead><tr><th>คุณลักษณะ</th><th>ดีเยี่ยม (3)</th><th>ดี (2)</th><th>ผ่าน (1)</th></tr></thead>
+        <tbody>
+            <tr><td><b>มีวินัย</b></td><td>เขย่าเบา ๆ ไม่ทำบอร์ดเสีย</td><td>เขย่าระวัง</td><td>เขย่าแรงเกินไป</td></tr>
+            <tr><td><b>ใฝ่เรียนรู้</b></td><td>ทดลอง gesture ครบหลายแบบ</td><td>ทำตามที่บอก</td><td>ทำเฉพาะที่จำเป็น</td></tr>
+            <tr><td><b>มุ่งมั่นทำงาน</b></td><td>แก้และทดสอบจนสำเร็จ</td><td>ขอความช่วยเหลือ</td><td>หยุดทำ</td></tr>
+        </tbody>
+    </table>
+
+    <div class="tool-title">บันทึกหลังการสอน</div>
+    <p><b>ผลที่เกิดกับผู้เรียน:</b></p><p class="dots">..........................................................................................................................</p>
+    <p><b>ปัญหา/อุปสรรค:</b></p><p class="dots">..........................................................................................................................</p>
+
+    <table class="signature" style="margin-top: 30pt;"><tr>
+        <td class="left" style="width: 50%;">ลงชื่อ <span class="dots">..............................................</span> ผู้สอน<br>(นายภาณุพงศ์ อุ่นคำ)<br>วันที่ <span class="dots">......./......./.........</span></td>
+        <td class="right">ลงชื่อ <span class="dots">..............................................</span><br>(<span class="dots">...........................................</span>)<br>ผู้อำนวยการโรงเรียนบ้านป่ายุบฯ</td>
+    </tr></table>
+</div>
+</body>
+</html>

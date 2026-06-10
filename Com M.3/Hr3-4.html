@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Quality Lab - โรงเรียนบ้านป่ายุบ (บุ้นกีประชานุเคราะห์)</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap');
+        :root { --p: #6366f1; --p-dark: #4338ca; --bg: #f1f5f9; --txt: #1e293b; --success: #10b981; --danger: #ef4444; --warning: #f59e0b; }
+        body { font-family: 'Kanit', sans-serif; background: var(--bg); margin: 0; color: var(--txt); }
+        .app { width: 100%; max-width: 1000px; background: #fff; min-height: 100vh; margin: 0 auto; box-shadow: 0 0 50px rgba(0,0,0,0.1); position: relative; }
+        .progress-bar { height: 6px; background: #e2e8f0; width: 100%; position: sticky; top: 0; z-index: 100; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--p), #a855f7); width: 0%; transition: 0.5s; }
+        .screen { display: none; padding: 40px; animation: fadeIn 0.6s ease-out forwards; }
+        .screen.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        h1 { text-align: center; color: var(--p-dark); font-size: 32px; }
+        h2 { border-left: 6px solid var(--p); padding-left: 15px; color: #334155; }
+        .card { background: #fff; padding: 25px; border-radius: 20px; border: 1px solid #e2e8f0; margin-bottom: 25px; transition: 0.3s; }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.05); }
+        .img-box { width: 100%; border-radius: 15px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .img-box img { width: 100%; height: 300px; object-fit: cover; }
+        input[type="text"] { width: 100%; padding: 15px; border: 2px solid #cbd5e1; border-radius: 12px; font-family: 'Kanit'; font-size: 16px; margin-top: 10px; }
+        .btn { padding: 15px 30px; border: none; border-radius: 12px; font-family: 'Kanit'; font-weight: 600; font-size: 18px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-p { background: var(--p); color: #fff; }
+        .btn-outline { background: #fff; border: 2px solid #cbd5e1; color: #64748b; }
+        .btn-success { background: var(--success); color: #fff; }
+        /* Abstraction Tool */
+        .ab-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .ab-item { padding: 15px; border: 2px solid #e2e8f0; border-radius: 12px; cursor: pointer; text-align: center; }
+        .ab-item.selected { border-color: var(--p); background: #eff6ff; color: var(--p-dark); font-weight: 600; }
+        /* Canvas */
+        #c-container { border: 2px solid #cbd5e1; border-radius: 20px; overflow: hidden; background: #f8fafc; position: relative; }
+        .toolbar { display: flex; gap: 8px; padding: 12px; background: #fff; border-bottom: 1px solid #e2e8f0; flex-wrap: wrap; justify-content: center; }
+        .t-btn { width: 45px; height: 45px; border-radius: 10px; border: 1px solid #cbd5e1; background: #fff; cursor: pointer; font-size: 18px; transition: 0.2s; }
+        .t-btn.active { background: var(--p); color: #fff; border-color: var(--p); }
+        #canvas-wrap { position: relative; width: 100%; height: 500px; cursor: crosshair; }
+        canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; touch-action: none; }
+        #text-overlay { position: absolute; display: none; }
+        #text-overlay input { padding: 8px; border: 2px solid var(--p); border-radius: 5px; outline: none; }
+        /* Report */
+        #report { padding: 40px; border: 2px solid #334155; border-radius: 15px; background: #fff; margin-top: 20px; }
+        @media print { .no-print { display: none !important; } .screen { display: none !important; } #screen-6 { display: block !important; padding: 0; } body { background: #fff; } .app { box-shadow: none; max-width: 100%; } }
+    </style>
+</head>
+<body>
+<div class="app">
+    <div class="progress-bar"><div class="progress-fill" id="p-fill"></div></div>
+    <div id="screen-0" class="screen active">
+        <h1>🔍 Data Quality Lab</h1>
+        <p style="text-align:center; color: var(--txt);">โรงเรียนบ้านป่ายุบ (บุ้นกีประชานุเคราะห์)</p>
+        <div class="card" style="background: #fdfbf7;">
+            <label><b>👤 ชื่อ-นามสกุล นักเรียน:</b></label>
+            <input type="text" id="stuName" placeholder="กรอกชื่อของคุณ...">
+            <div style="display:flex; gap:15px; margin-top:15px;">
+                <div style="flex:1;"><label><b>🏫 ชั้น ม.3/</b></label><input type="text" id="stuClass" placeholder="เช่น 1"></div>
+                <div style="flex:1;"><label><b>🔢 เลขที่:</b></label><input type="text" id="stuNo" placeholder="เช่น 25"></div>
+            </div>
+            <button class="btn btn-p" style="width:100%; margin-top:20px;" onclick="next(1)">🚀 เริ่มภารกิจสายลับข้อมูล</button>
+        </div>
+    </div>
+    <div id="screen-1" class="screen">
+        <h2>💡 บทเรียน 1: แนวคิดเชิงนามธรรม (Abstraction)</h2>
+        <div class="img-box"><img src="https://images.unsplash.com/photo-1555255707-c07966088b7b?q=80&w=1000" alt="Data Concept"></div>
+        <div class="info-box">
+            <b>Abstraction</b> คือการคัดเลือกเฉพาะ "ข้อมูลที่จำเป็น" และตัด "รายละเอียดที่ไม่เกี่ยวข้อง" ทิ้งไป เพื่อให้ AI ของเราไม่สับสนครับ
+        </div>
+        <p><b>ลองฝึกดูสิ!</b> หากเราต้องการสอน AI ให้รู้จัก "ผลส้ม" ข้อมูลตัวไหนบ้างที่ <b>จำเป็น (Essential)</b></p>
+        <div class="ab-grid" id="ab-orange">
+            <div class="ab-item" onclick="toggleAb(this)">รูปทรงกลม</div>
+            <div class="ab-item" onclick="toggleAb(this)">สีส้ม</div>
+            <div class="ab-item" onclick="toggleAb(this)">ผิวนูนขรุขระเล็กน้อย</div>
+            <div class="ab-item" onclick="toggleAb(this)">เงาของส้มบนโต๊ะ</div>
+            <div class="ab-item" onclick="toggleAb(this)">สติกเกอร์ที่ติดบนส้ม</div>
+            <div class="ab-item" onclick="toggleAb(this)">จานที่รองส้มอยู่</div>
+        </div>
+        <div class="nav-buttons" style="display:flex; gap:15px; margin-top:30px;">
+            <button class="btn btn-outline" onclick="prev(0)">ย้อนกลับ</button>
+            <button class="btn btn-p" onclick="next(2)">ไปต่อ ➡️</button>
+        </div>
+    </div>
+    <div id="screen-2" class="screen">
+        <h2>📊 บทเรียน 2: Garbage In, Garbage Out (GIGO)</h2>
+        <div class="card" style="border-left: 6px solid var(--danger);">
+            <p>จำไว้ว่า: <b>"ป้อนขยะเข้าไป ผลลัพธ์ที่ออกมาก็คือขยะ"</b></p>
+            <p style="font-size:15px;">หากเราเตรียมรูปภาพ (Dataset) ที่มีความผิดพลาด เช่น เอารูป "แมว" ไปใส่ในกลุ่ม "สุนัข" AI จะเรียนรู้ตรรกะที่ผิดไปตลอดกาล</p>
+        </div>
+        <div class="warning-box">
+            <b>ชุดข้อมูลที่ดีต้อง:</b> 1. ถูกต้อง 2. หลากหลาย 3. ปริมาณมากพอ 4. สมดุล
+        </div>
+        <div class="nav-buttons" style="display:flex; gap:15px; margin-top:30px;">
+            <button class="btn btn-outline" onclick="prev(1)">ย้อนกลับ</button>
+            <button class="btn btn-p" onclick="next(3)">เข้าสู่ใบงาน ✍️</button>
+        </div>
+    </div>
+    <div id="screen-3" class="screen">
+        <h2>📝 ใบงานส่วนที่ 1: วิเคราะห์รายละเอียดปัญหา</h2>
+        <p style="font-size:15px; color:var(--txt);"><b>สถานการณ์:</b> ให้นักเรียนวางแผนรวบรวมข้อมูลเพื่อสร้าง AI แยกแยะ "ขยะขวดพลาสติก" ออกจาก "กระป๋องอลูมิเนียม"</p>
+        <div class="card">
+            <div class="input-group"><label>1) ข้อมูลเข้า (Input) คืออะไร?</label><input type="text" id="ans-1" placeholder="ระบุประเภทข้อมูลที่ต้องป้อนให้ AI..."></div>
+            <div class="input-group" style="margin-top:15px;"><label>2) ข้อมูลออก (Output) คืออะไร?</label><input type="text" id="ans-2" placeholder="AI จะแสดงผลลัพธ์เป็นอะไร..."></div>
+            <div class="input-group" style="margin-top:15px;"><label>3) วิธีตรวจสอบความถูกต้อง (Evaluation) ทำอย่างไร?</label><input type="text" id="ans-3" placeholder="จะรู้ได้อย่างไรว่า AI ทายถูก..."></div>
+        </div>
+        <div class="nav-buttons" style="display:flex; gap:15px;">
+            <button class="btn btn-outline" onclick="prev(2)">ย้อนกลับ</button>
+            <button class="btn btn-p" onclick="next(4)">ไปส่วนที่ 2 (วาดภาพ) 🎨</button>
+        </div>
+    </div>
+    <div id="screen-4" class="screen">
+        <h2>🎨 ใบงานส่วนที่ 2: Mind Map ปัจจัยข้อมูลของ AI</h2>
+        <div class="info-box" style="margin-top:0;"><b>โจทย์:</b> วาดแผนผังระบุ "ปัญหาข้อมูล" ที่อาจทำให้ AI แยกแยะขยะผิดพลาด (เช่น ภาพเบลอ, แสงมืด, มุมมองไม่ชัด)</div>
+        <div id="c-container">
+            <div class="toolbar">
+                <button class="t-btn active" id="t-pen" onclick="sm('pen')"><i class="fas fa-pen"></i></button>
+                <button class="t-btn" id="t-circle" onclick="sm('circle')"><i class="far fa-circle"></i></button>
+                <button class="t-btn" id="t-rect" onclick="sm('rect')"><i class="far fa-square"></i></button>
+                <button class="t-btn" id="t-text" onclick="sm('text')"><i class="fas fa-font"></i></button>
+                <button class="t-btn" onclick="sm('eraser')"><i class="fas fa-eraser"></i></button>
+                <button class="t-btn" style="color:var(--danger)" onclick="clearC()"><i class="fas fa-trash"></i></button>
+            </div>
+            <div id="canvas-wrap">
+                <canvas id="mainC"></canvas>
+                <canvas id="preC"></canvas>
+                <div id="text-overlay"><input type="text" id="cTxtInput" placeholder="พิมพ์แล้วกด Enter..."></div>
+            </div>
+        </div>
+        <div class="nav-buttons" style="display:flex; gap:15px;">
+            <button class="btn btn-outline" onclick="prev(3)">ย้อนกลับ</button>
+            <button class="btn btn-success" onclick="submit()">✅ ส่งงานและสรุปผล</button>
+        </div>
+    </div>
+    <div id="screen-5" class="screen">
+        <h1 style="color:var(--success)">✨ ส่งงานสำเร็จ!</h1>
+        <div class="no-print" style="display:flex; gap:10px; margin-bottom:20px;">
+            <button class="btn btn-p" style="flex:1" onclick="window.print()"><i class="fas fa-file-pdf"></i> ดาวน์โหลด PDF / พิมพ์</button>
+        </div>
+        <div id="report">
+            <div style="text-align:center; border-bottom: 3px solid var(--p); padding-bottom:15px; margin-bottom:20px;">
+                <h2 style="border:none; margin:0; padding:0;">ใบรายงานผลการเรียนรู้: Data Quality Lab</h2>
+                <p style="margin:5px 0; color:#64748b;">โรงเรียนบ้านป่ายุบ (บุ้นกีประชานุเคราะห์)</p>
+            </div>
+            <div style="background:#f8fafc; padding:15px; border-radius:10px; margin-bottom:20px; border:1px solid #e2e8f0;">
+                <b id="r-name">ชื่อ: </b><br>
+                <span id="r-meta">ชั้น: | เลขที่: </span>
+            </div>
+            <h3>ตอนที่ 1: ผลการวิเคราะห์ปัญหา</h3>
+            <div id="r-ans" style="line-height:1.8;"></div>
+            <h3 style="margin-top:25px;">ตอนที่ 2: Mind Map การเตรียมข้อมูล</h3>
+            <img id="r-img" style="width:100%; border:1px solid #ddd; border-radius:10px; margin-top:10px;">
+        </div>
+        <button class="btn btn-outline no-print" style="width:100%; margin-top:20px;" onclick="location.reload()">🔄 ทำใหม่</button>
+    </div>
+</div>
+
+<script>
+    let cur = 0;
+    const questions = ["ข้อมูลเข้า (Input)", "ข้อมูลออก (Output)", "วิธีตรวจสอบความถูกต้อง"];
+    
+    function next(id) {
+        if(cur === 0 && !document.getElementById('stuName').value) { alert("กรุณาใส่ชื่อก่อนครับ"); return; }
+        document.getElementById(`screen-${cur}`).classList.remove('active');
+        document.getElementById(`screen-${id}`).classList.add('active');
+        cur = id;
+        document.getElementById('p-fill').style.width = (id/5)*100 + '%';
+        window.scrollTo(0,0);
+        if(id === 4) setTimeout(initC, 300);
+    }
+    function prev(id) {
+        document.getElementById(`screen-${cur}`).classList.remove('active');
+        document.getElementById(`screen-${id}`).classList.add('active');
+        cur = id;
+        document.getElementById('p-fill').style.width = (id/5)*100 + '%';
+    }
+
+    function toggleAb(el) { el.classList.toggle('selected'); }
+
+    // Canvas Logic (Fixed & Improved)
+    const mc = document.getElementById('mainC'), pc = document.getElementById('preC');
+    const mctx = mc.getContext('2d'), pctx = pc.getContext('2d');
+    let drawing = false, mode = 'pen', startX, startY;
+
+    function initC() {
+        const wrap = document.getElementById('canvas-wrap');
+        mc.width = pc.width = wrap.offsetWidth;
+        mc.height = pc.height = 500;
+        mctx.fillStyle = "#ffffff"; mctx.fillRect(0,0,mc.width, mc.height);
+        mctx.lineCap = mctx.lineJoin = pctx.lineCap = pctx.lineJoin = 'round';
+    }
+
+    function getP(e) {
+        const r = pc.getBoundingClientRect();
+        const ev = e.touches ? e.touches[0] : e;
+        return { x: ev.clientX - r.left, y: ev.clientY - r.top };
+    }
+
+    function sm(m) {
+        mode = m;
+        document.querySelectorAll('.t-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('t-'+(m === 'eraser'?'pen':m))?.classList.add('active');
+    }
+
+    function start(e) {
+        if(mode === 'text') { const p = getP(e); showT(p.x, p.y); return; }
+        drawing = true; const p = getP(e); startX = p.x; startY = p.y;
+        mctx.beginPath(); mctx.moveTo(p.x, p.y);
+    }
+
+    function move(e) {
+        if(!drawing) return; e.preventDefault(); const p = getP(e);
+        if(mode === 'pen' || mode === 'eraser') {
+            mctx.lineTo(p.x, p.y);
+            mctx.strokeStyle = mode === 'eraser' ? '#ffffff' : '#6366f1';
+            mctx.lineWidth = mode === 'eraser' ? 40 : 4;
+            mctx.stroke();
+        } else {
+            pctx.clearRect(0,0,pc.width, pc.height);
+            pctx.strokeStyle = '#6366f1'; pctx.lineWidth = 2; pctx.setLineDash([5,5]);
+            if(mode === 'rect') pctx.strokeRect(startX, startY, p.x-startX, p.y-startY);
+            else if(mode === 'circle') {
+                const rx = Math.abs(p.x-startX)/2, ry = Math.abs(p.y-startY)/2;
+                pctx.beginPath(); pctx.ellipse(startX+(p.x-startX)/2, startY+(p.y-startY)/2, rx, ry, 0, 0, 2*Math.PI); pctx.stroke();
+            }
+        }
+    }
+
+    function stop(e) {
+        if(!drawing) return; drawing = false; const p = getP(e);
+        pctx.clearRect(0,0,pc.width, pc.height);
+        mctx.strokeStyle = '#6366f1'; mctx.lineWidth = 3; mctx.setLineDash([]);
+        if(mode === 'rect') mctx.strokeRect(startX, startY, p.x-startX, p.y-startY);
+        else if(mode === 'circle') {
+            const rx = Math.abs(p.x-startX)/2, ry = Math.abs(p.y-startY)/2;
+            mctx.beginPath(); mctx.ellipse(startX+(p.x-startX)/2, startY+(p.y-startY)/2, rx, ry, 0, 0, 2*Math.PI); mctx.stroke();
+        }
+    }
+
+    function showT(x, y) {
+        const ov = document.getElementById('text-overlay'), inp = document.getElementById('cTxtInput');
+        ov.style.left = x+'px'; ov.style.top = (y-20)+'px'; ov.style.display = 'block';
+        inp.value = ""; setTimeout(()=>inp.focus(), 50);
+        inp.onkeydown = (e) => { if(e.key === 'Enter') { 
+            mctx.fillStyle = "#4338ca"; mctx.font = "bold 20px Kanit"; mctx.fillText(inp.value, x, y);
+            ov.style.display = 'none'; sm('pen');
+        }};
+        inp.onblur = () => ov.style.display = 'none';
+    }
+
+    function clearC() { if(confirm("ล้างกระดานวาดรูปทั้งหมด?")) { mctx.fillStyle="#fff"; mctx.fillRect(0,0,mc.width,mc.height); } }
+
+    pc.addEventListener('mousedown', start); window.addEventListener('mousemove', move); window.addEventListener('mouseup', stop);
+    pc.addEventListener('touchstart', start, {passive:false}); window.addEventListener('touchmove', move, {passive:false}); window.addEventListener('touchend', stop);
+
+    function submit() {
+        if(!confirm("ยืนยันการส่งผลงาน?")) return;
+        document.getElementById('r-name').innerText = "ชื่อ: " + document.getElementById('stuName').value;
+        document.getElementById('r-meta').innerText = `ชั้น ม.3/${document.getElementById('stuClass').value} | เลขที่: ${document.getElementById('stuNo').value}`;
+        
+        let h = "";
+        for(let i=1; i<=3; i++) {
+            h += `<p><b>${i}. ${questions[i-1]}:</b> ${document.getElementById('ans-'+i).value || '-'}</p>`;
+        }
+        document.getElementById('r-ans').innerHTML = h;
+        document.getElementById('r-img').src = mc.toDataURL();
+        next(5);
+    }
+</script>
+</body>
+</html>

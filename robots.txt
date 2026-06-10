@@ -1,0 +1,12 @@
+# robots.txt — Computer Science by ครูภาณุพงศ์ อุ่นคำ
+# โรงเรียนบ้านป่ายุบ (บุ้นกีประชานุเคราะห์)
+
+User-agent: *
+Allow: /
+
+# ไฟล์ภายในที่ไม่ต้องการให้ index
+Disallow: /python-game/multiplayer/match.html
+Disallow: /python-game/multiplayer/room.html
+
+# Sitemap
+Sitemap: https://kruJames.example/sitemap.xml

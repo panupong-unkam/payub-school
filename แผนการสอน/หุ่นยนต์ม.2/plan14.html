@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แผนการจัดการเรียนรู้ที่ 14 — DC Motor + เคลื่อนที่</title>
+    <link rel="stylesheet" href="lesson-plan.css">
+</head>
+<body>
+<div class="nav-bar no-print"><a href="index.html">⬅ กลับ</a><div style="color:white;">แผนที่ 14 / 20 — Hr 27-28</div><button class="print-btn" onclick="window.print()">🖨️ พิมพ์</button></div>
+<div class="paper">
+
+    <h1 class="plan-title">แผนการจัดการเรียนรู้ที่ 14</h1>
+    <div class="plan-meta-row"><span>หน่วยที่ 3 เรื่อง Cytron Maker Pi RP2040 + เว็บ Simulator</span><span>จำนวน 18 ชั่วโมง</span></div>
+    <div class="plan-meta-row"><span>เรื่อง DC Motor + การเคลื่อนที่ของหุ่นยนต์ (เดินหน้า/ถอย/เลี้ยว)</span><span>จำนวน 2 ชั่วโมง (ชั่วโมงที่ 27-28)</span></div>
+    <div class="plan-meta-row"><span>วิชา หุ่นยนต์</span><span>กลุ่มสาระการเรียนรู้ วิทยาศาสตร์และเทคโนโลยี</span></div>
+    <div class="plan-meta-row"><span>ชั้นมัธยมศึกษาปีที่ 2</span><span>ภาคเรียนที่ 1 ปีการศึกษา 2569</span></div>
+    <div class="plan-meta-row"><span>ผู้สอน นายภาณุพงศ์ อุ่นคำ</span><span>โรงเรียนบ้านป่ายุบ (บุ้นกีประชานุเคราะห์)</span></div>
+    <hr class="divider">
+
+    <div class="section">
+        <div class="section-title">1. มาตรฐานการเรียนรู้/ตัวชี้วัด</div>
+        <p class="indent"><b>มาตรฐาน ว 4.2</b> เข้าใจและใช้แนวคิดเชิงคำนวณในการแก้ปัญหา</p>
+        <p class="indent bold">ตัวชี้วัดระหว่างทาง</p>
+        <p class="indent2"><b>ว 4.2 ม.2/2</b> ออกแบบและเขียนโปรแกรมที่ใช้ตรรกะและฟังก์ชันในการแก้ปัญหา</p>
+        <p class="indent2"><b>ว 4.2 ม.2/3</b> อภิปรายองค์ประกอบและหลักการทำงานของระบบคอมพิวเตอร์</p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">2. จุดประสงค์การเรียนรู้</div>
+        <ol>
+            <li>อธิบายความแตกต่างระหว่าง DC Motor และ Servo Motor ได้ <span class="kpa">K</span></li>
+            <li>อธิบายหลักการทำงานของ Motor Driver (DRV8833) บน Maker Pi RP2040 ได้ <span class="kpa">K</span></li>
+            <li>เขียนฟังก์ชัน <code>forward(), backward(), turn_left(), turn_right(), stop()</code> ได้ <span class="kpa">P</span></li>
+            <li>เขียนโปรแกรม "หุ่นยนต์เต้นรำ" 6 จังหวะ <span class="kpa">P</span></li>
+            <li>ระมัดระวังเรื่องความปลอดภัยของหุ่นยนต์เคลื่อนที่ (ยกขึ้นก่อนทดสอบ) <span class="kpa">A</span></li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">3. คุณลักษณะอันพึงประสงค์</div>
+        <p class="indent">☐ 1. รักชาติฯ ☐ 2. ซื่อสัตย์ ☑ 3. มีวินัย ☑ 4. ใฝ่เรียนรู้ ☐ 5. พอเพียง ☑ 6. มุ่งมั่น ☐ 7. รักไทย ☐ 8. จิตสาธารณะ</p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">4. สมรรถนะสำคัญของผู้เรียน</div>
+        <ol><li>ความสามารถในการคิด</li><li>ความสามารถในการแก้ปัญหา</li><li>ความสามารถในการใช้เทคโนโลยี</li></ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">5. สาระสำคัญ</div>
+        <p class="indent">DC Motor หมุนต่อเนื่อง (ไม่หยุดที่มุม) เหมาะกับล้อหุ่นยนต์ Maker Pi RP2040 มี Motor Driver ชิป <b>DRV8833</b> ในตัว ขับได้ 2 มอเตอร์ — Motor 1: GP8 (M1A) + GP9 (M1B), Motor 2: GP10 (M2A) + GP11 (M2B) ใช้ PWM frequency 10000 Hz ส่งสัญญาณ duty_cycle (0-65535) เป็นแรง การหมุนทิศ A>0,B=0 = เดินหน้า / A=0,B>0 = ถอยหลัง / A=0,B=0 = หยุด การหมุนตัว (Tank Turn) ใช้ล้อ 2 ฝั่งคนละทิศ การเขียนฟังก์ชันช่วยให้โค้ดอ่านง่ายและใช้ซ้ำได้</p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">6. ความรู้เดิมที่นักเรียนต้องมี</div>
+        <ol><li>การใช้ PWM จากแผน Servo (13)</li><li>การคิดเรื่องการเคลื่อนที่จาก VEXcode VR หน่วย 1</li><li>การเขียน function พื้นฐาน</li></ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">7. การจัดกิจกรรมการเรียนรู้</div>
+        <div class="hour-banner">▶ ชั่วโมงที่ 27 (60 นาที) : DC Motor และ Motor Driver</div>
+
+        <p class="step-banner">ขั้นที่ 1: การวิเคราะห์และกำหนดรายละเอียดของปัญหา (15 นาที)</p>
+        <ol>
+            <li>ครูเปิดเว็บไซต์ <code>Robotm.2/Hr27-28RP.html</code> และให้นักเรียนลงชื่อ</li>
+            <p class="teacher-q">รถบังคับวิทยุของเล่นใช้มอเตอร์แบบใด? ทำไมไม่ใช้ Servo?</p>
+            <p class="student-a">ใช้ DC Motor เพราะต้องการให้ล้อหมุนต่อเนื่อง ไม่ใช่หมุนถึงมุมแล้วหยุด Servo จะไม่เหมาะกับล้อ</p>
+        </ol>
+
+        <p class="step-banner">ขั้นที่ 2: การวางแผนการแก้ปัญหา (20 นาที)</p>
+        <ol start="2">
+            <li>ครูแสดงตารางเปรียบเทียบ DC Motor vs Servo</li>
+            <li>ครูแนะนำ Motor Driver DRV8833 และตำแหน่งขั้ว M1A/B, M2A/B บนบอร์ด</li>
+            <li>ครูสาธิตการทำงาน 3 สถานะ: เดินหน้า, ถอยหลัง, หยุด</li>
+        </ol>
+
+        <p class="step-banner">ขั้นที่ 3: การดำเนินการแก้ปัญหา (25 นาที)</p>
+        <ol start="5">
+            <li>นักเรียนทดลอง Robot Car Demo ในเว็บไซต์ (ปุ่ม F/B/L/R/S)</li>
+            <li>นักเรียนเขียนโค้ดควบคุมมอเตอร์ 1 ตัวก่อน: เดินหน้า 2 วินาที แล้วหยุด</li>
+        </ol>
+
+        <div class="hour-banner">▶ ชั่วโมงที่ 28 (60 นาที) : หุ่นยนต์เต้นรำ 6 จังหวะ</div>
+
+        <p class="step-banner">ขั้นที่ 3 (ต่อ): การดำเนินการแก้ปัญหา (40 นาที)</p>
+        <ol start="7">
+            <li>ครูสอนการเขียนฟังก์ชัน <code>forward(), backward(), turn_left(), turn_right(), stop()</code></li>
+            <li>นักเรียนเขียนโปรแกรม "หุ่นยนต์เต้นรำ" 6 จังหวะ:
+                <ul>
+                    <li>เดินหน้า 1 วินาที → ถอย 1 วินาที</li>
+                    <li>หมุนซ้าย 0.5 วิ → หมุนขวา 0.5 วิ</li>
+                    <li>หมุน 360° (ทดลองเวลา)</li>
+                    <li>หยุด + LED กระพริบเขียว 3 ครั้ง</li>
+                </ul>
+            </li>
+            <li>นักเรียนทดสอบโดย <b>ยกหุ่นยนต์ขึ้นจากโต๊ะก่อน</b> เพื่อความปลอดภัย</li>
+        </ol>
+
+        <p class="step-banner">ขั้นที่ 4: การตรวจสอบและประเมินผล (20 นาที)</p>
+        <ol start="10">
+            <li>นักเรียนทำใบงานที่ 14.1 + วิดีโอ ≥30 วินาที</li>
+            <li>นักเรียนทำแบบทดสอบ 5 ข้อ</li>
+            <p class="teacher-q">ทำไมต้องเขียนฟังก์ชัน forward(), backward() ฯลฯ แทนการเขียนคำสั่งซ้ำ?</p>
+            <p class="student-a">ใช้ซ้ำได้ง่าย อ่านโค้ดเข้าใจง่ายขึ้น แก้ไขที่ฟังก์ชันที่เดียวมีผลทุกที่ที่เรียก — นี่คือหลัก DRY (Don't Repeat Yourself)</p>
+            <li>ครูสรุปบทเรียน</li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">8. ชิ้นงาน / ภาระงาน</div>
+        <ol><li>ใบงานที่ 14.1 "หุ่นยนต์เต้นรำ" + วิดีโอ ≥30 วินาที + แคปโค้ด</li><li>แบบทดสอบ 5 ข้อ</li></ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">9. การวัดและประเมินผล</div>
+        <table class="eval">
+            <thead><tr><th>รายการ</th><th>วิธีวัด</th><th>เครื่องมือ</th><th>เกณฑ์</th></tr></thead>
+            <tbody>
+                <tr><td><b>1. ความรู้ (K)</b></td><td>ตรวจใบงาน + ทดสอบ</td><td>1. ใบงาน 14.1<br>2. แบบทดสอบ 5 ข้อ</td><td>ร้อยละ 60</td></tr>
+                <tr><td><b>2. ทักษะกระบวนการ (P)</b></td><td>ตรวจชิ้นงาน</td><td>3. แบบประเมินทักษะ</td><td>ระดับ "ดี"</td></tr>
+                <tr><td><b>3. พฤติกรรม</b></td><td>สังเกต</td><td>4. แบบสังเกตพฤติกรรม</td><td>ระดับ "พอใช้"</td></tr>
+                <tr><td><b>4. คุณลักษณะ</b></td><td>สังเกต</td><td>5. แบบประเมินคุณลักษณะ</td><td>ระดับ "ผ่าน"</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <div class="section-title">10. สื่อและแหล่งการเรียนรู้</div>
+        <p class="indent"><b>สื่อ:</b> 1. <code>Robotm.2/Hr27-28RP.html</code> (Robot Car Demo) &nbsp; 2. DC Motor 2 ตัว + ตัวถังหุ่นยนต์ &nbsp; 3. บอร์ด Maker Pi &nbsp; 4. ใบงาน 14.1</p>
+        <p class="indent"><b>แหล่งการเรียนรู้:</b> 1. ห้องคอมพิวเตอร์ &nbsp; 2. อินเทอร์เน็ต</p>
+    </div>
+
+    <div class="page-break"></div>
+
+    <div class="appendix-banner">ภาคผนวก: เครื่องมือวัดและประเมินผล</div>
+
+    <div class="tool-title">เครื่องมือที่ 1: ใบงานที่ 14.1 และแบบประเมิน</div>
+
+    <div class="worksheet-header">
+        <h3>ใบงานที่ 14.1 "หุ่นยนต์เต้นรำ"</h3>
+        <p>ชื่อ-สกุล <span class="dots">..................................................................</span> ชั้น ม.2/<span class="dots">....</span> เลขที่ <span class="dots">....</span></p>
+    </div>
+
+    <p class="bold">ตอนที่ 1: ออกแบบฟังก์ชัน</p>
+    <p class="indent">1. forward() — M1: <span class="dots">.....</span> M2: <span class="dots">.....</span></p>
+    <p class="indent">2. turn_left() — M1: <span class="dots">.....</span> M2: <span class="dots">.....</span></p>
+    <p class="indent">3. ความเร็ว (SPEED) ที่เลือก: <span class="dots">.....</span> (0.0 - 1.0)</p>
+
+    <p class="bold">ตอนที่ 2: ลำดับการเต้น 6 จังหวะ</p>
+    <ol>
+        <li>เดินหน้า 1 วินาที</li><li>ถอยหลัง 1 วินาที</li>
+        <li>หมุนซ้าย 0.5 วินาที</li><li>หมุนขวา 0.5 วินาที</li>
+        <li>หมุน 360° — ทดลองเวลา = <span class="dots">.....</span> วินาที</li>
+        <li>หยุด + LED กระพริบเขียว 3 ครั้ง</li>
+    </ol>
+
+    <p class="bold">ตอนที่ 3: ส่งงาน</p>
+    <p class="indent">☐ 1. แคปโค้ดเต็ม &nbsp;&nbsp; ☐ 2. วิดีโอ ≥30 วินาที หุ่นยนต์เต้นรำ</p>
+    <p class="indent">☐ 3. แคปตอนหมุน 360° &nbsp;&nbsp; ☐ 4. แคป LED กระพริบ</p>
+
+    <p class="bold">ตอนที่ 4: คำถามท้าทาย (โบนัส +5)</p>
+    <p class="indent">เพิ่ม "เพลงของคุณเอง" + เปลี่ยน LED ตามจังหวะ + บัซเซอร์ — เขียน Pseudo</p>
+    <p class="indent dots">.................................................................................................................</p>
+
+    <div style="margin-top: 14pt; padding: 8pt; border: 1pt dashed #1e3a8a; background: #f0f9ff;">
+        <p class="bold" style="color: #1e3a8a;">เฉลย (สำหรับครู) - โค้ดหลัก</p>
+        <div class="code-box">import board, pwmio, time
+m1a = pwmio.PWMOut(board.GP8, frequency=10000)
+m1b = pwmio.PWMOut(board.GP9, frequency=10000)
+m2a = pwmio.PWMOut(board.GP10, frequency=10000)
+m2b = pwmio.PWMOut(board.GP11, frequency=10000)
+SPEED = 0.7
+
+def set_motor(a, b, s):
+    if s >= 0: a.duty_cycle = int(s*65535); b.duty_cycle = 0
+    else: a.duty_cycle = 0; b.duty_cycle = int(abs(s)*65535)
+
+def forward(): set_motor(m1a,m1b,SPEED); set_motor(m2a,m2b,SPEED)
+def backward(): set_motor(m1a,m1b,-SPEED); set_motor(m2a,m2b,-SPEED)
+def left(): set_motor(m1a,m1b,SPEED); set_motor(m2a,m2b,-SPEED)
+def right(): set_motor(m1a,m1b,-SPEED); set_motor(m2a,m2b,SPEED)
+def stop(): set_motor(m1a,m1b,0); set_motor(m2a,m2b,0)
+
+forward(); time.sleep(1); backward(); time.sleep(1)
+left(); time.sleep(0.5); right(); time.sleep(0.5)
+# 360° rotation - test for actual time
+left(); time.sleep(2); stop()</div>
+    </div>
+
+    <p class="bold" style="margin-top: 12pt;">แบบประเมินใบงาน 14.1</p>
+    <table>
+        <thead><tr><th style="width: 25%;">ประเด็น</th><th>ดีมาก (3)</th><th>ดี (2)</th><th>ปรับปรุง (1)</th></tr></thead>
+        <tbody>
+            <tr><td><b>การออกแบบฟังก์ชัน</b></td><td>มีครบ 5 ฟังก์ชัน + ทำงาน</td><td>มี 4 ฟังก์ชัน</td><td>≤3 ฟังก์ชัน</td></tr>
+            <tr><td><b>ลำดับ 6 จังหวะ</b></td><td>ทำครบ + สมบูรณ์</td><td>ครบ 5 จังหวะ</td><td>≤4 จังหวะ</td></tr>
+            <tr><td><b>วิดีโอ + แคป</b></td><td>ครบ 4 ไฟล์</td><td>ครบ 3 ไฟล์</td><td>≤2 ไฟล์</td></tr>
+            <tr><td><b>คำถามท้าทาย</b></td><td>มีไอเดียและ Pseudo</td><td>มีโครงสร้าง</td><td>ไม่ตอบ</td></tr>
+        </tbody>
+    </table>
+
+    <div class="page-break"></div>
+
+    <div class="tool-title">เครื่องมือที่ 2: แบบประเมินสมรรถนะการแก้ปัญหา</div>
+    <table>
+        <thead><tr><th style="width: 22%;">พฤติกรรม</th><th>ระดับ 3</th><th>ระดับ 2</th><th>ระดับ 1</th></tr></thead>
+        <tbody>
+            <tr><td><b>วิเคราะห์</b></td><td>เข้าใจ DC vs Servo + Tank Turn</td><td>เข้าใจบางส่วน</td><td>ไม่เข้าใจ</td></tr>
+            <tr><td><b>วางแผน</b></td><td>เขียนฟังก์ชันก่อนเรียกใช้</td><td>วางแผนคร่าวๆ</td><td>เขียนซ้ำ</td></tr>
+            <tr><td><b>ดำเนินการ</b></td><td>หุ่นยนต์เต้นได้ครบ 6 จังหวะ</td><td>เต้นได้ 4-5 จังหวะ</td><td>ไม่ทำงาน</td></tr>
+            <tr><td><b>ตรวจสอบ</b></td><td>ทดสอบ + ปรับเวลาให้พอดี</td><td>ทดสอบครั้งเดียว</td><td>ไม่ทดสอบ</td></tr>
+        </tbody>
+    </table>
+
+    <div class="tool-title">เครื่องมือที่ 3: แบบประเมินพฤติกรรมการทำงาน</div>
+    <table>
+        <thead><tr><th>ลำดับ</th><th>ชื่อ-สกุล</th><th>ตั้งใจ (3)</th><th>รับผิดชอบ (3)</th><th>ตรงเวลา (3)</th><th>รวม (9)</th></tr></thead>
+        <tbody>
+            <tr><td>1</td><td class="dots">...........................................................</td><td></td><td></td><td></td><td></td></tr>
+            <tr><td>2</td><td class="dots">...........................................................</td><td></td><td></td><td></td><td></td></tr>
+            <tr><td>...</td><td class="dots">...........................................................</td><td></td><td></td><td></td><td></td></tr>
+        </tbody>
+    </table>
+
+    <div class="tool-title">เครื่องมือที่ 4: แบบประเมินคุณลักษณะอันพึงประสงค์</div>
+    <table>
+        <thead><tr><th>คุณลักษณะ</th><th>ดีเยี่ยม (3)</th><th>ดี (2)</th><th>ผ่าน (1)</th></tr></thead>
+        <tbody>
+            <tr><td><b>มีวินัย</b></td><td>ยกหุ่นยนต์ขึ้นก่อนทดสอบทุกครั้ง</td><td>ทำบางครั้ง</td><td>ไม่ทำ</td></tr>
+            <tr><td><b>ใฝ่เรียนรู้</b></td><td>ทดลองความเร็วและท่าเต้นใหม่</td><td>ทำตามที่บอก</td><td>ทำเฉพาะที่จำเป็น</td></tr>
+            <tr><td><b>มุ่งมั่นทำงาน</b></td><td>ปรับเวลาจนหุ่นยนต์เต้นสมบูรณ์</td><td>ขอความช่วยเหลือ</td><td>หยุดทำ</td></tr>
+        </tbody>
+    </table>
+
+    <div class="tool-title">บันทึกหลังการสอน</div>
+    <p><b>ผลที่เกิดกับผู้เรียน:</b></p><p class="dots">..........................................................................................................................</p>
+    <p><b>ปัญหา/อุปสรรค:</b></p><p class="dots">..........................................................................................................................</p>
+
+    <table class="signature" style="margin-top: 30pt;"><tr>
+        <td class="left" style="width: 50%;">ลงชื่อ <span class="dots">..............................................</span> ผู้สอน<br>(นายภาณุพงศ์ อุ่นคำ)<br>วันที่ <span class="dots">......./......./.........</span></td>
+        <td class="right">ลงชื่อ <span class="dots">..............................................</span><br>(<span class="dots">...........................................</span>)<br>ผู้อำนวยการโรงเรียนบ้านป่ายุบฯ</td>
+    </tr></table>
+</div>
+</body>
+</html>
