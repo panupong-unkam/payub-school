@@ -143,17 +143,33 @@ function renderItems() {
 }
 
 // --- ACTIONS ---
-async function saveAvatar() {
+async function saveAvatar(andReturn = false) {
   const btn = document.getElementById('btn-save');
+  const btnBack = document.getElementById('btn-save-back');
   btn.disabled = true;
-  btn.textContent = '⏳ กำลังบันทึก...';
+  if (btnBack) btnBack.disabled = true;
+  const targetBtn = andReturn && btnBack ? btnBack : btn;
+  const oldLabel = targetBtn.innerHTML;
+  targetBtn.textContent = '⏳ กำลังบันทึก...';
+
   const { error } = await PY3D.saveAvatar(currentAvatar);
   btn.disabled = false;
-  btn.innerHTML = '💾 บันทึก';
+  if (btnBack) btnBack.disabled = false;
+  targetBtn.innerHTML = oldLabel;
+
   if (error) {
     showToast('❌ บันทึกไม่สำเร็จ: ' + (error.message || error));
-  } else {
-    showToast('✅ บันทึกแล้ว!');
+    return;
+  }
+  showToast('✅ บันทึกแล้ว!');
+
+  // กลับห้องอัตโนมัติ ถ้ามี return URL
+  if (andReturn && window.__RETURN_URL__) {
+    setTimeout(() => {
+      let href = window.__RETURN_URL__;
+      if (window.PY3D && PY3D.linkWithSession) href = PY3D.linkWithSession(href);
+      location.href = href;
+    }, 700);
   }
 }
 

@@ -17,9 +17,9 @@
 <canvas id="bg-canvas"></canvas>
 
 <header class="game-topbar">
-  <a href="../index.html" class="back-btn">
+  <a href="../index.html" class="back-btn" id="back-btn">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-    กลับ
+    <span id="back-btn-text">กลับ</span>
   </a>
   <div class="topbar-title">
     <span class="topbar-emoji">👕</span>
@@ -28,10 +28,49 @@
       <div class="topbar-sub" id="user-label">กำลังโหลดข้อมูล...</div>
     </div>
   </div>
-  <button class="btn-hero btn-hero-primary" id="btn-save" onclick="saveAvatar()">
-    💾 บันทึก
-  </button>
+  <div style="display:flex; gap:10px; flex-wrap:wrap;">
+    <button class="btn-hero btn-hero-ghost" id="btn-save" onclick="saveAvatar(false)">
+      💾 บันทึก
+    </button>
+    <button class="btn-hero btn-hero-primary" id="btn-save-back" onclick="saveAvatar(true)" style="display:none;">
+      💾 บันทึก + กลับห้อง
+    </button>
+  </div>
 </header>
+
+<script>
+// 🔙 ตั้งค่า back button + ปุ่มกลับห้อง ตาม ?return=
+(function setupReturnUrl(){
+  const params = new URLSearchParams(location.search);
+  const ret = params.get('return');
+  if (!ret) return;
+  let decoded;
+  try { decoded = decodeURIComponent(ret); } catch { return; }
+  // ตรวจว่าเป็น relative path ภายในเว็บ (ไม่ใช่ลิงก์ภายนอก)
+  if (/^(https?:|javascript:|\/\/)/.test(decoded)) return;
+  // คำนวณ relative จาก /avatar/index.html ไปยัง return target
+  // ถ้า decoded ขึ้นต้นด้วย / (absolute path) ใช้ตรงๆ
+  // ถ้าเป็น path ภายในให้แปลง
+  let targetHref;
+  if (decoded.startsWith('/')) {
+    targetHref = decoded;
+  } else {
+    targetHref = '../' + decoded.replace(/^\.\.?\//, '');
+  }
+  window.__RETURN_URL__ = targetHref;
+  // อัปเดต back button
+  const backBtn = document.getElementById('back-btn');
+  const backText = document.getElementById('back-btn-text');
+  if (backBtn) backBtn.href = targetHref;
+  // เปลี่ยน label ถ้าจะกลับห้อง
+  if (decoded.includes('room.html')) {
+    if (backText) backText.textContent = 'ห้องของฉัน';
+    document.getElementById('btn-save-back').style.display = '';
+  } else if (decoded.includes('lobby.html')) {
+    if (backText) backText.textContent = 'Lobby';
+  }
+})();
+</script>
 
 <main class="avatar-shell">
   <!-- LEFT: 3D PREVIEW -->

@@ -27,7 +27,8 @@
       <div class="topbar-sub" id="user-label">กำลังโหลด...</div>
     </div>
   </div>
-  <a href="../avatar/index.html" class="back-btn">👕 แต่งตัว</a>
+  <a href="../avatar/index.html" class="back-btn"
+     onclick="this.href = '../avatar/index.html?return=' + encodeURIComponent(location.pathname + location.search)">👕 แต่งตัว</a>
 </header>
 
 <main class="lobby-shell">
