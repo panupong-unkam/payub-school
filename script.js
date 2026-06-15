@@ -4034,9 +4034,9 @@ btn = Pin(4, Pin.IN)    # GROVE 3  Signal1
 
 while True:
     if btn.value() == 1:
-        led.on()    # กดปุ่ม → LED ติด
+        led.on()    # กดปุ่ม  LED ติด
     else:
-        led.off()   # ปล่อยปุ่ม → LED ดับ
+        led.off()   # ปล่อยปุ่ม  LED ดับ
     time.sleep(0.05)  # อ่านค่าทุก 50ms
 `,
         m4: `from machine import Pin
@@ -4062,9 +4062,9 @@ led = Pin(2, Pin.OUT)      # GROVE 2 Signal1
 while True:
     light = ldr.read_u16()
     if light < 20000:
-        led.on()    # มืด → เปิดไฟ
+        led.on()    # มืด  เปิดไฟ
     else:
-        led.off()   # สว่าง → ปิดไฟ
+        led.off()   # สว่าง  ปิดไฟ
     time.sleep(0.1)  # อ่านค่าทุก 100ms
 `,
         m6: `from machine import Pin, PWM
@@ -4202,15 +4202,15 @@ void loop() {
 
 void loop() {
     if (digitalRead(4) == HIGH) {
-        digitalWrite(2, HIGH);  // กดปุ่ม → LED ติด
+        digitalWrite(2, HIGH);  // กดปุ่ม  LED ติด
     } else {
-        digitalWrite(2, LOW);   // ปล่อยปุ่ม → LED ดับ
+        digitalWrite(2, LOW);   // ปล่อยปุ่ม  LED ดับ
     }
     delay(50);  // อ่านค่าทุก 50ms
 }
 `,
         m4: `void setup() {
-    pinMode(6, OUTPUT);    // GROVE 4 — Signal1
+    pinMode(6, OUTPUT);    // GROVE 4 Signal1
 }
 
 void loop() {
