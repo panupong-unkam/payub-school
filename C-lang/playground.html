@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#00599C">
+<title>Playground — เขียนโค้ด C ในเบราว์เซอร์ | ครูภาณุพงศ์</title>
+<link rel="icon" type="image/svg+xml" href="../logo.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Noto+Serif+Thai:wght@400;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="c-style.css">
+
+<!-- JSCPP — C/C++ Interpreter in JavaScript (v2.0.9, loaded via esm.sh as ES module) -->
+<script type="module">
+  try {
+    const mod = await import('https://esm.sh/JSCPP@2.0.9');
+    window.JSCPP = mod.default || mod;
+    window.dispatchEvent(new Event('jscpp-ready'));
+  } catch (e) {
+    console.error('JSCPP load failed:', e);
+    window.__jscppError = e;
+    window.dispatchEvent(new Event('jscpp-failed'));
+  }
+</script>
+
+<style>
+  body { overflow: hidden; }
+
+  .pg-wrap {
+    height: calc(100vh - 62px);
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    overflow: hidden;
+  }
+
+  .pg-sidebar {
+    background: var(--c-card);
+    border-right: 1px solid var(--c-border);
+    overflow-y: auto;
+    padding: 14px;
+  }
+
+  .pg-sidebar h4 {
+    font-size: 13px;
+    color: var(--c-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 14px 6px 8px;
+    font-weight: 700;
+  }
+
+  .pg-snippet {
+    display: block;
+    padding: 10px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    color: var(--c-text);
+    font-size: 13px;
+    margin-bottom: 4px;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+    text-decoration: none;
+  }
+
+  .pg-snippet:hover {
+    background: var(--c-bg);
+    border-color: var(--c-border);
+    color: var(--c-primary);
+  }
+
+  .pg-snippet .snippet-icon { margin-right: 8px; }
+
+  .pg-main {
+    display: grid;
+    grid-template-rows: 1fr 280px;
+    overflow: hidden;
+  }
+
+  .pg-editor-wrap {
+    display: flex;
+    flex-direction: column;
+    background: var(--c-code-bg);
+    overflow: hidden;
+  }
+
+  .pg-toolbar {
+    background: linear-gradient(135deg, var(--c-primary), var(--c-primary-dark));
+    color: white;
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .pg-toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    font-size: 14px;
+  }
+
+  .pg-toolbar-right {
+    display: flex;
+    gap: 8px;
+  }
+
+  .pg-editor {
+    flex: 1;
+    width: 100%;
+    background: var(--c-code-bg);
+    color: #E4E4E7;
+    border: none;
+    padding: 16px 18px;
+    font-family: 'Fira Code', 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.7;
+    resize: none;
+    outline: none;
+    tab-size: 4;
+    white-space: pre;
+  }
+
+  .pg-bottom {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-top: 2px solid var(--c-border);
+    overflow: hidden;
+  }
+
+  .pg-stdin-wrap, .pg-output-wrap {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .pg-stdin-wrap {
+    border-right: 1px solid var(--c-border);
+  }
+
+  .pg-panel-header {
+    background: var(--c-card);
+    padding: 8px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--c-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 1px solid var(--c-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .pg-stdin {
+    flex: 1;
+    background: var(--c-code-bg);
+    color: #E4E4E7;
+    border: none;
+    padding: 12px;
+    font-family: 'Fira Code', monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    resize: none;
+    outline: none;
+  }
+
+  .pg-output {
+    flex: 1;
+    background: #0A0E14;
+    color: #43C463;
+    padding: 12px;
+    font-family: 'Fira Code', monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    overflow-y: auto;
+    word-break: break-word;
+  }
+
+  .pg-output.error { color: var(--c-danger); }
+  .pg-output.running { color: var(--c-accent); }
+
+  .pg-status {
+    display: inline-block;
+    padding: 2px 10px;
+    background: rgba(67, 196, 99, 0.2);
+    color: var(--c-success);
+    border-radius: 100px;
+    font-size: 11px;
+    margin-left: 8px;
+  }
+
+  .pg-status.loading {
+    background: rgba(255, 204, 0, 0.2);
+    color: var(--c-accent);
+  }
+
+  .pg-status.error {
+    background: rgba(230, 57, 70, 0.2);
+    color: var(--c-danger);
+  }
+
+  @media (max-width: 800px) {
+    .pg-wrap { grid-template-columns: 1fr; height: auto; }
+    .pg-sidebar { border-right: none; border-bottom: 1px solid var(--c-border); max-height: 200px; }
+    .pg-main { height: 90vh; }
+    .pg-bottom { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
+    .pg-stdin-wrap { border-right: none; border-bottom: 1px solid var(--c-border); }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<header class="c-topbar">
+  <div class="c-topbar-left">
+    <a href="index.html" class="c-btn-icon" title="กลับหน้าหลัก">←</a>
+    <div class="c-topbar-logo">C</div>
+    <div>
+      <div class="c-topbar-title">💻 Playground</div>
+      <div class="c-topbar-subtitle">เขียนโค้ด C แล้วรันได้ทันทีในเบราว์เซอร์</div>
+    </div>
+  </div>
+  <div class="c-topbar-right">
+    <span id="engineStatus" class="pg-status loading">⏳ กำลังโหลด engine...</span>
+    <button class="c-btn-icon" id="themeToggle" title="สลับธีม">🌙</button>
+  </div>
+</header>
+
+<div class="pg-wrap">
+
+  <!-- SIDEBAR — Snippets -->
+  <aside class="pg-sidebar">
+    <h4>📚 ตัวอย่างโค้ด</h4>
+    <a class="pg-snippet" data-snippet="hello"><span class="snippet-icon">👋</span>Hello World</a>
+    <a class="pg-snippet" data-snippet="var"><span class="snippet-icon">📦</span>ตัวแปร & พิมพ์ค่า</a>
+    <a class="pg-snippet" data-snippet="input"><span class="snippet-icon">⌨️</span>รับข้อมูล (scanf)</a>
+    <a class="pg-snippet" data-snippet="if"><span class="snippet-icon">🤔</span>เงื่อนไข if-else</a>
+    <a class="pg-snippet" data-snippet="for"><span class="snippet-icon">🔁</span>ลูป for</a>
+    <a class="pg-snippet" data-snippet="while"><span class="snippet-icon">♾️</span>ลูป while</a>
+    <a class="pg-snippet" data-snippet="func"><span class="snippet-icon">⚙️</span>ฟังก์ชัน</a>
+    <a class="pg-snippet" data-snippet="array"><span class="snippet-icon">📊</span>อาร์เรย์</a>
+    <a class="pg-snippet" data-snippet="string"><span class="snippet-icon">🔤</span>สตริง</a>
+    <a class="pg-snippet" data-snippet="struct"><span class="snippet-icon">🏗️</span>struct</a>
+
+    <h4>🎮 โปรเจกต์เล่น ๆ</h4>
+    <a class="pg-snippet" data-snippet="calc"><span class="snippet-icon">🧮</span>เครื่องคิดเลข</a>
+    <a class="pg-snippet" data-snippet="guess"><span class="snippet-icon">🎯</span>ทายตัวเลข</a>
+    <a class="pg-snippet" data-snippet="grade"><span class="snippet-icon">🎓</span>คำนวณเกรด</a>
+    <a class="pg-snippet" data-snippet="multi"><span class="snippet-icon">✖️</span>ตารางสูตรคูณ</a>
+    <a class="pg-snippet" data-snippet="prime"><span class="snippet-icon">🔢</span>เช็คเลขเฉพาะ</a>
+  </aside>
+
+  <!-- MAIN AREA -->
+  <main class="pg-main">
+
+    <!-- EDITOR -->
+    <div class="pg-editor-wrap">
+      <div style="background:#FBBF24; color:#78350F; padding:8px 16px; font-size:13px; font-weight:600; text-align:center;">
+        💡 หมายเหตุ: ข้อความใน <code style="background:rgba(0,0,0,0.1); padding:0 4px; border-radius:3px;">printf("...")</code> ขอใช้ <b>ภาษาอังกฤษ</b> นะครับ — engine ในเบราว์เซอร์ยังไม่รองรับภาษาไทยใน string (แต่ comment เป็นไทยได้ปกติ)
+      </div>
+      <div class="pg-toolbar">
+        <div class="pg-toolbar-left">
+          <span>📝</span> main.c
+        </div>
+        <div class="pg-toolbar-right">
+          <button class="c-tryit-btn" id="btnClear">🗑️ ล้าง</button>
+          <button class="c-tryit-btn" id="btnReset">↺ Reset</button>
+          <button class="c-tryit-btn btn-run" id="btnRun">▶ รันโค้ด (Ctrl+Enter)</button>
+        </div>
+      </div>
+      <textarea class="pg-editor" id="editor" spellcheck="false">// 💡 ทุกข้อความใน "..." ให้ใช้ภาษาอังกฤษนะ (JSCPP ยังไม่รองรับ Unicode/ภาษาไทยใน string)
+#include &lt;stdio.h&gt;
+
+int main() {
+    printf("Hello from C!\n");
+    printf("Welcome to Playground\n");
+    return 0;
+}
+</textarea>
+    </div>
+
+    <!-- STDIN + OUTPUT -->
+    <div class="pg-bottom">
+      <div class="pg-stdin-wrap">
+        <div class="pg-panel-header">
+          ⌨️ Input (สำหรับ scanf)
+          <span style="text-transform:none; font-size:11px; opacity:0.7;">บรรทัดละค่า</span>
+        </div>
+        <textarea class="pg-stdin" id="stdin" spellcheck="false" placeholder="ใส่ข้อมูลที่จะส่งเข้าโปรแกรม (ถ้าโปรแกรมใช้ scanf)"></textarea>
+      </div>
+      <div class="pg-output-wrap">
+        <div class="pg-panel-header">
+          📺 Output (ผลลัพธ์)
+          <span id="outStatus" style="text-transform:none; font-size:11px;"></span>
+        </div>
+        <div class="pg-output" id="output">▸ กดปุ่ม "รันโค้ด" เพื่อดูผลลัพธ์</div>
+      </div>
+    </div>
+
+  </main>
+
+</div>
+
+<script>
+/* ============================================
+   THEME
+   ============================================ */
+const themeBtn = document.getElementById('themeToggle');
+const savedTheme = localStorage.getItem('clang-theme') || 'light';
+document.documentElement.setAttribute('data-theme', savedTheme);
+themeBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+themeBtn.addEventListener('click', () => {
+  const curr = document.documentElement.getAttribute('data-theme');
+  const next = curr === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('clang-theme', next);
+  themeBtn.textContent = next === 'dark' ? '☀️' : '🌙';
+});
+
+/* ============================================
+   SNIPPETS
+   ============================================ */
+const SNIPPETS = {
+  hello: `// 👋 โปรแกรมแรก — แสดงข้อความออกหน้าจอ
+#include <stdio.h>
+
+int main() {
+    printf("Hello from C!\\n");
+    printf("Welcome to Playground\\n");
+    return 0;
+}
+`,
+  var: `// 📦 ตัวแปร & การพิมพ์ค่า
+#include <stdio.h>
+
+int main() {
+    int age = 14;            // อายุ
+    float height = 165.5;    // ส่วนสูง
+    char grade = 'A';        // เกรด
+
+    printf("Age: %d years\\n", age);
+    printf("Height: %.1f cm\\n", height);
+    printf("Grade: %c\\n", grade);
+    return 0;
+}
+`,
+  input: `// ⌨️ รับ input จากผู้ใช้ ด้วย scanf
+#include <stdio.h>
+
+int main() {
+    int a, b;
+    printf("Enter 2 numbers: ");
+    scanf("%d %d", &a, &b);
+    printf("Sum = %d\\n", a + b);
+    return 0;
+}
+// ลองใส่ใน Input ข้างล่าง: 5 7
+`,
+  if: `// 🤔 ตัดสินใจด้วย if-else
+#include <stdio.h>
+
+int main() {
+    int score;
+    printf("Enter score (0-100): ");
+    scanf("%d", &score);
+
+    if (score >= 80) {
+        printf("Grade A\\n");
+    } else if (score >= 70) {
+        printf("Grade B\\n");
+    } else if (score >= 60) {
+        printf("Grade C\\n");
+    } else {
+        printf("Failed!\\n");
+    }
+    return 0;
+}
+// ลองใส่ใน Input: 85
+`,
+  for: `// 🔁 ลูป for — ทำซ้ำหลายรอบ
+#include <stdio.h>
+
+int main() {
+    // นับ 1 ถึง 10
+    for (int i = 1; i <= 10; i++) {
+        printf("%d ", i);
+    }
+    printf("\\n");
+    return 0;
+}
+`,
+  while: `// ♾️ ลูป while
+#include <stdio.h>
+
+int main() {
+    int n = 1;
+    while (n <= 5) {
+        printf("Round %d\\n", n);
+        n++;
+    }
+    return 0;
+}
+`,
+  func: `// ⚙️ ฟังก์ชัน — สร้างคำสั่งของเราเอง
+#include <stdio.h>
+
+// ฟังก์ชันบวกเลข
+int add(int a, int b) {
+    return a + b;
+}
+
+int main() {
+    int result = add(10, 20);
+    printf("10 + 20 = %d\\n", result);
+    printf("3 + 7 = %d\\n", add(3, 7));
+    return 0;
+}
+`,
+  array: `// 📊 อาร์เรย์ — เก็บข้อมูลหลายค่า
+#include <stdio.h>
+
+int main() {
+    int scores[5] = {85, 90, 78, 92, 88};
+    int sum = 0;
+
+    for (int i = 0; i < 5; i++) {
+        printf("Person %d: %d points\\n", i + 1, scores[i]);
+        sum += scores[i];
+    }
+    printf("Average: %.2f\\n", sum / 5.0);
+    return 0;
+}
+`,
+  string: `// 🔤 สตริง = อาร์เรย์ของตัวอักษร
+#include <stdio.h>
+#include <string.h>
+
+int main() {
+    char name[50] = "Krujames";
+    printf("Name: %s\\n", name);
+    printf("Length: %d chars\\n", (int)strlen(name));
+    return 0;
+}
+`,
+  struct: `// 🏗️ เก็บข้อมูลของ "นักเรียน 1 คน" ด้วยตัวแปรหลายตัว
+//    (struct จะเรียนในหน่วยที่ 9 — engine นี้ยังไม่รองรับ)
+#include <stdio.h>
+
+int main() {
+    char name[30] = "Somchai";
+    int  age      = 14;
+    float gpa     = 3.75f;
+
+    printf("Name: %s\\n", name);
+    printf("Age:  %d\\n", age);
+    printf("GPA:  %.2f\\n", gpa);
+    return 0;
+}
+`,
+  calc: `// 🧮 เครื่องคิดเลข — เลือก op ด้วยเลข 1-4
+#include <stdio.h>
+
+int main() {
+    float a, b;
+    int op;
+    printf("Number 1: ");  scanf("%f", &a);
+    printf("Op (1=+ 2=- 3=* 4=/): "); scanf("%d", &op);
+    printf("Number 2: ");  scanf("%f", &b);
+
+    if (op == 1) printf("= %.2f\\n", a + b);
+    else if (op == 2) printf("= %.2f\\n", a - b);
+    else if (op == 3) printf("= %.2f\\n", a * b);
+    else if (op == 4) {
+        if (b != 0) printf("= %.2f\\n", a / b);
+        else printf("Cannot divide by zero!\\n");
+    }
+    else printf("Unknown op\\n");
+    return 0;
+}
+// ลองใส่ใน Input (บรรทัดละค่า):
+// 12
+// 3
+// 7
+`,
+  guess: `// 🎯 เกมทายตัวเลข — คำตอบคือ 42
+#include <stdio.h>
+
+int main() {
+    int answer = 42;
+    int guess;
+    int tries = 0;
+
+    printf("Guess the number (1-100)\\n");
+    do {
+        printf("Guess: ");
+        scanf("%d", &guess);
+        tries++;
+        if (guess < answer) printf("Too low!\\n");
+        else if (guess > answer) printf("Too high!\\n");
+        else printf("Correct! Took %d tries\\n", tries);
+    } while (guess != answer);
+    return 0;
+}
+// ลองใส่ใน Input (บรรทัดละค่า):
+// 50
+// 25
+// 40
+// 45
+// 42
+`,
+  grade: `// 🎓 คำนวณเกรดจากคะแนน 5 คน
+#include <stdio.h>
+
+int main() {
+    // ลองแก้ค่าใน { } เป็นคะแนนของเพื่อน ๆ ดูสิ!
+    int scores[5] = {85, 72, 60, 45, 91};
+
+    for (int i = 0; i < 5; i++) {
+        char g;
+        if (scores[i] >= 80) g = 'A';
+        else if (scores[i] >= 70) g = 'B';
+        else if (scores[i] >= 60) g = 'C';
+        else if (scores[i] >= 50) g = 'D';
+        else g = 'F';
+        printf("Person %d: %d => Grade %c\\n", i + 1, scores[i], g);
+    }
+    return 0;
+}
+`,
+  multi: `// ✖️ ตารางสูตรคูณ
+#include <stdio.h>
+
+int main() {
+    int n;
+    printf("Which times table? ");
+    scanf("%d", &n);
+    for (int i = 1; i <= 12; i++) {
+        printf("%d x %2d = %d\\n", n, i, n * i);
+    }
+    return 0;
+}
+// Input: 7
+`,
+  prime: `// 🔢 เช็คเลขเฉพาะ
+#include <stdio.h>
+
+int isPrime(int n) {
+    if (n < 2) return 0;
+    for (int i = 2; i * i <= n; i++) {
+        if (n % i == 0) return 0;
+    }
+    return 1;
+}
+
+int main() {
+    int n;
+    printf("Check prime: ");
+    scanf("%d", &n);
+    if (isPrime(n)) printf("%d is prime\\n", n);
+    else printf("%d is NOT prime\\n", n);
+    return 0;
+}
+// Input: 17
+`
+};
+
+const editor = document.getElementById('editor');
+const stdinEl = document.getElementById('stdin');
+const outputEl = document.getElementById('output');
+const outStatus = document.getElementById('outStatus');
+const engineStatus = document.getElementById('engineStatus');
+
+document.querySelectorAll('.pg-snippet').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const key = btn.dataset.snippet;
+    if (SNIPPETS[key]) {
+      editor.value = SNIPPETS[key];
+      outputEl.textContent = '▸ โหลดตัวอย่างแล้ว — กดรันได้เลย';
+      outputEl.className = 'pg-output';
+    }
+  });
+});
+
+document.getElementById('btnClear').addEventListener('click', () => {
+  if (confirm('ล้างโค้ดทั้งหมด?')) {
+    editor.value = '';
+    outputEl.textContent = '';
+  }
+});
+
+document.getElementById('btnReset').addEventListener('click', () => {
+  editor.value = SNIPPETS.hello;
+  stdinEl.value = '';
+  outputEl.textContent = '▸ รีเซ็ตแล้ว';
+});
+
+// Tab in editor
+editor.addEventListener('keydown', (e) => {
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    const s = editor.selectionStart;
+    const ev = editor.selectionEnd;
+    editor.value = editor.value.substring(0, s) + '    ' + editor.value.substring(ev);
+    editor.selectionStart = editor.selectionEnd = s + 4;
+  }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+    e.preventDefault();
+    runCode();
+  }
+});
+
+/* ============================================
+   RUN — using JSCPP
+   ============================================ */
+function setStatus(text, type = '') {
+  engineStatus.textContent = text;
+  engineStatus.className = 'pg-status ' + type;
+}
+
+// Check JSCPP loaded — listen for ESM loader events
+function markReady() { setStatus('✓ พร้อมใช้งาน'); }
+function markFailed() { setStatus('✕ ไม่สามารถโหลด engine', 'error'); }
+
+if (typeof window.JSCPP !== 'undefined') markReady();
+else {
+  window.addEventListener('jscpp-ready', markReady);
+  window.addEventListener('jscpp-failed', markFailed);
+  // fallback timeout
+  setTimeout(() => {
+    if (typeof window.JSCPP === 'undefined') markFailed();
+  }, 8000);
+}
+
+function runCode() {
+  if (typeof window.JSCPP === 'undefined') {
+    outputEl.textContent = '⏳ Engine ยังโหลดไม่เสร็จ — รอสักครู่แล้วลองใหม่';
+    outputEl.className = 'pg-output error';
+    return;
+  }
+
+  const code = editor.value;
+  const stdin = stdinEl.value;
+  let output = '';
+
+  outputEl.textContent = '⏳ กำลังรัน...';
+  outputEl.className = 'pg-output running';
+  outStatus.textContent = 'กำลังประมวลผล...';
+
+  const config = {
+    stdio: { write: (s) => { output += s; } },
+    unsigned_overflow: 'warn',
+    maxTimeout: 5000
+  };
+
+  setTimeout(() => {
+    try {
+      const exitCode = window.JSCPP.run(code, stdin, config);
+      outputEl.textContent = output + `\n\n▸ Process exited with code ${exitCode}`;
+      outputEl.className = 'pg-output';
+      outStatus.textContent = `เสร็จสิ้น (exit ${exitCode})`;
+      localStorage.setItem('clang-playground-code', code);
+    } catch (err) {
+      outputEl.textContent = (output ? output + '\n\n' : '') + '❌ เกิดข้อผิดพลาด:\n' + (err.message || err.toString());
+      outputEl.className = 'pg-output error';
+      outStatus.textContent = 'เกิดข้อผิดพลาด';
+    }
+  }, 50);
+}
+
+document.getElementById('btnRun').addEventListener('click', runCode);
+
+// Load last saved code
+const lastCode = localStorage.getItem('clang-playground-code');
+if (lastCode && lastCode.trim()) {
+  editor.value = lastCode;
+}
+</script>
+
+</body>
+</html>

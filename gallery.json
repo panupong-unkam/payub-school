@@ -1,0 +1,67 @@
+{
+  "_comment": "📝 วิธีแก้: เปลี่ยน youtubeId เป็นของจริง / เปลี่ยน url รูปเป็น Cloudinary ของครู (dxqdo0i47) — push ขึ้น GitHub แล้วเว็บอัปเดตทันที",
+  "_cloudinary_cloud_name": "dxqdo0i47",
+  "_cloudinary_url_format": "https://res.cloudinary.com/dxqdo0i47/image/upload/w_800,q_auto,f_auto/<ชื่อไฟล์ที่อัปโหลด>",
+
+  "featuredVideo": {
+    "youtubeId": "nYShO3NtGWw",
+    "title": "วิดีโอแนะนำการเรียน Computer Science",
+    "description": "เรียนรู้พื้นฐานวิทยาการคำนวณ Python และหุ่นยนต์ กับครูภาณุพงศ์"
+  },
+
+  "videos": [
+    {
+      "youtubeId": "dQw4w9WgXcQ",
+      "title": "สอน Python บทที่ 1 — Variables",
+      "description": "พื้นฐานตัวแปรในภาษา Python"
+    },
+    {
+      "youtubeId": "9bZkp7q19f0",
+      "title": "สอน Python บทที่ 2 — Loops",
+      "description": "การวนซ้ำด้วย for และ while"
+    },
+    {
+      "youtubeId": "kJQP7kiw5Fk",
+      "title": "หุ่นยนต์ RP2040 — บทเรียนแรก",
+      "description": "เริ่มต้นกับบอร์ด Raspberry Pi Pico"
+    },
+    {
+      "youtubeId": "fRh_vgS2dFE",
+      "title": "Circuit Lab — ต่อวงจร LED",
+      "description": "ฝึกต่อวงจรไฟฟ้าเบื้องต้น"
+    }
+  ],
+
+  "images": [
+    {
+      "url": "https://res.cloudinary.com/dxqdo0i47/image/upload/w_800,q_auto,f_auto/v1781104021/LINE_ALBUM_%E0%B9%81%E0%B8%82%E0%B9%88%E0%B8%87%E0%B8%82%E0%B8%B1%E0%B8%99%E0%B8%AB%E0%B8%B8%E0%B9%88%E0%B8%99%E0%B8%A2%E0%B8%99%E0%B8%95%E0%B9%8C_260610_9_vm3nuo.jpg",
+      "title": "🤖 การแข่งขันหุ่นยนต์",
+      "caption": "นักเรียนเข้าร่วมแข่งขันหุ่นยนต์ ประจำปี 2569"
+    },
+    {
+      "url": "https://res.cloudinary.com/dxqdo0i47/image/upload/w_800,q_auto,f_auto/v1781104021/LINE_ALBUM_%E0%B8%9C%E0%B8%B9%E0%B9%89%E0%B8%AA%E0%B8%A3%E0%B9%89%E0%B8%B2%E0%B8%87%E0%B8%AA%E0%B8%B7%E0%B9%88%E0%B8%AD_260610_2_etaalp.jpg",
+      "title": "🎬 กิจกรรมผู้สร้างสื่อ",
+      "caption": "นักเรียนเรียนรู้การสร้างสื่อดิจิทัล"
+    },
+    {
+      "url": "https://res.cloudinary.com/dxqdo0i47/image/upload/w_800,q_auto,f_auto/v1781104020/LINE_ALBUM_%E0%B9%81%E0%B8%82%E0%B9%88%E0%B8%87%E0%B8%82%E0%B8%B1%E0%B8%99%E0%B8%AB%E0%B8%B8%E0%B9%88%E0%B8%99%E0%B8%A2%E0%B8%99%E0%B8%95%E0%B9%8C_260610_2_upqia1.jpg",
+      "title": "🤖 ทีมหุ่นยนต์โรงเรียน",
+      "caption": "ฝึกซ้อมและทดสอบหุ่นยนต์ก่อนแข่งขัน"
+    },
+    {
+      "url": "https://res.cloudinary.com/dxqdo0i47/image/upload/w_800,q_auto,f_auto/v1781102193/ipad_246_ppibje.jpg",
+      "title": "📱 การเรียนการสอนยุคใหม่",
+      "caption": "ใช้ iPad ในห้องเรียน Computer Science"
+    },
+    {
+      "url": "https://res.cloudinary.com/dxqdo0i47/image/upload/w_800,q_auto,f_auto/v1781104020/LINE_ALBUM_%E0%B9%81%E0%B8%82%E0%B9%88%E0%B8%87%E0%B8%82%E0%B8%B1%E0%B8%99%E0%B8%AB%E0%B8%B8%E0%B9%88%E0%B8%99%E0%B8%A2%E0%B8%99%E0%B8%95%E0%B9%8C_260610_4_tpx2ym.jpg",
+      "title": "🏆 ผลงานการแข่งขัน",
+      "caption": "ความภาคภูมิใจของทีมนักเรียน"
+    },
+    {
+      "url": "https://res.cloudinary.com/dxqdo0i47/image/upload/w_800,q_auto,f_auto/v1781104021/LINE_ALBUM_%E0%B8%9C%E0%B8%B9%E0%B9%89%E0%B8%AA%E0%B8%A3%E0%B9%89%E0%B8%B2%E0%B8%87%E0%B8%AA%E0%B8%B7%E0%B9%88%E0%B8%AD_260610_1_lkvytt.jpg",
+      "title": "🎨 ผู้สร้างสื่อรุ่นใหม่",
+      "caption": "นักเรียนนำเสนอผลงานสื่อสร้างสรรค์"
+    }
+  ]
+}

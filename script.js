@@ -3989,7 +3989,7 @@ const STARTER_CODE = {
         default: `from machine import Pin
 import time
 
-led = Pin(2, Pin.OUT)   # GROVE 2  Signal1
+led = Pin(2, Pin.OUT)   # GROVE 2 — Signal1
 
 while True:
     led.on()
@@ -4000,7 +4000,7 @@ while True:
         m1: `from machine import Pin
 import time
 
-led = Pin(2, Pin.OUT)   # GROVE 2  Signal1
+led = Pin(2, Pin.OUT)   # GROVE 2 — Signal1
 
 while True:
     led.on()
@@ -4011,9 +4011,9 @@ while True:
         m2: `from machine import Pin
 import time
 
-red    = Pin(2, Pin.OUT)   # GROVE 2  Signal1
-yellow = Pin(4, Pin.OUT)   # GROVE 3  Signal1
-green  = Pin(6, Pin.OUT)   # GROVE 4  Signal1
+red    = Pin(2, Pin.OUT)   # GROVE 2 — Signal1
+yellow = Pin(4, Pin.OUT)   # GROVE 3 — Signal1
+green  = Pin(6, Pin.OUT)   # GROVE 4 — Signal1
 
 while True:
     red.on()
@@ -4029,20 +4029,20 @@ while True:
         m3: `from machine import Pin
 import time
 
-led = Pin(2, Pin.OUT)   # GROVE 2  Signal1
-btn = Pin(4, Pin.IN)    # GROVE 3  Signal1
+led = Pin(2, Pin.OUT)   # GROVE 2 — Signal1
+btn = Pin(4, Pin.IN)    # GROVE 3 — Signal1
 
 while True:
     if btn.value() == 1:
-        led.on()    # กดปุ่ม  LED ติด
+        led.on()    # กดปุ่ม → LED ติด
     else:
-        led.off()   # ปล่อยปุ่ม  LED ดับ
+        led.off()   # ปล่อยปุ่ม → LED ดับ
     time.sleep(0.05)  # อ่านค่าทุก 50ms
 `,
         m4: `from machine import Pin
 import time
 
-buzzer = Pin(6, Pin.OUT)   # GROVE 4  Signal1
+buzzer = Pin(6, Pin.OUT)   # GROVE 4 — Signal1
 
 while True:
     # เล่นเสียงสั้น ๆ 5 ครั้ง
@@ -4056,21 +4056,21 @@ while True:
         m5: `from machine import Pin, ADC
 import time
 
-ldr = ADC(26)              # GROVE 6  ADC0
-led = Pin(2, Pin.OUT)      # GROVE 2 Signal1
+ldr = ADC(26)              # GROVE 6 — ADC0
+led = Pin(2, Pin.OUT)      # GROVE 2 — Signal1
 
 while True:
     light = ldr.read_u16()
     if light < 20000:
-        led.on()    # มืด  เปิดไฟ
+        led.on()    # มืด → เปิดไฟ
     else:
-        led.off()   # สว่าง  ปิดไฟ
+        led.off()   # สว่าง → ปิดไฟ
     time.sleep(0.1)  # อ่านค่าทุก 100ms
 `,
         m6: `from machine import Pin, PWM
 import time
 
-servo = PWM(Pin(12))       # S1 Connector  Signal (GP12)
+servo = PWM(Pin(12))       # S1 Connector — Signal (GP12)
 servo.freq(50)             # ความถี่ 50 Hz สำหรับ Servo
 
 while True:
@@ -4085,8 +4085,8 @@ while True:
         m7: `from machine import Pin, ADC
 import time
 
-soil = ADC(26)             # GROVE 6  ADC0 (Soil Sensor)
-pump = Pin(16, Pin.OUT)    # GROVE 5  Signal1 (Water Pump)
+soil = ADC(26)             # GROVE 6 — ADC0 (Soil Sensor)
+pump = Pin(16, Pin.OUT)    # GROVE 5 — Signal1 (Water Pump)
 
 while True:
     moisture = soil.read_u16()
@@ -4100,7 +4100,7 @@ while True:
         m8: `from machine import Pin
 import time
 
-dht = Pin(4)               # GROVE 3  Signal1 (DHT11)
+dht = Pin(4)               # GROVE 3 — Signal1 (DHT11)
 
 while True:
     temp = dht.read_temp()       # อุณหภูมิ (°C)
@@ -4202,15 +4202,15 @@ void loop() {
 
 void loop() {
     if (digitalRead(4) == HIGH) {
-        digitalWrite(2, HIGH);  // กดปุ่ม  LED ติด
+        digitalWrite(2, HIGH);  // กดปุ่ม → LED ติด
     } else {
-        digitalWrite(2, LOW);   // ปล่อยปุ่ม  LED ดับ
+        digitalWrite(2, LOW);   // ปล่อยปุ่ม → LED ดับ
     }
     delay(50);  // อ่านค่าทุก 50ms
 }
 `,
         m4: `void setup() {
-    pinMode(6, OUTPUT);    // GROVE 4 Signal1
+    pinMode(6, OUTPUT);    // GROVE 4 — Signal1
 }
 
 void loop() {
@@ -4242,7 +4242,7 @@ void loop() {
 Servo myServo;
 
 void setup() {
-    myServo.attach(12);    // S1 Signal  GP12 (5V จาก VBUS)
+    myServo.attach(12);    // S1 Signal — GP12 (5V จาก VBUS)
 }
 
 void loop() {
@@ -4255,8 +4255,8 @@ void loop() {
 }
 `,
         m7: `void setup() {
-    pinMode(16, OUTPUT);   // GROVE 5  Pump
-    pinMode(26, INPUT);    // GROVE 6  ADC0 (Soil)
+    pinMode(16, OUTPUT);   // GROVE 5 — Pump
+    pinMode(26, INPUT);    // GROVE 6 — ADC0 (Soil)
 }
 
 void loop() {
@@ -4270,7 +4270,7 @@ void loop() {
 }
 `,
         m8: `#include <DHT.h>
-DHT dht(4, DHT11);         // GROVE 3  Signal1
+DHT dht(4, DHT11);         // GROVE 3 — Signal1
 
 void setup() {
     Serial.begin(9600);
@@ -4288,8 +4288,8 @@ void loop() {
 }
 `,
         m10: `void setup() {
-    pinMode(8, OUTPUT);   // MOTOR 1  IN1
-    pinMode(9, OUTPUT);   // MOTOR 1  IN2
+    pinMode(8, OUTPUT);   // MOTOR 1 — IN1
+    pinMode(9, OUTPUT);   // MOTOR 1 — IN2
 }
 
 void loop() {
@@ -7461,5 +7461,206 @@ if (!window._pasteHandlerAttached) {
         document.addEventListener('DOMContentLoaded', start);
     } else {
         start();
+    }
+})();
+
+/* =====================================================
+   🎬 GALLERY MODULE — Featured Video + Image Marquee
+   โหลดจาก gallery.json (แก้ไฟล์เดียวอัปเดตเว็บได้)
+   ===================================================== */
+(function galleryModule() {
+    'use strict';
+
+    let galleryData = null;
+    let currentLightboxIndex = 0;
+
+    const ytThumb = (id) => `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
+    const ytEmbed = (id, autoplay = 0) =>
+        `https://www.youtube.com/embed/${id}?rel=0&modestbranding=1${autoplay ? '&autoplay=1&mute=1&loop=1&playlist=' + id : ''}`;
+
+    function escapeHtml(str) {
+        return String(str || '')
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    function ensureLightboxAtBodyLevel() {
+        const lb = document.getElementById('gallery-lightbox');
+        if (lb && lb.parentElement !== document.body) {
+            document.body.appendChild(lb);
+        }
+    }
+
+    async function loadGallery() {
+        try {
+            ensureLightboxAtBodyLevel();
+            const res = await fetch('gallery.json', { cache: 'no-store' });
+            if (!res.ok) throw new Error('Failed to fetch gallery.json');
+            galleryData = await res.json();
+            renderFeaturedVideo();
+            renderVideoGrid();
+            renderImageMarquee();
+        } catch (e) {
+            console.warn('[gallery] โหลด gallery.json ไม่สำเร็จ:', e);
+            const wrap = document.getElementById('featured-video-wrap');
+            if (wrap) wrap.innerHTML = '<div class="video-skeleton">ยังไม่มีข้อมูล gallery.json</div>';
+            const marquee = document.getElementById('marquee-track');
+            if (marquee) marquee.innerHTML = '<div class="marquee-loading">ยังไม่มีรูปภาพ</div>';
+        }
+    }
+
+    function renderFeaturedVideo() {
+        const wrap = document.getElementById('featured-video-wrap');
+        if (!wrap || !galleryData?.featuredVideo?.youtubeId) return;
+        const v = galleryData.featuredVideo;
+        wrap.innerHTML = `
+            <iframe
+                src="${ytEmbed(escapeHtml(v.youtubeId), 1)}"
+                title="${escapeHtml(v.title || 'Featured video')}"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowfullscreen
+                loading="lazy"
+                referrerpolicy="strict-origin-when-cross-origin">
+            </iframe>
+        `;
+    }
+
+    function renderVideoGrid() {
+        const grid = document.getElementById('video-grid');
+        if (!grid || !Array.isArray(galleryData?.videos)) return;
+        grid.innerHTML = galleryData.videos.map((v, i) => `
+            <div class="video-card" data-video-index="${i}" role="button" tabindex="0">
+                <div class="video-thumb-wrap">
+                    <img src="${ytThumb(escapeHtml(v.youtubeId))}"
+                         alt="${escapeHtml(v.title || 'วิดีโอ')}"
+                         loading="lazy"
+                         onerror="this.style.background='linear-gradient(135deg,#0d3d28,#2d8a5e)'">
+                    <div class="video-play-overlay"></div>
+                </div>
+                <div class="video-info">
+                    <div class="video-info-title">${escapeHtml(v.title || '')}</div>
+                    <div class="video-info-desc">${escapeHtml(v.description || '')}</div>
+                </div>
+            </div>
+        `).join('');
+
+        grid.querySelectorAll('.video-card').forEach(card => {
+            const idx = +card.dataset.videoIndex;
+            const handler = () => playVideoInFeatured(idx);
+            card.addEventListener('click', handler);
+            card.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handler(); }
+            });
+        });
+    }
+
+    function playVideoInFeatured(index) {
+        const v = galleryData?.videos?.[index];
+        if (!v) return;
+        const wrap = document.getElementById('featured-video-wrap');
+        if (!wrap) return;
+        wrap.innerHTML = `
+            <iframe
+                src="${ytEmbed(escapeHtml(v.youtubeId), 1)}"
+                title="${escapeHtml(v.title || 'วิดีโอ')}"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowfullscreen
+                referrerpolicy="strict-origin-when-cross-origin">
+            </iframe>
+        `;
+        wrap.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function renderImageMarquee() {
+        const track = document.getElementById('marquee-track');
+        if (!track || !Array.isArray(galleryData?.images) || galleryData.images.length === 0) {
+            if (track) track.innerHTML = '<div class="marquee-loading">ยังไม่มีรูปภาพ</div>';
+            return;
+        }
+
+        const cardsHtml = galleryData.images.map((img, i) => `
+            <div class="marquee-card" data-img-index="${i}" role="button" tabindex="0"
+                 aria-label="${escapeHtml(img.title || 'รูปภาพ')}">
+                <img src="${escapeHtml(img.url)}"
+                     alt="${escapeHtml(img.title || 'รูปภาพ')}"
+                     loading="lazy"
+                     onerror="this.parentElement.style.background='linear-gradient(135deg,#0d3d28,#2d8a5e)'; this.remove();">
+                <div class="marquee-zoom-hint">🔍</div>
+                <div class="marquee-caption">
+                    <div class="marquee-caption-title">${escapeHtml(img.title || '')}</div>
+                    <div class="marquee-caption-sub">${escapeHtml(img.caption || '')}</div>
+                </div>
+            </div>
+        `).join('');
+
+        // duplicate for seamless infinite scroll
+        track.innerHTML = cardsHtml + cardsHtml;
+
+        track.querySelectorAll('.marquee-card').forEach(card => {
+            const idx = +card.dataset.imgIndex;
+            const handler = () => openLightbox(idx);
+            card.addEventListener('click', handler);
+            card.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handler(); }
+            });
+        });
+    }
+
+    // ----- LIGHTBOX -----
+    function openLightbox(index) {
+        if (!galleryData?.images?.[index]) return;
+        currentLightboxIndex = index;
+        updateLightboxContent();
+        const lb = document.getElementById('gallery-lightbox');
+        if (lb) {
+            lb.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+    }
+
+    function updateLightboxContent() {
+        const img = galleryData.images[currentLightboxIndex];
+        if (!img) return;
+        const lbImg = document.getElementById('lightbox-img');
+        const lbTitle = document.getElementById('lightbox-title');
+        const lbDesc = document.getElementById('lightbox-desc');
+        const lbCounter = document.getElementById('lightbox-counter');
+        if (lbImg) { lbImg.src = img.url; lbImg.alt = img.title || ''; }
+        if (lbTitle) lbTitle.textContent = img.title || '';
+        if (lbDesc) lbDesc.textContent = img.caption || '';
+        if (lbCounter) lbCounter.textContent = `${currentLightboxIndex + 1} / ${galleryData.images.length}`;
+    }
+
+    window.closeLightbox = function(event, force = false) {
+        // only close when clicking backdrop (not image), or when force=true (X button)
+        if (!force && event && event.target.closest('.lightbox-content')) return;
+        const lb = document.getElementById('gallery-lightbox');
+        if (lb) {
+            lb.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    };
+
+    window.navigateLightbox = function(event, direction) {
+        if (event) event.stopPropagation();
+        if (!galleryData?.images?.length) return;
+        currentLightboxIndex = (currentLightboxIndex + direction + galleryData.images.length) % galleryData.images.length;
+        updateLightboxContent();
+    };
+
+    // keyboard nav
+    document.addEventListener('keydown', (e) => {
+        const lb = document.getElementById('gallery-lightbox');
+        if (!lb || !lb.classList.contains('active')) return;
+        if (e.key === 'Escape') window.closeLightbox(null, true);
+        else if (e.key === 'ArrowLeft') window.navigateLightbox(null, -1);
+        else if (e.key === 'ArrowRight') window.navigateLightbox(null, 1);
+    });
+
+    // ----- BOOT -----
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadGallery);
+    } else {
+        loadGallery();
     }
 })();

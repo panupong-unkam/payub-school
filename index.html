@@ -4,11 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
 <meta name="theme-color" content="#1a5f3f">
-<title>Computer Science By ครูภาณุพงศ์ อุ่นคำ — โรงเรียนบ้านป่ายุบ(บุ้นกีประชานุเคราะห์)</title>
+<title>Computer Science By ครูภาณุพงศ์ อุ่นคำ — โรงเรียนบ้านป่ายุบ</title>
 
 <!-- ============ SEO META ============ -->
 <meta name="description" content="แหล่งเรียนรู้วิทยาการคำนวณ Python หุ่นยนต์ และ IoT สำหรับนักเรียน — มีบทเรียนออนไลน์ ใบงาน คะแนน และเกมเขียนโค้ดสนุก ๆ โดยครูภาณุพงศ์ อุ่นคำ โรงเรียนบ้านป่ายุบ (บุ้นกีประชานุเคราะห์)">
-<meta name="keywords" content="วิทยาการคำนวณ, Python, ครูภาณุพงศ์ อุ่นคำ, โรงเรียนบ้านป่ายุบ(บุ้นกีประชานุเคราะห์), RP2040, IoT, หุ่นยนต์, คอมพิวเตอร์, บทเรียนออนไลน์, ใบงาน">
+<meta name="keywords" content="วิทยาการคำนวณ, Python, ครูภาณุพงศ์, โรงเรียนบ้านป่ายุบ, บุ้นกีประชานุเคราะห์, RP2040, IoT, หุ่นยนต์, คอมพิวเตอร์, บทเรียนออนไลน์, ใบงาน">
 <meta name="author" content="ครูภาณุพงศ์ อุ่นคำ">
 <meta name="robots" content="index, follow">
 <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -236,6 +236,7 @@ window.openPython3DFromNav = function(e) {
     <div class="nav-item" onclick="navigate('games', this)">🎮 เกมหุ่นยนต์</div>
     <div class="nav-item" onclick="navigate('lab', this)">🔌 Circuit Lab</div>
     <div class="nav-item" onclick="navigate('python', this)">🐍 Python Lab</div>
+    <div class="nav-item" onclick="window.open('C-lang/index.html','_blank')">🔵 ภาษา C</div>
     </div>
   <div style="padding: 20px;" id="auth-btn-area"></div>
 </nav>
@@ -426,6 +427,44 @@ window.openPython3DFromNav = function(e) {
           </div>
         </a>
 
+        <!-- 🔵 C LANGUAGE CARD -->
+        <a href="C-lang/index.html" target="_blank" class="featured-lab-card lab-clang"
+           style="background: linear-gradient(135deg, #00599C 0%, #004482 100%);
+                  box-shadow: 0 12px 30px rgba(0, 89, 156, 0.35);">
+          <div class="lab-card-bg-deco">
+            <span class="deco-emoji">©️</span>
+            <span class="deco-emoji deco-2">⌨️</span>
+            <span class="deco-emoji deco-3">🧩</span>
+          </div>
+          <div class="lab-card-badge" style="background:rgba(255,255,255,0.25);">⭐ ใหม่</div>
+          <div class="lab-card-icon" style="font-family:'Fira Code',monospace; font-weight:700;">C</div>
+          <div class="lab-card-content">
+            <div class="lab-card-eyebrow">C PROGRAMMING</div>
+            <h3 class="lab-card-title">ภาษา C ตั้งแต่ศูนย์</h3>
+            <p class="lab-card-desc">
+              เรียนภาษา C สำหรับมัธยมต้น <b>ไม่ต้องมีพื้นฐาน</b> · มี Editor รันโค้ดในเบราว์เซอร์ · แบบฝึก + แบบทดสอบทุกบท
+            </p>
+            <div class="lab-card-stats">
+              <div class="lab-stat-item">
+                <div class="lab-stat-num">11</div>
+                <div class="lab-stat-label">หน่วย</div>
+              </div>
+              <div class="lab-stat-item">
+                <div class="lab-stat-num">40+</div>
+                <div class="lab-stat-label">บทเรียน</div>
+              </div>
+              <div class="lab-stat-item">
+                <div class="lab-stat-num">100+</div>
+                <div class="lab-stat-label">แบบฝึก</div>
+              </div>
+            </div>
+            <div class="lab-card-cta">
+              <span>เริ่มเรียนภาษา C</span>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </div>
+          </div>
+        </a>
+
         <!-- 🔌 CIRCUIT LAB CARD -->
         <a href="#" onclick="event.preventDefault(); navigate('lab', document.querySelectorAll('.nav-item')[7]); return false;" class="featured-lab-card lab-circuit">
           <div class="lab-card-bg-deco">
@@ -464,6 +503,54 @@ window.openPython3DFromNav = function(e) {
 
       </div>
     </div>
+
+    <!-- ============================================
+         🎬 GALLERY SECTION (Videos + Image Slideshow)
+         แก้ไขรายการได้ที่ไฟล์ gallery.json
+         ============================================ -->
+    <section class="gallery-section" id="gallery-section">
+
+      <!-- 🎥 FEATURED VIDEO + VIDEO GRID -->
+      <div class="gallery-header">
+        <div class="gallery-title-wrap">
+          <span class="gallery-icon-deco">🎬</span>
+          <div>
+            <div class="gallery-eyebrow">CLASSROOM MEDIA</div>
+            <h3 class="gallery-title">วิดีโอการสอนของครู</h3>
+          </div>
+        </div>
+        <div class="gallery-pill">▶ เล่นอัตโนมัติ</div>
+      </div>
+
+      <div class="featured-video-wrap" id="featured-video-wrap">
+        <!-- featured video iframe จะถูกฉีดเข้ามาโดย JS -->
+        <div class="video-skeleton">กำลังโหลดวิดีโอ...</div>
+      </div>
+
+      <div class="video-grid" id="video-grid">
+        <!-- video cards generated by JS -->
+      </div>
+
+      <!-- 📸 IMAGE SLIDESHOW (Infinite Marquee) -->
+      <div class="gallery-header" style="margin-top: 50px;">
+        <div class="gallery-title-wrap">
+          <span class="gallery-icon-deco">📸</span>
+          <div>
+            <div class="gallery-eyebrow">PHOTO MOMENTS</div>
+            <h3 class="gallery-title">บรรยากาศการเรียนการสอน</h3>
+          </div>
+        </div>
+        <div class="gallery-pill gallery-pill-accent">∞ สไลด์ต่อเนื่อง</div>
+      </div>
+
+      <div class="image-marquee" id="image-marquee">
+        <div class="marquee-track" id="marquee-track">
+          <!-- image cards generated by JS -->
+          <div class="marquee-loading">กำลังโหลดรูปภาพ...</div>
+        </div>
+      </div>
+
+    </section>
 
     <div style="margin-top: 60px; text-align: center; opacity: 0.6;">
         <p style="font-size: 14px; letter-spacing: 1px;">POWERED BY PANUPONG & COMPUTERT EDUCATION</p>
@@ -1453,5 +1540,20 @@ setTimeout(function() {
     }
 }, 4000);
 </script>
+
+<!-- 🖼️ GALLERY LIGHTBOX — ต้องอยู่ระดับ body (นอก .page) ไม่งั้นโดน parent filter/transform กักพื้นที่ position:fixed -->
+<div class="gallery-lightbox" id="gallery-lightbox" onclick="closeLightbox(event)">
+  <button class="lightbox-close" onclick="closeLightbox(event, true)" aria-label="ปิด">✕</button>
+  <button class="lightbox-nav lightbox-prev" onclick="navigateLightbox(event, -1)" aria-label="ก่อนหน้า">‹</button>
+  <button class="lightbox-nav lightbox-next" onclick="navigateLightbox(event, 1)" aria-label="ถัดไป">›</button>
+  <div class="lightbox-content" onclick="event.stopPropagation()">
+    <img id="lightbox-img" src="" alt="">
+    <div class="lightbox-caption">
+      <div class="lightbox-title" id="lightbox-title"></div>
+      <div class="lightbox-desc" id="lightbox-desc"></div>
+      <div class="lightbox-counter" id="lightbox-counter"></div>
+    </div>
+  </div>
+</div>
 </body>
 </html>

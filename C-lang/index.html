@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#00599C">
+<title>เรียนภาษา C ตั้งแต่ศูนย์ | ครูภาณุพงศ์ อุ่นคำ</title>
+<meta name="description" content="หลักสูตรเรียนภาษา C สำหรับนักเรียนมัธยมต้น เริ่มจากศูนย์ ไม่ต้องมีพื้นฐาน เรียนเขียนโค้ด สร้างฟังก์ชัน และทำโปรเจกต์จริง โดยครูภาณุพงศ์ อุ่นคำ">
+<link rel="icon" type="image/svg+xml" href="../logo.svg">
+<link rel="manifest" href="../manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Noto+Serif+Thai:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="c-style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<header class="c-topbar">
+  <div class="c-topbar-left">
+    <a href="../index.html" class="c-btn-icon" title="กลับหน้าหลัก">←</a>
+    <div class="c-topbar-logo">C</div>
+    <div>
+      <div class="c-topbar-title">ภาษา C สำหรับมัธยมต้น</div>
+      <div class="c-topbar-subtitle">โรงเรียนบ้านป่ายุบ — ครูภาณุพงศ์ อุ่นคำ</div>
+    </div>
+  </div>
+  <div class="c-topbar-right">
+    <button class="c-btn-icon" id="themeToggle" title="สลับธีม">🌙</button>
+    <a href="playground.html" class="c-btn c-btn-ghost" title="ลองเขียนโค้ดเอง">
+      <span>💻</span> Playground
+    </a>
+    <button class="c-btn" id="loginBtn">
+      <span>👤</span> <span id="loginLabel">เข้าสู่ระบบ</span>
+    </button>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="c-hero">
+  <div class="c-floating-code fc-1">#include &lt;stdio.h&gt;</div>
+  <div class="c-floating-code fc-2">printf("Hello!");</div>
+  <div class="c-floating-code fc-3">int main() { ... }</div>
+
+  <div class="c-hero-content">
+    <span class="c-hero-badge">⭐ หลักสูตรสำหรับมัธยมต้น — ไม่ต้องมีพื้นฐาน</span>
+    <h1>เรียน <span class="c-hero-code">printf("C")</span><br>ตั้งแต่ศูนย์จนเขียนได้</h1>
+    <p class="c-hero-sub">11 หน่วย · 40+ บทเรียน · มี Editor รันโค้ดในเบราว์เซอร์ · มีแบบฝึก + แบบทดสอบทุกบท</p>
+    <div class="c-hero-actions">
+      <a href="lessons/00-intro.html" class="c-btn c-btn-accent">
+        🚀 เริ่มเรียนเลย
+      </a>
+      <a href="playground.html" class="c-btn c-btn-outline">
+        💻 ลองเขียนโค้ดเอง
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="c-stats">
+  <div class="c-stat-card">
+    <div class="c-stat-icon">📚</div>
+    <div class="c-stat-value">11</div>
+    <div class="c-stat-label">หน่วยการเรียน</div>
+  </div>
+  <div class="c-stat-card">
+    <div class="c-stat-icon">⏱️</div>
+    <div class="c-stat-value">40+</div>
+    <div class="c-stat-label">ชั่วโมงเรียน</div>
+  </div>
+  <div class="c-stat-card">
+    <div class="c-stat-icon">✏️</div>
+    <div class="c-stat-value">100+</div>
+    <div class="c-stat-label">แบบฝึกหัด</div>
+  </div>
+  <div class="c-stat-card">
+    <div class="c-stat-icon">🏆</div>
+    <div class="c-stat-value" id="myProgress">0%</div>
+    <div class="c-stat-label">ความก้าวหน้าของคุณ</div>
+  </div>
+</div>
+
+<!-- MY PROGRESS -->
+<div class="c-container-narrow" style="padding-top:0;">
+  <div class="c-section" style="text-align:center;" id="progressSection">
+    <h2 style="justify-content:center;">
+      <span class="c-section-icon">📈</span> ความก้าวหน้าของคุณ
+    </h2>
+    <p style="color:var(--c-text-muted);" id="progressDetail">ยังไม่เริ่มเรียน — คลิก "เริ่มเรียนเลย" เพื่อเริ่มต้น</p>
+    <div class="c-progress-bar">
+      <div class="c-progress-fill" id="progressFill" style="width:0%;"></div>
+    </div>
+    <div style="margin-top:14px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+      <a href="#roadmap" class="c-btn c-btn-ghost">📖 ดูบทเรียนทั้งหมด</a>
+      <button class="c-btn c-btn-ghost" id="resetProgressBtn" title="ล้างความก้าวหน้าทั้งหมด">🔄 รีเซ็ต</button>
+    </div>
+  </div>
+</div>
+
+<!-- ROADMAP -->
+<div class="c-container" id="roadmap">
+  <h2 class="c-section-title">🗺️ แผนการเรียน (Roadmap)</h2>
+  <p class="c-section-sub">เรียนตามลำดับจากบนลงล่าง แต่ละหน่วยจะปลดล็อกบทถัดไป</p>
+
+  <div class="c-roadmap" id="roadmapList">
+    <!-- หน่วย 0 -->
+    <div class="c-unit" data-unit="0" style="--unit-color:#6B7280;">
+      <div class="c-unit-num">0<span class="c-unit-check">✓</span></div>
+      <a class="c-unit-card" href="lessons/00-intro.html">
+        <div class="c-unit-info">
+          <div class="c-unit-tags">
+            <span class="c-unit-tag">ปฐมนิเทศ</span>
+            <span class="c-unit-tag tag-time">⏱️ 1 คาบ</span>
+          </div>
+          <div class="c-unit-title">โปรแกรมคืออะไร? ทำไมต้องเรียนภาษา C</div>
+          <div class="c-unit-desc">รู้จักภาษา C, ประวัติย่อ, เห็นภาพรวมหลักสูตรและเครื่องมือที่ใช้</div>
+        </div>
+        <div class="c-unit-arrow">→</div>
+      </a>
+    </div>
+
+    <!-- หน่วย 1 -->
+    <div class="c-unit" data-unit="1" style="--unit-color:#4ECDC4;">
+      <div class="c-unit-num">1<span class="c-unit-check">✓</span></div>
+      <a class="c-unit-card" href="lessons/01-hello-world.html">
+        <div class="c-unit-info">
+          <div class="c-unit-tags">
+            <span class="c-unit-tag">เริ่มต้น</span>
+            <span class="c-unit-tag tag-time">⏱️ 2 คาบ</span>
+          </div>
+          <div class="c-unit-title">Hello World — โปรแกรมแรกของคุณ</div>
+          <div class="c-unit-desc">โครงสร้างพื้นฐาน, <code>#include</code>, <code>main()</code>, <code>printf</code> และวิธีรันโค้ด</div>
+        </div>
+        <div class="c-unit-arrow">→</div>
+      </a>
+    </div>
+
+    <!-- หน่วย 2 -->
+    <div class="c-unit locked" data-unit="2" style="--unit-color:#45B7D1;">
+      <div class="c-unit-num">2<span class="c-unit-check">✓</span></div>
+      <a class="c-unit-card" href="#">
+        <div class="c-unit-info">
+          <div class="c-unit-tags">
+            <span class="c-unit-tag">พื้นฐาน</span>
+            <span class="c-unit-tag tag-time">⏱️ 3 คาบ</span>
+            <span class="c-unit-tag" style="background:#FBBF24;color:#78350F;">🔒 เร็ว ๆ นี้</span>
+          </div>
+          <div class="c-unit-title">ตัวแปรและชนิดข้อมูล</div>
+          <div class="c-unit-desc"><code>int</code>, <code>float</code>, <code>double</code>, <code>char</code>, <code>const</code> และวิธีตั้งชื่อตัวแปร</div>
+        </div>
+        <div class="c-unit-arrow">→</div>
+      </a>
+    </div>
+
+    <!-- หน่วย 3 -->
+    <div class="c-unit locked" data-unit="3" style="--unit-color:#5B8DEF;">
+      <div class="c-unit-num">3<span class="c-unit-check">✓</span></div>
+      <a class="c-unit-card" href="#">
+        <div class="c-unit-info">
+          <div class="c-unit-tags">
+            <span class="c-unit-tag">พื้นฐาน</span>
+            <span class="c-unit-tag tag-time">⏱️ 3 คาบ</span>
+            <span class="c-unit-tag" style="background:#FBBF24;color:#78350F;">🔒 เร็ว ๆ นี้</span>
+          </div>
+          <div class="c-unit-title">รับข้อมูล & ตัวดำเนินการ</div>
+          <div class="c-unit-desc">รับ input ด้วย <code>scanf</code>, +-*/%, การเปรียบเทียบ, ตรรกะ</div>
+        </div>
+        <div class="c-unit-arrow">→</div>
+      </a>
+    </div>
+
+    <!-- หน่วย 4 -->
+    <div class="c-unit locked" data-unit="4" style="--unit-color:#9B59B6;">
+      <div class="c-unit-num">4<span class="c-unit-check">✓</span></div>
+      <a class="c-unit-card" href="#">
+        <div class="c-unit-info">
+          <div class="c-unit-tags">
+            <span class="c-unit-tag">ควบคุม</span>
+            <span class="c-unit-tag tag-time">⏱️ 4 คาบ</span>
+            <span class="c-unit-tag" style="background:#FBBF24;color:#78350F;">🔒 เร็ว ๆ นี้</span>
+          </div>
+          <div class="c-unit-title">คำสั่งเงื่อนไข (if / else / switch)</div>
+          <div class="c-unit-desc">ให้คอมพิวเตอร์ตัดสินใจเอง เช่น เปรียบเทียบคะแนน แล้วบอกผลสอบ</div>
+        </div>
+        <div class="c-unit-arrow">→</div>
+      </a>
+    </div>
+
+    <!-- หน่วย 5 -->
+    <div class="c-unit locked" data-unit="5" style="--unit-color:#E91E63;">
+      <div class="c-unit-num">5<span class="c-unit-check">✓</span></div>
+      <a class="c-unit-card" href="#">
+        <div class="c-unit-info">
+          <div class="c-unit-tags">
+            <span class="c-unit-tag">ควบคุม</span>
+            <span class="c-unit-tag tag-time">⏱️ 4 คาบ</span>
+            <span class="c-unit-tag" style="background:#FBBF24;color:#78350F;">🔒 เร็ว ๆ นี้</span>
+          </div>
+          <div class="c-unit-title">การวนซ้ำ (for / while / do-while)</div>
+          <div class="c-unit-desc">ทำซ้ำคำสั่งหลายครั้ง เช่น นับเลข 1-100 พิมพ์ตารางสูตรคูณ</div>
+        </div>
+        <div class="c-unit-arrow">→</div>
+      </a>
+    </div>
+
+    <!-- หน่วย 6 -->
+    <div class="c-unit locked" data-unit="6" style="--unit-color:#F39C12;">
+      <div class="c-unit-num">6<span class="c-unit-check">✓</span></div>
+      <a class="c-unit-card" href="#">
+        <div class="c-unit-info">
+          <div class="c-unit-tags">
+            <span class="c-unit-tag">โครงสร้าง</span>
+            <span class="c-unit-tag tag-time">⏱️ 4 คาบ</span>
+            <span class="c-unit-tag" style="background:#FBBF24;color:#78350F;">🔒 เร็ว ๆ นี้</span>
+          </div>
+          <div class="c-unit-title">ฟังก์ชัน (Functions)</div>
+          <div class="c-unit-desc">สร้างคำสั่งของเราเอง เช่น <code>คำนวณเกรด()</code> เรียกใช้ซ้ำได้</div>
+        </div>
+        <div class="c-unit-arrow">→</div>
+      </a>
+    </div>
+
+    <!-- หน่วย 7 -->
+    <div class="c-unit locked" data-unit="7" style="--unit-color:#FF6B35;">
+      <div class="c-unit-num">7<span class="c-unit-check">✓</span></div>
+      <a class="c-unit-card" href="#">
+        <div class="c-unit-info">
+          <div class="c-unit-tags">
+            <span class="c-unit-tag">ข้อมูล</span>
+            <span class="c-unit-tag tag-time">⏱️ 4 คาบ</span>
+            <span class="c-unit-tag" style="background:#FBBF24;color:#78350F;">🔒 เร็ว ๆ นี้</span>
+          </div>
+          <div class="c-unit-title">อาร์เรย์ & สตริง</div>
+          <div class="c-unit-desc">เก็บข้อมูลหลายค่าในตัวแปรเดียว เช่น คะแนนนักเรียน 30 คน</div>
+        </div>
+        <div class="c-unit-arrow">→</div>
+      </a>
+    </div>
+
+    <!-- หน่วย 8 -->
+    <div class="c-unit locked" data-unit="8" style="--unit-color:#E63946;">
+      <div class="c-unit-num">8<span class="c-unit-check">✓</span></div>
+      <a class="c-unit-card" href="#">
+        <div class="c-unit-info">
+          <div class="c-unit-tags">
+            <span class="c-unit-tag">ขั้นกลาง</span>
+            <span class="c-unit-tag tag-time">⏱️ 3 คาบ</span>
+            <span class="c-unit-tag" style="background:#FBBF24;color:#78350F;">🔒 เร็ว ๆ นี้</span>
+          </div>
+          <div class="c-unit-title">พอยน์เตอร์ (Pointers) — เบื้องต้น</div>
+          <div class="c-unit-desc">เข้าใจ "ที่อยู่หน่วยความจำ" ด้วยภาพ ไม่งงแน่นอน</div>
+        </div>
+        <div class="c-unit-arrow">→</div>
+      </a>
+    </div>
+
+    <!-- หน่วย 9 -->
+    <div class="c-unit locked" data-unit="9" style="--unit-color:#2ECC71;">
+      <div class="c-unit-num">9<span class="c-unit-check">✓</span></div>
+      <a class="c-unit-card" href="#">
+        <div class="c-unit-info">
+          <div class="c-unit-tags">
+            <span class="c-unit-tag">ขั้นกลาง</span>
+            <span class="c-unit-tag tag-time">⏱️ 3 คาบ</span>
+            <span class="c-unit-tag" style="background:#FBBF24;color:#78350F;">🔒 เร็ว ๆ นี้</span>
+          </div>
+          <div class="c-unit-title">โครงสร้างข้อมูล (struct)</div>
+          <div class="c-unit-desc">รวมข้อมูลหลายชนิดเป็นตัวเดียว เช่น <code>นักเรียน{ชื่อ, อายุ, เกรด}</code></div>
+        </div>
+        <div class="c-unit-arrow">→</div>
+      </a>
+    </div>
+
+    <!-- หน่วย 10 -->
+    <div class="c-unit locked" data-unit="10" style="--unit-color:#FFCC00;">
+      <div class="c-unit-num">10<span class="c-unit-check">✓</span></div>
+      <a class="c-unit-card" href="#">
+        <div class="c-unit-info">
+          <div class="c-unit-tags">
+            <span class="c-unit-tag">โปรเจกต์</span>
+            <span class="c-unit-tag tag-time">⏱️ 5 คาบ</span>
+            <span class="c-unit-tag" style="background:#FBBF24;color:#78350F;">🔒 เร็ว ๆ นี้</span>
+          </div>
+          <div class="c-unit-title">ไฟล์ & โปรเจกต์จบหลักสูตร</div>
+          <div class="c-unit-desc">อ่าน-เขียนไฟล์ และทำมินิโปรเจกต์ เช่น เครื่องคิดเลข, ทายตัวเลข, ระบบเกรด</div>
+        </div>
+        <div class="c-unit-arrow">→</div>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- QUICK LINKS -->
+<div class="c-container">
+  <h2 class="c-section-title">🔗 ลิงก์ลัด</h2>
+  <p class="c-section-sub">เครื่องมือและทรัพยากรที่ใช้บ่อย</p>
+  <div class="c-quick-grid">
+    <a class="c-quick-card" href="playground.html">
+      <div class="c-quick-icon">💻</div>
+      <div class="c-quick-title">Playground</div>
+      <div class="c-quick-desc">เขียนโค้ดและรันได้ทันทีในเบราว์เซอร์</div>
+    </a>
+    <a class="c-quick-card" href="#" onclick="alert('เร็ว ๆ นี้ครับ — ใบงาน PDF กำลังพัฒนา'); return false;">
+      <div class="c-quick-icon">📋</div>
+      <div class="c-quick-title">ใบงาน PDF</div>
+      <div class="c-quick-desc">ดาวน์โหลดเอกสารและใบงานพิมพ์ออก</div>
+    </a>
+    <a class="c-quick-card" href="#" onclick="alert('เร็ว ๆ นี้ครับ — Cheatsheet กำลังพัฒนา'); return false;">
+      <div class="c-quick-icon">📑</div>
+      <div class="c-quick-title">Cheatsheet</div>
+      <div class="c-quick-desc">ตารางสรุปคำสั่งที่ใช้บ่อย</div>
+    </a>
+    <a class="c-quick-card" href="#" onclick="alert('เร็ว ๆ นี้ครับ — Glossary กำลังพัฒนา'); return false;">
+      <div class="c-quick-icon">📖</div>
+      <div class="c-quick-title">อภิธานศัพท์</div>
+      <div class="c-quick-desc">รวมศัพท์เทคนิคที่เจอในบทเรียน</div>
+    </a>
+  </div>
+</div>
+
+<!-- BADGES -->
+<div class="c-container">
+  <h2 class="c-section-title">🏅 เหรียญตราที่ได้รับ</h2>
+  <p class="c-section-sub">เก็บสะสมเหรียญเมื่อเรียนจบแต่ละหน่วย</p>
+  <div class="c-badge-grid" id="badgeGrid">
+    <div class="c-badge" data-badge="first-step"><span class="c-badge-emoji">🐣</span><div class="c-badge-name">ก้าวแรก</div></div>
+    <div class="c-badge" data-badge="hello-world"><span class="c-badge-emoji">👋</span><div class="c-badge-name">Hello World</div></div>
+    <div class="c-badge" data-badge="variable-master"><span class="c-badge-emoji">📦</span><div class="c-badge-name">นักจัดของ</div></div>
+    <div class="c-badge" data-badge="operator-pro"><span class="c-badge-emoji">➕</span><div class="c-badge-name">นักคำนวณ</div></div>
+    <div class="c-badge" data-badge="decision-maker"><span class="c-badge-emoji">🤔</span><div class="c-badge-name">นักตัดสินใจ</div></div>
+    <div class="c-badge" data-badge="loop-master"><span class="c-badge-emoji">🔁</span><div class="c-badge-name">เจ้าแห่งลูป</div></div>
+    <div class="c-badge" data-badge="function-hero"><span class="c-badge-emoji">⚙️</span><div class="c-badge-name">ฮีโร่ฟังก์ชัน</div></div>
+    <div class="c-badge" data-badge="array-king"><span class="c-badge-emoji">📊</span><div class="c-badge-name">ราชาอาร์เรย์</div></div>
+    <div class="c-badge" data-badge="pointer-ninja"><span class="c-badge-emoji">🥷</span><div class="c-badge-name">นินจาพอยน์เตอร์</div></div>
+    <div class="c-badge" data-badge="struct-architect"><span class="c-badge-emoji">🏗️</span><div class="c-badge-name">สถาปนิก</div></div>
+    <div class="c-badge" data-badge="graduate"><span class="c-badge-emoji">🎓</span><div class="c-badge-name">จบหลักสูตร</div></div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="c-footer">
+  <p>© 2026 Computer Science By <a href="../index.html">ครูภาณุพงศ์ อุ่นคำ</a> · โรงเรียนบ้านป่ายุบ (บุ้นกีประชานุเคราะห์)</p>
+  <p style="margin-top:6px;">หลักสูตรภาษา C สำหรับมัธยมต้น · ไม่เก็บค่าใช้จ่าย</p>
+</footer>
+
+<!-- LOGIN MODAL -->
+<div class="c-modal-backdrop" id="loginModal">
+  <div class="c-modal">
+    <h3>🔐 เข้าสู่ระบบ</h3>
+    <p>ใส่ชื่อ-นามสกุล และเลขประจำตัว เพื่อบันทึกความก้าวหน้า</p>
+    <input class="c-modal-input" id="loginName" placeholder="ชื่อ-นามสกุล (เช่น สมชาย ใจดี)">
+    <input class="c-modal-input" id="loginCode" placeholder="เลขประจำตัวนักเรียน">
+    <select class="c-modal-input" id="loginClass">
+      <option value="">เลือกชั้นเรียน...</option>
+      <option value="ม.1/1">ม.1/1</option>
+      <option value="ม.1/2">ม.1/2</option>
+      <option value="ม.2/1">ม.2/1</option>
+      <option value="ม.2/2">ม.2/2</option>
+      <option value="ม.3/1">ม.3/1</option>
+      <option value="ม.3/2">ม.3/2</option>
+    </select>
+    <div class="c-modal-actions">
+      <button class="c-btn c-btn-ghost" id="loginCancel">ยกเลิก</button>
+      <button class="c-btn c-btn-success" id="loginSubmit">เข้าสู่ระบบ</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="c-toast" id="toast">
+  <span id="toastIcon">✓</span>
+  <span id="toastMsg">ข้อความ</span>
+</div>
+
+<script>
+/* ============================================
+   THEME TOGGLE
+   ============================================ */
+const themeBtn = document.getElementById('themeToggle');
+const savedTheme = localStorage.getItem('clang-theme') || 'light';
+document.documentElement.setAttribute('data-theme', savedTheme);
+themeBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+themeBtn.addEventListener('click', () => {
+  const curr = document.documentElement.getAttribute('data-theme');
+  const next = curr === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('clang-theme', next);
+  themeBtn.textContent = next === 'dark' ? '☀️' : '🌙';
+});
+
+/* ============================================
+   TOAST
+   ============================================ */
+function toast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  const icons = { success: '✓', error: '✕', info: 'ℹ️' };
+  document.getElementById('toastIcon').textContent = icons[type] || '✓';
+  document.getElementById('toastMsg').textContent = msg;
+  t.className = 'c-toast show ' + (type === 'success' ? '' : type);
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+/* ============================================
+   PROGRESS — LocalStorage Fallback
+   (จะใช้ Supabase หากครูตั้งค่า credentials)
+   ============================================ */
+const TOTAL_UNITS = 11;
+
+function getProgress() {
+  return JSON.parse(localStorage.getItem('clang-progress') || '{}');
+}
+
+function setProgress(unit) {
+  const p = getProgress();
+  p[unit] = { completed: true, ts: Date.now() };
+  localStorage.setItem('clang-progress', JSON.stringify(p));
+  renderProgress();
+}
+
+function getBadges() {
+  return JSON.parse(localStorage.getItem('clang-badges') || '[]');
+}
+
+function renderProgress() {
+  const p = getProgress();
+  const done = Object.keys(p).length;
+  const pct = Math.round((done / TOTAL_UNITS) * 100);
+  document.getElementById('myProgress').textContent = pct + '%';
+  document.getElementById('progressFill').style.width = pct + '%';
+  const detail = document.getElementById('progressDetail');
+  if (done === 0) {
+    detail.textContent = 'ยังไม่เริ่มเรียน — คลิก "เริ่มเรียนเลย" เพื่อเริ่มต้น';
+  } else if (done === TOTAL_UNITS) {
+    detail.innerHTML = '🎉 <b>ยินดีด้วย!</b> คุณเรียนจบหลักสูตรแล้ว';
+  } else {
+    detail.textContent = `เรียนไปแล้ว ${done} จาก ${TOTAL_UNITS} หน่วย (เหลืออีก ${TOTAL_UNITS - done} หน่วย)`;
+  }
+
+  // unlock/check units
+  document.querySelectorAll('.c-unit').forEach(el => {
+    const u = el.dataset.unit;
+    if (p[u]?.completed) {
+      el.classList.add('completed');
+      el.classList.remove('locked');
+    }
+    // unlock next unit
+    const prevUnit = parseInt(u) - 1;
+    if (prevUnit < 0 || p[prevUnit]?.completed) {
+      el.classList.remove('locked');
+    }
+  });
+
+  // badges
+  const badges = getBadges();
+  document.querySelectorAll('.c-badge').forEach(b => {
+    if (badges.includes(b.dataset.badge)) b.classList.add('earned');
+  });
+}
+
+document.getElementById('resetProgressBtn').addEventListener('click', () => {
+  if (confirm('ต้องการล้างความก้าวหน้าทั้งหมดใช่ไหม?')) {
+    localStorage.removeItem('clang-progress');
+    localStorage.removeItem('clang-badges');
+    renderProgress();
+    toast('ล้างความก้าวหน้าแล้ว', 'info');
+  }
+});
+
+renderProgress();
+
+/* ============================================
+   LOGIN / USER
+   ============================================ */
+const loginBtn = document.getElementById('loginBtn');
+const loginLabel = document.getElementById('loginLabel');
+const loginModal = document.getElementById('loginModal');
+
+function getUser() {
+  return JSON.parse(localStorage.getItem('clang-user') || 'null');
+}
+
+function refreshUser() {
+  const u = getUser();
+  if (u) {
+    loginLabel.textContent = u.name.split(' ')[0];
+    loginBtn.title = `${u.name} · ${u.cls}`;
+  } else {
+    loginLabel.textContent = 'เข้าสู่ระบบ';
+  }
+}
+
+loginBtn.addEventListener('click', () => {
+  const u = getUser();
+  if (u) {
+    if (confirm(`ออกจากระบบ "${u.name}"?`)) {
+      localStorage.removeItem('clang-user');
+      refreshUser();
+      toast('ออกจากระบบแล้ว', 'info');
+    }
+  } else {
+    loginModal.classList.add('show');
+  }
+});
+
+document.getElementById('loginCancel').addEventListener('click', () => {
+  loginModal.classList.remove('show');
+});
+
+document.getElementById('loginSubmit').addEventListener('click', () => {
+  const name = document.getElementById('loginName').value.trim();
+  const code = document.getElementById('loginCode').value.trim();
+  const cls = document.getElementById('loginClass').value;
+  if (!name || !code || !cls) {
+    toast('กรุณากรอกข้อมูลให้ครบ', 'error');
+    return;
+  }
+  const user = { name, code, cls, since: Date.now() };
+  localStorage.setItem('clang-user', JSON.stringify(user));
+  loginModal.classList.remove('show');
+  refreshUser();
+  toast(`ยินดีต้อนรับ ${name.split(' ')[0]}!`, 'success');
+});
+
+loginModal.addEventListener('click', (e) => {
+  if (e.target === loginModal) loginModal.classList.remove('show');
+});
+
+refreshUser();
+</script>
+
+</body>
+</html>

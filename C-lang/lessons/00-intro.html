@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#6B7280">
+<title>หน่วยที่ 0: โปรแกรมคืออะไร? | ภาษา C สำหรับมัธยมต้น</title>
+<link rel="icon" type="image/svg+xml" href="../../logo.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Noto+Serif+Thai:wght@400;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../c-style.css">
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+
+<header class="c-topbar">
+  <div class="c-topbar-left">
+    <a href="../../index.html" class="c-btn-icon" title="หน้าหลักเว็บไซต์">🏠</a>
+    <a href="../index.html" class="c-btn-icon" title="กลับ Roadmap">←</a>
+    <div class="c-topbar-logo" style="background:linear-gradient(135deg,#6B7280,#9CA3AF);">0</div>
+    <div>
+      <div class="c-topbar-title">หน่วยที่ 0 · ปฐมนิเทศ</div>
+      <div class="c-topbar-subtitle">โปรแกรมคืออะไร? ทำไมต้องเรียนภาษา C</div>
+    </div>
+  </div>
+  <div class="c-topbar-right">
+    <button class="c-btn-icon" id="themeToggle" title="สลับธีม">🌙</button>
+    <a href="../playground.html" class="c-btn c-btn-ghost">💻 Playground</a>
+  </div>
+</header>
+
+<!-- LESSON HEADER -->
+<section class="c-lesson-header" style="--unit-color:#6B7280; background:linear-gradient(135deg,#6B7280,#374151);">
+  <div class="c-lesson-header-content">
+    <div class="c-lesson-breadcrumb">
+      <a href="../../index.html">🏠 หน้าหลัก</a> &nbsp;›&nbsp; <a href="../index.html">หลักสูตร C</a> &nbsp;›&nbsp; หน่วยที่ 0
+    </div>
+    <h1 class="c-lesson-title">🌱 โปรแกรมคืออะไร? ทำไมต้องเรียน C</h1>
+    <p class="c-lesson-subtitle">ก่อนเขียนโค้ดจริง มาทำความรู้จักกับ "โปรแกรม" และ "ภาษา C" กันก่อน</p>
+    <div class="c-lesson-meta">
+      <span>⏱️ ใช้เวลา ~30 นาที</span>
+      <span>📖 ระดับ: เริ่มต้น</span>
+      <span>✅ ไม่ต้องเขียนโค้ด</span>
+    </div>
+  </div>
+</section>
+
+<div class="c-container-narrow">
+
+  <!-- จุดประสงค์ -->
+  <div class="c-section">
+    <h2><span class="c-section-icon">🎯</span> สิ่งที่จะได้เรียนรู้ในบทนี้</h2>
+    <div class="c-objectives">
+      <h4>📌 หลังจบบทนี้ คุณจะ:</h4>
+      <ul>
+        <li>เข้าใจว่า <b>"โปรแกรม"</b> และ <b>"โปรแกรมเมอร์"</b> คืออะไร</li>
+        <li>รู้จัก <b>ภาษา C</b> และเหตุผลที่เราต้องเรียน</li>
+        <li>มองเห็นภาพรวมหลักสูตรทั้งหมด</li>
+        <li>รู้จักเครื่องมือที่จะใช้เรียน (Playground บนเว็บ + Editor)</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 1. โปรแกรมคืออะไร -->
+  <div class="c-section">
+    <h2><span class="c-section-icon">💡</span> 1. โปรแกรมคืออะไร?</h2>
+    <p>
+      <b>"โปรแกรม"</b> คือ <b>ชุดคำสั่ง</b> ที่บอกให้คอมพิวเตอร์ทำอะไรบางอย่าง
+      เหมือนเรา <b>"สั่งงาน"</b> คอมพิวเตอร์ทีละขั้นตอน
+    </p>
+
+    <div class="c-note">
+      <div class="c-note-icon">🍳</div>
+      <div>
+        <b>เปรียบเทียบง่าย ๆ:</b>
+        เวลาเราทำไข่ดาว เราทำตามขั้นตอน — ตอกไข่ → ใส่กระทะ → ใส่เกลือ → ตัก → กิน
+        <br>โปรแกรมก็คือ <b>"สูตรอาหาร"</b> ที่เราเขียนไว้ให้คอมพิวเตอร์ทำตาม
+      </div>
+    </div>
+
+    <h3>ตัวอย่างโปรแกรมในชีวิตประจำวัน</h3>
+    <ul>
+      <li>📱 <b>แอป LINE / TikTok / YouTube</b> — โปรแกรมบนมือถือ</li>
+      <li>🎮 <b>เกม ROV / Roblox / Minecraft</b> — โปรแกรมที่สนุก</li>
+      <li>🌐 <b>เว็บไซต์ที่คุณกำลังเรียนอยู่นี้</b> — ก็เป็นโปรแกรม!</li>
+      <li>🚗 <b>ระบบในรถยนต์, ตู้ ATM, ไฟแดง</b> — มีโปรแกรมอยู่ในนั้นทั้งหมด</li>
+    </ul>
+
+    <p>📍 ทุกอย่างที่เป็น <b>"อิเล็กทรอนิกส์"</b> ส่วนใหญ่ทำงานด้วยโปรแกรม — และทั้งหมดนี้มีคน <b>"เขียน"</b> ขึ้นมา!</p>
+  </div>
+
+  <!-- 2. โปรแกรมเมอร์ -->
+  <div class="c-section">
+    <h2><span class="c-section-icon">👨‍💻</span> 2. โปรแกรมเมอร์ทำอะไร?</h2>
+    <p>
+      <b>โปรแกรมเมอร์</b> คือ <b>คนที่เขียนโปรแกรม</b> — เปรียบเหมือน <b>"นักเขียนสูตรอาหาร"</b>
+      ที่บอกคอมพิวเตอร์ว่าต้องทำอะไรบ้าง
+    </p>
+
+    <div class="c-tip">
+      <div class="c-tip-icon">💰</div>
+      <div>
+        <b>รู้หรือไม่?</b> โปรแกรมเมอร์เป็นหนึ่งในอาชีพที่<b>เป็นที่ต้องการมากที่สุด</b>ในปัจจุบัน
+        และมีเงินเดือนเริ่มต้นสูง (~25,000-50,000 บาท สำหรับมือใหม่จบใหม่)
+      </div>
+    </div>
+
+    <h3>โปรแกรมเมอร์ใช้ "ภาษา" คุยกับคอมพิวเตอร์</h3>
+    <p>คอมพิวเตอร์ไม่เข้าใจภาษาไทย/อังกฤษ — เราต้องใช้ <b>"ภาษาโปรแกรม"</b> ซึ่งมีหลายภาษา เช่น:</p>
+    <ul>
+      <li><b>C</b> ← <span style="color:var(--c-primary);font-weight:700;">บทเรียนของเรา!</span></li>
+      <li><b>Python</b> ← ภาษายอดนิยมในปัจจุบัน</li>
+      <li><b>Java</b> ← ใช้ทำแอป Android</li>
+      <li><b>JavaScript</b> ← ใช้ทำเว็บไซต์</li>
+      <li><b>C++, C#, Swift, Go, Rust, ...</b></li>
+    </ul>
+  </div>
+
+  <!-- 3. ทำไมต้อง C -->
+  <div class="c-section">
+    <h2><span class="c-section-icon">🤔</span> 3. ทำไมต้องเรียน "ภาษา C"?</h2>
+
+    <p>ภาษา C เป็นภาษาโปรแกรมที่ <b>เก่าแก่</b> (สร้างปี ค.ศ. 1972 หรือเมื่อ <b>50+ ปีที่แล้ว!</b>) แต่ยังใช้กันอย่างแพร่หลายจนถึงทุกวันนี้</p>
+
+    <h3>เหตุผลที่ควรเรียน C</h3>
+    <div class="c-quick-grid" style="margin-top:14px;">
+      <div class="c-quick-card" style="cursor:default;">
+        <div class="c-quick-icon">⚡</div>
+        <div class="c-quick-title">รวดเร็วและทรงพลัง</div>
+        <div class="c-quick-desc">โปรแกรมที่เขียนด้วย C ทำงานเร็วกว่าภาษาอื่นเกือบทั้งหมด</div>
+      </div>
+      <div class="c-quick-card" style="cursor:default;">
+        <div class="c-quick-icon">🧠</div>
+        <div class="c-quick-title">เข้าใจคอมพิวเตอร์ลึก</div>
+        <div class="c-quick-desc">เห็นการทำงานในระดับใกล้กับเครื่อง รู้ว่าคอมทำงานอย่างไรจริง ๆ</div>
+      </div>
+      <div class="c-quick-card" style="cursor:default;">
+        <div class="c-quick-icon">🌍</div>
+        <div class="c-quick-title">ใช้สร้างของใหญ่ ๆ</div>
+        <div class="c-quick-desc">Windows, Linux, iOS, เกม PS5, Microcontroller ใช้ C ทั้งสิ้น</div>
+      </div>
+      <div class="c-quick-card" style="cursor:default;">
+        <div class="c-quick-icon">🪜</div>
+        <div class="c-quick-title">เป็น "พื้นฐาน" ของภาษาอื่น</div>
+        <div class="c-quick-desc">เรียน C แล้วเรียน C++, Java, Python, JavaScript จะง่ายขึ้นมาก</div>
+      </div>
+    </div>
+
+    <div class="c-warn">
+      <div class="c-warn-icon">⚠️</div>
+      <div>
+        <b>แต่ก็ต้องบอกตรง ๆ ว่า:</b> ภาษา C อาจจะ <b>"ดูยากกว่า"</b> Python นิดหน่อย เพราะต้องระวังเรื่องเล็ก ๆ น้อย ๆ
+        (เช่น ลืม <code>;</code> โปรแกรมก็รันไม่ได้) — แต่ <b>ถ้าผ่านไปได้ คุณจะเก่งมาก ๆ!</b> 💪
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. ภาพรวมหลักสูตร -->
+  <div class="c-section">
+    <h2><span class="c-section-icon">🗺️</span> 4. ภาพรวมหลักสูตรของเรา</h2>
+    <p>เราจะเรียนทั้งหมด <b>11 หน่วย</b> (รวมหน่วยนี้) จากง่ายไปยาก:</p>
+
+    <ol style="margin-left:28px; margin-top:12px;">
+      <li><b>หน่วย 0:</b> ปฐมนิเทศ (ที่คุณกำลังอ่านอยู่นี้) 👈</li>
+      <li><b>หน่วย 1:</b> Hello World — โปรแกรมแรก</li>
+      <li><b>หน่วย 2:</b> ตัวแปร & ชนิดข้อมูล</li>
+      <li><b>หน่วย 3:</b> รับข้อมูล & ตัวดำเนินการ</li>
+      <li><b>หน่วย 4:</b> คำสั่งเงื่อนไข (if-else)</li>
+      <li><b>หน่วย 5:</b> การวนซ้ำ (for, while)</li>
+      <li><b>หน่วย 6:</b> ฟังก์ชัน</li>
+      <li><b>หน่วย 7:</b> อาร์เรย์ & สตริง</li>
+      <li><b>หน่วย 8:</b> พอยน์เตอร์</li>
+      <li><b>หน่วย 9:</b> struct</li>
+      <li><b>หน่วย 10:</b> ไฟล์ & โปรเจกต์จบ 🎓</li>
+    </ol>
+
+    <div class="c-tip">
+      <div class="c-tip-icon">💡</div>
+      <div>
+        <b>เคล็ดลับ:</b> เรียนตามลำดับครับ! แต่ละบทจะใช้ความรู้จากบทก่อนหน้า
+        ถ้าข้ามไปอาจจะงงได้
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. เครื่องมือ -->
+  <div class="c-section">
+    <h2><span class="c-section-icon">🛠️</span> 5. เครื่องมือที่จะใช้</h2>
+
+    <h3>1️⃣ Playground (ใช้บนเว็บไซต์นี้)</h3>
+    <p>คุณ <b>ไม่ต้องติดตั้งอะไรเลย!</b> เพราะมี <a href="../playground.html" style="color:var(--c-primary);font-weight:700;">Playground</a> ในตัวเว็บไซต์ — เปิดเบราว์เซอร์ก็เขียนโค้ดได้เลย</p>
+
+    <h3>2️⃣ ในแต่ละบทเรียน จะมี "Try-it Editor"</h3>
+    <p>กล่องเขียนโค้ดเล็ก ๆ ในบทเรียน ให้คุณลองแก้ลองรันได้ทันที</p>
+
+    <h3>3️⃣ ถ้าอยากเขียนโค้ดที่บ้าน (ไม่บังคับ)</h3>
+    <ul>
+      <li><b>Code::Blocks</b> — โปรแกรมฟรี ติดตั้งง่าย เหมาะกับมือใหม่</li>
+      <li><b>Dev-C++</b> — โปรแกรมฟรี สำหรับ Windows</li>
+      <li><b>VS Code + GCC</b> — สำหรับคนที่อยากเริ่มแบบมืออาชีพ</li>
+    </ul>
+
+    <div class="c-note">
+      <div class="c-note-icon">📌</div>
+      <div>
+        <b>สำหรับบทเรียนนี้:</b> เราจะใช้ <b>Playground บนเว็บ</b> เป็นหลัก
+        เพราะใช้งานง่ายและไม่ต้องตั้งค่าอะไร
+      </div>
+    </div>
+  </div>
+
+  <!-- ข้อควรระวัง -->
+  <div class="c-section">
+    <h2><span class="c-section-icon">🌟</span> 6. เคล็ดลับสำหรับมือใหม่</h2>
+    <div class="c-tip">
+      <div class="c-tip-icon">✅</div>
+      <div>
+        <b>1. อย่ากลัวที่จะลองผิดลองถูก</b> — โปรแกรมเมอร์ทุกคน เริ่มจากการ "เขียนผิด" ทั้งนั้น
+      </div>
+    </div>
+    <div class="c-tip">
+      <div class="c-tip-icon">✅</div>
+      <div>
+        <b>2. ลองเขียนเองทุกครั้ง</b> — อย่าแค่ดู! ลองพิมพ์ตามและรันดูจริง ๆ
+      </div>
+    </div>
+    <div class="c-tip">
+      <div class="c-tip-icon">✅</div>
+      <div>
+        <b>3. อ่าน Error Message</b> — เมื่อโปรแกรมรันไม่ได้ ระบบจะบอกว่าผิดตรงไหน อ่านให้เข้าใจ
+      </div>
+    </div>
+    <div class="c-tip">
+      <div class="c-tip-icon">✅</div>
+      <div>
+        <b>4. ถามครู / ถามเพื่อน</b> — ไม่เข้าใจอย่าเก็บไว้ ถามทันที!
+      </div>
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="c-quiz" id="quiz">
+    <div class="c-quiz-header">
+      <h3>📝 แบบทดสอบท้ายบท</h3>
+      <p style="color:var(--c-text-muted);">ตอบให้ถูก 3 ใน 4 ข้อ เพื่อปลดล็อกบทถัดไป</p>
+    </div>
+
+    <div class="c-quiz-question" data-correct="b">
+      <div class="c-quiz-question-text"><span class="q-num">1</span>"โปรแกรม" หมายถึงอะไร?</div>
+      <div class="c-quiz-options">
+        <label class="c-quiz-option"><input type="radio" name="q1" value="a"><span class="opt-letter">A</span> ฮาร์ดแวร์คอมพิวเตอร์</label>
+        <label class="c-quiz-option"><input type="radio" name="q1" value="b"><span class="opt-letter">B</span> ชุดคำสั่งที่บอกให้คอมพิวเตอร์ทำอะไรบางอย่าง</label>
+        <label class="c-quiz-option"><input type="radio" name="q1" value="c"><span class="opt-letter">C</span> เว็บไซต์ที่เปิดดู</label>
+        <label class="c-quiz-option"><input type="radio" name="q1" value="d"><span class="opt-letter">D</span> ไฟล์รูปภาพ</label>
+      </div>
+    </div>
+
+    <div class="c-quiz-question" data-correct="c">
+      <div class="c-quiz-question-text"><span class="q-num">2</span>ภาษา C ถูกสร้างขึ้นเมื่อปี ค.ศ. ใด?</div>
+      <div class="c-quiz-options">
+        <label class="c-quiz-option"><input type="radio" name="q2" value="a"><span class="opt-letter">A</span> ปี 2010</label>
+        <label class="c-quiz-option"><input type="radio" name="q2" value="b"><span class="opt-letter">B</span> ปี 1995</label>
+        <label class="c-quiz-option"><input type="radio" name="q2" value="c"><span class="opt-letter">C</span> ปี 1972</label>
+        <label class="c-quiz-option"><input type="radio" name="q2" value="d"><span class="opt-letter">D</span> ปี 2000</label>
+      </div>
+    </div>
+
+    <div class="c-quiz-question" data-correct="d">
+      <div class="c-quiz-question-text"><span class="q-num">3</span>ข้อใด <b>ไม่ใช่</b> เหตุผลที่ควรเรียนภาษา C?</div>
+      <div class="c-quiz-options">
+        <label class="c-quiz-option"><input type="radio" name="q3" value="a"><span class="opt-letter">A</span> รวดเร็วและทรงพลัง</label>
+        <label class="c-quiz-option"><input type="radio" name="q3" value="b"><span class="opt-letter">B</span> เข้าใจคอมพิวเตอร์ลึก</label>
+        <label class="c-quiz-option"><input type="radio" name="q3" value="c"><span class="opt-letter">C</span> เป็นพื้นฐานของภาษาอื่น</label>
+        <label class="c-quiz-option"><input type="radio" name="q3" value="d"><span class="opt-letter">D</span> เขียนง่ายกว่าทุกภาษา ไม่ต้องระวังอะไรเลย</label>
+      </div>
+    </div>
+
+    <div class="c-quiz-question" data-correct="a">
+      <div class="c-quiz-question-text"><span class="q-num">4</span>ในการเรียนหลักสูตรนี้ เราจะใช้เครื่องมือใดเป็นหลัก?</div>
+      <div class="c-quiz-options">
+        <label class="c-quiz-option"><input type="radio" name="q4" value="a"><span class="opt-letter">A</span> Playground บนเว็บไซต์ (ไม่ต้องติดตั้ง)</label>
+        <label class="c-quiz-option"><input type="radio" name="q4" value="b"><span class="opt-letter">B</span> Microsoft Word</label>
+        <label class="c-quiz-option"><input type="radio" name="q4" value="c"><span class="opt-letter">C</span> Excel</label>
+        <label class="c-quiz-option"><input type="radio" name="q4" value="d"><span class="opt-letter">D</span> PowerPoint</label>
+      </div>
+    </div>
+
+    <div style="text-align:center; margin-top:20px;">
+      <button class="c-btn c-btn-success" id="submitQuiz" style="padding:12px 30px; font-size:15px;">✓ ส่งคำตอบ</button>
+    </div>
+
+    <div class="c-quiz-result" id="quizResult"></div>
+  </div>
+
+  <!-- NAV -->
+  <div class="c-lesson-nav">
+    <a href="../index.html" class="c-lesson-nav-btn">
+      <div class="c-lesson-nav-label">← กลับ</div>
+      <div class="c-lesson-nav-title">หน้า Roadmap หลักสูตร</div>
+    </a>
+    <a href="01-hello-world.html" class="c-lesson-nav-btn next">
+      <div class="c-lesson-nav-label">บทถัดไป →</div>
+      <div class="c-lesson-nav-title">หน่วยที่ 1: Hello World 👋</div>
+    </a>
+  </div>
+
+</div>
+
+<footer class="c-footer">
+  <p>© 2026 Computer Science By <a href="../../index.html">ครูภาณุพงศ์ อุ่นคำ</a> · โรงเรียนบ้านป่ายุบ</p>
+</footer>
+
+<script>
+// Theme
+const themeBtn = document.getElementById('themeToggle');
+const savedTheme = localStorage.getItem('clang-theme') || 'light';
+document.documentElement.setAttribute('data-theme', savedTheme);
+themeBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+themeBtn.addEventListener('click', () => {
+  const curr = document.documentElement.getAttribute('data-theme');
+  const next = curr === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('clang-theme', next);
+  themeBtn.textContent = next === 'dark' ? '☀️' : '🌙';
+});
+
+// Quiz selection visual
+document.querySelectorAll('.c-quiz-option').forEach(opt => {
+  opt.addEventListener('click', () => {
+    const name = opt.querySelector('input').name;
+    document.querySelectorAll(`input[name="${name}"]`).forEach(i => {
+      i.closest('.c-quiz-option').classList.remove('selected');
+    });
+    opt.classList.add('selected');
+    opt.querySelector('input').checked = true;
+  });
+});
+
+// Submit
+document.getElementById('submitQuiz').addEventListener('click', () => {
+  const questions = document.querySelectorAll('.c-quiz-question');
+  let correctCount = 0;
+
+  questions.forEach((q, idx) => {
+    const correctAns = q.dataset.correct;
+    const selected = q.querySelector('input:checked');
+
+    q.querySelectorAll('.c-quiz-option').forEach(opt => {
+      opt.classList.remove('correct', 'wrong');
+      const val = opt.querySelector('input').value;
+      if (val === correctAns) opt.classList.add('correct');
+      else if (selected && opt.querySelector('input').checked && val !== correctAns) {
+        opt.classList.add('wrong');
+      }
+    });
+
+    if (selected && selected.value === correctAns) correctCount++;
+  });
+
+  const result = document.getElementById('quizResult');
+  result.classList.add('show');
+  const total = questions.length;
+
+  if (correctCount >= 3) {
+    result.className = 'c-quiz-result show pass';
+    result.innerHTML = `🎉 เก่งมาก! คุณตอบถูก ${correctCount}/${total} ข้อ — บทถัดไปปลดล็อกแล้ว!`;
+
+    // Save progress
+    const p = JSON.parse(localStorage.getItem('clang-progress') || '{}');
+    p[0] = { completed: true, ts: Date.now(), score: correctCount };
+    localStorage.setItem('clang-progress', JSON.stringify(p));
+
+    // Award badge
+    const badges = JSON.parse(localStorage.getItem('clang-badges') || '[]');
+    if (!badges.includes('first-step')) {
+      badges.push('first-step');
+      localStorage.setItem('clang-badges', JSON.stringify(badges));
+    }
+
+    // Confetti
+    if (typeof confetti !== 'undefined') {
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
+    }
+  } else {
+    result.className = 'c-quiz-result show fail';
+    result.innerHTML = `📚 คุณตอบถูก ${correctCount}/${total} ข้อ — ต้องอย่างน้อย 3 ข้อ ลองอ่านบทเรียนแล้วทำใหม่นะ`;
+  }
+
+  result.scrollIntoView({ behavior: 'smooth', block: 'center' });
+});
+</script>
+
+</body>
+</html>
