@@ -3977,11 +3977,11 @@ const PART_DEFS = {
 };
 
 const WIRE_COLORS = {
-    power: '#e74c3c',   // red — VBUS, 3V3, anode
-    ground: '#2c2c2c',  // black — GND
-    signal: '#f1c40f',  // yellow — GPIO signal
-    data: '#3498db',    // blue — Data lines
-    sensor: '#27ae60'   // green — sensors / i2c
+    power: '#e74c3c',   // red  VBUS, 3V3, anode
+    ground: '#2c2c2c',  // black  GND
+    signal: '#f1c40f',  // yellow  GPIO signal
+    data: '#3498db',    // blue  Data lines
+    sensor: '#27ae60'   // green  sensors / i2c
 };
 
 const STARTER_CODE = {
@@ -3989,7 +3989,7 @@ const STARTER_CODE = {
         default: `from machine import Pin
 import time
 
-led = Pin(2, Pin.OUT)   # GROVE 2 — Signal1
+led = Pin(2, Pin.OUT)   # GROVE 2  Signal1
 
 while True:
     led.on()
@@ -4000,7 +4000,7 @@ while True:
         m1: `from machine import Pin
 import time
 
-led = Pin(2, Pin.OUT)   # GROVE 2 — Signal1
+led = Pin(2, Pin.OUT)   # GROVE 2  Signal1
 
 while True:
     led.on()
@@ -4011,9 +4011,9 @@ while True:
         m2: `from machine import Pin
 import time
 
-red    = Pin(2, Pin.OUT)   # GROVE 2 — Signal1
-yellow = Pin(4, Pin.OUT)   # GROVE 3 — Signal1
-green  = Pin(6, Pin.OUT)   # GROVE 4 — Signal1
+red    = Pin(2, Pin.OUT)   # GROVE 2  Signal1
+yellow = Pin(4, Pin.OUT)   # GROVE 3  Signal1
+green  = Pin(6, Pin.OUT)   # GROVE 4  Signal1
 
 while True:
     red.on()
@@ -4029,20 +4029,20 @@ while True:
         m3: `from machine import Pin
 import time
 
-led = Pin(2, Pin.OUT)   # GROVE 2 — Signal1
-btn = Pin(4, Pin.IN)    # GROVE 3 — Signal1
+led = Pin(2, Pin.OUT)   # GROVE 2 Signal1
+btn = Pin(4, Pin.IN)    # GROVE 3 Signal1
 
 while True:
     if btn.value() == 1:
-        led.on()    # กดปุ่ม → LED ติด
+        led.on()    # กดปุ่ม  LED ติด
     else:
-        led.off()   # ปล่อยปุ่ม → LED ดับ
+        led.off()   # ปล่อยปุ่ม  LED ดับ
     time.sleep(0.05)  # อ่านค่าทุก 50ms
 `,
         m4: `from machine import Pin
 import time
 
-buzzer = Pin(6, Pin.OUT)   # GROVE 4 — Signal1
+buzzer = Pin(6, Pin.OUT)   # GROVE 4  Signal1
 
 while True:
     # เล่นเสียงสั้น ๆ 5 ครั้ง
@@ -4056,25 +4056,25 @@ while True:
         m5: `from machine import Pin, ADC
 import time
 
-ldr = ADC(26)              # GROVE 6 — ADC0
-led = Pin(2, Pin.OUT)      # GROVE 2 — Signal1
+ldr = ADC(26)              # GROVE 6  ADC0
+led = Pin(2, Pin.OUT)      # GROVE 2  Signal1
 
 while True:
     light = ldr.read_u16()
     if light < 20000:
-        led.on()    # มืด → เปิดไฟ
+        led.on()    # มืด  เปิดไฟ
     else:
-        led.off()   # สว่าง → ปิดไฟ
+        led.off()   # สว่าง  ปิดไฟ
     time.sleep(0.1)  # อ่านค่าทุก 100ms
 `,
         m6: `from machine import Pin, PWM
 import time
 
-servo = PWM(Pin(12))       # S1 Connector — Signal (GP12)
+servo = PWM(Pin(12))       # S1 Connector Signal (GP12)
 servo.freq(50)             # ความถี่ 50 Hz สำหรับ Servo
 
 while True:
-    # กวาด 0° → 90° → 180° → ลูป
+    # กวาด 0° > 90° > 180° >  ลูป
     servo.duty_u16(1638)   # 0°
     time.sleep(1)
     servo.duty_u16(4915)   # 90°
@@ -4085,8 +4085,8 @@ while True:
         m7: `from machine import Pin, ADC
 import time
 
-soil = ADC(26)             # GROVE 6 — ADC0 (Soil Sensor)
-pump = Pin(16, Pin.OUT)    # GROVE 5 — Signal1 (Water Pump)
+soil = ADC(26)             # GROVE 6  ADC0 (Soil Sensor)
+pump = Pin(16, Pin.OUT)    # GROVE 5  Signal1 (Water Pump)
 
 while True:
     moisture = soil.read_u16()
@@ -4100,7 +4100,7 @@ while True:
         m8: `from machine import Pin
 import time
 
-dht = Pin(4)               # GROVE 3 — Signal1 (DHT11)
+dht = Pin(4)               # GROVE 3 Signal1 (DHT11)
 
 while True:
     temp = dht.read_temp()       # อุณหภูมิ (°C)
@@ -4111,7 +4111,7 @@ while True:
         m10: `from machine import Pin
 import time
 
-in1 = Pin(8, Pin.OUT)   # MOTOR 1  IN1 (GP8)
+in1 = Pin(8, Pin.OUT)   # MOTOR 1 IN1 (GP8)
 in2 = Pin(9, Pin.OUT)   # MOTOR 1 IN2 (GP9)
 
 while True:
@@ -4137,7 +4137,7 @@ import time
 
 trig   = Pin(4, Pin.OUT)   # GROVE 3  Signal1 (HC-SR04 TRIG)
 echo   = Pin(5, Pin.IN)    # GROVE 3  Signal2 (HC-SR04 ECHO)
-servo  = PWM(Pin(12))      # S1 Connector — Signal (GP12)
+servo  = PWM(Pin(12))      # S1 Connector  Signal (GP12)
 buzzer = Pin(6, Pin.OUT)   # GROVE 4  Signal1
 
 servo.freq(50)
@@ -4202,15 +4202,15 @@ void loop() {
 
 void loop() {
     if (digitalRead(4) == HIGH) {
-        digitalWrite(2, HIGH);  // กดปุ่ม → LED ติด
+        digitalWrite(2, HIGH);  // กดปุ่ม  LED ติด
     } else {
-        digitalWrite(2, LOW);   // ปล่อยปุ่ม → LED ดับ
+        digitalWrite(2, LOW);   // ปล่อยปุ่ม LED ดับ
     }
     delay(50);  // อ่านค่าทุก 50ms
 }
 `,
         m4: `void setup() {
-    pinMode(6, OUTPUT);    // GROVE 4 — Signal1
+    pinMode(6, OUTPUT);    // GROVE 4  Signal1
 }
 
 void loop() {
@@ -4242,7 +4242,7 @@ void loop() {
 Servo myServo;
 
 void setup() {
-    myServo.attach(12);    // S1 Signal — GP12 (5V จาก VBUS)
+    myServo.attach(12);    // S1 Signal  GP12 (5V จาก VBUS)
 }
 
 void loop() {
@@ -4255,8 +4255,8 @@ void loop() {
 }
 `,
         m7: `void setup() {
-    pinMode(16, OUTPUT);   // GROVE 5 — Pump
-    pinMode(26, INPUT);    // GROVE 6 — ADC0 (Soil)
+    pinMode(16, OUTPUT);   // GROVE 5  Pump
+    pinMode(26, INPUT);    // GROVE 6  ADC0 (Soil)
 }
 
 void loop() {
@@ -4270,7 +4270,7 @@ void loop() {
 }
 `,
         m8: `#include <DHT.h>
-DHT dht(4, DHT11);         // GROVE 3 — Signal1
+DHT dht(4, DHT11);         // GROVE 3  Signal1
 
 void setup() {
     Serial.begin(9600);
@@ -4288,8 +4288,8 @@ void loop() {
 }
 `,
         m10: `void setup() {
-    pinMode(8, OUTPUT);   // MOTOR 1 — IN1
-    pinMode(9, OUTPUT);   // MOTOR 1 — IN2
+    pinMode(8, OUTPUT);   // MOTOR 1  IN1
+    pinMode(9, OUTPUT);   // MOTOR 1  IN2
 }
 
 void loop() {
@@ -4341,7 +4341,7 @@ const LAB_MISSIONS = [
         id: 'm1', num: 1, icon: '💡', diff: 'easy',
         title: 'Hello LED',
         short: 'กระพริบ LED + Resistor 220Ω แบบอนุกรม (GP2)',
-        desc: 'เป้าหมาย: ต่อ LED แบบ series กับ Resistor 220Ω — GP2 → LED → Resistor → GND (Resistor ลดกระแสไม่ให้ LED ไหม้). ตามจริงทางวิศวกรรม: I = (V - V_LED) / R',
+        desc: 'เป้าหมาย: ต่อ LED แบบ series กับ Resistor 220Ω  GP2 LED  Resistor  GND (Resistor ลดกระแสไม่ให้ LED ไหม้). ตามจริงทางวิศวกรรม: I = (V - V_LED) / R',
         requiredParts: ['led_red', 'resistor'],
         requiredPaths: [
             { from: 'GP2',   to: 'led:a' },                        // GP2 → LED anode (direct)
@@ -4353,7 +4353,7 @@ const LAB_MISSIONS = [
         id: 'm2', num: 2, icon: '🚦', diff: 'easy',
         title: 'Traffic Light',
         short: '3 LED + Resistor ต่อ GP2/GP4/GP6',
-        desc: 'เป้าหมาย: ไฟจราจร 3 สี (แดง GP2, เหลือง GP4, เขียว GP6) — LED แต่ละดวงต้องผ่าน Resistor 220Ω ก่อนถึง GND',
+        desc: 'เป้าหมาย: ไฟจราจร 3 สี (แดง GP2, เหลือง GP4, เขียว GP6)  LED แต่ละดวงต้องผ่าน Resistor 220Ω ก่อนถึง GND',
         requiredParts: ['led_red', 'led_yellow', 'led_green', 'resistor', 'resistor', 'resistor'],
         requiredPaths: [
             { from: 'GP2', to: 'led_red:a' },
