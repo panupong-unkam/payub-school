@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#E91E63">
+<title>หน่วยที่ 5: การวนซ้ำ (Loops) | ภาษา C</title>
+<link rel="icon" type="image/svg+xml" href="../../logo.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Noto+Serif+Thai:wght@400;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../c-style.css">
+<script type="module">
+  try {
+    const mod = await import('https://esm.sh/JSCPP@2.0.9');
+    window.JSCPP = mod.default || mod;
+    window.dispatchEvent(new Event('jscpp-ready'));
+  } catch (e) {
+    console.error('JSCPP load failed:', e);
+    window.dispatchEvent(new Event('jscpp-failed'));
+  }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+
+<header class="c-topbar">
+  <div class="c-topbar-left">
+    <a href="../../index.html" class="c-btn-icon" title="หน้าหลักเว็บไซต์">🏠</a>
+    <a href="../index.html" class="c-btn-icon" title="กลับ Roadmap">←</a>
+    <div class="c-topbar-logo" style="background:linear-gradient(135deg,#E91E63,#F39C12);">5</div>
+    <div>
+      <div class="c-topbar-title">หน่วยที่ 5 · การวนซ้ำ</div>
+      <div class="c-topbar-subtitle">ทำงานซ้ำ ๆ โดยไม่ต้องเขียนซ้ำ</div>
+    </div>
+  </div>
+  <div class="c-topbar-right">
+    <button class="c-btn-icon" id="themeToggle" title="สลับธีม">🌙</button>
+    <a href="../playground.html" class="c-btn c-btn-ghost">💻 Playground</a>
+  </div>
+</header>
+
+<!-- LESSON HEADER -->
+<section class="c-lesson-header" style="--unit-color:#E91E63; background:linear-gradient(135deg,#E91E63,#A01346);">
+  <div class="c-lesson-header-content">
+    <div class="c-lesson-breadcrumb">
+      <a href="../../index.html">🏠 หน้าหลัก</a> &nbsp;›&nbsp; <a href="../index.html">หลักสูตร C</a> &nbsp;›&nbsp; หน่วยที่ 5
+    </div>
+    <h1 class="c-lesson-title">🔁 การวนซ้ำ (Loops)</h1>
+    <p class="c-lesson-subtitle">ให้คอมพิวเตอร์ทำงานซ้ำ ๆ แทนเรา เช่น นับ 1-100 หรือพิมพ์สูตรคูณ ในไม่กี่บรรทัด</p>
+    <div class="c-lesson-meta">
+      <span>⏱️ ใช้เวลา ~60 นาที</span>
+      <span>📖 ระดับ: ควบคุม</span>
+      <span>💻 มีโค้ดให้ลอง</span>
+    </div>
+  </div>
+</section>
+
+<div class="c-container-narrow">
+
+  <!-- จุดประสงค์ -->
+  <div class="c-section">
+    <h2><span class="c-section-icon">🎯</span> สิ่งที่จะได้เรียนรู้ในบทนี้</h2>
+    <div class="c-objectives">
+      <h4>📌 หลังจบบทนี้ คุณจะ:</h4>
+      <ul>
+        <li>ใช้ <code>for</code> วนซ้ำตามจำนวนรอบที่รู้แน่นอน</li>
+        <li>ใช้ <code>while</code> และ <code>do...while</code> วนซ้ำตามเงื่อนไข</li>
+        <li>ใช้ <code>break</code> ออกจากลูป และ <code>continue</code> ข้ามรอบ</li>
+        <li>เขียน <b>ลูปซ้อนลูป</b> (nested loop) เช่น พิมพ์สูตรคูณ</li>
+        <li>ระวังและเลี่ยง <b>ลูปไม่รู้จบ</b> (infinite loop)</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 1. for -->
+  <div class="c-section">
+    <h2><span class="c-section-icon">🔢</span> 1. ลูป for — รู้จำนวนรอบแน่นอน</h2>
+    <p><code>for</code> เหมาะเมื่อรู้ว่าจะวนกี่รอบ มี 3 ส่วนในวงเล็บ คั่นด้วย <code>;</code></p>
+
+    <div class="c-code-block">
+      <div class="code-header"><span class="code-lang">C</span></div>
+<pre><span class="c-kw">for</span> (<span class="c-type">int</span> i = <span class="c-num">1</span>; i &lt;= <span class="c-num">5</span>; i++) {
+       │            │        │
+     เริ่มต้น      เงื่อนไข   เพิ่มค่า
+    <span class="c-fn">printf</span>(<span class="c-str">"%d "</span>, i);
+}</pre>
+    </div>
+
+    <div class="c-tryit">
+      <div class="c-tryit-header">
+        <div class="c-tryit-title">🧪 นับ 1 ถึง 10</div>
+        <div class="c-tryit-actions">
+          <button class="c-tryit-btn" data-reset="tryit1">↺ Reset</button>
+          <button class="c-tryit-btn btn-run" data-run="tryit1">▶ รัน</button>
+        </div>
+      </div>
+      <textarea class="c-tryit-editor" id="tryit1" spellcheck="false">#include &lt;stdio.h&gt;
+
+int main() {
+    for (int i = 1; i <= 10; i++) {
+        printf("%d ", i);
+    }
+    printf("\n");
+    return 0;
+}
+</textarea>
+      <div class="c-tryit-output" id="tryit1-out"></div>
+    </div>
+
+    <div class="c-tip">
+      <div class="c-tip-icon">💡</div>
+      <div><code>i++</code> คือการเพิ่มค่า <code>i</code> ทีละ 1 (ย่อจาก <code>i = i + 1</code>) — ถ้าอยากเพิ่มทีละ 2 ใช้ <code>i += 2</code></div>
+    </div>
+  </div>
+
+  <!-- 2. while -->
+  <div class="c-section">
+    <h2><span class="c-section-icon">🔄</span> 2. ลูป while — วนตามเงื่อนไข</h2>
+    <p><code>while</code> วนซ้ำ <b>ตราบเท่าที่</b>เงื่อนไขยังเป็นจริง เหมาะเมื่อไม่รู้จำนวนรอบล่วงหน้า</p>
+
+    <div class="c-tryit">
+      <div class="c-tryit-header">
+        <div class="c-tryit-title">🧪 นับถอยหลังจรวด</div>
+        <div class="c-tryit-actions">
+          <button class="c-tryit-btn" data-reset="tryit2">↺ Reset</button>
+          <button class="c-tryit-btn btn-run" data-run="tryit2">▶ รัน</button>
+        </div>
+      </div>
+      <textarea class="c-tryit-editor" id="tryit2" spellcheck="false">#include &lt;stdio.h&gt;
+
+int main() {
+    int count = 5;
+    while (count > 0) {
+        printf("%d...\n", count);
+        count--;             // ลดค่าทีละ 1
+    }
+    printf("Liftoff!\n");
+    return 0;
+}
+</textarea>
+      <div class="c-tryit-output" id="tryit2-out"></div>
+    </div>
+
+    <div class="c-danger">
+      <div class="c-danger-icon">❌</div>
+      <div>
+        <b>ระวังลูปไม่รู้จบ!</b> ถ้าลืม <code>count--</code> เงื่อนไข <code>count &gt; 0</code> จะจริงตลอด
+        โปรแกรมจะวนไม่หยุด — ต้องมีอะไรที่ทำให้เงื่อนไข "เปลี่ยนเป็นเท็จ" ในที่สุดเสมอ
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. do-while -->
+  <div class="c-section">
+    <h2><span class="c-section-icon">🔁</span> 3. ลูป do...while — ทำก่อนเช็คทีหลัง</h2>
+    <p>
+      คล้าย <code>while</code> แต่ <b>ทำงาน 1 รอบก่อนเสมอ</b> แล้วค่อยเช็คเงื่อนไข
+      — เหมาะกับเมนูที่ต้องแสดงอย่างน้อย 1 ครั้ง
+    </p>
+
+    <div class="c-tryit">
+      <div class="c-tryit-header">
+        <div class="c-tryit-title">🧪 do...while</div>
+        <div class="c-tryit-actions">
+          <button class="c-tryit-btn" data-reset="tryit3">↺ Reset</button>
+          <button class="c-tryit-btn btn-run" data-run="tryit3">▶ รัน</button>
+        </div>
+      </div>
+      <textarea class="c-tryit-editor" id="tryit3" spellcheck="false">#include &lt;stdio.h&gt;
+
+int main() {
+    int i = 1;
+    do {
+        printf("Round %d\n", i);
+        i++;
+    } while (i <= 3);
+    return 0;
+}
+</textarea>
+      <div class="c-tryit-output" id="tryit3-out"></div>
+    </div>
+  </div>
+
+  <!-- 4. break / continue -->
+  <div class="c-section">
+    <h2><span class="c-section-icon">🚦</span> 4. break และ continue</h2>
+    <ul>
+      <li><code>break</code> = <b>ออกจากลูปทันที</b> (หยุดวน)</li>
+      <li><code>continue</code> = <b>ข้ามไปรอบถัดไป</b> (ไม่ทำคำสั่งที่เหลือในรอบนี้)</li>
+    </ul>
+
+    <div class="c-tryit">
+      <div class="c-tryit-header">
+        <div class="c-tryit-title">🧪 พิมพ์เฉพาะเลขคี่ 1-9 แล้วหยุดที่เจอ 8</div>
+        <div class="c-tryit-actions">
+          <button class="c-tryit-btn" data-reset="tryit4">↺ Reset</button>
+          <button class="c-tryit-btn btn-run" data-run="tryit4">▶ รัน</button>
+        </div>
+      </div>
+      <textarea class="c-tryit-editor" id="tryit4" spellcheck="false">#include &lt;stdio.h&gt;
+
+int main() {
+    for (int i = 1; i <= 20; i++) {
+        if (i == 8) break;        // เจอ 8 ออกจากลูปเลย
+        if (i % 2 == 0) continue; // เลขคู่ ข้ามไป
+        printf("%d ", i);
+    }
+    printf("\n");
+    return 0;
+}
+</textarea>
+      <div class="c-tryit-output" id="tryit4-out"></div>
+    </div>
+  </div>
+
+  <!-- 5. nested -->
+  <div class="c-section">
+    <h2><span class="c-section-icon">🎯</span> 5. ลูปซ้อนลูป (Nested Loop)</h2>
+    <p>ใส่ลูปไว้ในลูป — ลูปข้างในจะวนครบทุกรอบ ต่อ 1 รอบของลูปข้างนอก เหมาะกับตารางหรือรูปภาพ</p>
+
+    <div class="c-tryit">
+      <div class="c-tryit-header">
+        <div class="c-tryit-title">🧪 สามเหลี่ยมดาว</div>
+        <div class="c-tryit-actions">
+          <button class="c-tryit-btn" data-reset="tryit5">↺ Reset</button>
+          <button class="c-tryit-btn btn-run" data-run="tryit5">▶ รัน</button>
+        </div>
+      </div>
+      <textarea class="c-tryit-editor" id="tryit5" spellcheck="false">#include &lt;stdio.h&gt;
+
+int main() {
+    for (int row = 1; row <= 5; row++) {
+        for (int star = 1; star <= row; star++) {
+            printf("*");
+        }
+        printf("\n");
+    }
+    return 0;
+}
+</textarea>
+      <div class="c-tryit-output" id="tryit5-out"></div>
+    </div>
+
+    <div class="c-tip">
+      <div class="c-tip-icon">💡</div>
+      <div>ลองเปลี่ยน <code>printf("*")</code> เป็นสูตรคูณ <code>printf("%d ", row * star)</code> ดูสิ!</div>
+    </div>
+  </div>
+
+  <!-- 6. แบบฝึก -->
+  <div class="c-section">
+    <h2><span class="c-section-icon">✏️</span> 6. แบบฝึกหัด</h2>
+
+    <!-- Easy -->
+    <div class="c-exercise">
+      <div class="c-exercise-header">
+        <span class="c-exercise-badge level-easy">⭐ ง่าย</span>
+        <span class="c-exercise-title">โจทย์ที่ 1: บวกเลข 1 ถึง N</span>
+      </div>
+      <p>รับเลข <code>N</code> แล้วหาผลบวก 1+2+3+...+N พิมพ์ผลลัพธ์ (เช่น N=5 → 15)</p>
+
+      <div class="c-tryit">
+        <div class="c-tryit-header">
+          <div class="c-tryit-title">💻 พื้นที่เขียนโค้ด</div>
+          <div class="c-tryit-actions">
+            <button class="c-tryit-btn" data-reset="ex1ed">↺ Reset</button>
+            <button class="c-tryit-btn btn-run" data-run="ex1ed">▶ รัน</button>
+          </div>
+        </div>
+        <textarea class="c-tryit-editor" id="ex1ed" spellcheck="false">#include &lt;stdio.h&gt;
+
+int main() {
+    int N;
+    scanf("%d", &N);
+    int sum = 0;
+    // for (int i = 1; i <= N; i++) sum += i;
+
+    printf("Sum = %d\n", sum);
+    return 0;
+}
+</textarea>
+        <div class="c-tryit-stdin-label">⌨️ ค่าที่ป้อน (Input) — N:</div>
+        <textarea class="c-tryit-stdin" id="ex1ed-stdin" spellcheck="false">5</textarea>
+        <div class="c-tryit-output" id="ex1ed-out"></div>
+      </div>
+    </div>
+
+    <!-- Medium -->
+    <div class="c-exercise">
+      <div class="c-exercise-header">
+        <span class="c-exercise-badge level-medium">⭐⭐ ปานกลาง</span>
+        <span class="c-exercise-title">โจทย์ที่ 2: สูตรคูณแม่ N</span>
+      </div>
+      <p>รับเลข <code>N</code> แล้วพิมพ์สูตรคูณแม่นั้นตั้งแต่ N×1 ถึง N×12</p>
+      <p>รูปแบบ: <code>7 x 1 = 7</code></p>
+
+      <div class="c-tryit">
+        <div class="c-tryit-header">
+          <div class="c-tryit-title">💻 พื้นที่เขียนโค้ด</div>
+          <div class="c-tryit-actions">
+            <button class="c-tryit-btn" data-reset="ex2ed">↺ Reset</button>
+            <button class="c-tryit-btn btn-run" data-run="ex2ed">▶ รัน</button>
+          </div>
+        </div>
+        <textarea class="c-tryit-editor" id="ex2ed" spellcheck="false">#include &lt;stdio.h&gt;
+
+int main() {
+    int N;
+    scanf("%d", &N);
+    // for (int i = 1; i <= 12; i++)
+    //     printf("%d x %d = %d\n", N, i, N * i);
+
+    return 0;
+}
+</textarea>
+        <div class="c-tryit-stdin-label">⌨️ ค่าที่ป้อน (Input) — แม่สูตรคูณ:</div>
+        <textarea class="c-tryit-stdin" id="ex2ed-stdin" spellcheck="false">7</textarea>
+        <div class="c-tryit-output" id="ex2ed-out"></div>
+      </div>
+    </div>
+
+    <!-- Hard -->
+    <div class="c-exercise">
+      <div class="c-exercise-header">
+        <span class="c-exercise-badge level-hard">⭐⭐⭐ ท้าทาย</span>
+        <span class="c-exercise-title">โจทย์ที่ 3: พีระมิดดาว</span>
+      </div>
+      <p>รับความสูง <code>H</code> แล้วพิมพ์พีระมิดดาวจัดกึ่งกลาง เช่น H=4:</p>
+      <div class="c-code-block"><pre>   *
+  ***
+ *****
+*******</pre></div>
+      <p>💡 แต่ละแถวมี ช่องว่างนำ = (H − row) ตัว และดาว = (2×row − 1) ตัว</p>
+
+      <div class="c-tryit">
+        <div class="c-tryit-header">
+          <div class="c-tryit-title">💻 พื้นที่เขียนโค้ด</div>
+          <div class="c-tryit-actions">
+            <button class="c-tryit-btn" data-reset="ex3ed">↺ Reset</button>
+            <button class="c-tryit-btn btn-run" data-run="ex3ed">▶ รัน</button>
+          </div>
+        </div>
+        <textarea class="c-tryit-editor" id="ex3ed" spellcheck="false">#include &lt;stdio.h&gt;
+
+int main() {
+    int H;
+    scanf("%d", &H);
+    for (int row = 1; row <= H; row++) {
+        // 1) พิมพ์ช่องว่างนำ (H - row) ตัว
+        // 2) พิมพ์ดาว (2*row - 1) ตัว
+        // 3) printf("\n");
+    }
+    return 0;
+}
+</textarea>
+        <div class="c-tryit-stdin-label">⌨️ ค่าที่ป้อน (Input) — ความสูง:</div>
+        <textarea class="c-tryit-stdin" id="ex3ed-stdin" spellcheck="false">4</textarea>
+        <div class="c-tryit-output" id="ex3ed-out"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="c-quiz" id="quiz">
+    <div class="c-quiz-header">
+      <h3>📝 แบบทดสอบท้ายบท</h3>
+      <p style="color:var(--c-text-muted);">ตอบให้ถูก 4 ใน 5 ข้อ เพื่อปลดล็อกบทถัดไป</p>
+    </div>
+
+    <div class="c-quiz-question" data-correct="c">
+      <div class="c-quiz-question-text"><span class="q-num">1</span>ลูปแบบใดเหมาะเมื่อ "รู้จำนวนรอบแน่นอน"?</div>
+      <div class="c-quiz-options">
+        <label class="c-quiz-option"><input type="radio" name="q1" value="a"><span class="opt-letter">A</span> <code>while</code></label>
+        <label class="c-quiz-option"><input type="radio" name="q1" value="b"><span class="opt-letter">B</span> <code>do...while</code></label>
+        <label class="c-quiz-option"><input type="radio" name="q1" value="c"><span class="opt-letter">C</span> <code>for</code></label>
+        <label class="c-quiz-option"><input type="radio" name="q1" value="d"><span class="opt-letter">D</span> <code>if</code></label>
+      </div>
+    </div>
+
+    <div class="c-quiz-question" data-correct="b">
+      <div class="c-quiz-question-text"><span class="q-num">2</span>ในลูป <code>for (int i=1; i&lt;=5; i++)</code> จะวนกี่รอบ?</div>
+      <div class="c-quiz-options">
+        <label class="c-quiz-option"><input type="radio" name="q2" value="a"><span class="opt-letter">A</span> 4 รอบ</label>
+        <label class="c-quiz-option"><input type="radio" name="q2" value="b"><span class="opt-letter">B</span> 5 รอบ</label>
+        <label class="c-quiz-option"><input type="radio" name="q2" value="c"><span class="opt-letter">C</span> 6 รอบ</label>
+        <label class="c-quiz-option"><input type="radio" name="q2" value="d"><span class="opt-letter">D</span> ไม่รู้จบ</label>
+      </div>
+    </div>
+
+    <div class="c-quiz-question" data-correct="a">
+      <div class="c-quiz-question-text"><span class="q-num">3</span>คำสั่งใดใช้ "ออกจากลูปทันที"?</div>
+      <div class="c-quiz-options">
+        <label class="c-quiz-option"><input type="radio" name="q3" value="a"><span class="opt-letter">A</span> <code>break</code></label>
+        <label class="c-quiz-option"><input type="radio" name="q3" value="b"><span class="opt-letter">B</span> <code>continue</code></label>
+        <label class="c-quiz-option"><input type="radio" name="q3" value="c"><span class="opt-letter">C</span> <code>return</code></label>
+        <label class="c-quiz-option"><input type="radio" name="q3" value="d"><span class="opt-letter">D</span> <code>stop</code></label>
+      </div>
+    </div>
+
+    <div class="c-quiz-question" data-correct="d">
+      <div class="c-quiz-question-text"><span class="q-num">4</span>อะไรทำให้เกิด "ลูปไม่รู้จบ"?</div>
+      <div class="c-quiz-options">
+        <label class="c-quiz-option"><input type="radio" name="q4" value="a"><span class="opt-letter">A</span> ใส่ break มากไป</label>
+        <label class="c-quiz-option"><input type="radio" name="q4" value="b"><span class="opt-letter">B</span> ใช้ for แทน while</label>
+        <label class="c-quiz-option"><input type="radio" name="q4" value="c"><span class="opt-letter">C</span> วนแค่รอบเดียว</label>
+        <label class="c-quiz-option"><input type="radio" name="q4" value="d"><span class="opt-letter">D</span> เงื่อนไขไม่เคยเป็นเท็จ</label>
+      </div>
+    </div>
+
+    <div class="c-quiz-question" data-correct="b">
+      <div class="c-quiz-question-text"><span class="q-num">5</span>ลูปแบบใด "ทำงานอย่างน้อย 1 รอบเสมอ"?</div>
+      <div class="c-quiz-options">
+        <label class="c-quiz-option"><input type="radio" name="q5" value="a"><span class="opt-letter">A</span> <code>for</code></label>
+        <label class="c-quiz-option"><input type="radio" name="q5" value="b"><span class="opt-letter">B</span> <code>do...while</code></label>
+        <label class="c-quiz-option"><input type="radio" name="q5" value="c"><span class="opt-letter">C</span> <code>while</code></label>
+        <label class="c-quiz-option"><input type="radio" name="q5" value="d"><span class="opt-letter">D</span> ทุกแบบเหมือนกัน</label>
+      </div>
+    </div>
+
+    <div style="text-align:center; margin-top:20px;">
+      <button class="c-btn c-btn-success" id="submitQuiz" style="padding:12px 30px; font-size:15px;">✓ ส่งคำตอบ</button>
+    </div>
+
+    <div class="c-quiz-result" id="quizResult"></div>
+  </div>
+
+  <!-- NAV -->
+  <div class="c-lesson-nav">
+    <a href="04-conditions.html" class="c-lesson-nav-btn">
+      <div class="c-lesson-nav-label">← บทก่อนหน้า</div>
+      <div class="c-lesson-nav-title">หน่วย 4: เงื่อนไข</div>
+    </a>
+    <a href="06-functions.html" class="c-lesson-nav-btn next disabled" id="nextBtn" title="ทำแบบทดสอบให้ผ่านก่อน">
+      <div class="c-lesson-nav-label">บทถัดไป →</div>
+      <div class="c-lesson-nav-title">หน่วยที่ 6: ฟังก์ชัน ⚙️</div>
+    </a>
+  </div>
+
+</div>
+
+<footer class="c-footer">
+  <p>© 2026 Computer Science By <a href="../../index.html">ครูภาณุพงศ์ อุ่นคำ</a> · โรงเรียนบ้านป่ายุบ</p>
+</footer>
+
+<script>
+/* Theme */
+const themeBtn = document.getElementById('themeToggle');
+const savedTheme = localStorage.getItem('clang-theme') || 'light';
+document.documentElement.setAttribute('data-theme', savedTheme);
+themeBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+themeBtn.addEventListener('click', () => {
+  const curr = document.documentElement.getAttribute('data-theme');
+  const next = curr === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('clang-theme', next);
+  themeBtn.textContent = next === 'dark' ? '☀️' : '🌙';
+});
+
+/* Copy code */
+document.querySelectorAll('.code-copy').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const target = document.getElementById(btn.dataset.copy);
+    if (target) {
+      navigator.clipboard.writeText(target.innerText);
+      const orig = btn.textContent;
+      btn.textContent = '✓ คัดลอกแล้ว';
+      setTimeout(() => btn.textContent = orig, 1500);
+    }
+  });
+});
+
+/* Tab in textareas (editor only) */
+document.querySelectorAll('.c-tryit-editor').forEach(ed => {
+  ed.addEventListener('keydown', (e) => {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const s = ed.selectionStart;
+      const ev = ed.selectionEnd;
+      ed.value = ed.value.substring(0, s) + '    ' + ed.value.substring(ev);
+      ed.selectionStart = ed.selectionEnd = s + 4;
+    }
+  });
+});
+
+/* Save originals for Reset (editors + stdin) */
+const originals = {};
+document.querySelectorAll('.c-tryit-editor, .c-tryit-stdin').forEach(ed => {
+  originals[ed.id] = ed.value;
+});
+
+document.querySelectorAll('[data-reset]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const id = btn.dataset.reset;
+    const ed = document.getElementById(id);
+    if (ed && originals[id] !== undefined) ed.value = originals[id];
+    const sid = id + '-stdin';
+    const sed = document.getElementById(sid);
+    if (sed && originals[sid] !== undefined) sed.value = originals[sid];
+    const out = document.getElementById(id + '-out');
+    if (out) { out.textContent = ''; out.className = 'c-tryit-output'; }
+  });
+});
+
+/* Run buttons */
+document.querySelectorAll('[data-run]').forEach(btn => {
+  btn.addEventListener('click', () => runTryIt(btn.dataset.run));
+});
+
+function runTryIt(id) {
+  const ed = document.getElementById(id);
+  const out = document.getElementById(id + '-out');
+  if (!ed || !out) return;
+
+  if (typeof window.JSCPP === 'undefined') {
+    out.textContent = '⏳ Engine ยังโหลดไม่เสร็จ — รอสักครู่แล้วลองใหม่';
+    out.className = 'c-tryit-output error';
+    return;
+  }
+
+  const stdinEl = document.getElementById(id + '-stdin');
+  const stdin = stdinEl ? stdinEl.value : '';
+
+  let output = '';
+  out.textContent = '⏳ กำลังรัน...';
+  out.className = 'c-tryit-output';
+
+  const config = {
+    stdio: { write: (s) => { output += s; } },
+    unsigned_overflow: 'warn',
+    maxTimeout: 5000
+  };
+
+  setTimeout(() => {
+    try {
+      const exitCode = window.JSCPP.run(ed.value, stdin, config);
+      out.textContent = output + `\n▸ Process exited with code ${exitCode}`;
+      out.className = 'c-tryit-output success';
+    } catch (err) {
+      out.textContent = (output ? output + '\n\n' : '') + '❌ ข้อผิดพลาด:\n' + (err.message || err.toString());
+      out.className = 'c-tryit-output error';
+    }
+  }, 50);
+}
+
+/* Quiz */
+document.querySelectorAll('.c-quiz-option').forEach(opt => {
+  opt.addEventListener('click', () => {
+    const inp = opt.querySelector('input');
+    const name = inp.name;
+    document.querySelectorAll(`input[name="${name}"]`).forEach(i => {
+      i.closest('.c-quiz-option').classList.remove('selected');
+    });
+    opt.classList.add('selected');
+    inp.checked = true;
+  });
+});
+
+document.getElementById('submitQuiz').addEventListener('click', () => {
+  const questions = document.querySelectorAll('.c-quiz-question');
+  let correctCount = 0;
+
+  questions.forEach(q => {
+    const correctAns = q.dataset.correct;
+    const selected = q.querySelector('input:checked');
+    q.querySelectorAll('.c-quiz-option').forEach(opt => {
+      opt.classList.remove('correct', 'wrong');
+      const val = opt.querySelector('input').value;
+      if (val === correctAns) opt.classList.add('correct');
+      else if (selected && opt.querySelector('input').checked && val !== correctAns) {
+        opt.classList.add('wrong');
+      }
+    });
+    if (selected && selected.value === correctAns) correctCount++;
+  });
+
+  const result = document.getElementById('quizResult');
+  result.classList.add('show');
+  const total = questions.length;
+
+  if (correctCount >= 4) {
+    result.className = 'c-quiz-result show pass';
+    result.innerHTML = `🎉 เก่งมาก! คุณตอบถูก ${correctCount}/${total} ข้อ — ผ่านหน่วยที่ 5 แล้ว!`;
+
+    const p = JSON.parse(localStorage.getItem('clang-progress') || '{}');
+    p[5] = { completed: true, ts: Date.now(), score: correctCount };
+    localStorage.setItem('clang-progress', JSON.stringify(p));
+
+    const badges = JSON.parse(localStorage.getItem('clang-badges') || '[]');
+    if (!badges.includes('loop-master')) {
+      badges.push('loop-master');
+      localStorage.setItem('clang-badges', JSON.stringify(badges));
+    }
+
+    const nb = document.getElementById('nextBtn');
+    if (nb) { nb.classList.remove('disabled'); nb.title = 'ปลดล็อกแล้ว!'; }
+
+    if (typeof confetti !== 'undefined') {
+      confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+    }
+  } else {
+    result.className = 'c-quiz-result show fail';
+    result.innerHTML = `📚 คุณตอบถูก ${correctCount}/${total} ข้อ — ต้องอย่างน้อย 4 ข้อ ลองอ่านบทเรียนแล้วทำใหม่นะ`;
+  }
+
+  result.scrollIntoView({ behavior: 'smooth', block: 'center' });
+});
+
+/* Unlock next button if already passed */
+(() => {
+  const p = JSON.parse(localStorage.getItem('clang-progress') || '{}');
+  if (p[5] && p[5].completed) {
+    const nb = document.getElementById('nextBtn');
+    if (nb) { nb.classList.remove('disabled'); nb.title = 'ปลดล็อกแล้ว!'; }
+  }
+})();
+</script>
+
+</body>
+</html>

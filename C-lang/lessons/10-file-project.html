@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#FFCC00">
+<title>หน่วยที่ 10: ไฟล์ & โปรเจกต์จบหลักสูตร | ภาษา C</title>
+<link rel="icon" type="image/svg+xml" href="../../logo.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Noto+Serif+Thai:wght@400;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../c-style.css">
+<script type="module">
+  try {
+    const mod = await import('https://esm.sh/JSCPP@2.0.9');
+    window.JSCPP = mod.default || mod;
+    window.dispatchEvent(new Event('jscpp-ready'));
+  } catch (e) {
+    console.error('JSCPP load failed:', e);
+    window.dispatchEvent(new Event('jscpp-failed'));
+  }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+
+<header class="c-topbar">
+  <div class="c-topbar-left">
+    <a href="../../index.html" class="c-btn-icon" title="หน้าหลักเว็บไซต์">🏠</a>
+    <a href="../index.html" class="c-btn-icon" title="กลับ Roadmap">←</a>
+    <div class="c-topbar-logo" style="background:linear-gradient(135deg,#FFCC00,#F39C12);color:#78350F;">10</div>
+    <div>
+      <div class="c-topbar-title">หน่วยที่ 10 · ไฟล์ & โปรเจกต์จบ</div>
+      <div class="c-topbar-subtitle">รวมทุกอย่างที่เรียนมา</div>
+    </div>
+  </div>
+  <div class="c-topbar-right">
+    <button class="c-btn-icon" id="themeToggle" title="สลับธีม">🌙</button>
+    <a href="../playground.html" class="c-btn c-btn-ghost">💻 Playground</a>
+  </div>
+</header>
+
+<!-- LESSON HEADER -->
+<section class="c-lesson-header" style="--unit-color:#FFCC00; background:linear-gradient(135deg,#F39C12,#B36F05);">
+  <div class="c-lesson-header-content">
+    <div class="c-lesson-breadcrumb">
+      <a href="../../index.html">🏠 หน้าหลัก</a> &nbsp;›&nbsp; <a href="../index.html">หลักสูตร C</a> &nbsp;›&nbsp; หน่วยที่ 10
+    </div>
+    <h1 class="c-lesson-title">🎓 ไฟล์ & โปรเจกต์จบหลักสูตร</h1>
+    <p class="c-lesson-subtitle">บทสุดท้าย! รู้จักการอ่าน-เขียนไฟล์ และรวมทุกความรู้มาสร้างโปรแกรมจริง 3 โปรเจกต์</p>
+    <div class="c-lesson-meta">
+      <span>⏱️ ใช้เวลา ~75 นาที</span>
+      <span>📖 ระดับ: โปรเจกต์</span>
+      <span>💻 มีโค้ดให้ลอง</span>
+    </div>
+  </div>
+</section>
+
+<div class="c-container-narrow">
+
+  <!-- จุดประสงค์ -->
+  <div class="c-section">
+    <h2><span class="c-section-icon">🎯</span> สิ่งที่จะได้เรียนรู้ในบทนี้</h2>
+    <div class="c-objectives">
+      <h4>📌 หลังจบบทนี้ คุณจะ:</h4>
+      <ul>
+        <li>เข้าใจแนวคิดการ <b>อ่าน-เขียนไฟล์</b> ด้วย <code>fopen</code>, <code>fprintf</code>, <code>fclose</code></li>
+        <li>รวมความรู้ทุกหน่วย (ตัวแปร, เงื่อนไข, ลูป, ฟังก์ชัน, อาร์เรย์) มาสร้างโปรแกรมจริง</li>
+        <li>สร้าง <b>3 มินิโปรเจกต์</b>: เครื่องคิดเลข, เกมทายเลข, ระบบจัดการคะแนน</li>
+        <li>มีพื้นฐานพร้อมต่อยอดไปเรียน C ระดับสูง หรือภาษาอื่น</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- หมายเหตุ -->
+  <div class="c-warn" style="border-left-color:#F59E0B;">
+    <div class="c-warn-icon">📌</div>
+    <div>
+      <b>เหมือนหน่วย struct:</b> engine ในเบราว์เซอร์ <b>ยังไม่รองรับการอ่าน-เขียนไฟล์</b> (ไม่มีระบบไฟล์)
+      โค้ดไฟล์จึงเป็น <b>"โค้ดอ้างอิง"</b> ให้นำไปรันในคอมไพเลอร์จริง เช่น
+      <a href="https://www.onlinegdb.com/online_c_compiler" target="_blank" rel="noopener"><b>OnlineGDB</b></a> หรือ Dev-C++
+      — แต่ <b>3 โปรเจกต์จบ รันได้จริงในเบราว์เซอร์!</b>
+    </div>
+  </div>
+
+  <!-- 1. ไฟล์ -->
+  <div class="c-section">
+    <h2><span class="c-section-icon">📁</span> 1. การอ่าน-เขียนไฟล์ (โค้ดอ้างอิง)</h2>
+    <p>
+      ที่ผ่านมา ข้อมูลหายไปเมื่อโปรแกรมปิด การเขียนไฟล์ทำให้ <b>เก็บข้อมูลถาวร</b> ได้
+      ขั้นตอนหลักมี 3 ส่วน: <b>เปิด (fopen) → ทำงาน (อ่าน/เขียน) → ปิด (fclose)</b>
+    </p>
+
+    <h3>✍️ เขียนลงไฟล์</h3>
+    <div class="c-code-block">
+      <div class="code-header">
+        <span class="code-lang">C · โค้ดอ้างอิง</span>
+        <button class="code-copy" data-copy="ref1">📋 คัดลอก</button>
+      </div>
+<pre id="ref1"><span class="c-prep">#include &lt;stdio.h&gt;</span>
+
+<span class="c-type">int</span> <span class="c-fn">main</span>() {
+    <span class="c-type">FILE</span> *f = <span class="c-fn">fopen</span>(<span class="c-str">"score.txt"</span>, <span class="c-str">"w"</span>);  <span class="c-cmt">// "w" = write</span>
+    <span class="c-fn">fprintf</span>(f, <span class="c-str">"Somchai 85\n"</span>);
+    <span class="c-fn">fprintf</span>(f, <span class="c-str">"Malee 92\n"</span>);
+    <span class="c-fn">fclose</span>(f);                          <span class="c-cmt">// ต้องปิดเสมอ!</span>
+    <span class="c-fn">printf</span>(<span class="c-str">"Saved to score.txt\n"</span>);
+    <span class="c-kw">return</span> <span class="c-num">0</span>;
+}</pre>
+    </div>
+
+    <h3>📖 อ่านจากไฟล์</h3>
+    <div class="c-code-block">
+      <div class="code-header">
+        <span class="code-lang">C · โค้ดอ้างอิง</span>
+        <button class="code-copy" data-copy="ref2">📋 คัดลอก</button>
+      </div>
+<pre id="ref2"><span class="c-type">FILE</span> *f = <span class="c-fn">fopen</span>(<span class="c-str">"score.txt"</span>, <span class="c-str">"r"</span>);  <span class="c-cmt">// "r" = read</span>
+<span class="c-type">char</span> name[<span class="c-num">20</span>];
+<span class="c-type">int</span> score;
+<span class="c-kw">while</span> (<span class="c-fn">fscanf</span>(f, <span class="c-str">"%s %d"</span>, name, &amp;score) != EOF) {
+    <span class="c-fn">printf</span>(<span class="c-str">"%s got %d\n"</span>, name, score);
+}
+<span class="c-fn">fclose</span>(f);</pre>
+    </div>
+
+    <table style="width:100%; border-collapse:collapse; margin:14px 0;">
+      <thead>
+        <tr style="background:var(--c-primary); color:white;">
+          <th style="padding:10px; text-align:left;">โหมด</th>
+          <th style="padding:10px; text-align:left;">ความหมาย</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid var(--c-border);"><td style="padding:10px;"><code>"w"</code></td><td style="padding:10px;">เขียน (ลบของเดิมทิ้ง)</td></tr>
+        <tr style="border-bottom:1px solid var(--c-border);"><td style="padding:10px;"><code>"r"</code></td><td style="padding:10px;">อ่านอย่างเดียว</td></tr>
+        <tr><td style="padding:10px;"><code>"a"</code></td><td style="padding:10px;">เขียนต่อท้าย (append)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- CAPSTONE -->
+  <div class="c-section">
+    <h2><span class="c-section-icon">🏆</span> 2. โปรเจกต์จบหลักสูตร (รันได้จริง!)</h2>
+    <p>
+      ถึงเวลารวมทุกอย่างที่เรียนมา! 3 โปรแกรมนี้ <b>ทำงานได้จริง</b> — ลองรัน อ่านให้เข้าใจ
+      แล้วดัดแปลงเพิ่มความสามารถของตัวเอง
+    </p>
+  </div>
+
+  <!-- Project 1: Calculator -->
+  <div class="c-section">
+    <h2><span class="c-section-icon">🧮</span> โปรเจกต์ 1: เครื่องคิดเลข</h2>
+    <p>ใช้: <b>scanf + switch + ตัวดำเนินการ</b> — รับเลข 2 ตัวและรหัสการคำนวณ (1=+ 2=− 3=× 4=÷)</p>
+
+    <div class="c-tryit">
+      <div class="c-tryit-header">
+        <div class="c-tryit-title">🧪 Calculator (รันได้)</div>
+        <div class="c-tryit-actions">
+          <button class="c-tryit-btn" data-reset="proj1">↺ Reset</button>
+          <button class="c-tryit-btn btn-run" data-run="proj1">▶ รัน</button>
+        </div>
+      </div>
+      <textarea class="c-tryit-editor" id="proj1" spellcheck="false">#include &lt;stdio.h&gt;
+
+int main() {
+    float a, b;
+    int op;
+    scanf("%f", &a);
+    scanf("%d", &op);
+    scanf("%f", &b);
+
+    printf("=== Calculator ===\n");
+    switch (op) {
+        case 1: printf("%.2f + %.2f = %.2f\n", a, b, a + b); break;
+        case 2: printf("%.2f - %.2f = %.2f\n", a, b, a - b); break;
+        case 3: printf("%.2f x %.2f = %.2f\n", a, b, a * b); break;
+        case 4:
+            if (b != 0) printf("%.2f / %.2f = %.2f\n", a, b, a / b);
+            else        printf("Error: cannot divide by zero\n");
+            break;
+        default: printf("Unknown operator\n");
+    }
+    return 0;
+}
+</textarea>
+      <div class="c-tryit-stdin-label">⌨️ ค่าที่ป้อน (Input) — a, op(1-4), b:</div>
+      <textarea class="c-tryit-stdin" id="proj1-stdin" spellcheck="false">12
+3
+4</textarea>
+      <div class="c-tryit-output" id="proj1-out"></div>
+    </div>
+    <div class="c-tip">
+      <div class="c-tip-icon">🎯</div>
+      <div><b>ท้าทาย:</b> เพิ่ม case 5 สำหรับ "หารเอาเศษ" (%) — แต่ต้องเปลี่ยนเป็นเลขจำนวนเต็ม!</div>
+    </div>
+  </div>
+
+  <!-- Project 2: Guessing game -->
+  <div class="c-section">
+    <h2><span class="c-section-icon">🎲</span> โปรเจกต์ 2: เกมทายเลข</h2>
+    <p>ใช้: <b>ลูป + เงื่อนไข + break</b> — เลขลับคือ 7 ผู้เล่นทายได้ 3 ครั้ง โปรแกรมบอกใบ้ สูง/ต่ำ</p>
+
+    <div class="c-tryit">
+      <div class="c-tryit-header">
+        <div class="c-tryit-title">🧪 Number Guessing (รันได้)</div>
+        <div class="c-tryit-actions">
+          <button class="c-tryit-btn" data-reset="proj2">↺ Reset</button>
+          <button class="c-tryit-btn btn-run" data-run="proj2">▶ รัน</button>
+        </div>
+      </div>
+      <textarea class="c-tryit-editor" id="proj2" spellcheck="false">#include &lt;stdio.h&gt;
+
+int main() {
+    int secret = 7;       // เลขลับ (1-10)
+    int guess;
+    int won = 0;
+
+    printf("Guess the number from 1 to 10. You have 3 tries!\n");
+    for (int i = 1; i <= 3; i++) {
+        scanf("%d", &guess);
+        printf("Try %d: you guessed %d\n", i, guess);
+        if (guess == secret) {
+            printf("Correct! You win!\n");
+            won = 1;
+            break;
+        } else if (guess < secret) {
+            printf("Too low!\n");
+        } else {
+            printf("Too high!\n");
+        }
+    }
+    if (won == 0) printf("Game over. The number was %d\n", secret);
+    return 0;
+}
+</textarea>
+      <div class="c-tryit-stdin-label">⌨️ ค่าที่ป้อน (Input) — 3 การทาย:</div>
+      <textarea class="c-tryit-stdin" id="proj2-stdin" spellcheck="false">5
+9
+7</textarea>
+      <div class="c-tryit-output" id="proj2-out"></div>
+    </div>
+    <div class="c-tip">
+      <div class="c-tip-icon">🎯</div>
+      <div><b>ท้าทาย:</b> ลองเปลี่ยนการทายในช่อง Input เป็น <code>3</code> / <code>8</code> / <code>6</code> ดูว่าแพ้ไหม</div>
+    </div>
+  </div>
+
+  <!-- Project 3: Grade system -->
+  <div class="c-section">
+    <h2><span class="c-section-icon">📊</span> โปรเจกต์ 3: ระบบจัดการคะแนน</h2>
+    <p>ใช้: <b>อาร์เรย์ + ลูป + ฟังก์ชัน + เงื่อนไข</b> — รับคะแนน 5 คน หาค่าเฉลี่ย มากสุด น้อยสุด และตัดเกรด</p>
+
+    <div class="c-tryit">
+      <div class="c-tryit-header">
+        <div class="c-tryit-title">🧪 Grade System (รันได้)</div>
+        <div class="c-tryit-actions">
+          <button class="c-tryit-btn" data-reset="proj3">↺ Reset</button>
+          <button class="c-tryit-btn btn-run" data-run="proj3">▶ รัน</button>
+        </div>
+      </div>
+      <textarea class="c-tryit-editor" id="proj3" spellcheck="false">#include &lt;stdio.h&gt;
+
+char getGrade(int score) {
+    if (score >= 80) return 'A';
+    if (score >= 70) return 'B';
+    if (score >= 60) return 'C';
+    if (score >= 50) return 'D';
+    return 'F';
+}
+
+int main() {
+    int scores[5];
+    int t, sum = 0, max, min;
+
+    for (int i = 0; i < 5; i++) {
+        scanf("%d", &t);
+        scores[i] = t;
+        sum += t;
+        if (i == 0) { max = t; min = t; }
+        if (t > max) max = t;
+        if (t < min) min = t;
+    }
+
+    printf("=== Class Report ===\n");
+    for (int i = 0; i < 5; i++) {
+        printf("Student %d: %d [%c]\n", i + 1, scores[i], getGrade(scores[i]));
+    }
+    printf("--------------------\n");
+    printf("Average: %.2f\n", (float)sum / 5);
+    printf("Highest: %d\n", max);
+    printf("Lowest : %d\n", min);
+    return 0;
+}
+</textarea>
+      <div class="c-tryit-stdin-label">⌨️ ค่าที่ป้อน (Input) — คะแนน 5 คน:</div>
+      <textarea class="c-tryit-stdin" id="proj3-stdin" spellcheck="false">85
+72
+60
+45
+91</textarea>
+      <div class="c-tryit-output" id="proj3-out"></div>
+    </div>
+    <div class="c-tip">
+      <div class="c-tip-icon">🎯</div>
+      <div><b>ท้าทาย:</b> เพิ่มการนับว่ามีกี่คนที่ "สอบผ่าน" (คะแนน ≥ 50)</div>
+    </div>
+  </div>
+
+  <!-- Graduation -->
+  <div class="c-section">
+    <div class="c-objectives" style="background:linear-gradient(135deg,rgba(255,204,0,0.12),rgba(243,156,18,0.12));">
+      <h4>🎓 ยินดีด้วย! คุณมาถึงบทสุดท้ายแล้ว</h4>
+      <p style="margin:10px 0;">ตลอด 11 หน่วย คุณได้เรียนรู้:</p>
+      <ul>
+        <li>✅ โครงสร้างโปรแกรม, ตัวแปร, การรับ-ส่งข้อมูล</li>
+        <li>✅ เงื่อนไข, การวนซ้ำ, ฟังก์ชัน</li>
+        <li>✅ อาร์เรย์, สตริง, พอยน์เตอร์, struct</li>
+        <li>✅ สร้างโปรแกรมจริงที่รวมทุกอย่างเข้าด้วยกัน</li>
+      </ul>
+      <p style="margin-top:10px;"><b>ก้าวต่อไป:</b> ลองทำโจทย์เพิ่มใน Playground, ติดตั้ง Dev-C++/VS Code เขียนบนเครื่องจริง,
+        หรือต่อยอดไปภาษา C++, Python ได้เลย — พื้นฐานที่แน่นทำให้เรียนภาษาไหนก็ง่ายขึ้น!</p>
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="c-quiz" id="quiz">
+    <div class="c-quiz-header">
+      <h3>📝 แบบทดสอบท้ายบท (บททิ้งทวน)</h3>
+      <p style="color:var(--c-text-muted);">ตอบให้ถูก 4 ใน 5 ข้อ เพื่อรับเหรียญ "จบหลักสูตร" 🎓</p>
+    </div>
+
+    <div class="c-quiz-question" data-correct="b">
+      <div class="c-quiz-question-text"><span class="q-num">1</span>ฟังก์ชันใดใช้ "เปิดไฟล์"?</div>
+      <div class="c-quiz-options">
+        <label class="c-quiz-option"><input type="radio" name="q1" value="a"><span class="opt-letter">A</span> <code>openfile()</code></label>
+        <label class="c-quiz-option"><input type="radio" name="q1" value="b"><span class="opt-letter">B</span> <code>fopen()</code></label>
+        <label class="c-quiz-option"><input type="radio" name="q1" value="c"><span class="opt-letter">C</span> <code>scanf()</code></label>
+        <label class="c-quiz-option"><input type="radio" name="q1" value="d"><span class="opt-letter">D</span> <code>read()</code></label>
+      </div>
+    </div>
+
+    <div class="c-quiz-question" data-correct="c">
+      <div class="c-quiz-question-text"><span class="q-num">2</span>โหมด <code>"w"</code> ใน <code>fopen</code> หมายถึงอะไร?</div>
+      <div class="c-quiz-options">
+        <label class="c-quiz-option"><input type="radio" name="q2" value="a"><span class="opt-letter">A</span> อ่านไฟล์</label>
+        <label class="c-quiz-option"><input type="radio" name="q2" value="b"><span class="opt-letter">B</span> เขียนต่อท้าย</label>
+        <label class="c-quiz-option"><input type="radio" name="q2" value="c"><span class="opt-letter">C</span> เขียน (ลบของเดิม)</label>
+        <label class="c-quiz-option"><input type="radio" name="q2" value="d"><span class="opt-letter">D</span> ลบไฟล์</label>
+      </div>
+    </div>
+
+    <div class="c-quiz-question" data-correct="a">
+      <div class="c-quiz-question-text"><span class="q-num">3</span>หลังทำงานกับไฟล์เสร็จ ต้องทำอะไร?</div>
+      <div class="c-quiz-options">
+        <label class="c-quiz-option"><input type="radio" name="q3" value="a"><span class="opt-letter">A</span> <code>fclose(f)</code> ปิดไฟล์</label>
+        <label class="c-quiz-option"><input type="radio" name="q3" value="b"><span class="opt-letter">B</span> ลบไฟล์ทิ้ง</label>
+        <label class="c-quiz-option"><input type="radio" name="q3" value="c"><span class="opt-letter">C</span> ไม่ต้องทำอะไร</label>
+        <label class="c-quiz-option"><input type="radio" name="q3" value="d"><span class="opt-letter">D</span> รีสตาร์ทเครื่อง</label>
+      </div>
+    </div>
+
+    <div class="c-quiz-question" data-correct="d">
+      <div class="c-quiz-question-text"><span class="q-num">4</span>ในโปรเจกต์เครื่องคิดเลข ใช้คำสั่งใดเลือกการคำนวณตามรหัส?</div>
+      <div class="c-quiz-options">
+        <label class="c-quiz-option"><input type="radio" name="q4" value="a"><span class="opt-letter">A</span> <code>for</code></label>
+        <label class="c-quiz-option"><input type="radio" name="q4" value="b"><span class="opt-letter">B</span> <code>while</code></label>
+        <label class="c-quiz-option"><input type="radio" name="q4" value="c"><span class="opt-letter">C</span> <code>scanf</code></label>
+        <label class="c-quiz-option"><input type="radio" name="q4" value="d"><span class="opt-letter">D</span> <code>switch</code></label>
+      </div>
+    </div>
+
+    <div class="c-quiz-question" data-correct="b">
+      <div class="c-quiz-question-text"><span class="q-num">5</span>เก็บคะแนนนักเรียน 5 คน เหมาะใช้อะไรที่สุด?</div>
+      <div class="c-quiz-options">
+        <label class="c-quiz-option"><input type="radio" name="q5" value="a"><span class="opt-letter">A</span> ตัวแปร char</label>
+        <label class="c-quiz-option"><input type="radio" name="q5" value="b"><span class="opt-letter">B</span> อาร์เรย์ (array)</label>
+        <label class="c-quiz-option"><input type="radio" name="q5" value="c"><span class="opt-letter">C</span> ตัวแปรเดียว</label>
+        <label class="c-quiz-option"><input type="radio" name="q5" value="d"><span class="opt-letter">D</span> พอยน์เตอร์เดียว</label>
+      </div>
+    </div>
+
+    <div style="text-align:center; margin-top:20px;">
+      <button class="c-btn c-btn-success" id="submitQuiz" style="padding:12px 30px; font-size:15px;">🎓 ส่งคำตอบ & รับปริญญา</button>
+    </div>
+
+    <div class="c-quiz-result" id="quizResult"></div>
+  </div>
+
+  <!-- NAV -->
+  <div class="c-lesson-nav">
+    <a href="09-struct.html" class="c-lesson-nav-btn">
+      <div class="c-lesson-nav-label">← บทก่อนหน้า</div>
+      <div class="c-lesson-nav-title">หน่วย 9: struct</div>
+    </a>
+    <a href="../index.html" class="c-lesson-nav-btn next" id="nextBtn">
+      <div class="c-lesson-nav-label">จบหลักสูตร! →</div>
+      <div class="c-lesson-nav-title">🎉 กลับสู่ Roadmap</div>
+    </a>
+  </div>
+
+</div>
+
+<footer class="c-footer">
+  <p>© 2026 Computer Science By <a href="../../index.html">ครูภาณุพงศ์ อุ่นคำ</a> · โรงเรียนบ้านป่ายุบ</p>
+</footer>
+
+<script>
+/* Theme */
+const themeBtn = document.getElementById('themeToggle');
+const savedTheme = localStorage.getItem('clang-theme') || 'light';
+document.documentElement.setAttribute('data-theme', savedTheme);
+themeBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+themeBtn.addEventListener('click', () => {
+  const curr = document.documentElement.getAttribute('data-theme');
+  const next = curr === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('clang-theme', next);
+  themeBtn.textContent = next === 'dark' ? '☀️' : '🌙';
+});
+
+/* Copy code */
+document.querySelectorAll('.code-copy').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const target = document.getElementById(btn.dataset.copy);
+    if (target) {
+      navigator.clipboard.writeText(target.innerText);
+      const orig = btn.textContent;
+      btn.textContent = '✓ คัดลอกแล้ว';
+      setTimeout(() => btn.textContent = orig, 1500);
+    }
+  });
+});
+
+/* Tab in textareas (editor only) */
+document.querySelectorAll('.c-tryit-editor').forEach(ed => {
+  ed.addEventListener('keydown', (e) => {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const s = ed.selectionStart;
+      const ev = ed.selectionEnd;
+      ed.value = ed.value.substring(0, s) + '    ' + ed.value.substring(ev);
+      ed.selectionStart = ed.selectionEnd = s + 4;
+    }
+  });
+});
+
+/* Save originals for Reset (editors + stdin) */
+const originals = {};
+document.querySelectorAll('.c-tryit-editor, .c-tryit-stdin').forEach(ed => {
+  originals[ed.id] = ed.value;
+});
+
+document.querySelectorAll('[data-reset]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const id = btn.dataset.reset;
+    const ed = document.getElementById(id);
+    if (ed && originals[id] !== undefined) ed.value = originals[id];
+    const sid = id + '-stdin';
+    const sed = document.getElementById(sid);
+    if (sed && originals[sid] !== undefined) sed.value = originals[sid];
+    const out = document.getElementById(id + '-out');
+    if (out) { out.textContent = ''; out.className = 'c-tryit-output'; }
+  });
+});
+
+/* Run buttons */
+document.querySelectorAll('[data-run]').forEach(btn => {
+  btn.addEventListener('click', () => runTryIt(btn.dataset.run));
+});
+
+function runTryIt(id) {
+  const ed = document.getElementById(id);
+  const out = document.getElementById(id + '-out');
+  if (!ed || !out) return;
+
+  if (typeof window.JSCPP === 'undefined') {
+    out.textContent = '⏳ Engine ยังโหลดไม่เสร็จ — รอสักครู่แล้วลองใหม่';
+    out.className = 'c-tryit-output error';
+    return;
+  }
+
+  const stdinEl = document.getElementById(id + '-stdin');
+  const stdin = stdinEl ? stdinEl.value : '';
+
+  let output = '';
+  out.textContent = '⏳ กำลังรัน...';
+  out.className = 'c-tryit-output';
+
+  const config = {
+    stdio: { write: (s) => { output += s; } },
+    unsigned_overflow: 'warn',
+    maxTimeout: 5000
+  };
+
+  setTimeout(() => {
+    try {
+      const exitCode = window.JSCPP.run(ed.value, stdin, config);
+      out.textContent = output + `\n▸ Process exited with code ${exitCode}`;
+      out.className = 'c-tryit-output success';
+    } catch (err) {
+      out.textContent = (output ? output + '\n\n' : '') + '❌ ข้อผิดพลาด:\n' + (err.message || err.toString());
+      out.className = 'c-tryit-output error';
+    }
+  }, 50);
+}
+
+/* Quiz */
+document.querySelectorAll('.c-quiz-option').forEach(opt => {
+  opt.addEventListener('click', () => {
+    const inp = opt.querySelector('input');
+    const name = inp.name;
+    document.querySelectorAll(`input[name="${name}"]`).forEach(i => {
+      i.closest('.c-quiz-option').classList.remove('selected');
+    });
+    opt.classList.add('selected');
+    inp.checked = true;
+  });
+});
+
+document.getElementById('submitQuiz').addEventListener('click', () => {
+  const questions = document.querySelectorAll('.c-quiz-question');
+  let correctCount = 0;
+
+  questions.forEach(q => {
+    const correctAns = q.dataset.correct;
+    const selected = q.querySelector('input:checked');
+    q.querySelectorAll('.c-quiz-option').forEach(opt => {
+      opt.classList.remove('correct', 'wrong');
+      const val = opt.querySelector('input').value;
+      if (val === correctAns) opt.classList.add('correct');
+      else if (selected && opt.querySelector('input').checked && val !== correctAns) {
+        opt.classList.add('wrong');
+      }
+    });
+    if (selected && selected.value === correctAns) correctCount++;
+  });
+
+  const result = document.getElementById('quizResult');
+  result.classList.add('show');
+  const total = questions.length;
+
+  if (correctCount >= 4) {
+    result.className = 'c-quiz-result show pass';
+    result.innerHTML = `🎓 สุดยอด! คุณตอบถูก ${correctCount}/${total} ข้อ — <b>จบหลักสูตรภาษา C อย่างเป็นทางการ!</b> 🎉`;
+
+    const p = JSON.parse(localStorage.getItem('clang-progress') || '{}');
+    p[10] = { completed: true, ts: Date.now(), score: correctCount };
+    localStorage.setItem('clang-progress', JSON.stringify(p));
+
+    const badges = JSON.parse(localStorage.getItem('clang-badges') || '[]');
+    if (!badges.includes('graduate')) {
+      badges.push('graduate');
+      localStorage.setItem('clang-badges', JSON.stringify(badges));
+    }
+
+    if (typeof confetti !== 'undefined') {
+      confetti({ particleCount: 250, spread: 120, origin: { y: 0.6 } });
+      setTimeout(() => confetti({ particleCount: 150, spread: 100, origin: { y: 0.5 } }), 400);
+    }
+  } else {
+    result.className = 'c-quiz-result show fail';
+    result.innerHTML = `📚 คุณตอบถูก ${correctCount}/${total} ข้อ — ต้องอย่างน้อย 4 ข้อ ลองทบทวนแล้วทำใหม่นะ`;
+  }
+
+  result.scrollIntoView({ behavior: 'smooth', block: 'center' });
+});
+</script>
+
+</body>
+</html>

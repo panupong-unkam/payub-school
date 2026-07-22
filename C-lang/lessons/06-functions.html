@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#F39C12">
+<title>หน่วยที่ 6: ฟังก์ชัน (Functions) | ภาษา C</title>
+<link rel="icon" type="image/svg+xml" href="../../logo.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Noto+Serif+Thai:wght@400;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../c-style.css">
+<script type="module">
+  try {
+    const mod = await import('https://esm.sh/JSCPP@2.0.9');
+    window.JSCPP = mod.default || mod;
+    window.dispatchEvent(new Event('jscpp-ready'));
+  } catch (e) {
+    console.error('JSCPP load failed:', e);
+    window.dispatchEvent(new Event('jscpp-failed'));
+  }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+
+<header class="c-topbar">
+  <div class="c-topbar-left">
+    <a href="../../index.html" class="c-btn-icon" title="หน้าหลักเว็บไซต์">🏠</a>
+    <a href="../index.html" class="c-btn-icon" title="กลับ Roadmap">←</a>
+    <div class="c-topbar-logo" style="background:linear-gradient(135deg,#F39C12,#FF6B35);">6</div>
+    <div>
+      <div class="c-topbar-title">หน่วยที่ 6 · ฟังก์ชัน</div>
+      <div class="c-topbar-subtitle">สร้างคำสั่งของเราเอง ใช้ซ้ำได้</div>
+    </div>
+  </div>
+  <div class="c-topbar-right">
+    <button class="c-btn-icon" id="themeToggle" title="สลับธีม">🌙</button>
+    <a href="../playground.html" class="c-btn c-btn-ghost">💻 Playground</a>
+  </div>
+</header>
+
+<!-- LESSON HEADER -->
+<section class="c-lesson-header" style="--unit-color:#F39C12; background:linear-gradient(135deg,#F39C12,#B36F05);">
+  <div class="c-lesson-header-content">
+    <div class="c-lesson-breadcrumb">
+      <a href="../../index.html">🏠 หน้าหลัก</a> &nbsp;›&nbsp; <a href="../index.html">หลักสูตร C</a> &nbsp;›&nbsp; หน่วยที่ 6
+    </div>
+    <h1 class="c-lesson-title">⚙️ ฟังก์ชัน (Functions)</h1>
+    <p class="c-lesson-subtitle">สร้าง "คำสั่งของเราเอง" เก็บโค้ดที่ใช้บ่อยไว้เรียกซ้ำ — โปรแกรมสั้นลง อ่านง่ายขึ้น</p>
+    <div class="c-lesson-meta">
+      <span>⏱️ ใช้เวลา ~60 นาที</span>
+      <span>📖 ระดับ: โครงสร้าง</span>
+      <span>💻 มีโค้ดให้ลอง</span>
+    </div>
+  </div>
+</section>
+
+<div class="c-container-narrow">
+
+  <!-- จุดประสงค์ -->
+  <div class="c-section">
+    <h2><span class="c-section-icon">🎯</span> สิ่งที่จะได้เรียนรู้ในบทนี้</h2>
+    <div class="c-objectives">
+      <h4>📌 หลังจบบทนี้ คุณจะ:</h4>
+      <ul>
+        <li>เข้าใจว่าฟังก์ชันคืออะไร และทำไมช่วยให้โค้ดดีขึ้น</li>
+        <li>สร้างฟังก์ชันที่ <b>คืนค่า</b> (return) และแบบ <b>ไม่คืนค่า</b> (void)</li>
+        <li>ส่ง <b>พารามิเตอร์ (parameter)</b> เข้าไปในฟังก์ชัน</li>
+        <li>เรียกใช้ฟังก์ชันหลายตัวร่วมกัน</li>
+        <li>แบ่งโปรแกรมใหญ่ ๆ เป็นชิ้นเล็ก ๆ ที่จัดการง่าย</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 1. ฟังก์ชันคืออะไร -->
+  <div class="c-section">
+    <h2><span class="c-section-icon">🧩</span> 1. ฟังก์ชันคืออะไร?</h2>
+    <p>
+      <b>ฟังก์ชัน (Function)</b> คือ <b>"กล่องคำสั่ง"</b> ที่เราตั้งชื่อ เก็บโค้ดไว้ข้างใน
+      แล้วเรียกใช้เมื่อไหร่ก็ได้ — จริง ๆ แล้ว <code>main()</code> และ <code>printf()</code> ก็คือฟังก์ชัน!
+    </p>
+
+    <div class="c-note">
+      <div class="c-note-icon">📚</div>
+      <div>
+        <b>เปรียบเทียบ:</b> เหมือน <b>"เครื่องปั่นน้ำผลไม้"</b> — เราใส่ผลไม้ (input/พารามิเตอร์)
+        เครื่องทำงาน แล้วคืน น้ำผลไม้ (output/return) ออกมา โดยไม่ต้องรู้ว่าข้างในทำงานยังไง
+      </div>
+    </div>
+
+    <div class="c-code-block">
+      <div class="code-header"><span class="code-lang">C</span></div>
+<pre><span class="c-type">int</span> <span class="c-fn">add</span>(<span class="c-type">int</span> a, <span class="c-type">int</span> b) {
+ │     │       │
+ชนิดที่คืน ชื่อ  พารามิเตอร์
+    <span class="c-kw">return</span> a + b;   <span class="c-cmt">// ส่งผลลัพธ์กลับ</span>
+}</pre>
+    </div>
+  </div>
+
+  <!-- 2. ฟังก์ชันคืนค่า -->
+  <div class="c-section">
+    <h2><span class="c-section-icon">↩️</span> 2. ฟังก์ชันที่คืนค่า (return)</h2>
+    <p>
+      เขียนฟังก์ชัน <b>ก่อน</b> <code>main()</code> แล้วเรียกใช้ใน main
+      ค่าที่ <code>return</code> จะถูกส่งกลับไปแทนที่การเรียกฟังก์ชัน
+    </p>
+
+    <div class="c-tryit">
+      <div class="c-tryit-header">
+        <div class="c-tryit-title">🧪 ฟังก์ชันบวกเลข</div>
+        <div class="c-tryit-actions">
+          <button class="c-tryit-btn" data-reset="tryit1">↺ Reset</button>
+          <button class="c-tryit-btn btn-run" data-run="tryit1">▶ รัน</button>
+        </div>
+      </div>
+      <textarea class="c-tryit-editor" id="tryit1" spellcheck="false">#include &lt;stdio.h&gt;
+
+// ฟังก์ชัน add รับเลข 2 ตัว คืนผลบวก
+int add(int a, int b) {
+    return a + b;
+}
+
+int main() {
+    int result = add(3, 4);   // เรียกใช้ -> ได้ 7
+    printf("3 + 4 = %d\n", result);
+    printf("10 + 20 = %d\n", add(10, 20));
+    return 0;
+}
+</textarea>
+      <div class="c-tryit-output" id="tryit1-out"></div>
+    </div>
+
+    <div class="c-warn">
+      <div class="c-warn-icon">⚠️</div>
+      <div>
+        <b>กฎง่าย ๆ:</b> ในบทเรียนนี้ให้เขียนฟังก์ชัน <b>ไว้ก่อน <code>main()</code> เสมอ</b>
+        เพื่อให้ main รู้จักฟังก์ชันนั้นก่อนเรียกใช้
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. void -->
+  <div class="c-section">
+    <h2><span class="c-section-icon">📢</span> 3. ฟังก์ชันแบบไม่คืนค่า (void)</h2>
+    <p>
+      บางฟังก์ชันแค่ "ทำงาน" (เช่น พิมพ์ข้อความ) ไม่ต้องคืนค่า ใช้ <code>void</code> นำหน้า
+    </p>
+
+    <div class="c-tryit">
+      <div class="c-tryit-header">
+        <div class="c-tryit-title">🧪 ฟังก์ชันวาดเส้นคั่น</div>
+        <div class="c-tryit-actions">
+          <button class="c-tryit-btn" data-reset="tryit2">↺ Reset</button>
+          <button class="c-tryit-btn btn-run" data-run="tryit2">▶ รัน</button>
+        </div>
+      </div>
+      <textarea class="c-tryit-editor" id="tryit2" spellcheck="false">#include &lt;stdio.h&gt;
+
+void drawLine() {
+    printf("========================\n");
+}
+
+int main() {
+    drawLine();
+    printf("   MENU\n");
+    drawLine();
+    return 0;
+}
+</textarea>
+      <div class="c-tryit-output" id="tryit2-out"></div>
+    </div>
+  </div>
+
+  <!-- 4. หลายฟังก์ชัน -->
+  <div class="c-section">
+    <h2><span class="c-section-icon">🔗</span> 4. ใช้หลายฟังก์ชันร่วมกัน</h2>
+    <p>ฟังก์ชันเรียกใช้ฟังก์ชันอื่นได้ ทำให้แบ่งงานเป็นชิ้นเล็ก ๆ:</p>
+
+    <div class="c-tryit">
+      <div class="c-tryit-header">
+        <div class="c-tryit-title">🧪 หาพื้นที่วงกลม</div>
+        <div class="c-tryit-actions">
+          <button class="c-tryit-btn" data-reset="tryit3">↺ Reset</button>
+          <button class="c-tryit-btn btn-run" data-run="tryit3">▶ รัน</button>
+        </div>
+      </div>
+      <textarea class="c-tryit-editor" id="tryit3" spellcheck="false">#include &lt;stdio.h&gt;
+
+float circleArea(float r) {
+    return 3.14159f * r * r;
+}
+
+int square(int x) {
+    return x * x;
+}
+
+int main() {
+    printf("Area(r=2) = %.2f\n", circleArea(2.0f));
+    printf("Square(5) = %d\n", square(5));
+    return 0;
+}
+</textarea>
+      <div class="c-tryit-output" id="tryit3-out"></div>
+    </div>
+
+    <div class="c-tip">
+      <div class="c-tip-icon">💡</div>
+      <div>
+        <b>DRY = Don't Repeat Yourself</b> — ถ้าเขียนโค้ดเดิมซ้ำหลายที่ ให้ยกไปทำเป็นฟังก์ชัน
+        แก้ครั้งเดียวมีผลทุกที่ที่เรียก
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. ข้อผิดพลาด -->
+  <div class="c-section">
+    <h2><span class="c-section-icon">⚠️</span> 5. ข้อผิดพลาดที่พบบ่อย</h2>
+
+    <div class="c-danger">
+      <div class="c-danger-icon">❌</div>
+      <div>
+        <b>1. ชนิดที่คืนไม่ตรงกับ return</b>
+        <div class="c-code-block" style="margin-top:8px;"><pre>int add(int a, int b) {
+    printf("hi");   // ผิด! บอกว่าคืน int แต่ไม่ได้ return
+}</pre></div>
+      </div>
+    </div>
+
+    <div class="c-danger">
+      <div class="c-danger-icon">❌</div>
+      <div>
+        <b>2. ส่งพารามิเตอร์ไม่ครบ/ผิดชนิด</b>
+        <div class="c-code-block" style="margin-top:8px;"><pre>int add(int a, int b) { return a + b; }
+add(5);        // ผิด! ต้องส่ง 2 ตัว
+add(5, 3);     // ถูก ✓</pre></div>
+      </div>
+    </div>
+
+    <div class="c-danger">
+      <div class="c-danger-icon">❌</div>
+      <div>
+        <b>3. เขียนฟังก์ชันไว้หลัง main โดยไม่ประกาศก่อน</b>
+        — ในบทนี้ให้วางฟังก์ชัน <b>ก่อน</b> <code>main()</code> จะปลอดภัยที่สุด
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. แบบฝึก -->
+  <div class="c-section">
+    <h2><span class="c-section-icon">✏️</span> 6. แบบฝึกหัด</h2>
+
+    <!-- Easy -->
+    <div class="c-exercise">
+      <div class="c-exercise-header">
+        <span class="c-exercise-badge level-easy">⭐ ง่าย</span>
+        <span class="c-exercise-title">โจทย์ที่ 1: ฟังก์ชันคูณ</span>
+      </div>
+      <p>สร้างฟังก์ชัน <code>int multiply(int a, int b)</code> ที่คืนค่า a×b แล้วเรียกใช้ใน main พิมพ์ผลลัพธ์</p>
+
+      <div class="c-tryit">
+        <div class="c-tryit-header">
+          <div class="c-tryit-title">💻 พื้นที่เขียนโค้ด</div>
+          <div class="c-tryit-actions">
+            <button class="c-tryit-btn" data-reset="ex1ed">↺ Reset</button>
+            <button class="c-tryit-btn btn-run" data-run="ex1ed">▶ รัน</button>
+          </div>
+        </div>
+        <textarea class="c-tryit-editor" id="ex1ed" spellcheck="false">#include &lt;stdio.h&gt;
+
+// สร้างฟังก์ชัน multiply — ตอนนี้คืน 0 ไปก่อน แก้ให้คืน a * b
+int multiply(int a, int b) {
+    return 0;
+}
+
+int main() {
+    printf("6 x 7 = %d\n", multiply(6, 7));
+    return 0;
+}
+</textarea>
+        <div class="c-tryit-output" id="ex1ed-out"></div>
+      </div>
+    </div>
+
+    <!-- Medium -->
+    <div class="c-exercise">
+      <div class="c-exercise-header">
+        <span class="c-exercise-badge level-medium">⭐⭐ ปานกลาง</span>
+        <span class="c-exercise-title">โจทย์ที่ 2: ฟังก์ชันหาค่ามากกว่า</span>
+      </div>
+      <p>
+        สร้างฟังก์ชัน <code>int maxOf(int a, int b)</code> คืนค่าที่มากกว่า
+        รับเลข 2 ตัวจากผู้ใช้ แล้วพิมพ์ค่ามากที่สุด
+      </p>
+
+      <div class="c-tryit">
+        <div class="c-tryit-header">
+          <div class="c-tryit-title">💻 พื้นที่เขียนโค้ด</div>
+          <div class="c-tryit-actions">
+            <button class="c-tryit-btn" data-reset="ex2ed">↺ Reset</button>
+            <button class="c-tryit-btn btn-run" data-run="ex2ed">▶ รัน</button>
+          </div>
+        </div>
+        <textarea class="c-tryit-editor" id="ex2ed" spellcheck="false">#include &lt;stdio.h&gt;
+
+int maxOf(int a, int b) {
+    // ถ้า a > b คืน a ไม่งั้นคืน b
+    return 0;   // แก้บรรทัดนี้
+}
+
+int main() {
+    int x, y;
+    scanf("%d", &x);
+    scanf("%d", &y);
+    printf("Max = %d\n", maxOf(x, y));
+    return 0;
+}
+</textarea>
+        <div class="c-tryit-stdin-label">⌨️ ค่าที่ป้อน (Input) — 2 จำนวน:</div>
+        <textarea class="c-tryit-stdin" id="ex2ed-stdin" spellcheck="false">15
+23</textarea>
+        <div class="c-tryit-output" id="ex2ed-out"></div>
+      </div>
+    </div>
+
+    <!-- Hard -->
+    <div class="c-exercise">
+      <div class="c-exercise-header">
+        <span class="c-exercise-badge level-hard">⭐⭐⭐ ท้าทาย</span>
+        <span class="c-exercise-title">โจทย์ที่ 3: ฟังก์ชันแฟกทอเรียล</span>
+      </div>
+      <p>
+        สร้างฟังก์ชัน <code>int factorial(int n)</code> คืนค่า n! = 1×2×3×...×n
+        รับ n แล้วพิมพ์ผลลัพธ์ (เช่น 5! = 120)
+      </p>
+
+      <div class="c-tryit">
+        <div class="c-tryit-header">
+          <div class="c-tryit-title">💻 พื้นที่เขียนโค้ด</div>
+          <div class="c-tryit-actions">
+            <button class="c-tryit-btn" data-reset="ex3ed">↺ Reset</button>
+            <button class="c-tryit-btn btn-run" data-run="ex3ed">▶ รัน</button>
+          </div>
+        </div>
+        <textarea class="c-tryit-editor" id="ex3ed" spellcheck="false">#include &lt;stdio.h&gt;
+
+int factorial(int n) {
+    int result = 1;
+    // for (int i = 1; i <= n; i++) result *= i;
+
+    return result;
+}
+
+int main() {
+    int n;
+    scanf("%d", &n);
+    printf("%d! = %d\n", n, factorial(n));
+    return 0;
+}
+</textarea>
+        <div class="c-tryit-stdin-label">⌨️ ค่าที่ป้อน (Input) — n:</div>
+        <textarea class="c-tryit-stdin" id="ex3ed-stdin" spellcheck="false">5</textarea>
+        <div class="c-tryit-output" id="ex3ed-out"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="c-quiz" id="quiz">
+    <div class="c-quiz-header">
+      <h3>📝 แบบทดสอบท้ายบท</h3>
+      <p style="color:var(--c-text-muted);">ตอบให้ถูก 4 ใน 5 ข้อ เพื่อปลดล็อกบทถัดไป</p>
+    </div>
+
+    <div class="c-quiz-question" data-correct="b">
+      <div class="c-quiz-question-text"><span class="q-num">1</span>คำสั่งใดใช้ "ส่งค่ากลับ" จากฟังก์ชัน?</div>
+      <div class="c-quiz-options">
+        <label class="c-quiz-option"><input type="radio" name="q1" value="a"><span class="opt-letter">A</span> <code>break</code></label>
+        <label class="c-quiz-option"><input type="radio" name="q1" value="b"><span class="opt-letter">B</span> <code>return</code></label>
+        <label class="c-quiz-option"><input type="radio" name="q1" value="c"><span class="opt-letter">C</span> <code>send</code></label>
+        <label class="c-quiz-option"><input type="radio" name="q1" value="d"><span class="opt-letter">D</span> <code>give</code></label>
+      </div>
+    </div>
+
+    <div class="c-quiz-question" data-correct="c">
+      <div class="c-quiz-question-text"><span class="q-num">2</span>ฟังก์ชันที่ "ไม่คืนค่า" ใช้ชนิดใดนำหน้า?</div>
+      <div class="c-quiz-options">
+        <label class="c-quiz-option"><input type="radio" name="q2" value="a"><span class="opt-letter">A</span> <code>int</code></label>
+        <label class="c-quiz-option"><input type="radio" name="q2" value="b"><span class="opt-letter">B</span> <code>empty</code></label>
+        <label class="c-quiz-option"><input type="radio" name="q2" value="c"><span class="opt-letter">C</span> <code>void</code></label>
+        <label class="c-quiz-option"><input type="radio" name="q2" value="d"><span class="opt-letter">D</span> <code>null</code></label>
+      </div>
+    </div>
+
+    <div class="c-quiz-question" data-correct="a">
+      <div class="c-quiz-question-text"><span class="q-num">3</span>ค่าที่ส่งเข้าไปในฟังก์ชันเรียกว่าอะไร?</div>
+      <div class="c-quiz-options">
+        <label class="c-quiz-option"><input type="radio" name="q3" value="a"><span class="opt-letter">A</span> พารามิเตอร์ (parameter)</label>
+        <label class="c-quiz-option"><input type="radio" name="q3" value="b"><span class="opt-letter">B</span> ตัวชี้ (pointer)</label>
+        <label class="c-quiz-option"><input type="radio" name="q3" value="c"><span class="opt-letter">C</span> ลูป (loop)</label>
+        <label class="c-quiz-option"><input type="radio" name="q3" value="d"><span class="opt-letter">D</span> เงื่อนไข</label>
+      </div>
+    </div>
+
+    <div class="c-quiz-question" data-correct="d">
+      <div class="c-quiz-question-text"><span class="q-num">4</span><code>int add(int a, int b)</code> ต้องเรียกอย่างไร?</div>
+      <div class="c-quiz-options">
+        <label class="c-quiz-option"><input type="radio" name="q4" value="a"><span class="opt-letter">A</span> <code>add;</code></label>
+        <label class="c-quiz-option"><input type="radio" name="q4" value="b"><span class="opt-letter">B</span> <code>add(5);</code></label>
+        <label class="c-quiz-option"><input type="radio" name="q4" value="c"><span class="opt-letter">C</span> <code>add[5, 3];</code></label>
+        <label class="c-quiz-option"><input type="radio" name="q4" value="d"><span class="opt-letter">D</span> <code>add(5, 3);</code></label>
+      </div>
+    </div>
+
+    <div class="c-quiz-question" data-correct="b">
+      <div class="c-quiz-question-text"><span class="q-num">5</span>ข้อดีหลักของการใช้ฟังก์ชันคืออะไร?</div>
+      <div class="c-quiz-options">
+        <label class="c-quiz-option"><input type="radio" name="q5" value="a"><span class="opt-letter">A</span> ทำให้โปรแกรมรันช้าลง</label>
+        <label class="c-quiz-option"><input type="radio" name="q5" value="b"><span class="opt-letter">B</span> ใช้โค้ดซ้ำได้ ไม่ต้องเขียนใหม่</label>
+        <label class="c-quiz-option"><input type="radio" name="q5" value="c"><span class="opt-letter">C</span> ทำให้โค้ดยาวขึ้นเสมอ</label>
+        <label class="c-quiz-option"><input type="radio" name="q5" value="d"><span class="opt-letter">D</span> ห้ามใช้ตัวแปร</label>
+      </div>
+    </div>
+
+    <div style="text-align:center; margin-top:20px;">
+      <button class="c-btn c-btn-success" id="submitQuiz" style="padding:12px 30px; font-size:15px;">✓ ส่งคำตอบ</button>
+    </div>
+
+    <div class="c-quiz-result" id="quizResult"></div>
+  </div>
+
+  <!-- NAV -->
+  <div class="c-lesson-nav">
+    <a href="05-loops.html" class="c-lesson-nav-btn">
+      <div class="c-lesson-nav-label">← บทก่อนหน้า</div>
+      <div class="c-lesson-nav-title">หน่วย 5: การวนซ้ำ</div>
+    </a>
+    <a href="07-arrays-strings.html" class="c-lesson-nav-btn next disabled" id="nextBtn" title="ทำแบบทดสอบให้ผ่านก่อน">
+      <div class="c-lesson-nav-label">บทถัดไป →</div>
+      <div class="c-lesson-nav-title">หน่วยที่ 7: อาร์เรย์ & สตริง 📊</div>
+    </a>
+  </div>
+
+</div>
+
+<footer class="c-footer">
+  <p>© 2026 Computer Science By <a href="../../index.html">ครูภาณุพงศ์ อุ่นคำ</a> · โรงเรียนบ้านป่ายุบ</p>
+</footer>
+
+<script>
+/* Theme */
+const themeBtn = document.getElementById('themeToggle');
+const savedTheme = localStorage.getItem('clang-theme') || 'light';
+document.documentElement.setAttribute('data-theme', savedTheme);
+themeBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+themeBtn.addEventListener('click', () => {
+  const curr = document.documentElement.getAttribute('data-theme');
+  const next = curr === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('clang-theme', next);
+  themeBtn.textContent = next === 'dark' ? '☀️' : '🌙';
+});
+
+/* Copy code */
+document.querySelectorAll('.code-copy').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const target = document.getElementById(btn.dataset.copy);
+    if (target) {
+      navigator.clipboard.writeText(target.innerText);
+      const orig = btn.textContent;
+      btn.textContent = '✓ คัดลอกแล้ว';
+      setTimeout(() => btn.textContent = orig, 1500);
+    }
+  });
+});
+
+/* Tab in textareas (editor only) */
+document.querySelectorAll('.c-tryit-editor').forEach(ed => {
+  ed.addEventListener('keydown', (e) => {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const s = ed.selectionStart;
+      const ev = ed.selectionEnd;
+      ed.value = ed.value.substring(0, s) + '    ' + ed.value.substring(ev);
+      ed.selectionStart = ed.selectionEnd = s + 4;
+    }
+  });
+});
+
+/* Save originals for Reset (editors + stdin) */
+const originals = {};
+document.querySelectorAll('.c-tryit-editor, .c-tryit-stdin').forEach(ed => {
+  originals[ed.id] = ed.value;
+});
+
+document.querySelectorAll('[data-reset]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const id = btn.dataset.reset;
+    const ed = document.getElementById(id);
+    if (ed && originals[id] !== undefined) ed.value = originals[id];
+    const sid = id + '-stdin';
+    const sed = document.getElementById(sid);
+    if (sed && originals[sid] !== undefined) sed.value = originals[sid];
+    const out = document.getElementById(id + '-out');
+    if (out) { out.textContent = ''; out.className = 'c-tryit-output'; }
+  });
+});
+
+/* Run buttons */
+document.querySelectorAll('[data-run]').forEach(btn => {
+  btn.addEventListener('click', () => runTryIt(btn.dataset.run));
+});
+
+function runTryIt(id) {
+  const ed = document.getElementById(id);
+  const out = document.getElementById(id + '-out');
+  if (!ed || !out) return;
+
+  if (typeof window.JSCPP === 'undefined') {
+    out.textContent = '⏳ Engine ยังโหลดไม่เสร็จ — รอสักครู่แล้วลองใหม่';
+    out.className = 'c-tryit-output error';
+    return;
+  }
+
+  const stdinEl = document.getElementById(id + '-stdin');
+  const stdin = stdinEl ? stdinEl.value : '';
+
+  let output = '';
+  out.textContent = '⏳ กำลังรัน...';
+  out.className = 'c-tryit-output';
+
+  const config = {
+    stdio: { write: (s) => { output += s; } },
+    unsigned_overflow: 'warn',
+    maxTimeout: 5000
+  };
+
+  setTimeout(() => {
+    try {
+      const exitCode = window.JSCPP.run(ed.value, stdin, config);
+      out.textContent = output + `\n▸ Process exited with code ${exitCode}`;
+      out.className = 'c-tryit-output success';
+    } catch (err) {
+      out.textContent = (output ? output + '\n\n' : '') + '❌ ข้อผิดพลาด:\n' + (err.message || err.toString());
+      out.className = 'c-tryit-output error';
+    }
+  }, 50);
+}
+
+/* Quiz */
+document.querySelectorAll('.c-quiz-option').forEach(opt => {
+  opt.addEventListener('click', () => {
+    const inp = opt.querySelector('input');
+    const name = inp.name;
+    document.querySelectorAll(`input[name="${name}"]`).forEach(i => {
+      i.closest('.c-quiz-option').classList.remove('selected');
+    });
+    opt.classList.add('selected');
+    inp.checked = true;
+  });
+});
+
+document.getElementById('submitQuiz').addEventListener('click', () => {
+  const questions = document.querySelectorAll('.c-quiz-question');
+  let correctCount = 0;
+
+  questions.forEach(q => {
+    const correctAns = q.dataset.correct;
+    const selected = q.querySelector('input:checked');
+    q.querySelectorAll('.c-quiz-option').forEach(opt => {
+      opt.classList.remove('correct', 'wrong');
+      const val = opt.querySelector('input').value;
+      if (val === correctAns) opt.classList.add('correct');
+      else if (selected && opt.querySelector('input').checked && val !== correctAns) {
+        opt.classList.add('wrong');
+      }
+    });
+    if (selected && selected.value === correctAns) correctCount++;
+  });
+
+  const result = document.getElementById('quizResult');
+  result.classList.add('show');
+  const total = questions.length;
+
+  if (correctCount >= 4) {
+    result.className = 'c-quiz-result show pass';
+    result.innerHTML = `🎉 เก่งมาก! คุณตอบถูก ${correctCount}/${total} ข้อ — ผ่านหน่วยที่ 6 แล้ว!`;
+
+    const p = JSON.parse(localStorage.getItem('clang-progress') || '{}');
+    p[6] = { completed: true, ts: Date.now(), score: correctCount };
+    localStorage.setItem('clang-progress', JSON.stringify(p));
+
+    const badges = JSON.parse(localStorage.getItem('clang-badges') || '[]');
+    if (!badges.includes('function-hero')) {
+      badges.push('function-hero');
+      localStorage.setItem('clang-badges', JSON.stringify(badges));
+    }
+
+    const nb = document.getElementById('nextBtn');
+    if (nb) { nb.classList.remove('disabled'); nb.title = 'ปลดล็อกแล้ว!'; }
+
+    if (typeof confetti !== 'undefined') {
+      confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+    }
+  } else {
+    result.className = 'c-quiz-result show fail';
+    result.innerHTML = `📚 คุณตอบถูก ${correctCount}/${total} ข้อ — ต้องอย่างน้อย 4 ข้อ ลองอ่านบทเรียนแล้วทำใหม่นะ`;
+  }
+
+  result.scrollIntoView({ behavior: 'smooth', block: 'center' });
+});
+
+/* Unlock next button if already passed */
+(() => {
+  const p = JSON.parse(localStorage.getItem('clang-progress') || '{}');
+  if (p[6] && p[6].completed) {
+    const nb = document.getElementById('nextBtn');
+    if (nb) { nb.classList.remove('disabled'); nb.title = 'ปลดล็อกแล้ว!'; }
+  }
+})();
+</script>
+
+</body>
+</html>

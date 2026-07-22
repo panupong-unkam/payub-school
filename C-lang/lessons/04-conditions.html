@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#9B59B6">
+<title>หน่วยที่ 4: คำสั่งเงื่อนไข | ภาษา C</title>
+<link rel="icon" type="image/svg+xml" href="../../logo.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Noto+Serif+Thai:wght@400;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../c-style.css">
+<script type="module">
+  try {
+    const mod = await import('https://esm.sh/JSCPP@2.0.9');
+    window.JSCPP = mod.default || mod;
+    window.dispatchEvent(new Event('jscpp-ready'));
+  } catch (e) {
+    console.error('JSCPP load failed:', e);
+    window.dispatchEvent(new Event('jscpp-failed'));
+  }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+
+<header class="c-topbar">
+  <div class="c-topbar-left">
+    <a href="../../index.html" class="c-btn-icon" title="หน้าหลักเว็บไซต์">🏠</a>
+    <a href="../index.html" class="c-btn-icon" title="กลับ Roadmap">←</a>
+    <div class="c-topbar-logo" style="background:linear-gradient(135deg,#9B59B6,#E91E63);">4</div>
+    <div>
+      <div class="c-topbar-title">หน่วยที่ 4 · คำสั่งเงื่อนไข</div>
+      <div class="c-topbar-subtitle">ให้โปรแกรมตัดสินใจเอง</div>
+    </div>
+  </div>
+  <div class="c-topbar-right">
+    <button class="c-btn-icon" id="themeToggle" title="สลับธีม">🌙</button>
+    <a href="../playground.html" class="c-btn c-btn-ghost">💻 Playground</a>
+  </div>
+</header>
+
+<!-- LESSON HEADER -->
+<section class="c-lesson-header" style="--unit-color:#9B59B6; background:linear-gradient(135deg,#9B59B6,#6B2C8F);">
+  <div class="c-lesson-header-content">
+    <div class="c-lesson-breadcrumb">
+      <a href="../../index.html">🏠 หน้าหลัก</a> &nbsp;›&nbsp; <a href="../index.html">หลักสูตร C</a> &nbsp;›&nbsp; หน่วยที่ 4
+    </div>
+    <h1 class="c-lesson-title">🤔 คำสั่งเงื่อนไข (if / else / switch)</h1>
+    <p class="c-lesson-subtitle">สอนให้โปรแกรม "คิดและตัดสินใจ" — ถ้าเงื่อนไขจริงทำอย่างหนึ่ง ถ้าเท็จทำอีกอย่าง</p>
+    <div class="c-lesson-meta">
+      <span>⏱️ ใช้เวลา ~60 นาที</span>
+      <span>📖 ระดับ: ควบคุม</span>
+      <span>💻 มีโค้ดให้ลอง</span>
+    </div>
+  </div>
+</section>
+
+<div class="c-container-narrow">
+
+  <!-- จุดประสงค์ -->
+  <div class="c-section">
+    <h2><span class="c-section-icon">🎯</span> สิ่งที่จะได้เรียนรู้ในบทนี้</h2>
+    <div class="c-objectives">
+      <h4>📌 หลังจบบทนี้ คุณจะ:</h4>
+      <ul>
+        <li>ใช้ <code>if</code> เพื่อทำงานเมื่อเงื่อนไขเป็นจริง</li>
+        <li>ใช้ <code>if...else</code> เลือกทำ 2 ทาง</li>
+        <li>ใช้ <code>if...else if...else</code> เลือกได้หลายทาง (เช่น ตัดเกรด)</li>
+        <li>ใช้ <code>switch...case</code> เลือกตามค่าที่แน่นอน</li>
+        <li>เขียนโปรแกรมที่ตอบสนองต่างกันตามข้อมูลที่รับเข้ามา</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- หมายเหตุ -->
+  <div class="c-warn">
+    <div class="c-warn-icon">💡</div>
+    <div>
+      <b>ทบทวน:</b> เงื่อนไขใช้ตัวเปรียบเทียบจากหน่วยที่แล้ว (<code>==, !=, &gt;, &lt;, &gt;=, &lt;=, &amp;&amp;, ||</code>)
+      โปรแกรมที่มี <code>scanf</code> อย่าลืมพิมพ์ค่าในช่อง <b>⌨️ Input</b> ก่อนกดรัน
+    </div>
+  </div>
+
+  <!-- 1. if -->
+  <div class="c-section">
+    <h2><span class="c-section-icon">✅</span> 1. คำสั่ง if — "ถ้า...ก็..."</h2>
+    <p>โครงสร้างพื้นฐาน: <b>ถ้า</b>เงื่อนไขในวงเล็บเป็นจริง <b>ก็</b>ทำคำสั่งในปีกกา</p>
+
+    <div class="c-code-block">
+      <div class="code-header"><span class="code-lang">C</span></div>
+<pre><span class="c-kw">if</span> (score &gt;= <span class="c-num">50</span>) {
+    <span class="c-fn">printf</span>(<span class="c-str">"You pass!\n"</span>);
+}</pre>
+    </div>
+
+    <div class="c-tryit">
+      <div class="c-tryit-header">
+        <div class="c-tryit-title">🧪 ลองเปลี่ยนคะแนนในช่อง Input</div>
+        <div class="c-tryit-actions">
+          <button class="c-tryit-btn" data-reset="tryit1">↺ Reset</button>
+          <button class="c-tryit-btn btn-run" data-run="tryit1">▶ รัน</button>
+        </div>
+      </div>
+      <textarea class="c-tryit-editor" id="tryit1" spellcheck="false">#include &lt;stdio.h&gt;
+
+int main() {
+    int score;
+    scanf("%d", &score);
+
+    if (score >= 50) {
+        printf("You pass!\n");
+    }
+    printf("Your score is %d\n", score);
+    return 0;
+}
+</textarea>
+      <div class="c-tryit-stdin-label">⌨️ ค่าที่ป้อน (Input) — คะแนน:</div>
+      <textarea class="c-tryit-stdin" id="tryit1-stdin" spellcheck="false">75</textarea>
+      <div class="c-tryit-output" id="tryit1-out"></div>
+    </div>
+    <div class="c-tip">
+      <div class="c-tip-icon">💡</div>
+      <div>ลองเปลี่ยน Input เป็น <code>30</code> — บรรทัด "You pass!" จะหายไป เพราะเงื่อนไขเป็นเท็จ</div>
+    </div>
+  </div>
+
+  <!-- 2. if else -->
+  <div class="c-section">
+    <h2><span class="c-section-icon">🔀</span> 2. if...else — เลือก 2 ทาง</h2>
+    <p><b>ถ้า</b>จริงทำอย่างหนึ่ง <b>ไม่งั้น (else)</b> ทำอีกอย่าง — เลือกทางใดทางหนึ่งเสมอ</p>
+
+    <div class="c-tryit">
+      <div class="c-tryit-header">
+        <div class="c-tryit-title">🧪 เช็คเลขคู่หรือคี่</div>
+        <div class="c-tryit-actions">
+          <button class="c-tryit-btn" data-reset="tryit2">↺ Reset</button>
+          <button class="c-tryit-btn btn-run" data-run="tryit2">▶ รัน</button>
+        </div>
+      </div>
+      <textarea class="c-tryit-editor" id="tryit2" spellcheck="false">#include &lt;stdio.h&gt;
+
+int main() {
+    int n;
+    scanf("%d", &n);
+
+    if (n % 2 == 0) {
+        printf("%d is EVEN\n", n);
+    } else {
+        printf("%d is ODD\n", n);
+    }
+    return 0;
+}
+</textarea>
+      <div class="c-tryit-stdin-label">⌨️ ค่าที่ป้อน (Input):</div>
+      <textarea class="c-tryit-stdin" id="tryit2-stdin" spellcheck="false">7</textarea>
+      <div class="c-tryit-output" id="tryit2-out"></div>
+    </div>
+  </div>
+
+  <!-- 3. else if -->
+  <div class="c-section">
+    <h2><span class="c-section-icon">🪜</span> 3. else if — เลือกหลายทาง</h2>
+    <p>
+      เมื่อมีหลายกรณี เช่น การตัดเกรด ใช้ <code>else if</code> ต่อกันเป็นขั้นบันได
+      โปรแกรมจะเช็คจากบนลงล่าง เจอเงื่อนไขจริงตัวแรกก็ทำแล้วหยุด
+    </p>
+
+    <div class="c-code-block">
+      <div class="code-header"><span class="code-lang">C</span></div>
+<pre><span class="c-kw">if</span>      (score &gt;= <span class="c-num">80</span>) grade = <span class="c-str">'A'</span>;
+<span class="c-kw">else if</span> (score &gt;= <span class="c-num">70</span>) grade = <span class="c-str">'B'</span>;
+<span class="c-kw">else if</span> (score &gt;= <span class="c-num">60</span>) grade = <span class="c-str">'C'</span>;
+<span class="c-kw">else</span>                 grade = <span class="c-str">'F'</span>;</pre>
+    </div>
+
+    <div class="c-tryit">
+      <div class="c-tryit-header">
+        <div class="c-tryit-title">🧪 โปรแกรมตัดเกรด</div>
+        <div class="c-tryit-actions">
+          <button class="c-tryit-btn" data-reset="tryit3">↺ Reset</button>
+          <button class="c-tryit-btn btn-run" data-run="tryit3">▶ รัน</button>
+        </div>
+      </div>
+      <textarea class="c-tryit-editor" id="tryit3" spellcheck="false">#include &lt;stdio.h&gt;
+
+int main() {
+    int score;
+    scanf("%d", &score);
+    char grade;
+
+    if (score >= 80)      grade = 'A';
+    else if (score >= 70) grade = 'B';
+    else if (score >= 60) grade = 'C';
+    else if (score >= 50) grade = 'D';
+    else                  grade = 'F';
+
+    printf("Score %d = Grade %c\n", score, grade);
+    return 0;
+}
+</textarea>
+      <div class="c-tryit-stdin-label">⌨️ ค่าที่ป้อน (Input) — คะแนน 0-100:</div>
+      <textarea class="c-tryit-stdin" id="tryit3-stdin" spellcheck="false">73</textarea>
+      <div class="c-tryit-output" id="tryit3-out"></div>
+    </div>
+
+    <div class="c-warn">
+      <div class="c-warn-icon">⚠️</div>
+      <div>
+        <b>ลำดับสำคัญมาก!</b> ต้องเรียงจาก <b>มากไปน้อย</b> — ถ้าเอา <code>score &gt;= 50</code> ขึ้นก่อน
+        คะแนน 90 ก็จะได้เกรด D เพราะมันเจอเงื่อนไขแรกที่จริงแล้วหยุด
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. switch -->
+  <div class="c-section">
+    <h2><span class="c-section-icon">🎛️</span> 4. switch...case — เลือกตามค่าที่แน่นอน</h2>
+    <p>
+      เมื่อต้องเทียบตัวแปรกับ <b>ค่าเจาะจงหลาย ๆ ค่า</b> (เช่น เลขวัน 1-7)
+      <code>switch</code> อ่านง่ายกว่า <code>else if</code> ยาว ๆ
+    </p>
+
+    <div class="c-tryit">
+      <div class="c-tryit-header">
+        <div class="c-tryit-title">🧪 แปลงเลขเป็นชื่อวัน</div>
+        <div class="c-tryit-actions">
+          <button class="c-tryit-btn" data-reset="tryit4">↺ Reset</button>
+          <button class="c-tryit-btn btn-run" data-run="tryit4">▶ รัน</button>
+        </div>
+      </div>
+      <textarea class="c-tryit-editor" id="tryit4" spellcheck="false">#include &lt;stdio.h&gt;
+
+int main() {
+    int day;
+    scanf("%d", &day);
+
+    switch (day) {
+        case 1: printf("Monday\n");    break;
+        case 2: printf("Tuesday\n");   break;
+        case 3: printf("Wednesday\n"); break;
+        case 4: printf("Thursday\n");  break;
+        case 5: printf("Friday\n");    break;
+        default: printf("Weekend!\n");
+    }
+    return 0;
+}
+</textarea>
+      <div class="c-tryit-stdin-label">⌨️ ค่าที่ป้อน (Input) — เลขวัน 1-7:</div>
+      <textarea class="c-tryit-stdin" id="tryit4-stdin" spellcheck="false">3</textarea>
+      <div class="c-tryit-output" id="tryit4-out"></div>
+    </div>
+
+    <div class="c-danger">
+      <div class="c-danger-icon">❌</div>
+      <div>
+        <b>อย่าลืม <code>break;</code>!</b> ถ้าลืม โปรแกรมจะทำ case ถัดไปต่อไปเรื่อย ๆ (เรียกว่า "fall through")
+        ส่วน <code>default</code> คือกรณีที่ไม่ตรง case ไหนเลย
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. ข้อผิดพลาด -->
+  <div class="c-section">
+    <h2><span class="c-section-icon">⚠️</span> 5. ข้อผิดพลาดที่พบบ่อย</h2>
+
+    <div class="c-danger">
+      <div class="c-danger-icon">❌</div>
+      <div>
+        <b>1. ใช้ <code>=</code> แทน <code>==</code></b>
+        <div class="c-code-block" style="margin-top:8px;"><pre>if (x = 5)    // ผิด! นี่คือการกำหนดค่า (จริงเสมอ)
+if (x == 5)   // ถูก ✓ เปรียบเทียบ</pre></div>
+      </div>
+    </div>
+
+    <div class="c-danger">
+      <div class="c-danger-icon">❌</div>
+      <div>
+        <b>2. ใส่ <code>;</code> หลัง if ทันที</b>
+        <div class="c-code-block" style="margin-top:8px;"><pre>if (score > 50);          // ผิด! บล็อกจบทันที
+{ printf("pass"); }        // บรรทัดนี้ทำเสมอ</pre></div>
+      </div>
+    </div>
+
+    <div class="c-danger">
+      <div class="c-danger-icon">❌</div>
+      <div>
+        <b>3. ลืม break ใน switch</b> ทำให้ผลลัพธ์ผิดเพราะ case ไหลต่อกัน
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. แบบฝึก -->
+  <div class="c-section">
+    <h2><span class="c-section-icon">✏️</span> 6. แบบฝึกหัด</h2>
+
+    <!-- Easy -->
+    <div class="c-exercise">
+      <div class="c-exercise-header">
+        <span class="c-exercise-badge level-easy">⭐ ง่าย</span>
+        <span class="c-exercise-title">โจทย์ที่ 1: บวกหรือลบ</span>
+      </div>
+      <p>รับเลข 1 จำนวน ถ้ามากกว่าหรือเท่ากับ 0 พิมพ์ <code>Positive</code> ไม่งั้นพิมพ์ <code>Negative</code></p>
+
+      <div class="c-tryit">
+        <div class="c-tryit-header">
+          <div class="c-tryit-title">💻 พื้นที่เขียนโค้ด</div>
+          <div class="c-tryit-actions">
+            <button class="c-tryit-btn" data-reset="ex1ed">↺ Reset</button>
+            <button class="c-tryit-btn btn-run" data-run="ex1ed">▶ รัน</button>
+          </div>
+        </div>
+        <textarea class="c-tryit-editor" id="ex1ed" spellcheck="false">#include &lt;stdio.h&gt;
+
+int main() {
+    int n;
+    scanf("%d", &n);
+    // if (n >= 0) ... else ...
+
+    return 0;
+}
+</textarea>
+        <div class="c-tryit-stdin-label">⌨️ ค่าที่ป้อน (Input):</div>
+        <textarea class="c-tryit-stdin" id="ex1ed-stdin" spellcheck="false">-3</textarea>
+        <div class="c-tryit-output" id="ex1ed-out"></div>
+      </div>
+    </div>
+
+    <!-- Medium -->
+    <div class="c-exercise">
+      <div class="c-exercise-header">
+        <span class="c-exercise-badge level-medium">⭐⭐ ปานกลาง</span>
+        <span class="c-exercise-title">โจทย์ที่ 2: หาค่ามากที่สุดใน 3 จำนวน</span>
+      </div>
+      <p>รับเลข 3 จำนวน แล้วพิมพ์ค่าที่มากที่สุด (ใช้ if ซ้อน หรือ &amp;&amp;)</p>
+
+      <div class="c-tryit">
+        <div class="c-tryit-header">
+          <div class="c-tryit-title">💻 พื้นที่เขียนโค้ด</div>
+          <div class="c-tryit-actions">
+            <button class="c-tryit-btn" data-reset="ex2ed">↺ Reset</button>
+            <button class="c-tryit-btn btn-run" data-run="ex2ed">▶ รัน</button>
+          </div>
+        </div>
+        <textarea class="c-tryit-editor" id="ex2ed" spellcheck="false">#include &lt;stdio.h&gt;
+
+int main() {
+    int a, b, c;
+    scanf("%d", &a);
+    scanf("%d", &b);
+    scanf("%d", &c);
+    // หา max แล้วพิมพ์ เช่น: Max = 9
+
+    return 0;
+}
+</textarea>
+        <div class="c-tryit-stdin-label">⌨️ ค่าที่ป้อน (Input) — 3 จำนวน:</div>
+        <textarea class="c-tryit-stdin" id="ex2ed-stdin" spellcheck="false">4
+9
+6</textarea>
+        <div class="c-tryit-output" id="ex2ed-out"></div>
+      </div>
+    </div>
+
+    <!-- Hard -->
+    <div class="c-exercise">
+      <div class="c-exercise-header">
+        <span class="c-exercise-badge level-hard">⭐⭐⭐ ท้าทาย</span>
+        <span class="c-exercise-title">โจทย์ที่ 3: เครื่องคิดเลข switch</span>
+      </div>
+      <p>
+        รับเลข 2 ตัว และรหัสตัวดำเนินการ (1=บวก 2=ลบ 3=คูณ 4=หาร)
+        ใช้ <code>switch</code> คำนวณตามรหัส แล้วพิมพ์ผลลัพธ์
+      </p>
+
+      <div class="c-tryit">
+        <div class="c-tryit-header">
+          <div class="c-tryit-title">💻 พื้นที่เขียนโค้ด</div>
+          <div class="c-tryit-actions">
+            <button class="c-tryit-btn" data-reset="ex3ed">↺ Reset</button>
+            <button class="c-tryit-btn btn-run" data-run="ex3ed">▶ รัน</button>
+          </div>
+        </div>
+        <textarea class="c-tryit-editor" id="ex3ed" spellcheck="false">#include &lt;stdio.h&gt;
+
+int main() {
+    int a, b, op;
+    scanf("%d", &a);
+    scanf("%d", &b);
+    scanf("%d", &op);   // 1=+  2=-  3=*  4=/
+
+    switch (op) {
+        // เติม case 1..4 แล้วพิมพ์ผลลัพธ์
+    }
+    return 0;
+}
+</textarea>
+        <div class="c-tryit-stdin-label">⌨️ ค่าที่ป้อน (Input) — a, b, op:</div>
+        <textarea class="c-tryit-stdin" id="ex3ed-stdin" spellcheck="false">12
+4
+3</textarea>
+        <div class="c-tryit-output" id="ex3ed-out"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="c-quiz" id="quiz">
+    <div class="c-quiz-header">
+      <h3>📝 แบบทดสอบท้ายบท</h3>
+      <p style="color:var(--c-text-muted);">ตอบให้ถูก 4 ใน 5 ข้อ เพื่อปลดล็อกบทถัดไป</p>
+    </div>
+
+    <div class="c-quiz-question" data-correct="b">
+      <div class="c-quiz-question-text"><span class="q-num">1</span>คำสั่ง <code>if</code> จะทำงานในปีกกาเมื่อใด?</div>
+      <div class="c-quiz-options">
+        <label class="c-quiz-option"><input type="radio" name="q1" value="a"><span class="opt-letter">A</span> เมื่อเงื่อนไขเป็นเท็จ</label>
+        <label class="c-quiz-option"><input type="radio" name="q1" value="b"><span class="opt-letter">B</span> เมื่อเงื่อนไขเป็นจริง</label>
+        <label class="c-quiz-option"><input type="radio" name="q1" value="c"><span class="opt-letter">C</span> ทำทุกครั้งเสมอ</label>
+        <label class="c-quiz-option"><input type="radio" name="q1" value="d"><span class="opt-letter">D</span> ไม่ทำเลย</label>
+      </div>
+    </div>
+
+    <div class="c-quiz-question" data-correct="d">
+      <div class="c-quiz-question-text"><span class="q-num">2</span>โค้ดนี้ผิดตรงไหน? <code>if (x = 5)</code></div>
+      <div class="c-quiz-options">
+        <label class="c-quiz-option"><input type="radio" name="q2" value="a"><span class="opt-letter">A</span> ลืมปีกกา</label>
+        <label class="c-quiz-option"><input type="radio" name="q2" value="b"><span class="opt-letter">B</span> ไม่ผิด ถูกต้องแล้ว</label>
+        <label class="c-quiz-option"><input type="radio" name="q2" value="c"><span class="opt-letter">C</span> ต้องมี else</label>
+        <label class="c-quiz-option"><input type="radio" name="q2" value="d"><span class="opt-letter">D</span> ควรใช้ <code>==</code> ไม่ใช่ <code>=</code></label>
+      </div>
+    </div>
+
+    <div class="c-quiz-question" data-correct="a">
+      <div class="c-quiz-question-text"><span class="q-num">3</span>ใน <code>switch</code> ถ้าลืม <code>break;</code> จะเกิดอะไร?</div>
+      <div class="c-quiz-options">
+        <label class="c-quiz-option"><input type="radio" name="q3" value="a"><span class="opt-letter">A</span> ทำ case ถัดไปต่อไปเรื่อย ๆ</label>
+        <label class="c-quiz-option"><input type="radio" name="q3" value="b"><span class="opt-letter">B</span> โปรแกรมหยุดทันที</label>
+        <label class="c-quiz-option"><input type="radio" name="q3" value="c"><span class="opt-letter">C</span> ข้าม switch ทั้งหมด</label>
+        <label class="c-quiz-option"><input type="radio" name="q3" value="d"><span class="opt-letter">D</span> ไม่มีผลอะไร</label>
+      </div>
+    </div>
+
+    <div class="c-quiz-question" data-correct="c">
+      <div class="c-quiz-question-text"><span class="q-num">4</span>เช็คว่าเลข <code>n</code> เป็นเลขคู่ ใช้เงื่อนไขใด?</div>
+      <div class="c-quiz-options">
+        <label class="c-quiz-option"><input type="radio" name="q4" value="a"><span class="opt-letter">A</span> <code>n / 2 == 0</code></label>
+        <label class="c-quiz-option"><input type="radio" name="q4" value="b"><span class="opt-letter">B</span> <code>n = 2</code></label>
+        <label class="c-quiz-option"><input type="radio" name="q4" value="c"><span class="opt-letter">C</span> <code>n % 2 == 0</code></label>
+        <label class="c-quiz-option"><input type="radio" name="q4" value="d"><span class="opt-letter">D</span> <code>n % 2 == 1</code></label>
+      </div>
+    </div>
+
+    <div class="c-quiz-question" data-correct="b">
+      <div class="c-quiz-question-text"><span class="q-num">5</span>ในการตัดเกรดด้วย <code>else if</code> ควรเรียงเงื่อนไขอย่างไร?</div>
+      <div class="c-quiz-options">
+        <label class="c-quiz-option"><input type="radio" name="q5" value="a"><span class="opt-letter">A</span> จากน้อยไปมาก</label>
+        <label class="c-quiz-option"><input type="radio" name="q5" value="b"><span class="opt-letter">B</span> จากมากไปน้อย</label>
+        <label class="c-quiz-option"><input type="radio" name="q5" value="c"><span class="opt-letter">C</span> เรียงยังไงก็ได้</label>
+        <label class="c-quiz-option"><input type="radio" name="q5" value="d"><span class="opt-letter">D</span> สลับไปมา</label>
+      </div>
+    </div>
+
+    <div style="text-align:center; margin-top:20px;">
+      <button class="c-btn c-btn-success" id="submitQuiz" style="padding:12px 30px; font-size:15px;">✓ ส่งคำตอบ</button>
+    </div>
+
+    <div class="c-quiz-result" id="quizResult"></div>
+  </div>
+
+  <!-- NAV -->
+  <div class="c-lesson-nav">
+    <a href="03-input-operators.html" class="c-lesson-nav-btn">
+      <div class="c-lesson-nav-label">← บทก่อนหน้า</div>
+      <div class="c-lesson-nav-title">หน่วย 3: รับข้อมูล</div>
+    </a>
+    <a href="05-loops.html" class="c-lesson-nav-btn next disabled" id="nextBtn" title="ทำแบบทดสอบให้ผ่านก่อน">
+      <div class="c-lesson-nav-label">บทถัดไป →</div>
+      <div class="c-lesson-nav-title">หน่วยที่ 5: การวนซ้ำ 🔁</div>
+    </a>
+  </div>
+
+</div>
+
+<footer class="c-footer">
+  <p>© 2026 Computer Science By <a href="../../index.html">ครูภาณุพงศ์ อุ่นคำ</a> · โรงเรียนบ้านป่ายุบ</p>
+</footer>
+
+<script>
+/* Theme */
+const themeBtn = document.getElementById('themeToggle');
+const savedTheme = localStorage.getItem('clang-theme') || 'light';
+document.documentElement.setAttribute('data-theme', savedTheme);
+themeBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+themeBtn.addEventListener('click', () => {
+  const curr = document.documentElement.getAttribute('data-theme');
+  const next = curr === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('clang-theme', next);
+  themeBtn.textContent = next === 'dark' ? '☀️' : '🌙';
+});
+
+/* Copy code */
+document.querySelectorAll('.code-copy').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const target = document.getElementById(btn.dataset.copy);
+    if (target) {
+      navigator.clipboard.writeText(target.innerText);
+      const orig = btn.textContent;
+      btn.textContent = '✓ คัดลอกแล้ว';
+      setTimeout(() => btn.textContent = orig, 1500);
+    }
+  });
+});
+
+/* Tab in textareas (editor only) */
+document.querySelectorAll('.c-tryit-editor').forEach(ed => {
+  ed.addEventListener('keydown', (e) => {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const s = ed.selectionStart;
+      const ev = ed.selectionEnd;
+      ed.value = ed.value.substring(0, s) + '    ' + ed.value.substring(ev);
+      ed.selectionStart = ed.selectionEnd = s + 4;
+    }
+  });
+});
+
+/* Save originals for Reset (editors + stdin) */
+const originals = {};
+document.querySelectorAll('.c-tryit-editor, .c-tryit-stdin').forEach(ed => {
+  originals[ed.id] = ed.value;
+});
+
+document.querySelectorAll('[data-reset]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const id = btn.dataset.reset;
+    const ed = document.getElementById(id);
+    if (ed && originals[id] !== undefined) ed.value = originals[id];
+    const sid = id + '-stdin';
+    const sed = document.getElementById(sid);
+    if (sed && originals[sid] !== undefined) sed.value = originals[sid];
+    const out = document.getElementById(id + '-out');
+    if (out) { out.textContent = ''; out.className = 'c-tryit-output'; }
+  });
+});
+
+/* Run buttons */
+document.querySelectorAll('[data-run]').forEach(btn => {
+  btn.addEventListener('click', () => runTryIt(btn.dataset.run));
+});
+
+function runTryIt(id) {
+  const ed = document.getElementById(id);
+  const out = document.getElementById(id + '-out');
+  if (!ed || !out) return;
+
+  if (typeof window.JSCPP === 'undefined') {
+    out.textContent = '⏳ Engine ยังโหลดไม่เสร็จ — รอสักครู่แล้วลองใหม่';
+    out.className = 'c-tryit-output error';
+    return;
+  }
+
+  const stdinEl = document.getElementById(id + '-stdin');
+  const stdin = stdinEl ? stdinEl.value : '';
+
+  let output = '';
+  out.textContent = '⏳ กำลังรัน...';
+  out.className = 'c-tryit-output';
+
+  const config = {
+    stdio: { write: (s) => { output += s; } },
+    unsigned_overflow: 'warn',
+    maxTimeout: 5000
+  };
+
+  setTimeout(() => {
+    try {
+      const exitCode = window.JSCPP.run(ed.value, stdin, config);
+      out.textContent = output + `\n▸ Process exited with code ${exitCode}`;
+      out.className = 'c-tryit-output success';
+    } catch (err) {
+      out.textContent = (output ? output + '\n\n' : '') + '❌ ข้อผิดพลาด:\n' + (err.message || err.toString());
+      out.className = 'c-tryit-output error';
+    }
+  }, 50);
+}
+
+/* Quiz */
+document.querySelectorAll('.c-quiz-option').forEach(opt => {
+  opt.addEventListener('click', () => {
+    const inp = opt.querySelector('input');
+    const name = inp.name;
+    document.querySelectorAll(`input[name="${name}"]`).forEach(i => {
+      i.closest('.c-quiz-option').classList.remove('selected');
+    });
+    opt.classList.add('selected');
+    inp.checked = true;
+  });
+});
+
+document.getElementById('submitQuiz').addEventListener('click', () => {
+  const questions = document.querySelectorAll('.c-quiz-question');
+  let correctCount = 0;
+
+  questions.forEach(q => {
+    const correctAns = q.dataset.correct;
+    const selected = q.querySelector('input:checked');
+    q.querySelectorAll('.c-quiz-option').forEach(opt => {
+      opt.classList.remove('correct', 'wrong');
+      const val = opt.querySelector('input').value;
+      if (val === correctAns) opt.classList.add('correct');
+      else if (selected && opt.querySelector('input').checked && val !== correctAns) {
+        opt.classList.add('wrong');
+      }
+    });
+    if (selected && selected.value === correctAns) correctCount++;
+  });
+
+  const result = document.getElementById('quizResult');
+  result.classList.add('show');
+  const total = questions.length;
+
+  if (correctCount >= 4) {
+    result.className = 'c-quiz-result show pass';
+    result.innerHTML = `🎉 เก่งมาก! คุณตอบถูก ${correctCount}/${total} ข้อ — ผ่านหน่วยที่ 4 แล้ว!`;
+
+    const p = JSON.parse(localStorage.getItem('clang-progress') || '{}');
+    p[4] = { completed: true, ts: Date.now(), score: correctCount };
+    localStorage.setItem('clang-progress', JSON.stringify(p));
+
+    const badges = JSON.parse(localStorage.getItem('clang-badges') || '[]');
+    if (!badges.includes('decision-maker')) {
+      badges.push('decision-maker');
+      localStorage.setItem('clang-badges', JSON.stringify(badges));
+    }
+
+    const nb = document.getElementById('nextBtn');
+    if (nb) { nb.classList.remove('disabled'); nb.title = 'ปลดล็อกแล้ว!'; }
+
+    if (typeof confetti !== 'undefined') {
+      confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+    }
+  } else {
+    result.className = 'c-quiz-result show fail';
+    result.innerHTML = `📚 คุณตอบถูก ${correctCount}/${total} ข้อ — ต้องอย่างน้อย 4 ข้อ ลองอ่านบทเรียนแล้วทำใหม่นะ`;
+  }
+
+  result.scrollIntoView({ behavior: 'smooth', block: 'center' });
+});
+
+/* Unlock next button if already passed */
+(() => {
+  const p = JSON.parse(localStorage.getItem('clang-progress') || '{}');
+  if (p[4] && p[4].completed) {
+    const nb = document.getElementById('nextBtn');
+    if (nb) { nb.classList.remove('disabled'); nb.title = 'ปลดล็อกแล้ว!'; }
+  }
+})();
+</script>
+
+</body>
+</html>

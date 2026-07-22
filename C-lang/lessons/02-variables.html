@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#45B7D1">
+<title>หน่วยที่ 2: ตัวแปรและชนิดข้อมูล | ภาษา C</title>
+<link rel="icon" type="image/svg+xml" href="../../logo.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Noto+Serif+Thai:wght@400;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../c-style.css">
+<script type="module">
+  try {
+    const mod = await import('https://esm.sh/JSCPP@2.0.9');
+    window.JSCPP = mod.default || mod;
+    window.dispatchEvent(new Event('jscpp-ready'));
+  } catch (e) {
+    console.error('JSCPP load failed:', e);
+    window.dispatchEvent(new Event('jscpp-failed'));
+  }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+
+<header class="c-topbar">
+  <div class="c-topbar-left">
+    <a href="../../index.html" class="c-btn-icon" title="หน้าหลักเว็บไซต์">🏠</a>
+    <a href="../index.html" class="c-btn-icon" title="กลับ Roadmap">←</a>
+    <div class="c-topbar-logo" style="background:linear-gradient(135deg,#45B7D1,#5B8DEF);">2</div>
+    <div>
+      <div class="c-topbar-title">หน่วยที่ 2 · ตัวแปรและชนิดข้อมูล</div>
+      <div class="c-topbar-subtitle">กล่องเก็บข้อมูลของโปรแกรม</div>
+    </div>
+  </div>
+  <div class="c-topbar-right">
+    <button class="c-btn-icon" id="themeToggle" title="สลับธีม">🌙</button>
+    <a href="../playground.html" class="c-btn c-btn-ghost">💻 Playground</a>
+  </div>
+</header>
+
+<!-- LESSON HEADER -->
+<section class="c-lesson-header" style="--unit-color:#45B7D1; background:linear-gradient(135deg,#45B7D1,#1D6E8C);">
+  <div class="c-lesson-header-content">
+    <div class="c-lesson-breadcrumb">
+      <a href="../../index.html">🏠 หน้าหลัก</a> &nbsp;›&nbsp; <a href="../index.html">หลักสูตร C</a> &nbsp;›&nbsp; หน่วยที่ 2
+    </div>
+    <h1 class="c-lesson-title">📦 ตัวแปรและชนิดข้อมูล</h1>
+    <p class="c-lesson-subtitle">เรียนรู้วิธีเก็บข้อมูล เช่น ตัวเลข ตัวอักษร ไว้ในโปรแกรม — เหมือนมี "กล่อง" ที่ตั้งชื่อได้</p>
+    <div class="c-lesson-meta">
+      <span>⏱️ ใช้เวลา ~50 นาที</span>
+      <span>📖 ระดับ: พื้นฐาน</span>
+      <span>💻 มีโค้ดให้ลอง</span>
+    </div>
+  </div>
+</section>
+
+<div class="c-container-narrow">
+
+  <!-- จุดประสงค์ -->
+  <div class="c-section">
+    <h2><span class="c-section-icon">🎯</span> สิ่งที่จะได้เรียนรู้ในบทนี้</h2>
+    <div class="c-objectives">
+      <h4>📌 หลังจบบทนี้ คุณจะ:</h4>
+      <ul>
+        <li>เข้าใจว่า <b>ตัวแปร (variable)</b> คืออะไร และทำไมต้องใช้</li>
+        <li>รู้จักชนิดข้อมูลหลัก: <code>int</code>, <code>float</code>, <code>double</code>, <code>char</code></li>
+        <li><b>ประกาศ</b> และ <b>กำหนดค่า</b> ตัวแปรได้ถูกต้อง</li>
+        <li>ใช้ <b>รหัสรูปแบบ</b> <code>%d</code>, <code>%f</code>, <code>%c</code> ใน <code>printf</code> ได้</li>
+        <li>รู้จัก <code>const</code> และกฎการตั้งชื่อตัวแปร</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- หมายเหตุข้อจำกัด -->
+  <div class="c-warn">
+    <div class="c-warn-icon">💡</div>
+    <div>
+      <b>หมายเหตุก่อนเริ่ม:</b> ใน Try-it Editor ขอให้ใช้ <b>ภาษาอังกฤษใน <code>printf("...")</code></b>
+      เพราะ engine ในเบราว์เซอร์ยังไม่รองรับภาษาไทยใน string literal — แต่ <b>comment ภาษาไทยใช้ได้ปกติ</b>
+    </div>
+  </div>
+
+  <!-- 1. ตัวแปรคืออะไร -->
+  <div class="c-section">
+    <h2><span class="c-section-icon">📦</span> 1. ตัวแปรคืออะไร?</h2>
+    <p>
+      <b>ตัวแปร (Variable)</b> คือ <b>"กล่องเก็บข้อมูล"</b> ที่เราตั้งชื่อได้เอง
+      ใช้เก็บค่าต่าง ๆ ไว้ในหน่วยความจำของคอมพิวเตอร์ เพื่อเอามาใช้ทีหลัง
+    </p>
+
+    <div class="c-note">
+      <div class="c-note-icon">📚</div>
+      <div>
+        <b>เปรียบเทียบ:</b> ลองนึกถึง <b>กล่องใส่ของที่มีป้ายชื่อ</b> —
+        กล่องชื่อ <code>age</code> ใส่เลข <code>14</code>, กล่องชื่อ <code>grade</code> ใส่ตัวอักษร <code>'A'</code>
+        เมื่ออยากรู้ว่าในกล่องมีอะไร ก็เรียกชื่อกล่องนั้น
+      </div>
+    </div>
+
+    <p>โครงสร้างการสร้างตัวแปร มี 3 ส่วน:</p>
+    <div class="c-code-block">
+      <div class="code-header"><span class="code-lang">C</span></div>
+<pre><span class="c-type">int</span> age <span class="c-kw">=</span> <span class="c-num">14</span>;
+ │    │       │
+ชนิด  ชื่อ    ค่าเริ่มต้น</pre>
+    </div>
+
+    <!-- TRY IT #1 -->
+    <div class="c-tryit">
+      <div class="c-tryit-header">
+        <div class="c-tryit-title">🧪 ลองรันเอง — กล่องใบแรก</div>
+        <div class="c-tryit-actions">
+          <button class="c-tryit-btn" data-reset="tryit1">↺ Reset</button>
+          <button class="c-tryit-btn btn-run" data-run="tryit1">▶ รัน</button>
+        </div>
+      </div>
+      <textarea class="c-tryit-editor" id="tryit1" spellcheck="false">#include &lt;stdio.h&gt;
+
+int main() {
+    int age = 14;      // กล่องเก็บเลขจำนวนเต็ม
+    printf("My age is %d\n", age);
+    return 0;
+}
+</textarea>
+      <div class="c-tryit-output" id="tryit1-out"></div>
+    </div>
+  </div>
+
+  <!-- 2. ชนิดข้อมูล -->
+  <div class="c-section">
+    <h2><span class="c-section-icon">🔢</span> 2. ชนิดข้อมูล (Data Types)</h2>
+    <p>กล่องแต่ละใบเก็บของได้ "คนละแบบ" เราต้องบอกชนิดของกล่องตอนสร้าง:</p>
+
+    <table style="width:100%; border-collapse:collapse; margin:14px 0;">
+      <thead>
+        <tr style="background:var(--c-primary); color:white;">
+          <th style="padding:10px; text-align:left;">ชนิด</th>
+          <th style="padding:10px; text-align:left;">เก็บอะไร</th>
+          <th style="padding:10px; text-align:left;">ตัวอย่างค่า</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid var(--c-border);"><td style="padding:10px;"><code>int</code></td><td style="padding:10px;">จำนวนเต็ม</td><td style="padding:10px;"><code>0, 14, -25, 1000</code></td></tr>
+        <tr style="border-bottom:1px solid var(--c-border);"><td style="padding:10px;"><code>float</code></td><td style="padding:10px;">ทศนิยม (ความละเอียดปกติ)</td><td style="padding:10px;"><code>3.14, -0.5, 98.6</code></td></tr>
+        <tr style="border-bottom:1px solid var(--c-border);"><td style="padding:10px;"><code>double</code></td><td style="padding:10px;">ทศนิยม (ละเอียดกว่า float)</td><td style="padding:10px;"><code>3.141592653</code></td></tr>
+        <tr><td style="padding:10px;"><code>char</code></td><td style="padding:10px;">ตัวอักษร 1 ตัว (ใช้ <code>' '</code>)</td><td style="padding:10px;"><code>'A', 'z', '5', '#'</code></td></tr>
+      </tbody>
+    </table>
+
+    <div class="c-warn">
+      <div class="c-warn-icon">⚠️</div>
+      <div>
+        <b>สังเกต:</b> <code>char</code> ใช้ <b>เครื่องหมายคำพูดเดี่ยว</b> <code>' '</code> (เก็บได้ 1 ตัว)
+        ส่วนข้อความยาว ๆ ใน <code>printf</code> ใช้ <b>เครื่องหมายคำพูดคู่</b> <code>" "</code>
+      </div>
+    </div>
+
+    <div class="c-tryit">
+      <div class="c-tryit-header">
+        <div class="c-tryit-title">🧪 ลองรันเอง — กล่องทั้ง 4 ชนิด</div>
+        <div class="c-tryit-actions">
+          <button class="c-tryit-btn" data-reset="tryit2">↺ Reset</button>
+          <button class="c-tryit-btn btn-run" data-run="tryit2">▶ รัน</button>
+        </div>
+      </div>
+      <textarea class="c-tryit-editor" id="tryit2" spellcheck="false">#include &lt;stdio.h&gt;
+
+int main() {
+    int   age    = 14;        // จำนวนเต็ม
+    float height = 1.65f;     // ทศนิยม
+    double pi    = 3.14159;   // ทศนิยมละเอียด
+    char  grade  = 'A';       // ตัวอักษร 1 ตัว
+
+    printf("Age: %d\n", age);
+    printf("Height: %.2f m\n", height);
+    printf("Pi: %.5f\n", pi);
+    printf("Grade: %c\n", grade);
+    return 0;
+}
+</textarea>
+      <div class="c-tryit-output" id="tryit2-out"></div>
+    </div>
+
+    <div class="c-tip">
+      <div class="c-tip-icon">💡</div>
+      <div>
+        เลข <code>f</code> ต่อท้าย เช่น <code>1.65f</code> บอกว่าค่านี้เป็น <code>float</code>
+        ส่วน <code>3.14159</code> (ไม่มี f) เป็น <code>double</code>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. รหัสรูปแบบ -->
+  <div class="c-section">
+    <h2><span class="c-section-icon">🏷️</span> 3. รหัสรูปแบบใน printf</h2>
+    <p>
+      ตอนพิมพ์ค่าของตัวแปร เราต้องใช้ <b>"รหัสรูปแบบ" (Format Specifier)</b>
+      เพื่อบอก <code>printf</code> ว่าจะเอาค่าชนิดไหนมาแทน:
+    </p>
+
+    <table style="width:100%; border-collapse:collapse; margin:14px 0;">
+      <thead>
+        <tr style="background:var(--c-primary); color:white;">
+          <th style="padding:10px; text-align:left;">รหัส</th>
+          <th style="padding:10px; text-align:left;">ใช้กับชนิด</th>
+          <th style="padding:10px; text-align:left;">ตัวอย่าง</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid var(--c-border);"><td style="padding:10px;"><code>%d</code></td><td style="padding:10px;"><code>int</code></td><td style="padding:10px;"><code>printf("%d", 14)</code> → 14</td></tr>
+        <tr style="border-bottom:1px solid var(--c-border);"><td style="padding:10px;"><code>%f</code></td><td style="padding:10px;"><code>float</code> / <code>double</code></td><td style="padding:10px;"><code>printf("%f", 3.14)</code> → 3.140000</td></tr>
+        <tr style="border-bottom:1px solid var(--c-border);"><td style="padding:10px;"><code>%.2f</code></td><td style="padding:10px;">ทศนิยม 2 ตำแหน่ง</td><td style="padding:10px;"><code>printf("%.2f", 3.14159)</code> → 3.14</td></tr>
+        <tr><td style="padding:10px;"><code>%c</code></td><td style="padding:10px;"><code>char</code></td><td style="padding:10px;"><code>printf("%c", 'A')</code> → A</td></tr>
+      </tbody>
+    </table>
+
+    <div class="c-tryit">
+      <div class="c-tryit-header">
+        <div class="c-tryit-title">🧪 ลองเปลี่ยน %.2f เป็น %.0f หรือ %.4f ดู</div>
+        <div class="c-tryit-actions">
+          <button class="c-tryit-btn" data-reset="tryit3">↺ Reset</button>
+          <button class="c-tryit-btn btn-run" data-run="tryit3">▶ รัน</button>
+        </div>
+      </div>
+      <textarea class="c-tryit-editor" id="tryit3" spellcheck="false">#include &lt;stdio.h&gt;
+
+int main() {
+    float price = 59.9f;
+    int quantity = 3;
+    float total = price * quantity;
+
+    printf("Price: %.2f baht\n", price);
+    printf("Quantity: %d\n", quantity);
+    printf("Total: %.2f baht\n", total);
+    return 0;
+}
+</textarea>
+      <div class="c-tryit-output" id="tryit3-out"></div>
+    </div>
+
+    <div class="c-warn">
+      <div class="c-warn-icon">⚠️</div>
+      <div>
+        <b>รหัสต้องตรงกับชนิด!</b> ถ้าใช้ <code>%d</code> กับ <code>float</code> ผลลัพธ์จะเพี้ยน
+        — จำง่าย ๆ: <code>d</code>=จำนวนเต็ม (di<b>g</b>it), <code>f</code>=ทศนิยม (<b>f</b>loat), <code>c</code>=ตัวอักษร (<b>c</b>har)
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. เปลี่ยนค่าตัวแปร -->
+  <div class="c-section">
+    <h2><span class="c-section-icon">🔄</span> 4. ตัวแปร "เปลี่ยนค่า" ได้</h2>
+    <p>
+      ชื่อ "ตัว<b>แปร</b>" ก็บอกอยู่แล้วว่า <b>ค่ามันเปลี่ยนได้</b>!
+      เราสามารถกำหนดค่าใหม่ทับค่าเดิมได้ตลอด:
+    </p>
+
+    <div class="c-tryit">
+      <div class="c-tryit-header">
+        <div class="c-tryit-title">🧪 ลองรันเอง — ค่าเปลี่ยนไปเรื่อย ๆ</div>
+        <div class="c-tryit-actions">
+          <button class="c-tryit-btn" data-reset="tryit4">↺ Reset</button>
+          <button class="c-tryit-btn btn-run" data-run="tryit4">▶ รัน</button>
+        </div>
+      </div>
+      <textarea class="c-tryit-editor" id="tryit4" spellcheck="false">#include &lt;stdio.h&gt;
+
+int main() {
+    int score = 10;
+    printf("Start: %d\n", score);
+
+    score = 25;              // กำหนดค่าใหม่
+    printf("After update: %d\n", score);
+
+    score = score + 5;       // เอาค่าเดิมมาบวกเพิ่ม
+    printf("After +5: %d\n", score);
+    return 0;
+}
+</textarea>
+      <div class="c-tryit-output" id="tryit4-out"></div>
+    </div>
+  </div>
+
+  <!-- 5. const + naming -->
+  <div class="c-section">
+    <h2><span class="c-section-icon">🔒</span> 5. ค่าคงที่ (const) และการตั้งชื่อ</h2>
+    <p>
+      บางค่าเราไม่อยากให้เปลี่ยน เช่น ค่า Pi หรือจำนวนวันใน 1 สัปดาห์
+      ใช้คำว่า <code>const</code> นำหน้า จะกลายเป็น <b>"ค่าคงที่"</b> ที่แก้ไม่ได้:
+    </p>
+
+    <div class="c-code-block">
+      <div class="code-header"><span class="code-lang">C</span></div>
+<pre><span class="c-type">const</span> <span class="c-type">int</span> DAYS_PER_WEEK <span class="c-kw">=</span> <span class="c-num">7</span>;
+<span class="c-cmt">// DAYS_PER_WEEK = 8;  // ❌ Error! แก้ค่าคงที่ไม่ได้</span></pre>
+    </div>
+
+    <h3>📏 กฎการตั้งชื่อตัวแปร</h3>
+    <ul>
+      <li>✅ ใช้ตัวอักษร a-z, A-Z, ตัวเลข 0-9 และ <code>_</code> ได้</li>
+      <li>✅ ต้องขึ้นต้นด้วย <b>ตัวอักษร</b> หรือ <code>_</code> (ห้ามขึ้นต้นด้วยตัวเลข)</li>
+      <li>❌ ห้ามมีเว้นวรรค เช่น <code>my age</code> → ต้องเขียน <code>my_age</code> หรือ <code>myAge</code></li>
+      <li>❌ ห้ามใช้คำสงวน เช่น <code>int</code>, <code>return</code>, <code>if</code> เป็นชื่อตัวแปร</li>
+      <li>💡 ควรตั้งชื่อให้ <b>สื่อความหมาย</b> เช่น <code>studentAge</code> ดีกว่า <code>x</code></li>
+    </ul>
+
+    <table style="width:100%; border-collapse:collapse; margin:14px 0;">
+      <thead>
+        <tr style="background:var(--c-primary); color:white;">
+          <th style="padding:10px; text-align:left;">✅ ชื่อที่ดี</th>
+          <th style="padding:10px; text-align:left;">❌ ชื่อที่ผิด</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid var(--c-border);"><td style="padding:10px;"><code>age</code></td><td style="padding:10px;"><code>2age</code> (ขึ้นต้นด้วยเลข)</td></tr>
+        <tr style="border-bottom:1px solid var(--c-border);"><td style="padding:10px;"><code>total_price</code></td><td style="padding:10px;"><code>total price</code> (มีเว้นวรรค)</td></tr>
+        <tr><td style="padding:10px;"><code>myScore</code></td><td style="padding:10px;"><code>return</code> (คำสงวน)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 6. ข้อผิดพลาด -->
+  <div class="c-section">
+    <h2><span class="c-section-icon">⚠️</span> 6. ข้อผิดพลาดที่พบบ่อย</h2>
+
+    <div class="c-danger">
+      <div class="c-danger-icon">❌</div>
+      <div>
+        <b>1. ใช้ตัวแปรก่อนประกาศ</b>
+        <div class="c-code-block" style="margin-top:8px;"><pre>age = 14;        // ผิด! ยังไม่ได้บอกชนิด
+int age = 14;    // ถูก ✓</pre></div>
+      </div>
+    </div>
+
+    <div class="c-danger">
+      <div class="c-danger-icon">❌</div>
+      <div>
+        <b>2. ใช้รหัสรูปแบบผิดชนิด</b>
+        <div class="c-code-block" style="margin-top:8px;"><pre>float x = 3.5f;
+printf("%d", x);   // ผิด! float ต้องใช้ %f
+printf("%f", x);   // ถูก ✓</pre></div>
+      </div>
+    </div>
+
+    <div class="c-danger">
+      <div class="c-danger-icon">❌</div>
+      <div>
+        <b>3. char ใช้เครื่องหมายคำพูดผิด</b>
+        <div class="c-code-block" style="margin-top:8px;"><pre>char g = "A";    // ผิด! char ใช้ ' ' ไม่ใช่ " "
+char g = 'A';    // ถูก ✓</pre></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. แบบฝึก -->
+  <div class="c-section">
+    <h2><span class="c-section-icon">✏️</span> 7. แบบฝึกหัด</h2>
+
+    <!-- Easy -->
+    <div class="c-exercise">
+      <div class="c-exercise-header">
+        <span class="c-exercise-badge level-easy">⭐ ง่าย</span>
+        <span class="c-exercise-title">โจทย์ที่ 1: บัตรประจำตัว</span>
+      </div>
+      <p>สร้างตัวแปร 3 ตัว แล้วพิมพ์ออกมา:</p>
+      <ul>
+        <li><code>int age</code> = อายุของคุณ</li>
+        <li><code>float height</code> = ส่วนสูง (เมตร) เช่น 1.60</li>
+        <li><code>char section</code> = ห้องเรียน เช่น <code>'A'</code></li>
+      </ul>
+
+      <div class="c-tryit">
+        <div class="c-tryit-header">
+          <div class="c-tryit-title">💻 พื้นที่เขียนโค้ด</div>
+          <div class="c-tryit-actions">
+            <button class="c-tryit-btn" data-reset="ex1ed">↺ Reset</button>
+            <button class="c-tryit-btn btn-run" data-run="ex1ed">▶ รัน</button>
+          </div>
+        </div>
+        <textarea class="c-tryit-editor" id="ex1ed" spellcheck="false">#include &lt;stdio.h&gt;
+
+int main() {
+    // 1. ประกาศตัวแปร age, height, section
+
+    // 2. พิมพ์ค่าออกมาด้วย %d %.2f %c
+
+    return 0;
+}
+</textarea>
+        <div class="c-tryit-output" id="ex1ed-out"></div>
+      </div>
+    </div>
+
+    <!-- Medium -->
+    <div class="c-exercise">
+      <div class="c-exercise-header">
+        <span class="c-exercise-badge level-medium">⭐⭐ ปานกลาง</span>
+        <span class="c-exercise-title">โจทย์ที่ 2: คิดเงินทอน</span>
+      </div>
+      <p>
+        ร้านค้ามีสินค้าราคา <code>45</code> บาท ลูกค้าจ่ายมา <code>100</code> บาท
+        เขียนโปรแกรมสร้างตัวแปร <code>price</code>, <code>paid</code> แล้วคำนวณ <code>change</code> (เงินทอน) พิมพ์ออกมา
+      </p>
+      <p>ผลลัพธ์ที่ต้องได้: <code>Change: 55 baht</code></p>
+
+      <div class="c-tryit">
+        <div class="c-tryit-header">
+          <div class="c-tryit-title">💻 พื้นที่เขียนโค้ด</div>
+          <div class="c-tryit-actions">
+            <button class="c-tryit-btn" data-reset="ex2ed">↺ Reset</button>
+            <button class="c-tryit-btn btn-run" data-run="ex2ed">▶ รัน</button>
+          </div>
+        </div>
+        <textarea class="c-tryit-editor" id="ex2ed" spellcheck="false">#include &lt;stdio.h&gt;
+
+int main() {
+    int price = 45;
+    int paid = 100;
+    // คำนวณเงินทอน change = paid - price แล้วพิมพ์
+
+    return 0;
+}
+</textarea>
+        <div class="c-tryit-output" id="ex2ed-out"></div>
+      </div>
+    </div>
+
+    <!-- Hard -->
+    <div class="c-exercise">
+      <div class="c-exercise-header">
+        <span class="c-exercise-badge level-hard">⭐⭐⭐ ท้าทาย</span>
+        <span class="c-exercise-title">โจทย์ที่ 3: แปลงหน่วยอุณหภูมิ</span>
+      </div>
+      <p>
+        เขียนโปรแกรมแปลงอุณหภูมิจาก <b>เซลเซียส เป็น ฟาเรนไฮต์</b>
+        <br>สูตร: <code>F = C * 9 / 5 + 32</code>
+        <br>กำหนดให้ <code>float celsius = 25.0f;</code> แล้วคำนวณและพิมพ์ค่า <code>fahrenheit</code>
+      </p>
+      <p>ผลลัพธ์ที่ต้องได้: <code>25.00 C = 77.00 F</code></p>
+
+      <div class="c-tryit">
+        <div class="c-tryit-header">
+          <div class="c-tryit-title">💻 พื้นที่เขียนโค้ด</div>
+          <div class="c-tryit-actions">
+            <button class="c-tryit-btn" data-reset="ex3ed">↺ Reset</button>
+            <button class="c-tryit-btn btn-run" data-run="ex3ed">▶ รัน</button>
+          </div>
+        </div>
+        <textarea class="c-tryit-editor" id="ex3ed" spellcheck="false">#include &lt;stdio.h&gt;
+
+int main() {
+    float celsius = 25.0f;
+    // คำนวณ fahrenheit = celsius * 9 / 5 + 32
+    // ระวัง! ใช้ 9.0f / 5.0f เพื่อไม่ให้ปัดเศษ
+
+    return 0;
+}
+</textarea>
+        <div class="c-tryit-output" id="ex3ed-out"></div>
+      </div>
+      <div class="c-tip">
+        <div class="c-tip-icon">💡</div>
+        <div><b>คำใบ้:</b> ถ้าเขียน <code>9 / 5</code> (จำนวนเต็ม) จะได้ 1 ไม่ใช่ 1.8! ต้องเขียน <code>9.0f / 5.0f</code></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="c-quiz" id="quiz">
+    <div class="c-quiz-header">
+      <h3>📝 แบบทดสอบท้ายบท</h3>
+      <p style="color:var(--c-text-muted);">ตอบให้ถูก 4 ใน 5 ข้อ เพื่อปลดล็อกบทถัดไป</p>
+    </div>
+
+    <div class="c-quiz-question" data-correct="b">
+      <div class="c-quiz-question-text"><span class="q-num">1</span>ชนิดข้อมูลใดใช้เก็บ "จำนวนเต็ม"?</div>
+      <div class="c-quiz-options">
+        <label class="c-quiz-option"><input type="radio" name="q1" value="a"><span class="opt-letter">A</span> <code>float</code></label>
+        <label class="c-quiz-option"><input type="radio" name="q1" value="b"><span class="opt-letter">B</span> <code>int</code></label>
+        <label class="c-quiz-option"><input type="radio" name="q1" value="c"><span class="opt-letter">C</span> <code>char</code></label>
+        <label class="c-quiz-option"><input type="radio" name="q1" value="d"><span class="opt-letter">D</span> <code>double</code></label>
+      </div>
+    </div>
+
+    <div class="c-quiz-question" data-correct="c">
+      <div class="c-quiz-question-text"><span class="q-num">2</span>รหัสรูปแบบใดใช้พิมพ์ค่า <code>char</code>?</div>
+      <div class="c-quiz-options">
+        <label class="c-quiz-option"><input type="radio" name="q2" value="a"><span class="opt-letter">A</span> <code>%d</code></label>
+        <label class="c-quiz-option"><input type="radio" name="q2" value="b"><span class="opt-letter">B</span> <code>%f</code></label>
+        <label class="c-quiz-option"><input type="radio" name="q2" value="c"><span class="opt-letter">C</span> <code>%c</code></label>
+        <label class="c-quiz-option"><input type="radio" name="q2" value="d"><span class="opt-letter">D</span> <code>%s</code></label>
+      </div>
+    </div>
+
+    <div class="c-quiz-question" data-correct="d">
+      <div class="c-quiz-question-text"><span class="q-num">3</span>ชื่อตัวแปรใด <b>ผิดกฎ</b>?</div>
+      <div class="c-quiz-options">
+        <label class="c-quiz-option"><input type="radio" name="q3" value="a"><span class="opt-letter">A</span> <code>my_age</code></label>
+        <label class="c-quiz-option"><input type="radio" name="q3" value="b"><span class="opt-letter">B</span> <code>score2</code></label>
+        <label class="c-quiz-option"><input type="radio" name="q3" value="c"><span class="opt-letter">C</span> <code>totalPrice</code></label>
+        <label class="c-quiz-option"><input type="radio" name="q3" value="d"><span class="opt-letter">D</span> <code>2score</code></label>
+      </div>
+    </div>
+
+    <div class="c-quiz-question" data-correct="a">
+      <div class="c-quiz-question-text"><span class="q-num">4</span>การประกาศตัวแปร <code>char</code> ข้อใดถูกต้อง?</div>
+      <div class="c-quiz-options">
+        <label class="c-quiz-option"><input type="radio" name="q4" value="a"><span class="opt-letter">A</span> <code>char g = 'A';</code></label>
+        <label class="c-quiz-option"><input type="radio" name="q4" value="b"><span class="opt-letter">B</span> <code>char g = "A";</code></label>
+        <label class="c-quiz-option"><input type="radio" name="q4" value="c"><span class="opt-letter">C</span> <code>char g = A;</code></label>
+        <label class="c-quiz-option"><input type="radio" name="q4" value="d"><span class="opt-letter">D</span> <code>char g = 65.5;</code></label>
+      </div>
+    </div>
+
+    <div class="c-quiz-question" data-correct="b">
+      <div class="c-quiz-question-text"><span class="q-num">5</span>คำว่า <code>const</code> มีไว้เพื่ออะไร?</div>
+      <div class="c-quiz-options">
+        <label class="c-quiz-option"><input type="radio" name="q5" value="a"><span class="opt-letter">A</span> ทำให้ตัวแปรพิมพ์เร็วขึ้น</label>
+        <label class="c-quiz-option"><input type="radio" name="q5" value="b"><span class="opt-letter">B</span> ทำให้เป็นค่าคงที่ แก้ค่าไม่ได้</label>
+        <label class="c-quiz-option"><input type="radio" name="q5" value="c"><span class="opt-letter">C</span> ลบตัวแปรทิ้ง</label>
+        <label class="c-quiz-option"><input type="radio" name="q5" value="d"><span class="opt-letter">D</span> เปลี่ยนชนิดเป็น int</label>
+      </div>
+    </div>
+
+    <div style="text-align:center; margin-top:20px;">
+      <button class="c-btn c-btn-success" id="submitQuiz" style="padding:12px 30px; font-size:15px;">✓ ส่งคำตอบ</button>
+    </div>
+
+    <div class="c-quiz-result" id="quizResult"></div>
+  </div>
+
+  <!-- NAV -->
+  <div class="c-lesson-nav">
+    <a href="01-hello-world.html" class="c-lesson-nav-btn">
+      <div class="c-lesson-nav-label">← บทก่อนหน้า</div>
+      <div class="c-lesson-nav-title">หน่วย 1: Hello World</div>
+    </a>
+    <a href="03-input-operators.html" class="c-lesson-nav-btn next disabled" id="nextBtn" title="ทำแบบทดสอบให้ผ่านก่อน">
+      <div class="c-lesson-nav-label">บทถัดไป →</div>
+      <div class="c-lesson-nav-title">หน่วยที่ 3: รับข้อมูล & ตัวดำเนินการ ➕</div>
+    </a>
+  </div>
+
+</div>
+
+<footer class="c-footer">
+  <p>© 2026 Computer Science By <a href="../../index.html">ครูภาณุพงศ์ อุ่นคำ</a> · โรงเรียนบ้านป่ายุบ</p>
+</footer>
+
+<script>
+/* Theme */
+const themeBtn = document.getElementById('themeToggle');
+const savedTheme = localStorage.getItem('clang-theme') || 'light';
+document.documentElement.setAttribute('data-theme', savedTheme);
+themeBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+themeBtn.addEventListener('click', () => {
+  const curr = document.documentElement.getAttribute('data-theme');
+  const next = curr === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('clang-theme', next);
+  themeBtn.textContent = next === 'dark' ? '☀️' : '🌙';
+});
+
+/* Copy code */
+document.querySelectorAll('.code-copy').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const target = document.getElementById(btn.dataset.copy);
+    if (target) {
+      navigator.clipboard.writeText(target.innerText);
+      const orig = btn.textContent;
+      btn.textContent = '✓ คัดลอกแล้ว';
+      setTimeout(() => btn.textContent = orig, 1500);
+    }
+  });
+});
+
+/* Tab in textareas */
+document.querySelectorAll('.c-tryit-editor').forEach(ed => {
+  ed.addEventListener('keydown', (e) => {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const s = ed.selectionStart;
+      const ev = ed.selectionEnd;
+      ed.value = ed.value.substring(0, s) + '    ' + ed.value.substring(ev);
+      ed.selectionStart = ed.selectionEnd = s + 4;
+    }
+  });
+});
+
+/* Save originals for Reset */
+const originals = {};
+document.querySelectorAll('.c-tryit-editor').forEach(ed => {
+  originals[ed.id] = ed.value;
+});
+
+document.querySelectorAll('[data-reset]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const id = btn.dataset.reset;
+    const ed = document.getElementById(id);
+    if (ed && originals[id] !== undefined) {
+      ed.value = originals[id];
+      const out = document.getElementById(id + '-out');
+      if (out) { out.textContent = ''; out.className = 'c-tryit-output'; }
+    }
+  });
+});
+
+/* Run buttons */
+document.querySelectorAll('[data-run]').forEach(btn => {
+  btn.addEventListener('click', () => runTryIt(btn.dataset.run));
+});
+
+function runTryIt(id) {
+  const ed = document.getElementById(id);
+  const out = document.getElementById(id + '-out');
+  if (!ed || !out) return;
+
+  if (typeof window.JSCPP === 'undefined') {
+    out.textContent = '⏳ Engine ยังโหลดไม่เสร็จ — รอสักครู่แล้วลองใหม่';
+    out.className = 'c-tryit-output error';
+    return;
+  }
+
+  const stdinEl = document.getElementById(id + '-stdin');
+  const stdin = stdinEl ? stdinEl.value : '';
+
+  let output = '';
+  out.textContent = '⏳ กำลังรัน...';
+  out.className = 'c-tryit-output';
+
+  const config = {
+    stdio: { write: (s) => { output += s; } },
+    unsigned_overflow: 'warn',
+    maxTimeout: 5000
+  };
+
+  setTimeout(() => {
+    try {
+      const exitCode = window.JSCPP.run(ed.value, stdin, config);
+      out.textContent = output + `\n▸ Process exited with code ${exitCode}`;
+      out.className = 'c-tryit-output success';
+    } catch (err) {
+      out.textContent = (output ? output + '\n\n' : '') + '❌ ข้อผิดพลาด:\n' + (err.message || err.toString());
+      out.className = 'c-tryit-output error';
+    }
+  }, 50);
+}
+
+/* Quiz */
+document.querySelectorAll('.c-quiz-option').forEach(opt => {
+  opt.addEventListener('click', () => {
+    const inp = opt.querySelector('input');
+    const name = inp.name;
+    document.querySelectorAll(`input[name="${name}"]`).forEach(i => {
+      i.closest('.c-quiz-option').classList.remove('selected');
+    });
+    opt.classList.add('selected');
+    inp.checked = true;
+  });
+});
+
+document.getElementById('submitQuiz').addEventListener('click', () => {
+  const questions = document.querySelectorAll('.c-quiz-question');
+  let correctCount = 0;
+
+  questions.forEach(q => {
+    const correctAns = q.dataset.correct;
+    const selected = q.querySelector('input:checked');
+    q.querySelectorAll('.c-quiz-option').forEach(opt => {
+      opt.classList.remove('correct', 'wrong');
+      const val = opt.querySelector('input').value;
+      if (val === correctAns) opt.classList.add('correct');
+      else if (selected && opt.querySelector('input').checked && val !== correctAns) {
+        opt.classList.add('wrong');
+      }
+    });
+    if (selected && selected.value === correctAns) correctCount++;
+  });
+
+  const result = document.getElementById('quizResult');
+  result.classList.add('show');
+  const total = questions.length;
+
+  if (correctCount >= 4) {
+    result.className = 'c-quiz-result show pass';
+    result.innerHTML = `🎉 เก่งมาก! คุณตอบถูก ${correctCount}/${total} ข้อ — ผ่านหน่วยที่ 2 แล้ว!`;
+
+    const p = JSON.parse(localStorage.getItem('clang-progress') || '{}');
+    p[2] = { completed: true, ts: Date.now(), score: correctCount };
+    localStorage.setItem('clang-progress', JSON.stringify(p));
+
+    const badges = JSON.parse(localStorage.getItem('clang-badges') || '[]');
+    if (!badges.includes('variable-master')) {
+      badges.push('variable-master');
+      localStorage.setItem('clang-badges', JSON.stringify(badges));
+    }
+
+    const nb = document.getElementById('nextBtn');
+    if (nb) { nb.classList.remove('disabled'); nb.title = 'ปลดล็อกแล้ว!'; }
+
+    if (typeof confetti !== 'undefined') {
+      confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+    }
+  } else {
+    result.className = 'c-quiz-result show fail';
+    result.innerHTML = `📚 คุณตอบถูก ${correctCount}/${total} ข้อ — ต้องอย่างน้อย 4 ข้อ ลองอ่านบทเรียนแล้วทำใหม่นะ`;
+  }
+
+  result.scrollIntoView({ behavior: 'smooth', block: 'center' });
+});
+
+/* Unlock next button if already passed */
+(() => {
+  const p = JSON.parse(localStorage.getItem('clang-progress') || '{}');
+  if (p[2] && p[2].completed) {
+    const nb = document.getElementById('nextBtn');
+    if (nb) { nb.classList.remove('disabled'); nb.title = 'ปลดล็อกแล้ว!'; }
+  }
+})();
+</script>
+
+</body>
+</html>

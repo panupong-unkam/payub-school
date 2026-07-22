@@ -4750,6 +4750,65 @@ body.dark-mode pre {
     border-color: var(--border);
 }
 
+/* ---- ยกเว้นช่องโค้ดของ RP2040 Simulator (คงสีเดิม) ---- */
+body.dark-mode .code-highlight,
+body.dark-mode .code-editor {
+    background: #1e1e1e !important;
+    color: #d4d4d4 !important;
+}
+
+/* ---- 🔧 Force text visibility ใน RP2040 Simulator (dark mode) ---- */
+/* ปัญหา: elements ใน .lab-screen inherit color ที่กลายเป็นเข้ม บนพื้นเข้ม → มองไม่เห็น */
+body.dark-mode .lab-screen,
+body.dark-mode .lab-screen div,
+body.dark-mode .lab-screen span,
+body.dark-mode .lab-screen p,
+body.dark-mode .lab-screen h1,
+body.dark-mode .lab-screen h2,
+body.dark-mode .lab-screen h3,
+body.dark-mode .lab-screen h4,
+body.dark-mode .lab-screen small,
+body.dark-mode .lab-screen b,
+body.dark-mode .lab-screen strong {
+    color: #f0f6f1 !important;
+}
+
+/* หัวข้อชิ้นส่วน */
+body.dark-mode .lab-parts-title {
+    color: #7dd882 !important;
+}
+
+/* ปุ่มชิ้นส่วน — พื้น + ข้อความ */
+body.dark-mode .lab-part-btn {
+    background: linear-gradient(145deg, #283529, #1f2a23) !important;
+    border-color: #3a4d3f !important;
+    color: #f0f6f1 !important;
+}
+body.dark-mode .lab-part-btn:hover {
+    background: linear-gradient(145deg, #2f4530, #253a2a) !important;
+    border-color: #7dd882 !important;
+}
+body.dark-mode .lab-part-btn .pb-name {
+    color: #f0f6f1 !important;
+}
+
+/* ลิสต์ชิ้นส่วนที่วางแล้ว */
+body.dark-mode .lab-placed-list {
+    color: #c8dccf !important;
+}
+
+/* ยกเว้น token colors ของ syntax highlight (ไม่ให้ทับ) */
+body.dark-mode .code-highlight .tok-kw,
+body.dark-mode .code-highlight .tok-fn,
+body.dark-mode .code-highlight .tok-str,
+body.dark-mode .code-highlight .tok-num,
+body.dark-mode .code-highlight .tok-com,
+body.dark-mode .code-highlight .tok-cls,
+body.dark-mode .code-highlight .tok-op,
+body.dark-mode .code-highlight .tok-pin {
+    color: unset !important;
+}
+
 /* ---- 🔒 LOCK Sidebar เป็นเขียวเข้มเสมอ (ไม่ตาม dark mode variables) ---- */
 body.dark-mode .sidebar,
 body.dark-mode .mobile-header {

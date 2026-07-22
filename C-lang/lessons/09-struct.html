@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#2ECC71">
+<title>หน่วยที่ 9: โครงสร้างข้อมูล (struct) | ภาษา C</title>
+<link rel="icon" type="image/svg+xml" href="../../logo.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Noto+Serif+Thai:wght@400;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../c-style.css">
+<script type="module">
+  try {
+    const mod = await import('https://esm.sh/JSCPP@2.0.9');
+    window.JSCPP = mod.default || mod;
+    window.dispatchEvent(new Event('jscpp-ready'));
+  } catch (e) {
+    console.error('JSCPP load failed:', e);
+    window.dispatchEvent(new Event('jscpp-failed'));
+  }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+
+<header class="c-topbar">
+  <div class="c-topbar-left">
+    <a href="../../index.html" class="c-btn-icon" title="หน้าหลักเว็บไซต์">🏠</a>
+    <a href="../index.html" class="c-btn-icon" title="กลับ Roadmap">←</a>
+    <div class="c-topbar-logo" style="background:linear-gradient(135deg,#2ECC71,#FFCC00);">9</div>
+    <div>
+      <div class="c-topbar-title">หน่วยที่ 9 · โครงสร้างข้อมูล</div>
+      <div class="c-topbar-subtitle">รวมข้อมูลหลายชนิดเป็นก้อนเดียว</div>
+    </div>
+  </div>
+  <div class="c-topbar-right">
+    <button class="c-btn-icon" id="themeToggle" title="สลับธีม">🌙</button>
+    <a href="../playground.html" class="c-btn c-btn-ghost">💻 Playground</a>
+  </div>
+</header>
+
+<!-- LESSON HEADER -->
+<section class="c-lesson-header" style="--unit-color:#2ECC71; background:linear-gradient(135deg,#2ECC71,#1B8B4C);">
+  <div class="c-lesson-header-content">
+    <div class="c-lesson-breadcrumb">
+      <a href="../../index.html">🏠 หน้าหลัก</a> &nbsp;›&nbsp; <a href="../index.html">หลักสูตร C</a> &nbsp;›&nbsp; หน่วยที่ 9
+    </div>
+    <h1 class="c-lesson-title">🏗️ โครงสร้างข้อมูล (struct)</h1>
+    <p class="c-lesson-subtitle">รวมข้อมูลหลายชนิดที่เกี่ยวข้องกันเป็น "ก้อนเดียว" เช่น นักเรียน 1 คน มีชื่อ อายุ และเกรด</p>
+    <div class="c-lesson-meta">
+      <span>⏱️ ใช้เวลา ~55 นาที</span>
+      <span>📖 ระดับ: ขั้นกลาง</span>
+      <span>💻 มีโค้ดให้ลอง</span>
+    </div>
+  </div>
+</section>
+
+<div class="c-container-narrow">
+
+  <!-- จุดประสงค์ -->
+  <div class="c-section">
+    <h2><span class="c-section-icon">🎯</span> สิ่งที่จะได้เรียนรู้ในบทนี้</h2>
+    <div class="c-objectives">
+      <h4>📌 หลังจบบทนี้ คุณจะ:</h4>
+      <ul>
+        <li>เข้าใจปัญหาของการใช้ตัวแปรแยก ๆ กับข้อมูลที่สัมพันธ์กัน</li>
+        <li>ประกาศ <code>struct</code> เพื่อรวมข้อมูลหลายชนิดเป็นชนิดใหม่</li>
+        <li>สร้างตัวแปรจาก struct และเข้าถึงสมาชิกด้วยเครื่องหมาย <code>.</code></li>
+        <li>เข้าใจแนวคิด "หนึ่งเรคคอร์ด" (record) ที่ใช้ในฐานข้อมูลจริง</li>
+        <li>ฝึกแนวคิดเดียวกันด้วยโค้ดที่รันได้ในเบราว์เซอร์</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- หมายเหตุพิเศษ -->
+  <div class="c-warn" style="border-left-color:#F59E0B;">
+    <div class="c-warn-icon">📌</div>
+    <div>
+      <b>สำคัญ — อ่านก่อน!</b> โปรแกรมรันโค้ดในเบราว์เซอร์ของเรา (engine เบา ๆ) <b>ยังไม่รองรับคำสั่ง <code>struct</code></b>
+      ดังนั้นในบทนี้:
+      <ul style="margin:8px 0 0 0;">
+        <li>📘 โค้ด <code>struct</code> ของจริง จะแสดงเป็น <b>"โค้ดอ้างอิง"</b> (กล่องสีเข้ม มีปุ่มคัดลอก) —
+          ให้นำไปรันในคอมไพเลอร์จริง เช่น <a href="https://www.onlinegdb.com/online_c_compiler" target="_blank" rel="noopener"><b>OnlineGDB</b> (คลิก)</a> หรือ Dev-C++</li>
+        <li>🧪 กล่อง <b>Try-it (รันได้)</b> จะใช้เทคนิค <b>"ตัวแปร/อาร์เรย์คู่ขนาน"</b> เพื่อฝึก <b>แนวคิดเดียวกัน</b> ในเบราว์เซอร์</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 1. ปัญหา -->
+  <div class="c-section">
+    <h2><span class="c-section-icon">😵</span> 1. ปัญหา: ข้อมูลที่อยู่ด้วยกัน</h2>
+    <p>
+      สมมติเราเก็บข้อมูลนักเรียน 1 คน ที่มี ชื่อ, อายุ, และเกรด ถ้าใช้ตัวแปรแยก ๆ:
+    </p>
+    <div class="c-code-block">
+      <div class="code-header"><span class="code-lang">C</span></div>
+<pre><span class="c-type">char</span> name1[<span class="c-num">20</span>];  <span class="c-type">int</span> age1;  <span class="c-type">char</span> grade1;
+<span class="c-type">char</span> name2[<span class="c-num">20</span>];  <span class="c-type">int</span> age2;  <span class="c-type">char</span> grade2;
+<span class="c-cmt">// ... มี 30 คน ต้องมี 90 ตัวแปร! ยุ่งมาก</span></pre>
+    </div>
+    <p>
+      พอมีหลายคนก็ยิ่งเละ — ข้อมูลของคนเดียวกันกระจัดกระจาย
+      <b><code>struct</code></b> ช่วยแก้ปัญหานี้ด้วยการ <b>"มัดรวม"</b> ข้อมูลของ 1 คน ไว้เป็นก้อนเดียว
+    </p>
+  </div>
+
+  <!-- 2. struct syntax -->
+  <div class="c-section">
+    <h2><span class="c-section-icon">📦</span> 2. ประกาศ struct (โค้ดอ้างอิง)</h2>
+    <p>สร้าง "แม่แบบ" ของชนิดข้อมูลใหม่ ชื่อ <code>Student</code> ที่มีสมาชิก 3 อย่าง:</p>
+
+    <div class="c-code-block">
+      <div class="code-header">
+        <span class="code-lang">C · โค้ดอ้างอิง (รันในคอมไพเลอร์จริง)</span>
+        <button class="code-copy" data-copy="ref1">📋 คัดลอก</button>
+      </div>
+<pre id="ref1"><span class="c-prep">#include &lt;stdio.h&gt;</span>
+
+<span class="c-kw">struct</span> Student {
+    <span class="c-type">char</span> name[<span class="c-num">20</span>];
+    <span class="c-type">int</span>  age;
+    <span class="c-type">char</span> grade;
+};
+
+<span class="c-type">int</span> <span class="c-fn">main</span>() {
+    <span class="c-kw">struct</span> Student s;
+    <span class="c-fn">strcpy</span>(s.name, <span class="c-str">"Somchai"</span>);
+    s.age = <span class="c-num">14</span>;
+    s.grade = <span class="c-str">'A'</span>;
+
+    <span class="c-fn">printf</span>(<span class="c-str">"Name: %s\n"</span>, s.name);
+    <span class="c-fn">printf</span>(<span class="c-str">"Age: %d\n"</span>, s.age);
+    <span class="c-fn">printf</span>(<span class="c-str">"Grade: %c\n"</span>, s.grade);
+    <span class="c-kw">return</span> <span class="c-num">0</span>;
+}</pre>
+    </div>
+
+    <div class="c-note">
+      <div class="c-note-icon">🔑</div>
+      <div>
+        <b>เข้าถึงสมาชิกด้วยจุด <code>.</code></b> — <code>s.age</code> อ่านว่า "age ของ s"
+        เหมือนพูดว่า "อายุ ของ สมชาย" นั่นเอง
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. struct array -->
+  <div class="c-section">
+    <h2><span class="c-section-icon">👥</span> 3. อาร์เรย์ของ struct (โค้ดอ้างอิง)</h2>
+    <p>พลังจริงของ struct: เก็บนักเรียนหลายคนด้วยอาร์เรย์ของ struct</p>
+
+    <div class="c-code-block">
+      <div class="code-header">
+        <span class="code-lang">C · โค้ดอ้างอิง</span>
+        <button class="code-copy" data-copy="ref2">📋 คัดลอก</button>
+      </div>
+<pre id="ref2"><span class="c-kw">struct</span> Student students[<span class="c-num">3</span>];
+
+students[<span class="c-num">0</span>].age = <span class="c-num">14</span>;
+students[<span class="c-num">1</span>].age = <span class="c-num">15</span>;
+students[<span class="c-num">2</span>].age = <span class="c-num">13</span>;
+
+<span class="c-kw">for</span> (<span class="c-type">int</span> i = <span class="c-num">0</span>; i &lt; <span class="c-num">3</span>; i++) {
+    <span class="c-fn">printf</span>(<span class="c-str">"Student %d age = %d\n"</span>, i, students[i].age);
+}</pre>
+    </div>
+  </div>
+
+  <!-- 4. runnable: parallel vars -->
+  <div class="c-section">
+    <h2><span class="c-section-icon">🧪</span> 4. ฝึกแนวคิดในเบราว์เซอร์ — ตัวแปรคู่ขนาน</h2>
+    <p>
+      ก่อนมี struct โปรแกรมเมอร์ใช้ <b>"ตัวแปรหลายตัวที่จับกลุ่มกัน"</b> แทน 1 เรคคอร์ด
+      กล่องนี้ <b>รันได้จริง</b> — เก็บข้อมูลนักเรียน 1 คนด้วยตัวแปรแยก:
+    </p>
+
+    <div class="c-tryit">
+      <div class="c-tryit-header">
+        <div class="c-tryit-title">🧪 โปรไฟล์นักเรียน (รันได้)</div>
+        <div class="c-tryit-actions">
+          <button class="c-tryit-btn" data-reset="tryit1">↺ Reset</button>
+          <button class="c-tryit-btn btn-run" data-run="tryit1">▶ รัน</button>
+        </div>
+      </div>
+      <textarea class="c-tryit-editor" id="tryit1" spellcheck="false">#include &lt;stdio.h&gt;
+
+int main() {
+    // ข้อมูลของนักเรียน 1 คน (จำลอง 1 record)
+    char name[20] = "Somchai";
+    int  age = 14;
+    char grade = 'A';
+
+    printf("=== Student Profile ===\n");
+    printf("Name : %s\n", name);
+    printf("Age  : %d\n", age);
+    printf("Grade: %c\n", grade);
+    return 0;
+}
+</textarea>
+      <div class="c-tryit-output" id="tryit1-out"></div>
+    </div>
+  </div>
+
+  <!-- 5. runnable: parallel arrays -->
+  <div class="c-section">
+    <h2><span class="c-section-icon">🧪</span> 5. หลายเรคคอร์ด — อาร์เรย์คู่ขนาน (รันได้)</h2>
+    <p>
+      เก็บนักเรียนหลายคนด้วย <b>อาร์เรย์ที่ index ตรงกัน</b>:
+      <code>age[i]</code> กับ <code>grade[i]</code> คือข้อมูลของนักเรียนคนที่ <code>i</code>
+      (นี่คือ "แนวคิดเดียวกับอาร์เรย์ของ struct")
+    </p>
+
+    <div class="c-tryit">
+      <div class="c-tryit-header">
+        <div class="c-tryit-title">🧪 ตารางนักเรียน 3 คน (รันได้)</div>
+        <div class="c-tryit-actions">
+          <button class="c-tryit-btn" data-reset="tryit2">↺ Reset</button>
+          <button class="c-tryit-btn btn-run" data-run="tryit2">▶ รัน</button>
+        </div>
+      </div>
+      <textarea class="c-tryit-editor" id="tryit2" spellcheck="false">#include &lt;stdio.h&gt;
+
+int main() {
+    // index เดียวกัน = นักเรียนคนเดียวกัน
+    int  id[3]    = {1, 2, 3};
+    int  age[3]   = {14, 15, 13};
+    char grade[3] = {'A', 'B', 'A'};
+
+    printf("ID  Age  Grade\n");
+    for (int i = 0; i < 3; i++) {
+        printf("%d   %d   %c\n", id[i], age[i], grade[i]);
+    }
+    return 0;
+}
+</textarea>
+      <div class="c-tryit-output" id="tryit2-out"></div>
+    </div>
+
+    <div class="c-tip">
+      <div class="c-tip-icon">💡</div>
+      <div>
+        <code>struct</code> ทำให้โค้ดนี้อ่านง่ายขึ้นมาก (เขียน <code>student[i].age</code> แทน <code>age[i]</code>)
+        แต่ <b>แนวคิดเบื้องหลังเหมือนกัน</b> — มัดข้อมูลของ 1 คนไว้ด้วยกัน
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. แบบฝึก -->
+  <div class="c-section">
+    <h2><span class="c-section-icon">✏️</span> 6. แบบฝึกหัด</h2>
+
+    <!-- Easy -->
+    <div class="c-exercise">
+      <div class="c-exercise-header">
+        <span class="c-exercise-badge level-easy">⭐ ง่าย</span>
+        <span class="c-exercise-title">โจทย์ที่ 1: การ์ดหนังสือ</span>
+      </div>
+      <p>
+        จำลอง 1 เรคคอร์ด "หนังสือ" ด้วยตัวแปรแยก: <code>title</code> (char[]), <code>pages</code> (int), <code>price</code> (float)
+        แล้วพิมพ์ข้อมูลออกมาให้สวยงาม
+      </p>
+
+      <div class="c-tryit">
+        <div class="c-tryit-header">
+          <div class="c-tryit-title">💻 พื้นที่เขียนโค้ด (รันได้)</div>
+          <div class="c-tryit-actions">
+            <button class="c-tryit-btn" data-reset="ex1ed">↺ Reset</button>
+            <button class="c-tryit-btn btn-run" data-run="ex1ed">▶ รัน</button>
+          </div>
+        </div>
+        <textarea class="c-tryit-editor" id="ex1ed" spellcheck="false">#include &lt;stdio.h&gt;
+
+int main() {
+    char title[30] = "C Programming";
+    int pages = 250;
+    float price = 199.0f;
+    // พิมพ์ Title, Pages, Price
+
+    return 0;
+}
+</textarea>
+        <div class="c-tryit-output" id="ex1ed-out"></div>
+      </div>
+    </div>
+
+    <!-- Medium -->
+    <div class="c-exercise">
+      <div class="c-exercise-header">
+        <span class="c-exercise-badge level-medium">⭐⭐ ปานกลาง</span>
+        <span class="c-exercise-title">โจทย์ที่ 2: หาคนอายุมากที่สุด</span>
+      </div>
+      <p>
+        มีนักเรียน 4 คน เก็บอายุใน <code>age[4]</code> และรหัสใน <code>id[4]</code> (index ตรงกัน)
+        หาว่านักเรียน <b>รหัสใด</b> อายุมากที่สุด แล้วพิมพ์ออกมา
+      </p>
+
+      <div class="c-tryit">
+        <div class="c-tryit-header">
+          <div class="c-tryit-title">💻 พื้นที่เขียนโค้ด (รันได้)</div>
+          <div class="c-tryit-actions">
+            <button class="c-tryit-btn" data-reset="ex2ed">↺ Reset</button>
+            <button class="c-tryit-btn btn-run" data-run="ex2ed">▶ รัน</button>
+          </div>
+        </div>
+        <textarea class="c-tryit-editor" id="ex2ed" spellcheck="false">#include &lt;stdio.h&gt;
+
+int main() {
+    int id[4]  = {101, 102, 103, 104};
+    int age[4] = {14, 16, 13, 15};
+
+    int idx = 0;   // ตำแหน่งของคนอายุมากสุด
+    // for (int i = 1; i < 4; i++)
+    //     if (age[i] > age[idx]) idx = i;
+
+    printf("Oldest ID = %d [age %d]\n", id[idx], age[idx]);
+    return 0;
+}
+</textarea>
+        <div class="c-tryit-output" id="ex2ed-out"></div>
+      </div>
+    </div>
+
+    <!-- Hard -->
+    <div class="c-exercise">
+      <div class="c-exercise-header">
+        <span class="c-exercise-badge level-hard">⭐⭐⭐ ท้าทาย</span>
+        <span class="c-exercise-title">โจทย์ที่ 3: เขียน struct ของจริง</span>
+      </div>
+      <p>
+        เขียนโปรแกรม <b>struct ของจริง</b> ชื่อ <code>Point</code> ที่มีสมาชิก <code>x</code> และ <code>y</code>
+        สร้างจุด (3, 4) แล้วพิมพ์ออกมาเป็น <code>(3, 4)</code>
+      </p>
+      <p>
+        💡 กล่องนี้เป็น <b>"โค้ดอ้างอิง"</b> เขียนแล้วนำไปรันที่
+        <a href="https://www.onlinegdb.com/online_c_compiler" target="_blank" rel="noopener"><b>OnlineGDB</b></a>
+        (engine ในเบราว์เซอร์รัน struct ไม่ได้)
+      </p>
+
+      <div class="c-code-block">
+        <div class="code-header">
+          <span class="code-lang">C · เขียนแล้วรันที่ OnlineGDB</span>
+          <button class="code-copy" data-copy="ex3ref">📋 คัดลอก</button>
+        </div>
+<pre id="ex3ref">#include &lt;stdio.h&gt;
+
+struct Point {
+    int x;
+    int y;
+};
+
+int main() {
+    struct Point p;
+    p.x = 3;
+    p.y = 4;
+    printf("(%d, %d)\n", p.x, p.y);
+    return 0;
+}</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="c-quiz" id="quiz">
+    <div class="c-quiz-header">
+      <h3>📝 แบบทดสอบท้ายบท</h3>
+      <p style="color:var(--c-text-muted);">ตอบให้ถูก 4 ใน 5 ข้อ เพื่อปลดล็อกบทถัดไป</p>
+    </div>
+
+    <div class="c-quiz-question" data-correct="b">
+      <div class="c-quiz-question-text"><span class="q-num">1</span><code>struct</code> มีไว้เพื่ออะไร?</div>
+      <div class="c-quiz-options">
+        <label class="c-quiz-option"><input type="radio" name="q1" value="a"><span class="opt-letter">A</span> วนซ้ำคำสั่ง</label>
+        <label class="c-quiz-option"><input type="radio" name="q1" value="b"><span class="opt-letter">B</span> รวมข้อมูลหลายชนิดเป็นก้อนเดียว</label>
+        <label class="c-quiz-option"><input type="radio" name="q1" value="c"><span class="opt-letter">C</span> รับข้อมูลจากผู้ใช้</label>
+        <label class="c-quiz-option"><input type="radio" name="q1" value="d"><span class="opt-letter">D</span> คำนวณเลข</label>
+      </div>
+    </div>
+
+    <div class="c-quiz-question" data-correct="c">
+      <div class="c-quiz-question-text"><span class="q-num">2</span>เข้าถึงสมาชิกของ struct ใช้เครื่องหมายใด?</div>
+      <div class="c-quiz-options">
+        <label class="c-quiz-option"><input type="radio" name="q2" value="a"><span class="opt-letter">A</span> <code>-></code></label>
+        <label class="c-quiz-option"><input type="radio" name="q2" value="b"><span class="opt-letter">B</span> <code>:</code></label>
+        <label class="c-quiz-option"><input type="radio" name="q2" value="c"><span class="opt-letter">C</span> <code>.</code> (จุด)</label>
+        <label class="c-quiz-option"><input type="radio" name="q2" value="d"><span class="opt-letter">D</span> <code>#</code></label>
+      </div>
+    </div>
+
+    <div class="c-quiz-question" data-correct="a">
+      <div class="c-quiz-question-text"><span class="q-num">3</span>จากโค้ด <code>struct Student s; s.age = 14;</code> — <code>age</code> เรียกว่าอะไร?</div>
+      <div class="c-quiz-options">
+        <label class="c-quiz-option"><input type="radio" name="q3" value="a"><span class="opt-letter">A</span> สมาชิก (member) ของ struct</label>
+        <label class="c-quiz-option"><input type="radio" name="q3" value="b"><span class="opt-letter">B</span> ฟังก์ชัน</label>
+        <label class="c-quiz-option"><input type="radio" name="q3" value="c"><span class="opt-letter">C</span> ลูป</label>
+        <label class="c-quiz-option"><input type="radio" name="q3" value="d"><span class="opt-letter">D</span> พอยน์เตอร์</label>
+      </div>
+    </div>
+
+    <div class="c-quiz-question" data-correct="d">
+      <div class="c-quiz-question-text"><span class="q-num">4</span>ข้อมูล "นักเรียน 1 คน" ที่มีชื่อ อายุ เกรด รวมกัน เรียกว่าอะไร?</div>
+      <div class="c-quiz-options">
+        <label class="c-quiz-option"><input type="radio" name="q4" value="a"><span class="opt-letter">A</span> ลูป</label>
+        <label class="c-quiz-option"><input type="radio" name="q4" value="b"><span class="opt-letter">B</span> เงื่อนไข</label>
+        <label class="c-quiz-option"><input type="radio" name="q4" value="c"><span class="opt-letter">C</span> ฟังก์ชัน</label>
+        <label class="c-quiz-option"><input type="radio" name="q4" value="d"><span class="opt-letter">D</span> เรคคอร์ด (record)</label>
+      </div>
+    </div>
+
+    <div class="c-quiz-question" data-correct="b">
+      <div class="c-quiz-question-text"><span class="q-num">5</span>เก็บนักเรียน 30 คนที่มีข้อมูลเหมือนกัน ควรใช้อะไร?</div>
+      <div class="c-quiz-options">
+        <label class="c-quiz-option"><input type="radio" name="q5" value="a"><span class="opt-letter">A</span> ตัวแปรแยก 90 ตัว</label>
+        <label class="c-quiz-option"><input type="radio" name="q5" value="b"><span class="opt-letter">B</span> อาร์เรย์ของ struct</label>
+        <label class="c-quiz-option"><input type="radio" name="q5" value="c"><span class="opt-letter">C</span> ตัวแปร char 1 ตัว</label>
+        <label class="c-quiz-option"><input type="radio" name="q5" value="d"><span class="opt-letter">D</span> ไม่ต้องเก็บ</label>
+      </div>
+    </div>
+
+    <div style="text-align:center; margin-top:20px;">
+      <button class="c-btn c-btn-success" id="submitQuiz" style="padding:12px 30px; font-size:15px;">✓ ส่งคำตอบ</button>
+    </div>
+
+    <div class="c-quiz-result" id="quizResult"></div>
+  </div>
+
+  <!-- NAV -->
+  <div class="c-lesson-nav">
+    <a href="08-pointers.html" class="c-lesson-nav-btn">
+      <div class="c-lesson-nav-label">← บทก่อนหน้า</div>
+      <div class="c-lesson-nav-title">หน่วย 8: พอยน์เตอร์</div>
+    </a>
+    <a href="10-file-project.html" class="c-lesson-nav-btn next disabled" id="nextBtn" title="ทำแบบทดสอบให้ผ่านก่อน">
+      <div class="c-lesson-nav-label">บทถัดไป →</div>
+      <div class="c-lesson-nav-title">หน่วยที่ 10: ไฟล์ & โปรเจกต์จบ 🎓</div>
+    </a>
+  </div>
+
+</div>
+
+<footer class="c-footer">
+  <p>© 2026 Computer Science By <a href="../../index.html">ครูภาณุพงศ์ อุ่นคำ</a> · โรงเรียนบ้านป่ายุบ</p>
+</footer>
+
+<script>
+/* Theme */
+const themeBtn = document.getElementById('themeToggle');
+const savedTheme = localStorage.getItem('clang-theme') || 'light';
+document.documentElement.setAttribute('data-theme', savedTheme);
+themeBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+themeBtn.addEventListener('click', () => {
+  const curr = document.documentElement.getAttribute('data-theme');
+  const next = curr === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('clang-theme', next);
+  themeBtn.textContent = next === 'dark' ? '☀️' : '🌙';
+});
+
+/* Copy code */
+document.querySelectorAll('.code-copy').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const target = document.getElementById(btn.dataset.copy);
+    if (target) {
+      navigator.clipboard.writeText(target.innerText);
+      const orig = btn.textContent;
+      btn.textContent = '✓ คัดลอกแล้ว';
+      setTimeout(() => btn.textContent = orig, 1500);
+    }
+  });
+});
+
+/* Tab in textareas (editor only) */
+document.querySelectorAll('.c-tryit-editor').forEach(ed => {
+  ed.addEventListener('keydown', (e) => {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const s = ed.selectionStart;
+      const ev = ed.selectionEnd;
+      ed.value = ed.value.substring(0, s) + '    ' + ed.value.substring(ev);
+      ed.selectionStart = ed.selectionEnd = s + 4;
+    }
+  });
+});
+
+/* Save originals for Reset (editors + stdin) */
+const originals = {};
+document.querySelectorAll('.c-tryit-editor, .c-tryit-stdin').forEach(ed => {
+  originals[ed.id] = ed.value;
+});
+
+document.querySelectorAll('[data-reset]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const id = btn.dataset.reset;
+    const ed = document.getElementById(id);
+    if (ed && originals[id] !== undefined) ed.value = originals[id];
+    const sid = id + '-stdin';
+    const sed = document.getElementById(sid);
+    if (sed && originals[sid] !== undefined) sed.value = originals[sid];
+    const out = document.getElementById(id + '-out');
+    if (out) { out.textContent = ''; out.className = 'c-tryit-output'; }
+  });
+});
+
+/* Run buttons */
+document.querySelectorAll('[data-run]').forEach(btn => {
+  btn.addEventListener('click', () => runTryIt(btn.dataset.run));
+});
+
+function runTryIt(id) {
+  const ed = document.getElementById(id);
+  const out = document.getElementById(id + '-out');
+  if (!ed || !out) return;
+
+  if (typeof window.JSCPP === 'undefined') {
+    out.textContent = '⏳ Engine ยังโหลดไม่เสร็จ — รอสักครู่แล้วลองใหม่';
+    out.className = 'c-tryit-output error';
+    return;
+  }
+
+  const stdinEl = document.getElementById(id + '-stdin');
+  const stdin = stdinEl ? stdinEl.value : '';
+
+  let output = '';
+  out.textContent = '⏳ กำลังรัน...';
+  out.className = 'c-tryit-output';
+
+  const config = {
+    stdio: { write: (s) => { output += s; } },
+    unsigned_overflow: 'warn',
+    maxTimeout: 5000
+  };
+
+  setTimeout(() => {
+    try {
+      const exitCode = window.JSCPP.run(ed.value, stdin, config);
+      out.textContent = output + `\n▸ Process exited with code ${exitCode}`;
+      out.className = 'c-tryit-output success';
+    } catch (err) {
+      out.textContent = (output ? output + '\n\n' : '') + '❌ ข้อผิดพลาด:\n' + (err.message || err.toString());
+      out.className = 'c-tryit-output error';
+    }
+  }, 50);
+}
+
+/* Quiz */
+document.querySelectorAll('.c-quiz-option').forEach(opt => {
+  opt.addEventListener('click', () => {
+    const inp = opt.querySelector('input');
+    const name = inp.name;
+    document.querySelectorAll(`input[name="${name}"]`).forEach(i => {
+      i.closest('.c-quiz-option').classList.remove('selected');
+    });
+    opt.classList.add('selected');
+    inp.checked = true;
+  });
+});
+
+document.getElementById('submitQuiz').addEventListener('click', () => {
+  const questions = document.querySelectorAll('.c-quiz-question');
+  let correctCount = 0;
+
+  questions.forEach(q => {
+    const correctAns = q.dataset.correct;
+    const selected = q.querySelector('input:checked');
+    q.querySelectorAll('.c-quiz-option').forEach(opt => {
+      opt.classList.remove('correct', 'wrong');
+      const val = opt.querySelector('input').value;
+      if (val === correctAns) opt.classList.add('correct');
+      else if (selected && opt.querySelector('input').checked && val !== correctAns) {
+        opt.classList.add('wrong');
+      }
+    });
+    if (selected && selected.value === correctAns) correctCount++;
+  });
+
+  const result = document.getElementById('quizResult');
+  result.classList.add('show');
+  const total = questions.length;
+
+  if (correctCount >= 4) {
+    result.className = 'c-quiz-result show pass';
+    result.innerHTML = `🎉 เก่งมาก! คุณตอบถูก ${correctCount}/${total} ข้อ — ผ่านหน่วยที่ 9 แล้ว!`;
+
+    const p = JSON.parse(localStorage.getItem('clang-progress') || '{}');
+    p[9] = { completed: true, ts: Date.now(), score: correctCount };
+    localStorage.setItem('clang-progress', JSON.stringify(p));
+
+    const badges = JSON.parse(localStorage.getItem('clang-badges') || '[]');
+    if (!badges.includes('struct-architect')) {
+      badges.push('struct-architect');
+      localStorage.setItem('clang-badges', JSON.stringify(badges));
+    }
+
+    const nb = document.getElementById('nextBtn');
+    if (nb) { nb.classList.remove('disabled'); nb.title = 'ปลดล็อกแล้ว!'; }
+
+    if (typeof confetti !== 'undefined') {
+      confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+    }
+  } else {
+    result.className = 'c-quiz-result show fail';
+    result.innerHTML = `📚 คุณตอบถูก ${correctCount}/${total} ข้อ — ต้องอย่างน้อย 4 ข้อ ลองอ่านบทเรียนแล้วทำใหม่นะ`;
+  }
+
+  result.scrollIntoView({ behavior: 'smooth', block: 'center' });
+});
+
+/* Unlock next button if already passed */
+(() => {
+  const p = JSON.parse(localStorage.getItem('clang-progress') || '{}');
+  if (p[9] && p[9].completed) {
+    const nb = document.getElementById('nextBtn');
+    if (nb) { nb.classList.remove('disabled'); nb.title = 'ปลดล็อกแล้ว!'; }
+  }
+})();
+</script>
+
+</body>
+</html>
