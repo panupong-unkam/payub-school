@@ -4074,7 +4074,7 @@ servo = PWM(Pin(12))  # S1 Connector  Signal (GP12)
 servo.freq(50) # ความถี่ 50 Hz สำหรับ Servo
 
 while True:
-    # กวาด 0องศา → 0องศา → 0องศา → ลูป
+    # กวาด 0องศา - 0องศา - 0องศา - ลูป
     servo.duty_u16(1638)   # 0องศา
     time.sleep(1)
     servo.duty_u16(4915)   # 90องศา
