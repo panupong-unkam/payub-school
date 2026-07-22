@@ -4075,11 +4075,11 @@ servo.freq(50)             # ความถี่ 50 Hz สำหรับ Serv
 
 while True:
     # กวาด 0° → 90° → 180° → ลูป
-    servo.duty_u16(1638)   # 0°
+    servo.duty_u16(1638)   # 0องศา
     time.sleep(1)
-    servo.duty_u16(4915)   # 90°
+    servo.duty_u16(4915)   # 90องศา
     time.sleep(1)
-    servo.duty_u16(8192)   # 180°
+    servo.duty_u16(8192)   # 180องศา
     time.sleep(1)
 `,
         m7: `from machine import Pin, ADC
@@ -4103,7 +4103,7 @@ import time
 dht = Pin(4)               # GROVE 3  Signal1 (DHT11)
 
 while True:
-    temp = dht.read_temp()       # อุณหภูมิ (°C)
+    temp = dht.read_temp()       # อุณหภูมิ (C)
     hum  = dht.read_humidity()   # ความชื้น (%)
     print("Temp:", temp, "C  Humidity:", hum, "%")
     time.sleep(2)
@@ -4147,10 +4147,10 @@ while True:
     print("Distance:", distance, "cm")
     if distance < 10:
         buzzer.on()
-        servo.duty_u16(4915)   # หมุน 90° หลบสิ่งกีดขวาง
+        servo.duty_u16(4915)   # หมุน 90องศา หลบสิ่งกีดขวาง
     else:
         buzzer.off()
-        servo.duty_u16(1638)   # กลับ 0°
+        servo.duty_u16(1638)   # กลับ 0องศา
     time.sleep(0.3)
 `
     },
@@ -4246,11 +4246,11 @@ void setup() {
 }
 
 void loop() {
-    myServo.write(0);      // 0°
+    myServo.write(0);      // 0องศา
     delay(1000);
-    myServo.write(90);     // 90°
+    myServo.write(90);     // 90องศา
     delay(1000);
-    myServo.write(180);    // 180°
+    myServo.write(180);    // 180องศา
     delay(1000);
 }
 `,
