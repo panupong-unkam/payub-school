@@ -4071,7 +4071,7 @@ while True:
 import time
 
 servo = PWM(Pin(12))  # S1 Connector  Signal (GP12)
-servo.freq(50)      # ความถี่ 50 Hz สำหรับ Servo
+servo.freq(50) # ความถี่ 50 Hz สำหรับ Servo
 
 while True:
     # กวาด 0องศา → 0องศา → 0องศา → ลูป
