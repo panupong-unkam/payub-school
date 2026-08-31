@@ -12,7 +12,6 @@
   "videos": [
     {
       "youtubeId": "nYShO3NtGWw",
-      "youtubeId": "7HqS00-NOYE",
       "title": "วิดีโอแนะนำการเรียน Computer Science",
       "description": "เรียนรู้พื้นฐานวิทยาการคำนวณ Python และหุ่นยนต์ กับครูภาณุพงศ์"
     },
@@ -26,6 +25,12 @@
       "title": "🏆 Move The Can — WRG 2026",
       "description": "ผลงานการแข่งขันหุ่นยนต์ของนักเรียนโรงเรียนบ้านป่ายุบ"
     }
+    
+  "featuredVideo": {
+    "youtubeId": "7HqS00-NOYE",
+      "title": "🏆 Lift The Cube — WRG 2026",
+      "description": "ผลงานการแข่งขันหุ่นยนต์ของนักเรียนโรงเรียนบ้านป่ายุบ"
+  },
   ],
 
   "images": [
