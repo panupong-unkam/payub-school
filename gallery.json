@@ -11,24 +11,19 @@
 
   "videos": [
     {
-      "youtubeId": "dQw4w9WgXcQ",
-      "title": "สอน Python บทที่ 1 — Variables",
-      "description": "พื้นฐานตัวแปรในภาษา Python"
+      "youtubeId": "7HqS00-NOYE",
+      "title": "🏆 Lift The Cube — WRG 2026",
+      "description": "ผลงานการแข่งขันหุ่นยนต์ของนักเรียนโรงเรียนบ้านป่ายุบ"
     },
     {
-      "youtubeId": "9bZkp7q19f0",
-      "title": "สอน Python บทที่ 2 — Loops",
-      "description": "การวนซ้ำด้วย for และ while"
+      "youtubeId": "CX0ZO7LTri0",
+      "title": "🏆 The Ring — RP2026",
+      "description": "ผลงานการแข่งขันหุ่นยนต์ของนักเรียนโรงเรียนบ้านป่ายุบ"
     },
     {
-      "youtubeId": "kJQP7kiw5Fk",
-      "title": "หุ่นยนต์ RP2040 — บทเรียนแรก",
-      "description": "เริ่มต้นกับบอร์ด Raspberry Pi Pico"
-    },
-    {
-      "youtubeId": "fRh_vgS2dFE",
-      "title": "Circuit Lab — ต่อวงจร LED",
-      "description": "ฝึกต่อวงจรไฟฟ้าเบื้องต้น"
+      "youtubeId": "TKuKjxNQVvU",
+      "title": "🏆 Move The Can — WRG 2026",
+      "description": "ผลงานการแข่งขันหุ่นยนต์ของนักเรียนโรงเรียนบ้านป่ายุบ"
     }
   ],
 
