@@ -6,13 +6,14 @@
 <meta name="theme-color" content="#00599C">
 <title>เรียนภาษา C ตั้งแต่ศูนย์ | ครูภาณุพงศ์ อุ่นคำ</title>
 <meta name="description" content="หลักสูตรเรียนภาษา C สำหรับนักเรียนมัธยมต้น เริ่มจากศูนย์ ไม่ต้องมีพื้นฐาน เรียนเขียนโค้ด สร้างฟังก์ชัน และทำโปรเจกต์จริง โดยครูภาณุพงศ์ อุ่นคำ">
-<link rel="icon" type="image/svg+xml" href="../logo.svg">
+<link rel="icon" type="image/svg+xml" href="../Logo.svg">
 <link rel="manifest" href="../manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Noto+Serif+Thai:wght@400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="c-style.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="clang-auth.js"></script>
 </head>
 <body>
 
@@ -30,6 +31,9 @@
     <button class="c-btn-icon" id="themeToggle" title="สลับธีม">🌙</button>
     <a href="playground.html" class="c-btn c-btn-ghost" title="ลองเขียนโค้ดเอง">
       <span>💻</span> Playground
+    </a>
+    <a href="teacher.html" class="c-btn c-btn-ghost" id="teacherLink" style="display:none;" title="ดูความก้าวหน้านักเรียนรายคน">
+      <span>📊</span> ห้องครู
     </a>
     <button class="c-btn" id="loginBtn">
       <span>👤</span> <span id="loginLabel">เข้าสู่ระบบ</span>
@@ -345,28 +349,7 @@
   <p style="margin-top:6px;">หลักสูตรภาษา C สำหรับมัธยมต้น · ไม่เก็บค่าใช้จ่าย</p>
 </footer>
 
-<!-- LOGIN MODAL -->
-<div class="c-modal-backdrop" id="loginModal">
-  <div class="c-modal">
-    <h3>🔐 เข้าสู่ระบบ</h3>
-    <p>ใส่ชื่อ-นามสกุล และเลขประจำตัว เพื่อบันทึกความก้าวหน้า</p>
-    <input class="c-modal-input" id="loginName" placeholder="ชื่อ-นามสกุล (เช่น สมชาย ใจดี)">
-    <input class="c-modal-input" id="loginCode" placeholder="เลขประจำตัวนักเรียน">
-    <select class="c-modal-input" id="loginClass">
-      <option value="">เลือกชั้นเรียน...</option>
-      <option value="ม.1/1">ม.1/1</option>
-      <option value="ม.1/2">ม.1/2</option>
-      <option value="ม.2/1">ม.2/1</option>
-      <option value="ม.2/2">ม.2/2</option>
-      <option value="ม.3/1">ม.3/1</option>
-      <option value="ม.3/2">ม.3/2</option>
-    </select>
-    <div class="c-modal-actions">
-      <button class="c-btn c-btn-ghost" id="loginCancel">ยกเลิก</button>
-      <button class="c-btn c-btn-success" id="loginSubmit">เข้าสู่ระบบ</button>
-    </div>
-  </div>
-</div>
+<!-- LOGIN MODAL — สร้างโดย clang-auth.js (CLANG.showLoginModal) ใช้บัญชีเดียวกับเว็บหลัก -->
 
 <!-- TOAST -->
 <div class="c-toast" id="toast">
@@ -392,46 +375,31 @@ themeBtn.addEventListener('click', () => {
 });
 
 /* ============================================
-   TOAST
+   TOAST — ตัวจริงอยู่ใน clang-auth.js
    ============================================ */
 function toast(msg, type = 'success') {
-  const t = document.getElementById('toast');
-  const icons = { success: '✓', error: '✕', info: 'ℹ️' };
-  document.getElementById('toastIcon').textContent = icons[type] || '✓';
-  document.getElementById('toastMsg').textContent = msg;
-  t.className = 'c-toast show ' + (type === 'success' ? '' : type);
-  setTimeout(() => t.classList.remove('show'), 3000);
+  CLANG.toast(msg, type);
 }
 
 /* ============================================
-   PROGRESS — LocalStorage Fallback
-   (จะใช้ Supabase หากครูตั้งค่า credentials)
+   PROGRESS — เก็บที่ Supabase ผูกกับ ID นักเรียน
+   (localStorage เป็นแค่สำเนาสำรองตอนออฟไลน์)
    ============================================ */
-const TOTAL_UNITS = 11;
-
-function getProgress() {
-  return JSON.parse(localStorage.getItem('clang-progress') || '{}');
-}
-
-function setProgress(unit) {
-  const p = getProgress();
-  p[unit] = { completed: true, ts: Date.now() };
-  localStorage.setItem('clang-progress', JSON.stringify(p));
-  renderProgress();
-}
-
-function getBadges() {
-  return JSON.parse(localStorage.getItem('clang-badges') || '[]');
-}
+const TOTAL_UNITS = CLANG.TOTAL_UNITS;   // 11 หน่วย (0..10)
 
 function renderProgress() {
-  const p = getProgress();
-  const done = Object.keys(p).length;
-  const pct = Math.round((done / TOTAL_UNITS) * 100);
+  const isTeacher = CLANG.isTeacher();
+  const done = CLANG.completedCount();
+  const pct  = Math.round((done / TOTAL_UNITS) * 100);
+
   document.getElementById('myProgress').textContent = pct + '%';
   document.getElementById('progressFill').style.width = pct + '%';
+
   const detail = document.getElementById('progressDetail');
-  if (done === 0) {
+  if (isTeacher) {
+    detail.innerHTML = '👨‍🏫 <b>โหมดครู</b> — ปลดล็อกทุกหน่วยแล้ว เปิดดูบทไหนก่อนก็ได้ ' +
+                       'และคะแนนที่ครูทดลองทำจะไม่ถูกบันทึกลงระบบ';
+  } else if (done === 0) {
     detail.textContent = 'ยังไม่เริ่มเรียน — คลิก "เริ่มเรียนเลย" เพื่อเริ่มต้น';
   } else if (done === TOTAL_UNITS) {
     detail.innerHTML = '🎉 <b>ยินดีด้วย!</b> คุณเรียนจบหลักสูตรแล้ว';
@@ -439,101 +407,85 @@ function renderProgress() {
     detail.textContent = `เรียนไปแล้ว ${done} จาก ${TOTAL_UNITS} หน่วย (เหลืออีก ${TOTAL_UNITS - done} หน่วย)`;
   }
 
-  // unlock/check units
+  /* ปลด/ใส่ล็อกแต่ละหน่วย — ครูปลดหมดทุกหน่วย */
   document.querySelectorAll('.c-unit').forEach(el => {
     const u = el.dataset.unit;
-    if (p[u]?.completed) {
-      el.classList.add('completed');
-      el.classList.remove('locked');
+
+    /* จำไว้ว่าเดิมหน่วยนี้ล็อกไว้ไหม — หน่วย 0 กับ 1 เปิดให้ตั้งแต่ต้น */
+    if (el.dataset.lockedByDefault === undefined) {
+      el.dataset.lockedByDefault = el.classList.contains('locked') ? '1' : '0';
     }
-    // unlock next unit
-    const prevUnit = parseInt(u) - 1;
-    if (prevUnit < 0 || p[prevUnit]?.completed) {
-      el.classList.remove('locked');
-    }
-    // hide lock tag once unit is unlocked
-    if (!el.classList.contains('locked')) {
-      const lockTag = el.querySelector('.tag-lock');
-      if (lockTag) lockTag.style.display = 'none';
-    }
+    const openFromStart = el.dataset.lockedByDefault === '0';
+    const unlocked = isTeacher || openFromStart || CLANG.isDone(parseInt(u, 10) - 1);
+
+    el.classList.toggle('completed', CLANG.isDone(u));
+    el.classList.toggle('locked', !unlocked);
+
+    const lockTag = el.querySelector('.tag-lock');
+    if (lockTag) lockTag.style.display = unlocked ? 'none' : '';
   });
 
-  // badges
-  const badges = getBadges();
+  /* เหรียญตรา */
+  const badges = CLANG.getBadges();
   document.querySelectorAll('.c-badge').forEach(b => {
-    if (badges.includes(b.dataset.badge)) b.classList.add('earned');
+    b.classList.toggle('earned', badges.includes(b.dataset.badge));
   });
+
+  /* ปุ่มเข้าห้องครู */
+  const tLink = document.getElementById('teacherLink');
+  if (tLink) tLink.style.display = isTeacher ? '' : 'none';
 }
 
-document.getElementById('resetProgressBtn').addEventListener('click', () => {
-  if (confirm('ต้องการล้างความก้าวหน้าทั้งหมดใช่ไหม?')) {
-    localStorage.removeItem('clang-progress');
-    localStorage.removeItem('clang-badges');
-    renderProgress();
-    toast('ล้างความก้าวหน้าแล้ว', 'info');
+document.getElementById('resetProgressBtn').addEventListener('click', async () => {
+  if (CLANG.isTeacher()) {
+    toast('โหมดครูไม่มีความก้าวหน้าให้ล้าง', 'info');
+    return;
   }
+  if (!confirm('ต้องการล้างความก้าวหน้าทั้งหมดใช่ไหม?\n(ข้อมูลบนระบบของครูจะถูกลบด้วย)')) return;
+  await CLANG.resetProgress();
+  toast('ล้างความก้าวหน้าแล้ว', 'info');
 });
 
+/* วาดครั้งแรกจากสำเนาสำรอง แล้ววาดซ้ำเมื่อข้อมูลจริงมาถึง */
 renderProgress();
+window.addEventListener('clang-progress-updated', renderProgress);
 
 /* ============================================
-   LOGIN / USER
+   LOGIN / USER — ใช้บัญชีเดียวกับเว็บหลัก
    ============================================ */
-const loginBtn = document.getElementById('loginBtn');
+const loginBtn   = document.getElementById('loginBtn');
 const loginLabel = document.getElementById('loginLabel');
-const loginModal = document.getElementById('loginModal');
-
-function getUser() {
-  return JSON.parse(localStorage.getItem('clang-user') || 'null');
-}
 
 function refreshUser() {
-  const u = getUser();
+  const u = CLANG.getUser();
   if (u) {
-    loginLabel.textContent = u.name.split(' ')[0];
-    loginBtn.title = `${u.name} · ${u.cls}`;
+    const name = CLANG.displayName() || '';
+    loginLabel.textContent = name.split(' ')[0] || 'ออกจากระบบ';
+    loginBtn.title = CLANG.isTeacher()
+      ? `${name} · ครู`
+      : `${name} · ${u.class_level || '-'} เลขที่ ${u.student_no || '-'}`;
   } else {
     loginLabel.textContent = 'เข้าสู่ระบบ';
+    loginBtn.title = 'เข้าสู่ระบบเพื่อบันทึกความก้าวหน้า';
   }
+  renderProgress();
 }
 
 loginBtn.addEventListener('click', () => {
-  const u = getUser();
+  const u = CLANG.getUser();
   if (u) {
-    if (confirm(`ออกจากระบบ "${u.name}"?`)) {
-      localStorage.removeItem('clang-user');
+    if (confirm(`ออกจากระบบ "${CLANG.displayName()}"?`)) {
+      CLANG.logout();
       refreshUser();
       toast('ออกจากระบบแล้ว', 'info');
     }
   } else {
-    loginModal.classList.add('show');
+    CLANG.showLoginModal();
   }
-});
-
-document.getElementById('loginCancel').addEventListener('click', () => {
-  loginModal.classList.remove('show');
-});
-
-document.getElementById('loginSubmit').addEventListener('click', () => {
-  const name = document.getElementById('loginName').value.trim();
-  const code = document.getElementById('loginCode').value.trim();
-  const cls = document.getElementById('loginClass').value;
-  if (!name || !code || !cls) {
-    toast('กรุณากรอกข้อมูลให้ครบ', 'error');
-    return;
-  }
-  const user = { name, code, cls, since: Date.now() };
-  localStorage.setItem('clang-user', JSON.stringify(user));
-  loginModal.classList.remove('show');
-  refreshUser();
-  toast(`ยินดีต้อนรับ ${name.split(' ')[0]}!`, 'success');
-});
-
-loginModal.addEventListener('click', (e) => {
-  if (e.target === loginModal) loginModal.classList.remove('show');
 });
 
 refreshUser();
+window.addEventListener('clang-progress-updated', refreshUser);
 </script>
 
 </body>

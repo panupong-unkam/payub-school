@@ -5,11 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#F39C12">
 <title>หน่วยที่ 6: ฟังก์ชัน (Functions) | ภาษา C</title>
-<link rel="icon" type="image/svg+xml" href="../../logo.svg">
+<link rel="icon" type="image/svg+xml" href="../../Logo.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Noto+Serif+Thai:wght@400;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../c-style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../clang-auth.js"></script>
 <script type="module">
   try {
     const mod = await import('https://esm.sh/JSCPP@2.0.9');
@@ -587,15 +589,7 @@ document.getElementById('submitQuiz').addEventListener('click', () => {
     result.className = 'c-quiz-result show pass';
     result.innerHTML = `🎉 เก่งมาก! คุณตอบถูก ${correctCount}/${total} ข้อ — ผ่านหน่วยที่ 6 แล้ว!`;
 
-    const p = JSON.parse(localStorage.getItem('clang-progress') || '{}');
-    p[6] = { completed: true, ts: Date.now(), score: correctCount };
-    localStorage.setItem('clang-progress', JSON.stringify(p));
-
-    const badges = JSON.parse(localStorage.getItem('clang-badges') || '[]');
-    if (!badges.includes('function-hero')) {
-      badges.push('function-hero');
-      localStorage.setItem('clang-badges', JSON.stringify(badges));
-    }
+    CLANG.markComplete(6, correctCount, 'function-hero');
 
     const nb = document.getElementById('nextBtn');
     if (nb) { nb.classList.remove('disabled'); nb.title = 'ปลดล็อกแล้ว!'; }
@@ -611,13 +605,16 @@ document.getElementById('submitQuiz').addEventListener('click', () => {
   result.scrollIntoView({ behavior: 'smooth', block: 'center' });
 });
 
-/* Unlock next button if already passed */
+/* ปลดล็อกปุ่มบทถัดไป — ครูปลดล็อกทุกหน่วย */
 (() => {
-  const p = JSON.parse(localStorage.getItem('clang-progress') || '{}');
-  if (p[6] && p[6].completed) {
-    const nb = document.getElementById('nextBtn');
-    if (nb) { nb.classList.remove('disabled'); nb.title = 'ปลดล็อกแล้ว!'; }
-  }
+  const apply = () => {
+    if (CLANG.isDone(6) || CLANG.isTeacher()) {
+      const nb = document.getElementById('nextBtn');
+      if (nb) { nb.classList.remove('disabled'); nb.title = 'ปลดล็อกแล้ว!'; }
+    }
+  };
+  apply();
+  window.addEventListener('clang-progress-updated', apply);
 })();
 </script>
 

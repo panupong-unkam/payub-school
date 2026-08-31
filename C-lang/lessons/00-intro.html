@@ -5,11 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#6B7280">
 <title>หน่วยที่ 0: โปรแกรมคืออะไร? | ภาษา C สำหรับมัธยมต้น</title>
-<link rel="icon" type="image/svg+xml" href="../../logo.svg">
+<link rel="icon" type="image/svg+xml" href="../../Logo.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Noto+Serif+Thai:wght@400;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../c-style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../clang-auth.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 </head>
 <body>
@@ -367,16 +369,7 @@ document.getElementById('submitQuiz').addEventListener('click', () => {
     result.innerHTML = `🎉 เก่งมาก! คุณตอบถูก ${correctCount}/${total} ข้อ — บทถัดไปปลดล็อกแล้ว!`;
 
     // Save progress
-    const p = JSON.parse(localStorage.getItem('clang-progress') || '{}');
-    p[0] = { completed: true, ts: Date.now(), score: correctCount };
-    localStorage.setItem('clang-progress', JSON.stringify(p));
-
-    // Award badge
-    const badges = JSON.parse(localStorage.getItem('clang-badges') || '[]');
-    if (!badges.includes('first-step')) {
-      badges.push('first-step');
-      localStorage.setItem('clang-badges', JSON.stringify(badges));
-    }
+    CLANG.markComplete(0, correctCount, 'first-step');
 
     // Confetti
     if (typeof confetti !== 'undefined') {

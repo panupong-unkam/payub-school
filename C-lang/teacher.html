@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#00599C">
+<meta name="robots" content="noindex, nofollow">
+<title>ห้องครู — ความก้าวหน้าภาษา C | ครูภาณุพงศ์ อุ่นคำ</title>
+<link rel="icon" type="image/svg+xml" href="../Logo.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Noto+Serif+Thai:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="c-style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="clang-auth.js"></script>
+<style>
+  .t-wrap      { max-width:1200px; margin:0 auto; padding:24px 20px 60px; }
+  .t-toolbar   { display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-bottom:20px; }
+  .t-toolbar select, .t-toolbar input {
+    padding:10px 14px; border-radius:10px; font-family:inherit; font-size:.95rem;
+    border:2px solid var(--c-border, #d7dde5);
+    background:var(--c-card, #fff); color:var(--c-text, #1a2332);
+  }
+  .t-grid      { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:14px; margin-bottom:24px; }
+  .t-stat      { background:var(--c-card,#fff); border:2px solid var(--c-border,#e3e8ef);
+                 border-radius:14px; padding:16px; text-align:center; }
+  .t-stat-val  { font-size:2rem; font-weight:700; color:var(--c-primary,#00599C); line-height:1.2; }
+  .t-stat-lbl  { font-size:.85rem; color:var(--c-text-muted,#6b7a8f); margin-top:4px; }
+
+  .t-table-wrap{ overflow-x:auto; border:2px solid var(--c-border,#e3e8ef); border-radius:14px; background:var(--c-card,#fff); }
+  table.t-table{ border-collapse:collapse; width:100%; min-width:900px; font-size:.92rem; }
+  .t-table th  { position:sticky; top:0; z-index:2; background:var(--c-primary,#00599C); color:#fff;
+                 padding:12px 10px; text-align:left; font-weight:600; white-space:nowrap; }
+  .t-table td  { padding:10px; border-top:1px solid var(--c-border,#e9edf3); vertical-align:middle; }
+  .t-table tbody tr:hover { background:rgba(0,89,156,.06); }
+  .t-name      { font-weight:600; white-space:nowrap; }
+  .t-muted     { color:var(--c-text-muted,#6b7a8f); }
+
+  /* แถวจุดหน่วย 0..10 */
+  .t-units     { display:flex; gap:3px; }
+  .t-dot       { width:22px; height:22px; border-radius:6px; display:grid; place-items:center;
+                 font-size:.68rem; font-weight:700; background:var(--c-border,#e3e8ef);
+                 color:var(--c-text-muted,#8a97a8); }
+  .t-dot.done  { background:#16a34a; color:#fff; }
+
+  .t-bar       { width:90px; height:8px; border-radius:99px; background:var(--c-border,#e3e8ef); overflow:hidden; }
+  .t-bar > i   { display:block; height:100%; background:linear-gradient(90deg,#00599C,#16a34a); }
+
+  .t-gate      { max-width:460px; margin:80px auto; text-align:center;
+                 background:var(--c-card,#fff); border:2px solid var(--c-border,#e3e8ef);
+                 border-radius:16px; padding:36px 28px; }
+  .t-empty     { padding:40px; text-align:center; color:var(--c-text-muted,#6b7a8f); }
+</style>
+</head>
+<body>
+
+<header class="c-topbar">
+  <div class="c-topbar-left">
+    <a href="index.html" class="c-btn-icon" title="กลับหน้าภาษา C">←</a>
+    <div class="c-topbar-logo">📊</div>
+    <div>
+      <div class="c-topbar-title">ห้องครู — ภาษา C</div>
+      <div class="c-topbar-subtitle">นักเรียนคนไหน เรียนถึงหน่วยไหนแล้ว</div>
+    </div>
+  </div>
+  <div class="c-topbar-right">
+    <button class="c-btn-icon" id="themeToggle" title="สลับธีม">🌙</button>
+    <button class="c-btn c-btn-ghost" id="reloadBtn">🔄 โหลดใหม่</button>
+    <button class="c-btn c-btn-ghost" id="csvBtn">⬇️ ดาวน์โหลด CSV</button>
+  </div>
+</header>
+
+<!-- หน้ากั้นสำหรับคนที่ไม่ใช่ครู -->
+<div class="t-gate" id="gate" style="display:none;">
+  <div style="font-size:3rem;">🔒</div>
+  <h2 style="margin:12px 0 8px;">หน้านี้สำหรับคุณครูเท่านั้น</h2>
+  <p class="t-muted" id="gateMsg">กรุณาเข้าสู่ระบบด้วยบัญชีครู</p>
+  <div style="margin-top:20px; display:flex; gap:10px; justify-content:center;">
+    <button class="c-btn c-btn-success" id="gateLogin">เข้าสู่ระบบ</button>
+    <a href="index.html" class="c-btn c-btn-ghost">กลับหน้าบทเรียน</a>
+  </div>
+</div>
+
+<main class="t-wrap" id="main" style="display:none;">
+
+  <div class="t-grid">
+    <div class="t-stat"><div class="t-stat-val" id="stNum">–</div><div class="t-stat-lbl">นักเรียนทั้งหมด</div></div>
+    <div class="t-stat"><div class="t-stat-val" id="stStarted">–</div><div class="t-stat-lbl">เริ่มเรียนแล้ว</div></div>
+    <div class="t-stat"><div class="t-stat-val" id="stFinished">–</div><div class="t-stat-lbl">เรียนจบหลักสูตร</div></div>
+    <div class="t-stat"><div class="t-stat-val" id="stAvgUnit">–</div><div class="t-stat-lbl">หน่วยเฉลี่ยที่ทำได้</div></div>
+  </div>
+
+  <div class="t-toolbar">
+    <select id="fClass"><option value="">— ทุกชั้นเรียน —</option></select>
+    <input type="search" id="fSearch" placeholder="ค้นหาชื่อนักเรียน..." style="flex:1; min-width:200px;">
+    <select id="fSort">
+      <option value="class">เรียงตามชั้น/เลขที่</option>
+      <option value="most">เรียนมากที่สุดก่อน</option>
+      <option value="least">เรียนน้อยที่สุดก่อน</option>
+      <option value="recent">ทำล่าสุดก่อน</option>
+    </select>
+  </div>
+
+  <div class="t-table-wrap">
+    <table class="t-table">
+      <thead>
+        <tr>
+          <th>ชั้น</th>
+          <th>เลขที่</th>
+          <th>ชื่อ-นามสกุล</th>
+          <th>ID</th>
+          <th>หน่วย 0 → 10</th>
+          <th>จบแล้ว</th>
+          <th>ถึงหน่วย</th>
+          <th>คะแนนเฉลี่ย</th>
+          <th>ทำล่าสุด</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <div class="t-empty" id="loading">กำลังโหลดข้อมูล...</div>
+  </div>
+
+  <p class="t-muted" style="margin-top:14px; font-size:.85rem;">
+    💡 ช่องสีเขียว = ทำแบบทดสอบท้ายหน่วยผ่านแล้ว · ข้อมูลดึงสดจากฐานข้อมูล ไม่ใช่ cache ของเบราว์เซอร์
+  </p>
+</main>
+
+<div class="c-toast" id="toast"><span id="toastIcon">✓</span><span id="toastMsg"></span></div>
+
+<script>
+/* ---------- ธีม ---------- */
+const themeBtn = document.getElementById('themeToggle');
+const savedTheme = localStorage.getItem('clang-theme') || 'light';
+document.documentElement.setAttribute('data-theme', savedTheme);
+themeBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+themeBtn.addEventListener('click', () => {
+  const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('clang-theme', next);
+  themeBtn.textContent = next === 'dark' ? '☀️' : '🌙';
+});
+
+const TOTAL_UNITS = CLANG.TOTAL_UNITS;   // 11 (หน่วย 0..10)
+let rows = [];
+
+/* ---------- ตรวจสิทธิ์ ---------- */
+function showGate(msg) {
+  document.getElementById('gate').style.display = '';
+  document.getElementById('main').style.display = 'none';
+  if (msg) document.getElementById('gateMsg').textContent = msg;
+}
+document.getElementById('gateLogin').addEventListener('click', () => CLANG.showLoginModal());
+window.addEventListener('clang-progress-updated', () => { if (CLANG.isTeacher()) boot(); });
+
+/* ---------- ดึงข้อมูล ---------- */
+async function loadData() {
+  const sb = CLANG.sb;
+  const loading = document.getElementById('loading');
+  loading.style.display = '';
+  loading.textContent = 'กำลังโหลดข้อมูล...';
+
+  /* ดึงเฉพาะคอลัมน์ที่ต้องใช้ — ไม่ดึงอีเมล/รหัสผ่านออกมา */
+  const [pRes, gRes] = await Promise.all([
+    sb.from('profiles').select('id, full_name, class_level, student_no').eq('role', 'student'),
+    sb.from('clang_progress').select('user_id, unit_id, score, completed, completed_at').eq('completed', true)
+  ]);
+
+  if (pRes.error || gRes.error) {
+    loading.textContent = '❌ โหลดข้อมูลไม่สำเร็จ — ' +
+      ((pRes.error || gRes.error).message || 'ตรวจสอบว่ารันไฟล์ supabase-schema-v2.sql แล้วหรือยัง');
+    return;
+  }
+
+  const byUser = new Map();
+  (gRes.data || []).forEach(r => {
+    if (!byUser.has(r.user_id)) byUser.set(r.user_id, []);
+    byUser.get(r.user_id).push(r);
+  });
+
+  rows = (pRes.data || []).map(p => {
+    const recs   = byUser.get(p.id) || [];
+    const units  = recs.map(r => r.unit_id);
+    const scores = recs.map(r => r.score).filter(s => typeof s === 'number');
+    const times  = recs.map(r => r.completed_at).filter(Boolean).sort();
+    return {
+      id: p.id,
+      name: p.full_name || '(ไม่มีชื่อ)',
+      cls: p.class_level || '-',
+      no: p.student_no || '',
+      units: new Set(units),
+      done: units.length,
+      furthest: units.length ? Math.max.apply(null, units) : null,
+      avg: scores.length ? (scores.reduce((a, b) => a + b, 0) / scores.length) : null,
+      last: times.length ? times[times.length - 1] : null
+    };
+  });
+
+  loading.style.display = 'none';
+  fillClassFilter();
+  renderStats();
+  renderTable();
+}
+
+function fillClassFilter() {
+  const sel = document.getElementById('fClass');
+  const cur = sel.value;
+  const classes = [...new Set(rows.map(r => r.cls))].filter(c => c && c !== '-').sort();
+  sel.innerHTML = '<option value="">— ทุกชั้นเรียน —</option>' +
+    classes.map(c => `<option value="${c}">${c}</option>`).join('');
+  sel.value = cur;
+}
+
+function renderStats() {
+  const started  = rows.filter(r => r.done > 0).length;
+  const finished = rows.filter(r => r.done >= TOTAL_UNITS).length;
+  const avgUnit  = rows.length ? (rows.reduce((a, r) => a + r.done, 0) / rows.length) : 0;
+  document.getElementById('stNum').textContent      = rows.length;
+  document.getElementById('stStarted').textContent  = started;
+  document.getElementById('stFinished').textContent = finished;
+  document.getElementById('stAvgUnit').textContent  = avgUnit.toFixed(1);
+}
+
+function thaiDate(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  return d.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' });
+}
+
+function visibleRows() {
+  const cls = document.getElementById('fClass').value;
+  const q   = document.getElementById('fSearch').value.trim().toLowerCase();
+  const srt = document.getElementById('fSort').value;
+
+  let out = rows.filter(r =>
+    (!cls || r.cls === cls) &&
+    (!q || r.name.toLowerCase().includes(q) || String(r.id) === q)
+  );
+
+  const numNo = v => parseInt(v, 10) || 999;
+  if (srt === 'most')        out.sort((a, b) => b.done - a.done);
+  else if (srt === 'least')  out.sort((a, b) => a.done - b.done);
+  else if (srt === 'recent') out.sort((a, b) => (b.last || '').localeCompare(a.last || ''));
+  else out.sort((a, b) => a.cls.localeCompare(b.cls, 'th') || numNo(a.no) - numNo(b.no) || a.name.localeCompare(b.name, 'th'));
+
+  return out;
+}
+
+function renderTable() {
+  const tb = document.getElementById('tbody');
+  const list = visibleRows();
+  tb.textContent = '';
+
+  if (!list.length) {
+    const l = document.getElementById('loading');
+    l.style.display = '';
+    l.textContent = 'ไม่พบนักเรียนตามเงื่อนไขที่เลือก';
+    return;
+  }
+  document.getElementById('loading').style.display = 'none';
+
+  const frag = document.createDocumentFragment();
+  list.forEach(r => {
+    const tr = document.createElement('tr');
+
+    const cell = (text, cls) => {
+      const td = document.createElement('td');
+      td.textContent = text;              // textContent — กัน XSS จากชื่อนักเรียน
+      if (cls) td.className = cls;
+      return td;
+    };
+
+    tr.appendChild(cell(r.cls));
+    tr.appendChild(cell(r.no || '—', 't-muted'));
+    tr.appendChild(cell(r.name, 't-name'));
+    tr.appendChild(cell(r.id, 't-muted'));
+
+    /* จุดหน่วย 0..10 */
+    const tdU = document.createElement('td');
+    const wrap = document.createElement('div');
+    wrap.className = 't-units';
+    for (let u = 0; u < TOTAL_UNITS; u++) {
+      const d = document.createElement('span');
+      d.className = 't-dot' + (r.units.has(u) ? ' done' : '');
+      d.textContent = u;
+      d.title = 'หน่วยที่ ' + u + (r.units.has(u) ? ' — ผ่านแล้ว' : ' — ยังไม่ผ่าน');
+      wrap.appendChild(d);
+    }
+    tdU.appendChild(wrap);
+    tr.appendChild(tdU);
+
+    /* จบแล้วกี่หน่วย + แถบ */
+    const tdD = document.createElement('td');
+    const bar = document.createElement('div');
+    bar.className = 't-bar';
+    const fill = document.createElement('i');
+    fill.style.width = Math.round((r.done / TOTAL_UNITS) * 100) + '%';
+    bar.appendChild(fill);
+    tdD.appendChild(document.createTextNode(r.done + '/' + TOTAL_UNITS + ' '));
+    tdD.appendChild(bar);
+    tr.appendChild(tdD);
+
+    tr.appendChild(cell(r.furthest === null ? '—' : 'หน่วย ' + r.furthest));
+    tr.appendChild(cell(r.avg === null ? '—' : r.avg.toFixed(1)));
+    tr.appendChild(cell(thaiDate(r.last), 't-muted'));
+
+    frag.appendChild(tr);
+  });
+  tb.appendChild(frag);
+}
+
+['fClass', 'fSearch', 'fSort'].forEach(id => {
+  document.getElementById(id).addEventListener('input', renderTable);
+});
+document.getElementById('reloadBtn').addEventListener('click', () => {
+  loadData().then(() => CLANG.toast('โหลดข้อมูลใหม่แล้ว', 'success'));
+});
+
+/* ---------- ดาวน์โหลด CSV ---------- */
+document.getElementById('csvBtn').addEventListener('click', () => {
+  const list = visibleRows();
+  if (!list.length) { CLANG.toast('ไม่มีข้อมูลให้ดาวน์โหลด', 'error'); return; }
+
+  const head = ['ชั้น', 'เลขที่', 'ชื่อ-นามสกุล', 'ID'];
+  for (let u = 0; u < TOTAL_UNITS; u++) head.push('หน่วย' + u);
+  head.push('จบแล้ว', 'ถึงหน่วย', 'คะแนนเฉลี่ย', 'ทำล่าสุด');
+
+  const esc = v => '"' + String(v === null || v === undefined ? '' : v).replace(/"/g, '""') + '"';
+  const lines = [head.map(esc).join(',')];
+
+  list.forEach(r => {
+    const row = [r.cls, r.no, r.name, r.id];
+    for (let u = 0; u < TOTAL_UNITS; u++) row.push(r.units.has(u) ? 1 : 0);
+    row.push(r.done, r.furthest === null ? '' : r.furthest, r.avg === null ? '' : r.avg.toFixed(2), r.last || '');
+    lines.push(row.map(esc).join(','));
+  });
+
+  /* ﻿ = BOM ให้ Excel ภาษาไทยอ่านออก */
+  const blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'ความก้าวหน้าภาษาC_' + new Date().toISOString().slice(0, 10) + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+});
+
+/* ---------- เริ่มทำงาน ---------- */
+let booted = false;
+function boot() {
+  if (booted) return;
+  booted = true;
+  document.getElementById('gate').style.display = 'none';
+  document.getElementById('main').style.display = '';
+  loadData();
+}
+
+CLANG.ready.then(() => {
+  if (!CLANG.getUser())      showGate('กรุณาเข้าสู่ระบบด้วยบัญชีครู');
+  else if (!CLANG.isTeacher()) showGate('บัญชีนี้เป็นบัญชีนักเรียน จึงเปิดหน้านี้ไม่ได้');
+  else boot();
+});
+</script>
+
+</body>
+</html>
