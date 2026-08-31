@@ -11,11 +11,6 @@
 
   "videos": [
     {
-      "youtubeId": "nYShO3NtGWw",
-      "title": "วิดีโอแนะนำการเรียน Computer Science",
-      "description": "เรียนรู้พื้นฐานวิทยาการคำนวณ Python และหุ่นยนต์ กับครูภาณุพงศ์"
-    },
-    {
       "youtubeId": "CX0ZO7LTri0",
       "title": "🏆 The Ring — RP2026",
       "description": "ผลงานการแข่งขันหุ่นยนต์ของนักเรียนโรงเรียนบ้านป่ายุบ"
@@ -25,6 +20,17 @@
       "title": "🏆 Move The Can — WRG 2026",
       "description": "ผลงานการแข่งขันหุ่นยนต์ของนักเรียนโรงเรียนบ้านป่ายุบ"
     }
+    {
+      "youtubeId": "nYShO3NtGWw",
+      "title": "การฝึกซ้อม Rp2040 ",
+      "description": "ทำหรับการแข่งขันหุ่นยนต์"
+    },
+    {
+      "youtubeId": "zJhO5WRmfX8",
+      "title": "กิจกกรมวันวิทยาศาสตร์ ปี 2569 ",
+      "description": "ชุมนุมหุ่นยนต์แข่งขันหุ่นยนต์หลังจากจัดกิจกรรมให้น้องๆเล่นเสร็จ"
+    },
+    
   ],
 
   "images": [
