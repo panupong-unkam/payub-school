@@ -4,16 +4,17 @@
   "_cloudinary_url_format": "https://res.cloudinary.com/dxqdo0i47/image/upload/w_800,q_auto,f_auto/<ชื่อไฟล์ที่อัปโหลด>",
 
   "featuredVideo": {
-    "youtubeId": "nYShO3NtGWw",
-    "title": "วิดีโอแนะนำการเรียน Computer Science",
-    "description": "เรียนรู้พื้นฐานวิทยาการคำนวณ Python และหุ่นยนต์ กับครูภาณุพงศ์"
+    "youtubeId": "7HqS00-NOYE",
+      "title": "🏆 Lift The Cube — WRG 2026",
+      "description": "ผลงานการแข่งขันหุ่นยนต์ของนักเรียนโรงเรียนบ้านป่ายุบ"
   },
 
   "videos": [
     {
+      "youtubeId": "nYShO3NtGWw",
       "youtubeId": "7HqS00-NOYE",
-      "title": "🏆 Lift The Cube — WRG 2026",
-      "description": "ผลงานการแข่งขันหุ่นยนต์ของนักเรียนโรงเรียนบ้านป่ายุบ"
+      "title": "วิดีโอแนะนำการเรียน Computer Science",
+      "description": "เรียนรู้พื้นฐานวิทยาการคำนวณ Python และหุ่นยนต์ กับครูภาณุพงศ์"
     },
     {
       "youtubeId": "CX0ZO7LTri0",
